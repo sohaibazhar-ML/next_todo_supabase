@@ -157,7 +157,7 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
                 value={profile.first_name}
                 onChange={handleInputChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder:text-gray-400"
               />
             </div>
             <div>
@@ -170,7 +170,7 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
                 value={profile.last_name}
                 onChange={handleInputChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder:text-gray-400"
               />
             </div>
             <div className="md:col-span-2">
@@ -183,7 +183,7 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
                 value={profile.phone_number}
                 onChange={handleInputChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder:text-gray-400"
               />
             </div>
           </div>
@@ -203,7 +203,7 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
                 onChange={handleInputChange}
                 required
                 rows={3}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder:text-gray-400"
               />
             </div>
             <div>
@@ -216,7 +216,7 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
                 value={profile.country_of_origin}
                 onChange={handleInputChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder:text-gray-400"
               />
             </div>
             <div>
@@ -229,7 +229,7 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
                 onChange={handleInputChange}
                 required
                 rows={3}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder:text-gray-400"
               />
             </div>
           </div>
@@ -250,7 +250,7 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
                 onChange={handleInputChange}
                 required
                 min={1}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder:text-gray-400"
               />
             </div>
             <div>
@@ -263,7 +263,7 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
                 value={profile.number_of_children}
                 onChange={handleInputChange}
                 min={0}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder:text-gray-400"
               />
             </div>
             <div className="md:col-span-2">
@@ -276,7 +276,7 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
                 value={profile.pets_type || ''}
                 onChange={handleInputChange}
                 placeholder="e.g., 2 dogs, 1 cat"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder:text-gray-400"
               />
             </div>
           </div>
@@ -329,7 +329,7 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
                 minLength={6}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder:text-gray-400"
               />
             </div>
             <div>
@@ -342,7 +342,7 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 minLength={6}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder:text-gray-400"
               />
             </div>
             <button
