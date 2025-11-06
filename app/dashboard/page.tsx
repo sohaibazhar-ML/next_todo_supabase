@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import TodoList from '../../components/TodoList'
 
 export default async function DashboardPage() {
@@ -50,14 +51,22 @@ export default async function DashboardPage() {
                 <p className="text-gray-600 mt-1 text-sm">{user.email}</p>
               </div>
             </div>
-            <form action="/auth/signout" method="post">
-              <button
-                type="submit"
-                className="px-5 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 font-medium"
+            <div className="flex gap-3">
+              <Link
+                href="/profile"
+                className="px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-xl hover:from-indigo-600 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 font-medium"
               >
-                Sign Out
-              </button>
-            </form>
+                Profile
+              </Link>
+              <form action="/auth/signout" method="post">
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 font-medium"
+                >
+                  Sign Out
+                </button>
+              </form>
+            </div>
           </div>
         </div>
         <TodoList initialTodos={todos || []} user={user} />
