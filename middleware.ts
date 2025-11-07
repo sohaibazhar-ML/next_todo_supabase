@@ -29,20 +29,26 @@ export async function middleware(request: NextRequest) {
 
   const {
     data: { user },
+    error,
   } = await supabase.auth.getUser()
 
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/signup') &&
-    !request.nextUrl.pathname.startsWith('/forgot-password') &&
-    !request.nextUrl.pathname.startsWith('/reset-password') &&
-    !request.nextUrl.pathname.startsWith('/auth/callback') &&
-    request.nextUrl.pathname !== '/'
-  ) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    return NextResponse.redirect(url)
+  // If authentication fails (expired/invalid token), redirect to login
+  if (error || !user) {
+    // Only redirect if not already on a public route
+    if (
+      !request.nextUrl.pathname.startsWith('/login') &&
+      !request.nextUrl.pathname.startsWith('/signup') &&
+      !request.nextUrl.pathname.startsWith('/forgot-password') &&
+      !request.nextUrl.pathname.startsWith('/reset-password') &&
+      !request.nextUrl.pathname.startsWith('/auth/callback') &&
+      request.nextUrl.pathname !== '/'
+    ) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      // Use supabaseResponse for redirect to preserve any cookie updates
+      supabaseResponse = NextResponse.redirect(url)
+      return supabaseResponse
+    }
   }
 
   return supabaseResponse

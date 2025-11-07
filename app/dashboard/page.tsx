@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { isAdmin } from '@/lib/utils/roles'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -23,6 +24,9 @@ export default async function DashboardPage() {
   const displayName = profile 
     ? `${profile.first_name} ${profile.last_name}` 
     : user.email
+
+  // Check if user is admin
+  const admin = await isAdmin(user.id)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 py-8">
@@ -94,13 +98,27 @@ export default async function DashboardPage() {
             <p className="text-gray-600 mb-6 max-w-md mx-auto">
               You have successfully logged in. Manage your profile and account settings from here.
             </p>
-            <div className="flex gap-4 justify-center">
+            <div className="flex flex-wrap gap-4 justify-center">
               <Link
                 href="/profile"
                 className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium"
               >
                 Manage Profile
               </Link>
+              <Link
+                href="/downloads"
+                className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium"
+              >
+                Download Center
+              </Link>
+              {admin && (
+                <Link
+                  href="/admin/documents"
+                  className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium"
+                >
+                  Manage Documents
+                </Link>
+              )}
             </div>
           </div>
         </div>
