@@ -84,7 +84,7 @@ export default function DocumentCard({ document }: DocumentCardProps) {
         throw new Error('Failed to generate download URL: No URL returned')
       }
 
-      console.log('Signed URL generated successfully:', urlData.signedUrl.substring(0, 50) + '...')
+      alert('Signed URL generated successfully:'+ urlData.signedUrl)
 
       // Log the download BEFORE triggering download (important for count increment)
       let downloadLogged = false
