@@ -47,7 +47,7 @@ export async function GET(request: Request) {
         tags: doc.tags,
         file_name: doc.file_name,
         file_path: doc.file_path,
-        file_size: doc.file_size,
+        file_size: typeof doc.file_size === 'bigint' ? Number(doc.file_size) : doc.file_size,
         file_type: doc.file_type,
         mime_type: '', // RPC doesn't return this
         version: null,
@@ -88,7 +88,13 @@ export async function GET(request: Request) {
       })
     }
 
-    return NextResponse.json(filteredDocuments)
+    // Convert BigInt file_size to Number for JSON serialization
+    const serializedDocuments = filteredDocuments.map((doc) => ({
+      ...doc,
+      file_size: typeof doc.file_size === 'bigint' ? Number(doc.file_size) : doc.file_size,
+    }))
+
+    return NextResponse.json(serializedDocuments)
   } catch (error: any) {
     console.error('Error fetching documents:', error)
     return NextResponse.json(
