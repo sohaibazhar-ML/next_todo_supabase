@@ -85,6 +85,9 @@ CREATE INDEX "idx_documents_is_active" ON "public"."documents"("is_active");
 CREATE INDEX "idx_documents_is_featured" ON "public"."documents"("is_featured");
 
 -- CreateIndex
+CREATE INDEX "idx_documents_parent_document_id" ON "public"."documents"("parent_document_id");
+
+-- CreateIndex
 CREATE INDEX "idx_documents_tags_gin" ON "public"."documents" USING GIN ("tags");
 
 -- CreateIndex

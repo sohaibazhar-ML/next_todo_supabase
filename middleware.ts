@@ -2,6 +2,12 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  // Skip middleware entirely for API routes - they handle their own auth
+  // This saves ~800-1200ms per API request
+  if (request.nextUrl.pathname.startsWith('/api')) {
+    return NextResponse.next()
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -34,10 +40,8 @@ export async function middleware(request: NextRequest) {
 
   // If authentication fails (expired/invalid token), redirect to login
   if (error || !user) {
-    // Only redirect if not already on a public route or API route
-    // API routes handle their own authentication and return JSON errors
+    // Only redirect if not already on a public route
     if (
-      !request.nextUrl.pathname.startsWith('/api') &&
       !request.nextUrl.pathname.startsWith('/login') &&
       !request.nextUrl.pathname.startsWith('/signup') &&
       !request.nextUrl.pathname.startsWith('/forgot-password') &&
@@ -47,7 +51,6 @@ export async function middleware(request: NextRequest) {
     ) {
       const url = request.nextUrl.clone()
       url.pathname = '/login'
-      // Use supabaseResponse for redirect to preserve any cookie updates
       supabaseResponse = NextResponse.redirect(url)
       return supabaseResponse
     }

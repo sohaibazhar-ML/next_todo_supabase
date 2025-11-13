@@ -41,6 +41,9 @@ model documents {
   @@index([file_type], map: "idx_documents_file_type")
   @@index([is_active], map: "idx_documents_is_active")
   @@index([is_featured], map: "idx_documents_is_featured")
+  @@index([parent_document_id], map: "idx_documents_parent_document_id")
+  @@index([parent_document_id, category], map: "idx_documents_parent_category")
+  @@index([parent_document_id, file_type], map: "idx_documents_parent_file_type")
   @@index([tags], map: "idx_documents_tags_gin", type: Gin)
   @@schema("public")
 }
