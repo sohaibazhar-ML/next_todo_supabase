@@ -104,24 +104,32 @@ export default function DocumentCard({ document }: DocumentCardProps) {
         console.error('Error logging download:', logErr)
       }
 
-      // Trigger download using multiple methods for browser compatibility
+      // Trigger download using blob method to force download (especially for PDFs)
       try {
-        // Method 1: Create download link (most compatible)
+        // Fetch the file as a blob to force download behavior
+        const fileResponse = await fetch(urlData.signedUrl)
+        if (!fileResponse.ok) {
+          throw new Error('Failed to fetch file')
+        }
+        
+        const blob = await fileResponse.blob()
+        const blobUrl = window.URL.createObjectURL(blob)
+        
+        // Create download link with blob URL
         const link = window.document.createElement('a')
-        link.href = urlData.signedUrl
+        link.href = blobUrl
         link.download = document.file_name
-        link.target = '_blank'
-        link.rel = 'noopener noreferrer'
         link.style.display = 'none'
         window.document.body.appendChild(link)
         link.click()
         
-        // Remove link after a short delay
+        // Clean up: remove link and revoke blob URL
         setTimeout(() => {
           if (window.document.body.contains(link)) {
             window.document.body.removeChild(link)
           }
-        }, 1000)
+          window.URL.revokeObjectURL(blobUrl)
+        }, 100)
 
         // Show success - download should start
         setError(null)
