@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import type { DocumentUploadData } from '@/types/document'
 
@@ -18,27 +17,10 @@ export default function DocumentUpload() {
     is_featured: false,
   })
   const [tagInput, setTagInput] = useState('')
-  const supabase = createClient()
   const router = useRouter()
 
   const allowedFileTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/zip']
   const allowedExtensions = ['.pdf', '.docx', '.xlsx', '.zip']
-
-  const getFileType = (fileName: string): 'PDF' | 'DOCX' | 'XLSX' | 'ZIP' => {
-    const ext = fileName.toLowerCase().split('.').pop()
-    switch (ext) {
-      case 'pdf':
-        return 'PDF'
-      case 'docx':
-        return 'DOCX'
-      case 'xlsx':
-        return 'XLSX'
-      case 'zip':
-        return 'ZIP'
-      default:
-        return 'PDF'
-    }
-  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -101,69 +83,36 @@ export default function DocumentUpload() {
     setLoading(true)
 
     try {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        throw new Error('You must be logged in to upload documents')
+      // Upload file and create document record via API route (handles everything server-side)
+      // This avoids RLS issues with client-side storage uploads
+      const uploadFormData = new FormData()
+      uploadFormData.append('file', formData.file)
+      uploadFormData.append('title', formData.title)
+      uploadFormData.append('description', formData.description || '')
+      uploadFormData.append('category', formData.category)
+      uploadFormData.append('tags', JSON.stringify(formData.tags || []))
+      uploadFormData.append('is_featured', formData.is_featured ? 'true' : 'false')
+      if (formData.searchable_content) {
+        uploadFormData.append('searchable_content', formData.searchable_content)
       }
 
-      // Verify user is admin via API
-      const profileResponse = await fetch(`/api/profiles?userId=${user.id}`)
-      if (!profileResponse.ok) {
-        throw new Error('Failed to verify admin status')
-      }
-      const profile = await profileResponse.json()
-      if (profile?.role !== 'admin') {
-        throw new Error('Admin access required')
-      }
+      const docResponse = await fetch('/api/documents/upload', {
+        method: 'POST',
+        body: uploadFormData,
+      })
 
-      // Generate unique file path
-      const fileExt = formData.file.name.split('.').pop()
-      const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`
-      const filePath = `${user.id}/${fileName}`
-
-      // Upload file to Supabase Storage
-      const { error: uploadError } = await supabase.storage
-        .from('documents')
-        .upload(filePath, formData.file, {
-          cacheControl: '3600',
-          upsert: false,
-        })
-
-      if (uploadError) {
-        if (uploadError.message.includes('Bucket not found') || uploadError.message.includes('not found')) {
+      if (!docResponse.ok) {
+        const errorData = await docResponse.json().catch(() => ({ error: 'Network error' }))
+        
+        // Provide helpful error messages
+        if (errorData.error?.includes('Bucket not found')) {
           throw new Error(
             'Storage bucket not found. Please run the storage bucket setup SQL migration in Supabase Dashboard. ' +
             'Go to SQL Editor and run: supabase/migrations/20240101000001_storage_bucket_setup.sql'
           )
         }
-        throw new Error(`Upload failed: ${uploadError.message}`)
-      }
-
-      // Insert document record via API
-      const docResponse = await fetch('/api/documents', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: formData.title,
-          description: formData.description || null,
-          category: formData.category,
-          tags: formData.tags && formData.tags.length > 0 ? formData.tags : [],
-          file_name: formData.file.name,
-          file_path: filePath,
-          file_size: formData.file.size,
-          file_type: getFileType(formData.file.name),
-          mime_type: formData.file.type,
-          is_featured: formData.is_featured || false,
-          searchable_content: formData.searchable_content || null,
-        })
-      })
-
-      if (!docResponse.ok) {
-        // If insert fails, try to delete uploaded file
-        await supabase.storage.from('documents').remove([filePath])
-        const data = await docResponse.json()
-        throw new Error(`Failed to create document record: ${data.error || 'Unknown error'}`)
+        
+        throw new Error(errorData.error || `Upload failed: HTTP ${docResponse.status}`)
       }
 
       setMessage('Document uploaded successfully!')

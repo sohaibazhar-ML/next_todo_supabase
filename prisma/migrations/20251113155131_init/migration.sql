@@ -349,3 +349,68 @@ ON download_logs FOR INSERT
 WITH CHECK (
   auth.uid() = user_id
 );
+
+-- ============================================================================
+-- Storage Bucket Setup for Documents
+-- Note: These are Supabase Storage configurations, not database tables
+-- ============================================================================
+
+-- Create the storage bucket for documents
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+  'documents',
+  'documents',
+  false, -- Private bucket (requires authentication)
+  52428800, -- 50MB limit
+  ARRAY[
+    'application/pdf',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/zip'
+  ]
+)
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================================
+-- Storage Policies for Documents Bucket
+-- Note: These policies use is_user_admin_for_documents function which
+--       bypasses RLS, avoiding conflicts when checking admin status
+-- ============================================================================
+
+-- Policy: Authenticated users can view/download documents
+CREATE POLICY "Users can view documents"
+ON storage.objects FOR SELECT
+USING (
+  bucket_id = 'documents' 
+  AND auth.role() = 'authenticated'
+);
+
+-- Drop existing admin policies if they exist (in case of re-running migration)
+DROP POLICY IF EXISTS "Admins can upload documents" ON storage.objects;
+DROP POLICY IF EXISTS "Admins can update documents" ON storage.objects;
+DROP POLICY IF EXISTS "Admins can delete documents" ON storage.objects;
+
+-- Policy: Only admins can upload documents
+-- Uses is_user_admin_for_documents function (SECURITY DEFINER) to bypass RLS
+CREATE POLICY "Admins can upload documents"
+ON storage.objects FOR INSERT
+WITH CHECK (
+  bucket_id = 'documents'
+  AND public.is_user_admin_for_documents(auth.uid()) = true
+);
+
+-- Policy: Only admins can update documents
+CREATE POLICY "Admins can update documents"
+ON storage.objects FOR UPDATE
+USING (
+  bucket_id = 'documents'
+  AND public.is_user_admin_for_documents(auth.uid()) = true
+);
+
+-- Policy: Only admins can delete documents
+CREATE POLICY "Admins can delete documents"
+ON storage.objects FOR DELETE
+USING (
+  bucket_id = 'documents'
+  AND public.is_user_admin_for_documents(auth.uid()) = true
+);
