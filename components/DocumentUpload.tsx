@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import type { DocumentUploadData } from '@/types/document'
+import type { Document } from '@/types/document'
 
 export default function DocumentUpload() {
   const [loading, setLoading] = useState(false)
@@ -17,10 +18,50 @@ export default function DocumentUpload() {
     is_featured: false,
   })
   const [tagInput, setTagInput] = useState('')
+  const [parentDocument, setParentDocument] = useState<Document | null>(null)
+  const [loadingParent, setLoadingParent] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  
+  // Check if this is a version upload
+  const uploadVersionId = searchParams?.get('uploadVersion')
 
   const allowedFileTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/zip']
   const allowedExtensions = ['.pdf', '.docx', '.xlsx', '.zip']
+
+  // Load parent document if uploading a version
+  useEffect(() => {
+    if (uploadVersionId) {
+      loadParentDocument(uploadVersionId)
+    }
+  }, [uploadVersionId])
+
+  const loadParentDocument = async (documentId: string) => {
+    try {
+      setLoadingParent(true)
+      const response = await fetch(`/api/documents/${documentId}`)
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to load parent document')
+      }
+
+      setParentDocument(data)
+      // Pre-fill form with parent document data
+      setFormData({
+        title: data.title,
+        description: data.description || '',
+        category: data.category,
+        tags: data.tags || [],
+        file: null as any,
+        is_featured: data.is_featured || false,
+      })
+    } catch (err: any) {
+      setError(err.message || 'Failed to load parent document')
+    } finally {
+      setLoadingParent(false)
+    }
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -95,6 +136,10 @@ export default function DocumentUpload() {
       if (formData.searchable_content) {
         uploadFormData.append('searchable_content', formData.searchable_content)
       }
+      // If uploading a version, include parent document ID
+      if (uploadVersionId && parentDocument) {
+        uploadFormData.append('parent_document_id', uploadVersionId)
+      }
 
       const docResponse = await fetch('/api/documents/upload', {
         method: 'POST',
@@ -115,7 +160,7 @@ export default function DocumentUpload() {
         throw new Error(errorData.error || `Upload failed: HTTP ${docResponse.status}`)
       }
 
-      setMessage('Document uploaded successfully!')
+      setMessage(uploadVersionId ? 'New version uploaded successfully!' : 'Document uploaded successfully!')
       
       // Reset form
       setFormData({
@@ -126,10 +171,16 @@ export default function DocumentUpload() {
         file: null as any,
         is_featured: false,
       })
+      setParentDocument(null)
       
       // Reset file input
       const fileInput = document.getElementById('file-input') as HTMLInputElement
       if (fileInput) fileInput.value = ''
+
+      // Clear URL parameter if it was a version upload
+      if (uploadVersionId) {
+        router.push('/admin/documents')
+      }
 
       // Refresh page after 1 second
       setTimeout(() => {
@@ -157,6 +208,25 @@ export default function DocumentUpload() {
         </div>
       )}
 
+      {uploadVersionId && (
+        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg">
+          <p className="text-sm text-blue-700 font-medium mb-2">
+            Uploading New Version
+          </p>
+          {loadingParent ? (
+            <p className="text-xs text-blue-600">Loading parent document...</p>
+          ) : parentDocument ? (
+            <div className="text-xs text-blue-600 space-y-1">
+              <p>Parent: {parentDocument.title}</p>
+              <p>Current Version: {parentDocument.version || '1.0'}</p>
+              <p className="mt-2 text-blue-700">The form is pre-filled with parent document details. You can modify them if needed.</p>
+            </div>
+          ) : (
+            <p className="text-xs text-blue-600">Failed to load parent document</p>
+          )}
+        </div>
+      )}
+
       {/* Title */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -167,7 +237,8 @@ export default function DocumentUpload() {
           value={formData.title}
           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
           required
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder:text-gray-400"
+          disabled={loadingParent}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
           placeholder="Document title"
         />
       </div>
@@ -279,10 +350,10 @@ export default function DocumentUpload() {
       {/* Submit */}
       <button
         type="submit"
-        disabled={loading}
+        disabled={loading || loadingParent}
         className="w-full px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {loading ? 'Uploading...' : 'Upload Document'}
+        {loading ? 'Uploading...' : loadingParent ? 'Loading...' : uploadVersionId ? 'Upload New Version' : 'Upload Document'}
       </button>
     </form>
   )

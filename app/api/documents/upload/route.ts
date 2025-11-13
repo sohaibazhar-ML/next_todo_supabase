@@ -34,12 +34,55 @@ export async function POST(request: Request) {
     const tags = formData.get('tags') as string
     const is_featured = formData.get('is_featured') === 'true'
     const searchable_content = formData.get('searchable_content') as string | null
+    const parent_document_id = formData.get('parent_document_id') as string | null
 
     if (!file || !title || !category) {
       return NextResponse.json(
         { error: 'Missing required fields: file, title, category' },
         { status: 400 }
       )
+    }
+
+    // If uploading a new version, validate parent document exists and get version number
+    let versionNumber = '1.0'
+    let parentDocumentId: string | null = null
+    
+    if (parent_document_id) {
+      // Get parent document to determine next version
+      const parentDoc = await prisma.documents.findUnique({
+        where: { id: parent_document_id },
+        select: { id: true, parent_document_id: true, version: true }
+      })
+
+      if (!parentDoc) {
+        return NextResponse.json(
+          { error: 'Parent document not found' },
+          { status: 404 }
+        )
+      }
+
+      // Determine root document ID
+      const rootId = parentDoc.parent_document_id || parentDoc.id
+
+      // Get all existing versions to calculate next version number
+      const existingVersions = await prisma.documents.findMany({
+        where: {
+          OR: [
+            { id: rootId },
+            { parent_document_id: rootId }
+          ]
+        },
+        select: { version: true }
+      })
+
+      // Find highest version number
+      const versionNumbers = existingVersions
+        .map(v => parseFloat(v.version || '1.0'))
+        .filter(v => !isNaN(v))
+      
+      const maxVersion = versionNumbers.length > 0 ? Math.max(...versionNumbers) : 0
+      versionNumber = (maxVersion + 0.1).toFixed(1) // Increment by 0.1
+      parentDocumentId = rootId
     }
 
     // Generate unique file path
@@ -88,7 +131,8 @@ export async function POST(request: Request) {
         file_size: BigInt(file.size),
         file_type: getFileType(file.name),
         mime_type: file.type,
-        version: '1.0',
+        version: versionNumber,
+        parent_document_id: parentDocumentId,
         is_active: true,
         is_featured: is_featured || false,
         searchable_content: searchable_content || null,

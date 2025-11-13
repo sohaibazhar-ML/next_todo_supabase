@@ -73,9 +73,13 @@ export async function GET(request: Request) {
       return NextResponse.json(filteredDocuments)
     }
 
-    // Regular query
+    // Regular query - only show root documents (not versions)
+    // Versions have parent_document_id set, so we filter those out
     const documents = await prisma.documents.findMany({
-      where,
+      where: {
+        ...where,
+        parent_document_id: null, // Only root documents
+      },
       orderBy: { created_at: 'desc' }
     })
 

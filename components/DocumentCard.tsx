@@ -11,6 +11,10 @@ interface DocumentCardProps {
 export default function DocumentCard({ document }: DocumentCardProps) {
   const [downloading, setDownloading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showVersions, setShowVersions] = useState(false)
+  const [versions, setVersions] = useState<Document[]>([])
+  const [loadingVersions, setLoadingVersions] = useState(false)
+  const [selectedVersion, setSelectedVersion] = useState<Document | null>(document) // Initialize with current document
   const supabase = createClient()
 
   const formatFileSize = (bytes: number): string => {
@@ -56,7 +60,83 @@ export default function DocumentCard({ document }: DocumentCardProps) {
     }
   }
 
-  const handleDownload = async () => {
+  const fetchVersions = async () => {
+    if (showVersions) {
+      setShowVersions(false)
+      return
+    }
+
+    try {
+      setLoadingVersions(true)
+      const response = await fetch(`/api/documents/${document.id}/versions`)
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch versions')
+      }
+
+      // Convert BigInt file_size to number
+      const versionsData = Array.isArray(data) ? data.map((doc: any) => ({
+        ...doc,
+        file_size: typeof doc.file_size === 'bigint' ? Number(doc.file_size) : doc.file_size
+      })) : []
+
+      setVersions(versionsData)
+      // Set selected version to current document (the one being displayed)
+      const currentVersion = versionsData.find((v: Document) => v.id === document.id) || document
+      
+      // Ensure currentVersion has all required properties
+      if (currentVersion && currentVersion.id) {
+        setSelectedVersion(currentVersion)
+        setShowVersions(true)
+        console.log('Versions loaded:', versionsData.length, 'Current version:', currentVersion.id, 'Full version:', currentVersion)
+      } else {
+        console.error('Current version missing ID:', currentVersion)
+        setError('Failed to load version information')
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch versions')
+      console.error('Error fetching versions:', err)
+    } finally {
+      setLoadingVersions(false)
+    }
+  }
+
+  const handleDownload = async (downloadDocument?: Document) => {
+    // Determine which document to download
+    const docToDownload = downloadDocument || selectedVersion || document
+    
+    // Debug logging
+    console.log('Download attempt:', {
+      hasDownloadDocument: !!downloadDocument,
+      hasSelectedVersion: !!selectedVersion,
+      selectedVersionId: selectedVersion?.id,
+      docToDownloadId: docToDownload?.id,
+      docToDownload: docToDownload
+    })
+    
+    // Validate document exists and is actually a Document object (not an event)
+    if (!docToDownload || typeof docToDownload !== 'object' || !('id' in docToDownload)) {
+      console.error('No document to download or invalid object:', docToDownload)
+      setError('No document selected. Please select a version and try again.')
+      return
+    }
+
+    // Validate document ID exists
+    if (!docToDownload.id || typeof docToDownload.id !== 'string') {
+      console.error('Document missing ID or invalid ID type:', docToDownload)
+      setError('Invalid document selected. Please try again.')
+      return
+    }
+
+    // Validate UUID format
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    if (!uuidRegex.test(docToDownload.id)) {
+      console.error('Invalid document ID format:', docToDownload.id, typeof docToDownload.id)
+      setError('Invalid document ID. Please refresh and try again.')
+      return
+    }
+    
     try {
       setDownloading(true)
       setError(null)
@@ -67,10 +147,10 @@ export default function DocumentCard({ document }: DocumentCardProps) {
         throw new Error('You must be logged in to download documents')
       }
 
-      console.log('Starting download for file:', document.file_path)
+      console.log('Starting download for file:', docToDownload.file_path, 'Document ID:', docToDownload.id)
 
       // Get download URL from API
-      const urlResponse = await fetch(`/api/documents/${document.id}/download-url`)
+      const urlResponse = await fetch(`/api/documents/${docToDownload.id}/download-url`)
       const urlData = await urlResponse.json()
 
       if (!urlResponse.ok || !urlData.signedUrl) {
@@ -84,12 +164,13 @@ export default function DocumentCard({ document }: DocumentCardProps) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            document_id: document.id,
+            document_id: docToDownload.id,
             user_id: user.id,
             context: 'download_center',
             metadata: {
-              file_name: document.file_name,
-              file_type: document.file_type,
+              file_name: docToDownload.file_name,
+              file_type: docToDownload.file_type,
+              version: docToDownload.version || '1.0',
             },
           })
         })
@@ -118,7 +199,11 @@ export default function DocumentCard({ document }: DocumentCardProps) {
         // Create download link with blob URL
         const link = window.document.createElement('a')
         link.href = blobUrl
-        link.download = document.file_name
+        // Include version in filename if it's not the current version
+        const fileName = docToDownload.version && docToDownload.version !== document.version
+          ? `${docToDownload.file_name.replace(/\.[^/.]+$/, '')}_v${docToDownload.version}${docToDownload.file_name.match(/\.[^/.]+$/)?.[0] || ''}`
+          : docToDownload.file_name
+        link.download = fileName
         link.style.display = 'none'
         window.document.body.appendChild(link)
         link.click()
@@ -236,6 +321,10 @@ export default function DocumentCard({ document }: DocumentCardProps) {
             <span className="font-medium text-gray-900">{document.file_type}</span>
           </div>
           <div className="flex items-center justify-between">
+            <span>Version:</span>
+            <span className="font-medium text-gray-900">{document.version || '1.0'}</span>
+          </div>
+          <div className="flex items-center justify-between">
             <span>Size:</span>
             <span className="font-medium text-gray-900">{formatFileSize(document.file_size)}</span>
           </div>
@@ -243,6 +332,78 @@ export default function DocumentCard({ document }: DocumentCardProps) {
             <span>Downloads:</span>
             <span className="font-medium text-gray-900">{document.download_count}</span>
           </div>
+        </div>
+
+        {/* Version Selector */}
+        {showVersions && (
+          <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+            {versions.length > 1 ? (
+              <>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Version to Download:
+                </label>
+                <select
+                  value={selectedVersion?.id || document.id}
+                  onChange={(e) => {
+                    const selectedId = e.target.value
+                    const version = versions.find(v => v.id === selectedId)
+                    if (version && version.id) {
+                      console.log('Version selected:', {
+                        id: version.id,
+                        version: version.version,
+                        hasFile: !!version.file_path,
+                        fullVersion: version
+                      })
+                      // Ensure we have a complete version object
+                      setSelectedVersion({
+                        ...version,
+                        id: String(version.id), // Ensure ID is a string
+                      } as Document)
+                    } else {
+                      console.error('Version not found or invalid for ID:', selectedId, 'Available versions:', versions.map(v => ({ id: v.id, version: v.version })))
+                      setSelectedVersion(document)
+                    }
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm text-gray-900 bg-white"
+                >
+                  {versions.map((version) => {
+                    // Ensure version has valid ID
+                    if (!version.id) {
+                      console.error('Version missing ID:', version)
+                      return null
+                    }
+                    return (
+                      <option key={version.id} value={version.id}>
+                        Version {version.version || '1.0'} - {new Date(version.created_at).toLocaleDateString()} ({formatFileSize(version.file_size)})
+                        {version.id === document.id ? ' (Current)' : ''}
+                      </option>
+                    )
+                  })}
+                </select>
+              </>
+            ) : (
+              <p className="text-sm text-gray-600 text-center">
+                No other versions available. This is the only version.
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* View Versions Button */}
+        <div className="mb-4">
+          <button
+            onClick={fetchVersions}
+            disabled={loadingVersions}
+            className="w-full px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loadingVersions ? (
+              'Loading Versions...'
+            ) : showVersions ? (
+              'Hide Versions'
+            ) : (
+              'View All Versions'
+            )}
+          </button>
         </div>
 
         {/* Error Message */}
@@ -254,7 +415,10 @@ export default function DocumentCard({ document }: DocumentCardProps) {
 
         {/* Download Button */}
         <button
-          onClick={handleDownload}
+          onClick={(e) => {
+            e.preventDefault()
+            handleDownload()
+          }}
           disabled={downloading}
           className="w-full px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >

@@ -17,6 +17,23 @@ export async function GET(
 
     const { id } = await params
 
+    // Validate UUID format
+    if (!id || typeof id !== 'string') {
+      return NextResponse.json(
+        { error: 'Invalid document ID' },
+        { status: 400 }
+      )
+    }
+
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    if (!uuidRegex.test(id)) {
+      console.error('Invalid UUID format:', id)
+      return NextResponse.json(
+        { error: 'Invalid document ID format' },
+        { status: 400 }
+      )
+    }
+
     // Get document to get file path
     const document = await prisma.documents.findUnique({
       where: { id },

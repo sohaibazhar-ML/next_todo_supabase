@@ -9,6 +9,9 @@ export default function DocumentManagement() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [editingDoc, setEditingDoc] = useState<Document | null>(null)
+  const [expandedVersions, setExpandedVersions] = useState<Set<string>>(new Set())
+  const [versions, setVersions] = useState<Record<string, Document[]>>({})
+  const [loadingVersions, setLoadingVersions] = useState<Set<string>>(new Set())
   const supabase = createClient() // Still needed for storage operations
 
   useEffect(() => {
@@ -98,6 +101,54 @@ export default function DocumentManagement() {
     }
   }
 
+  const fetchVersions = async (documentId: string) => {
+    if (expandedVersions.has(documentId)) {
+      // Collapse
+      setExpandedVersions(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(documentId)
+        return newSet
+      })
+      return
+    }
+
+    try {
+      setLoadingVersions(prev => new Set(prev).add(documentId))
+      const response = await fetch(`/api/documents/${documentId}/versions`)
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch versions')
+      }
+
+      // Convert BigInt file_size to number
+      const versionsData = Array.isArray(data) ? data.map((doc: any) => ({
+        ...doc,
+        file_size: typeof doc.file_size === 'bigint' ? Number(doc.file_size) : doc.file_size
+      })) : []
+
+      setVersions(prev => ({
+        ...prev,
+        [documentId]: versionsData
+      }))
+      setExpandedVersions(prev => new Set(prev).add(documentId))
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch versions')
+      console.error('Error fetching versions:', err)
+    } finally {
+      setLoadingVersions(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(documentId)
+        return newSet
+      })
+    }
+  }
+
+  const handleUploadNewVersion = (documentId: string) => {
+    // Redirect to upload page with parent document ID
+    window.location.href = `/admin/documents?uploadVersion=${documentId}`
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -175,11 +226,30 @@ export default function DocumentManagement() {
                   <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                     <span>Category: {document.category}</span>
                     <span>Type: {document.file_type}</span>
+                    <span>Version: {document.version || '1.0'}</span>
                     <span>Downloads: {document.download_count}</span>
                     <span>Created: {new Date(document.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
                 <div className="flex gap-2 ml-4">
+                  <button
+                    onClick={() => fetchVersions(document.id)}
+                    className="px-3 py-1 bg-blue-100 text-blue-800 rounded text-sm font-medium hover:bg-blue-200 transition"
+                  >
+                    {loadingVersions.has(document.id) ? (
+                      'Loading...'
+                    ) : expandedVersions.has(document.id) ? (
+                      'Hide Versions'
+                    ) : (
+                      'View Versions'
+                    )}
+                  </button>
+                  <button
+                    onClick={() => handleUploadNewVersion(document.id)}
+                    className="px-3 py-1 bg-green-100 text-green-800 rounded text-sm font-medium hover:bg-green-200 transition"
+                  >
+                    Upload Version
+                  </button>
                   <button
                     onClick={() => handleToggleFeatured(document)}
                     className={`px-3 py-1 rounded text-sm font-medium transition ${
@@ -198,6 +268,54 @@ export default function DocumentManagement() {
                   </button>
                 </div>
               </div>
+              
+              {/* Version History */}
+              {expandedVersions.has(document.id) && versions[document.id] && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Version History</h4>
+                  <div className="space-y-2">
+                    {versions[document.id].map((version) => (
+                      <div
+                        key={version.id}
+                        className={`p-3 rounded-lg border ${
+                          version.id === document.id
+                            ? 'bg-indigo-50 border-indigo-200'
+                            : 'bg-gray-50 border-gray-200'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm font-medium text-gray-900">
+                              Version {version.version || '1.0'}
+                            </span>
+                            {version.id === document.id && (
+                              <span className="px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded text-xs font-medium">
+                                Current
+                              </span>
+                            )}
+                            <span className="text-xs text-gray-500">
+                              {new Date(version.created_at).toLocaleString()}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {Math.round(version.file_size / 1024)} KB
+                            </span>
+                          </div>
+                          <div className="flex gap-2">
+                            {version.id !== document.id && (
+                              <button
+                                onClick={() => handleDelete(version.id, version.file_path)}
+                                className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs font-medium hover:bg-red-200 transition"
+                              >
+                                Delete Version
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
