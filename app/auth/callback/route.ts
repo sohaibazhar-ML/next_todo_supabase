@@ -16,15 +16,21 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(error.message)}`)
     }
 
-    // If user just confirmed email (first opt-in)
+    // If user just confirmed email (first opt-in) or OAuth signin
     if (data.user && type !== 'recovery') {
-      // Check if this is the first email confirmation
-      const { data: profile } = await supabase
+      // Check if profile exists
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('email_confirmed, email_confirmed_at')
         .eq('id', data.user.id)
-        .single()
+        .maybeSingle()
 
+      // If no profile exists (e.g., Google OAuth signup), redirect to profile creation
+      if (!profile && !profileError) {
+        return NextResponse.redirect(`${origin}/profile?setup=true`)
+      }
+
+      // If profile exists, handle email confirmation flow
       if (profile) {
         // First confirmation - update profile and send second confirmation email
         if (!profile.email_confirmed) {

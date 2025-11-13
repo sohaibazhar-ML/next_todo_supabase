@@ -26,47 +26,32 @@ export default async function ProfilePage() {
                          profileError?.message?.includes('No rows') ||
                          (!profileError && !profile)
 
+  // If profile doesn't exist, show profile creation form
   if (isNotFoundError || (!profile && !profileError)) {
-    // Profile doesn't exist - this shouldn't happen if signup worked correctly
-    // But we'll handle it gracefully
+    // Get user info from auth to pre-fill some fields
+    const userEmail = user.email || ''
+    const userName = user.user_metadata?.full_name || user.user_metadata?.name || ''
+    const nameParts = userName.split(' ')
+    const firstName = nameParts[0] || ''
+    const lastName = nameParts.slice(1).join(' ') || ''
+
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 py-8">
         <div className="max-w-4xl mx-auto px-4">
           <div className="bg-white rounded-2xl shadow-xl p-8">
-            <div className="text-center py-12">
-              <div className="mx-auto h-16 w-16 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
-                <svg
-                  className="h-8 w-8 text-yellow-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                  />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-3">
-                Profile Not Found
-              </h2>
-              <p className="text-gray-600 mb-4">
-                Your profile could not be found in the database. This may have occurred if profile creation failed during signup.
+            <div className="mb-6">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Complete Your Profile</h1>
+              <p className="text-gray-600">
+                Welcome! Please complete your profile to continue. All fields marked with <span className="text-red-500">*</span> are required.
               </p>
-              <p className="text-sm text-gray-500 mb-6">
-                User ID: {user.id}
-              </p>
-              <div className="flex gap-4 justify-center">
-                <a
-                  href="/dashboard"
-                  className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 font-medium"
-                >
-                  Back to Dashboard
-                </a>
-              </div>
             </div>
+            <ProfileForm 
+              initialProfile={null} 
+              userEmail={userEmail}
+              userFirstName={firstName}
+              userLastName={lastName}
+              userId={user.id}
+            />
           </div>
         </div>
       </div>
@@ -194,5 +179,3 @@ export default async function ProfilePage() {
     </div>
   )
 }
-
-//

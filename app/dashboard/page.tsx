@@ -19,7 +19,12 @@ export default async function DashboardPage() {
     .from('profiles')
     .select('first_name, last_name, username')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
+
+  // If no profile exists, redirect to profile creation
+  if (!profile) {
+    redirect('/profile?setup=true')
+  }
 
   const displayName = profile 
     ? `${profile.first_name} ${profile.last_name}` 

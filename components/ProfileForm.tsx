@@ -6,15 +6,49 @@ import { useRouter } from 'next/navigation'
 import type { UserProfile } from '@/types/user'
 
 interface ProfileFormProps {
-  initialProfile: UserProfile
+  initialProfile: UserProfile | null
+  userEmail?: string
+  userFirstName?: string
+  userLastName?: string
+  userId?: string
 }
 
-export default function ProfileForm({ initialProfile }: ProfileFormProps) {
+export default function ProfileForm({ 
+  initialProfile, 
+  userEmail = '', 
+  userFirstName = '', 
+  userLastName = '',
+  userId = ''
+}: ProfileFormProps) {
   const router = useRouter()
   const supabase = createClient()
   
-  const [profile, setProfile] = useState(initialProfile)
-  const [isEditing, setIsEditing] = useState(false)
+  const isCreating = initialProfile === null
+  
+  // Initialize profile state - if creating, use empty/default values, otherwise use initialProfile
+  const [profile, setProfile] = useState<UserProfile | Partial<UserProfile>>(
+    initialProfile || {
+      id: userId,
+      username: '',
+      first_name: userFirstName,
+      last_name: userLastName,
+      email: userEmail,
+      phone_number: '',
+      current_address: '',
+      country_of_origin: '',
+      new_address_switzerland: '',
+      number_of_adults: 1,
+      number_of_children: 0,
+      pets_type: null,
+      marketing_consent: false,
+      terms_accepted: false,
+      data_privacy_accepted: false,
+      email_confirmed: true, // OAuth users have confirmed email
+      email_confirmed_at: new Date().toISOString(),
+      role: 'user',
+    }
+  )
+  const [isEditing, setIsEditing] = useState(isCreating) // Start in edit mode if creating
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
@@ -41,10 +75,31 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
   }
 
   const handleCancel = () => {
+    if (isCreating) {
+      // Can't cancel profile creation - it's required
+      return
+    }
     setIsEditing(false)
-    setProfile(initialProfile) // Reset to original values
+    setProfile(initialProfile!) // Reset to original values
     setError(null)
     setMessage(null)
+  }
+
+  const validateProfile = (): string | null => {
+    if (!profile.first_name?.trim()) return 'First name is required'
+    if (!profile.last_name?.trim()) return 'Last name is required'
+    if (isCreating && !profile.username?.trim()) return 'Username is required'
+    if (isCreating && profile.username && profile.username.length < 3) return 'Username must be at least 3 characters'
+    if (!profile.email?.trim()) return 'Email is required'
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(profile.email || '')) return 'Invalid email format'
+    if (!profile.phone_number?.trim()) return 'Phone number is required'
+    if (!profile.current_address?.trim()) return 'Current address is required'
+    if (!profile.country_of_origin?.trim()) return 'Country of origin is required'
+    if (!profile.new_address_switzerland?.trim()) return 'New address in Switzerland is required'
+    if (!profile.number_of_adults || profile.number_of_adults < 1) return 'Number of adults must be at least 1'
+    if (isCreating && !profile.terms_accepted) return 'You must accept Terms & Conditions'
+    if (isCreating && !profile.data_privacy_accepted) return 'You must accept Data Privacy policy'
+    return null
   }
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
@@ -53,32 +108,135 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
     setError(null)
     setMessage(null)
 
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({
-        first_name: profile.first_name,
-        last_name: profile.last_name,
-        phone_number: profile.phone_number,
-        current_address: profile.current_address,
-        country_of_origin: profile.country_of_origin,
-        new_address_switzerland: profile.new_address_switzerland,
-        number_of_adults: profile.number_of_adults,
-        number_of_children: profile.number_of_children,
-        pets_type: profile.pets_type,
-        marketing_consent: profile.marketing_consent,
-      })
-      .eq('id', profile.id)
-
-    if (updateError) {
-      setError(updateError.message)
+    // Validate profile data
+    const validationError = validateProfile()
+    if (validationError) {
+      setError(validationError)
       setLoading(false)
       return
     }
 
-    setMessage('Profile updated successfully!')
+    if (isCreating) {
+      // Create new profile
+      // Generate username from email if not provided
+      let username = profile.username?.trim()
+      if (!username) {
+        username = profile.email?.split('@')[0] || `user_${Date.now()}`
+        // Check if username exists and make it unique
+        const { data: existing } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('username', username)
+          .maybeSingle()
+        
+        if (existing) {
+          username = `${username}_${Date.now().toString().slice(-6)}`
+        }
+      }
+
+      // Check if username already exists
+      const { data: usernameCheck } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('username', username)
+        .maybeSingle()
+
+      if (usernameCheck) {
+        setError('Username already exists. Please choose a different username.')
+        setLoading(false)
+        return
+      }
+
+      // Try to use RPC function if it exists, otherwise use direct insert
+      let createError = null
+      const { error: rpcError } = await supabase.rpc('create_user_profile', {
+        p_id: profile.id,
+        p_username: username,
+        p_first_name: profile.first_name,
+        p_last_name: profile.last_name,
+        p_email: profile.email,
+        p_phone_number: profile.phone_number,
+        p_current_address: profile.current_address,
+        p_country_of_origin: profile.country_of_origin,
+        p_new_address_switzerland: profile.new_address_switzerland,
+        p_number_of_adults: profile.number_of_adults || 1,
+        p_number_of_children: profile.number_of_children || 0,
+        p_pets_type: profile.pets_type || null,
+        p_marketing_consent: profile.marketing_consent || false,
+        p_terms_accepted: profile.terms_accepted || false,
+        p_data_privacy_accepted: profile.data_privacy_accepted || false,
+      })
+
+      // If RPC function doesn't exist or fails, use direct insert
+      if (rpcError) {
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            id: profile.id,
+            username: username,
+            first_name: profile.first_name,
+            last_name: profile.last_name,
+            email: profile.email,
+            phone_number: profile.phone_number,
+            current_address: profile.current_address,
+            country_of_origin: profile.country_of_origin,
+            new_address_switzerland: profile.new_address_switzerland,
+            number_of_adults: profile.number_of_adults || 1,
+            number_of_children: profile.number_of_children || 0,
+            pets_type: profile.pets_type || null,
+            marketing_consent: profile.marketing_consent || false,
+            terms_accepted: profile.terms_accepted || false,
+            data_privacy_accepted: profile.data_privacy_accepted || false,
+            email_confirmed: true,
+            email_confirmed_at: new Date().toISOString(),
+            role: 'user',
+          })
+        createError = insertError
+      } else {
+        createError = rpcError
+      }
+
+      if (createError) {
+        setError(createError.message || 'Failed to create profile')
+        setLoading(false)
+        return
+      }
+
+      setMessage('Profile created successfully! Redirecting to dashboard...')
+      setTimeout(() => {
+        router.push('/dashboard')
+        router.refresh()
+      }, 1500)
+    } else {
+      // Update existing profile
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          first_name: profile.first_name,
+          last_name: profile.last_name,
+          phone_number: profile.phone_number,
+          current_address: profile.current_address,
+          country_of_origin: profile.country_of_origin,
+          new_address_switzerland: profile.new_address_switzerland,
+          number_of_adults: profile.number_of_adults,
+          number_of_children: profile.number_of_children,
+          pets_type: profile.pets_type,
+          marketing_consent: profile.marketing_consent,
+        })
+        .eq('id', profile.id)
+
+      if (updateError) {
+        setError(updateError.message)
+        setLoading(false)
+        return
+      }
+
+      setMessage('Profile updated successfully!')
+      setIsEditing(false)
+      router.refresh()
+    }
+
     setLoading(false)
-    setIsEditing(false)
-    router.refresh()
   }
 
   const handlePasswordChange = async (e: React.FormEvent) => {
@@ -255,29 +413,53 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Username
-                </label>
-                <input
-                  type="text"
-                  value={profile.username}
-                  disabled
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
-                />
-                <p className="mt-1 text-xs text-gray-500">Username cannot be changed</p>
-              </div>
+              {isCreating ? (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Username <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="username"
+                    value={profile.username || ''}
+                    onChange={handleInputChange}
+                    required
+                    minLength={3}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder:text-gray-400"
+                    placeholder="Choose a username"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">Must be at least 3 characters</p>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    value={profile.username}
+                    disabled
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">Username cannot be changed</p>
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Email
                 </label>
                 <input
                   type="email"
-                  value={profile.email}
-                  disabled
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
+                  name="email"
+                  value={profile.email || ''}
+                  onChange={handleInputChange}
+                  required
+                  disabled={!isCreating}
+                  className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder:text-gray-400 ${
+                    !isCreating ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''
+                  }`}
                 />
-                <p className="mt-1 text-xs text-gray-500">Email cannot be changed</p>
+                {!isCreating && <p className="mt-1 text-xs text-gray-500">Email cannot be changed</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -420,7 +602,7 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
               <input
                 type="checkbox"
                 name="marketing_consent"
-                checked={profile.marketing_consent}
+                checked={profile.marketing_consent || false}
                 onChange={handleInputChange}
                 className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500"
               />
@@ -430,22 +612,59 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
             </div>
           </div>
 
+          {/* Terms and Privacy - Only show when creating */}
+          {isCreating && (
+            <div className="space-y-4 border-t pt-6">
+              <div className="flex items-start">
+                <input
+                  type="checkbox"
+                  name="terms_accepted"
+                  checked={profile.terms_accepted || false}
+                  onChange={handleInputChange}
+                  required
+                  className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500"
+                />
+                <label className="ml-2 text-sm text-gray-700">
+                  I accept the <a href="/terms" target="_blank" className="text-indigo-600 hover:underline">Terms & Conditions</a> <span className="text-red-500">*</span>
+                </label>
+              </div>
+              <div className="flex items-start">
+                <input
+                  type="checkbox"
+                  name="data_privacy_accepted"
+                  checked={profile.data_privacy_accepted || false}
+                  onChange={handleInputChange}
+                  required
+                  className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500"
+                />
+                <label className="ml-2 text-sm text-gray-700">
+                  I accept the <a href="/privacy" target="_blank" className="text-indigo-600 hover:underline">Data Privacy Policy</a> <span className="text-red-500">*</span>
+                </label>
+              </div>
+            </div>
+          )}
+
           <div className="flex gap-3">
             <button
               type="submit"
               disabled={loading}
               className="flex-1 py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-all duration-200"
             >
-              {loading ? 'Updating...' : 'Save Changes'}
+              {loading 
+                ? (isCreating ? 'Creating Profile...' : 'Updating...') 
+                : (isCreating ? 'Create Profile' : 'Save Changes')
+              }
             </button>
-            <button
-              type="button"
-              onClick={handleCancel}
-              disabled={loading}
-              className="px-6 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-all duration-200 font-medium"
-            >
-              Cancel
-            </button>
+            {!isCreating && (
+              <button
+                type="button"
+                onClick={handleCancel}
+                disabled={loading}
+                className="px-6 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-all duration-200 font-medium"
+              >
+                Cancel
+              </button>
+            )}
           </div>
         </form>
       )}

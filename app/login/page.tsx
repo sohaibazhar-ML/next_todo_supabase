@@ -70,6 +70,22 @@ export default function LoginPage() {
       return
     }
 
+    // Check if profile exists - if not, redirect to profile creation
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .maybeSingle()
+      
+      if (!profile) {
+        router.push('/profile?setup=true')
+        router.refresh()
+        return
+      }
+    }
+
     router.push('/dashboard')
     router.refresh()
   }
