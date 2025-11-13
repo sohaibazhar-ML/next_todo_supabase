@@ -9,7 +9,7 @@ export default function DocumentManagement() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [editingDoc, setEditingDoc] = useState<Document | null>(null)
-  const supabase = createClient()
+  const supabase = createClient() // Still needed for storage operations
 
   useEffect(() => {
     fetchDocuments()
@@ -20,16 +20,20 @@ export default function DocumentManagement() {
       setLoading(true)
       setError(null)
 
-      const { data, error: fetchError } = await supabase
-        .from('documents')
-        .select('*')
-        .order('created_at', { ascending: false })
+      const response = await fetch('/api/documents')
+      const data = await response.json()
 
-      if (fetchError) {
-        throw fetchError
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch documents')
       }
 
-      setDocuments(data || [])
+      // Convert BigInt file_size to number
+      const docs = Array.isArray(data) ? data.map((doc: any) => ({
+        ...doc,
+        file_size: typeof doc.file_size === 'bigint' ? Number(doc.file_size) : doc.file_size
+      })) : []
+
+      setDocuments(docs)
     } catch (err: any) {
       setError(err.message || 'Failed to fetch documents')
       console.error('Error fetching documents:', err)
@@ -54,14 +58,14 @@ export default function DocumentManagement() {
         // Continue with database deletion even if storage deletion fails
       }
 
-      // Delete from database
-      const { error: deleteError } = await supabase
-        .from('documents')
-        .delete()
-        .eq('id', documentId)
+      // Delete from database via API
+      const response = await fetch(`/api/documents/${documentId}`, {
+        method: 'DELETE'
+      })
 
-      if (deleteError) {
-        throw deleteError
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to delete document')
       }
 
       // Refresh list
@@ -74,13 +78,17 @@ export default function DocumentManagement() {
 
   const handleToggleFeatured = async (document: Document) => {
     try {
-      const { error } = await supabase
-        .from('documents')
-        .update({ is_featured: !document.is_featured })
-        .eq('id', document.id)
+      const response = await fetch(`/api/documents/${document.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          is_featured: !document.is_featured
+        })
+      })
 
-      if (error) {
-        throw error
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to update document')
       }
 
       fetchDocuments()

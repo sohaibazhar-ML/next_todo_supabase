@@ -69,29 +69,21 @@ export default function DocumentCard({ document }: DocumentCardProps) {
 
       console.log('Starting download for file:', document.file_path)
 
-      // Get download URL from Supabase Storage
-      const { data: urlData, error: urlError } = await supabase.storage
-        .from('documents')
-        .createSignedUrl(document.file_path, 3600) // 1 hour expiry
+      // Get download URL from API
+      const urlResponse = await fetch(`/api/documents/${document.id}/download-url`)
+      const urlData = await urlResponse.json()
 
-      if (urlError) {
-        console.error('Error creating signed URL:', urlError)
-        throw new Error(`Failed to generate download URL: ${urlError.message}`)
+      if (!urlResponse.ok || !urlData.signedUrl) {
+        throw new Error(urlData.error || 'Failed to generate download URL')
       }
-
-      if (!urlData || !urlData.signedUrl) {
-        console.error('No signed URL returned:', urlData)
-        throw new Error('Failed to generate download URL: No URL returned')
-      }
-
-      alert('Signed URL generated successfully:'+ urlData.signedUrl)
 
       // Log the download BEFORE triggering download (important for count increment)
       let downloadLogged = false
       try {
-        const { data: logData, error: logError } = await supabase
-          .from('download_logs')
-          .insert({
+        const logResponse = await fetch('/api/download-logs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
             document_id: document.id,
             user_id: user.id,
             context: 'download_center',
@@ -100,14 +92,13 @@ export default function DocumentCard({ document }: DocumentCardProps) {
               file_type: document.file_type,
             },
           })
-          .select()
+        })
 
-        if (logError) {
-          console.error('Error logging download:', logError)
-          // Don't block download, but log the error
+        if (!logResponse.ok) {
+          console.error('Error logging download:', await logResponse.json())
         } else {
           downloadLogged = true
-          console.log('Download logged successfully:', logData)
+          console.log('Download logged successfully')
         }
       } catch (logErr: any) {
         console.error('Error logging download:', logErr)
@@ -158,18 +149,17 @@ export default function DocumentCard({ document }: DocumentCardProps) {
       
       // If we have a signed URL but download failed, offer to open in new tab
       if (err.message && !err.message.includes('generate download URL')) {
-        // Try to open in new tab as last resort
+        // Try to get URL again as fallback
         try {
-          const { data: urlData } = await supabase.storage
-            .from('documents')
-            .createSignedUrl(document.file_path, 3600)
+          const fallbackResponse = await fetch(`/api/documents/${document.id}/download-url`)
+          const fallbackData = await fallbackResponse.json()
           
-          if (urlData?.signedUrl) {
+          if (fallbackData?.signedUrl) {
             const openNewTab = confirm(
               'Automatic download failed. Would you like to open the file in a new tab instead?'
             )
             if (openNewTab) {
-              window.open(urlData.signedUrl, '_blank')
+              window.open(fallbackData.signedUrl, '_blank')
             }
           }
         } catch (fallbackErr) {

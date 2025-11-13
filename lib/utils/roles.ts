@@ -1,16 +1,13 @@
-import { createClient } from '@/lib/supabase/server'
+import { prisma } from '@/lib/prisma'
 import type { UserRole } from '@/types/user'
 
 export async function getUserRole(userId: string): Promise<UserRole> {
-  const supabase = await createClient()
+  const profile = await prisma.profiles.findUnique({
+    where: { id: userId },
+    select: { role: true }
+  })
   
-  const { data } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', userId)
-    .single()
-
-  return (data?.role as UserRole) || 'user'
+  return (profile?.role as UserRole) || 'user'
 }
 
 export async function isAdmin(userId: string): Promise<boolean> {

@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { isAdmin } from '@/lib/utils/roles'
@@ -14,12 +15,11 @@ export default async function DashboardPage() {
     redirect('/login')
   }
 
-  // Fetch user profile to display name
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('first_name, last_name, username')
-    .eq('id', user.id)
-    .maybeSingle()
+  // Fetch user profile using Prisma
+  const profile = await prisma.profiles.findUnique({
+    where: { id: user.id },
+    select: { first_name: true, last_name: true, username: true }
+  })
 
   // If no profile exists, redirect to profile creation
   if (!profile) {

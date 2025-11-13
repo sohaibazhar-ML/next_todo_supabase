@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import type { Document, DocumentSearchFilters } from '@/types/document'
 import DocumentCard from './DocumentCard'
 import DocumentSearch from './DocumentSearch'
@@ -14,7 +13,6 @@ export default function DocumentList() {
   const [categories, setCategories] = useState<string[]>([])
   const [fileTypes, setFileTypes] = useState<string[]>([])
   const [tags, setTags] = useState<string[]>([])
-  const supabase = createClient()
 
   useEffect(() => {
     fetchFilterOptions()
@@ -27,27 +25,12 @@ export default function DocumentList() {
 
   const fetchFilterOptions = async () => {
     try {
-      // Fetch all documents to get unique categories, file types, and tags
-      const { data } = await supabase
-        .from('documents')
-        .select('category, file_type, tags')
-
-      if (data) {
-        const uniqueCategories = Array.from(new Set(data.map(doc => doc.category))).sort()
-        const uniqueFileTypes = Array.from(new Set(data.map(doc => doc.file_type))).sort()
-        
-        // Extract all unique tags from all documents
-        const allTags = new Set<string>()
-        data.forEach(doc => {
-          if (doc.tags && Array.isArray(doc.tags)) {
-            doc.tags.forEach(tag => allTags.add(tag))
-          }
-        })
-        const uniqueTags = Array.from(allTags).sort()
-        
-        setCategories(uniqueCategories)
-        setFileTypes(uniqueFileTypes)
-        setTags(uniqueTags)
+      const response = await fetch('/api/documents/filter-options')
+      if (response.ok) {
+        const data = await response.json()
+        setCategories(data.categories || [])
+        setFileTypes(data.fileTypes || [])
+        setTags(data.tags || [])
       }
     } catch (err) {
       console.error('Error fetching filter options:', err)
@@ -59,92 +42,28 @@ export default function DocumentList() {
       setLoading(true)
       setError(null)
 
-      let query = supabase
-        .from('documents')
-        .select('*')
-        .order('created_at', { ascending: false })
+      // Build query params
+      const params = new URLSearchParams()
+      if (filters.category) params.append('category', filters.category)
+      if (filters.fileType) params.append('fileType', filters.fileType)
+      if (filters.featuredOnly) params.append('featuredOnly', 'true')
+      if (filters.searchQuery) params.append('searchQuery', filters.searchQuery)
+      if (filters.tags && filters.tags.length > 0) params.append('tags', filters.tags.join(','))
 
-      // Apply filters
-      if (filters.category) {
-        query = query.eq('category', filters.category)
+      const response = await fetch(`/api/documents?${params.toString()}`)
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch documents')
       }
 
-      if (filters.fileType) {
-        query = query.eq('file_type', filters.fileType)
-      }
+      // Convert BigInt file_size to number if needed
+      const documents = Array.isArray(data) ? data.map((doc: any) => ({
+        ...doc,
+        file_size: typeof doc.file_size === 'bigint' ? Number(doc.file_size) : doc.file_size
+      })) : []
 
-      if (filters.featuredOnly) {
-        query = query.eq('is_featured', true)
-      }
-
-      // If search query exists, use full-text search function
-      if (filters.searchQuery && filters.searchQuery.trim()) {
-        const { data, error: searchError } = await supabase.rpc('search_documents', {
-          search_query: filters.searchQuery,
-          p_category: filters.category || null,
-          p_file_type: filters.fileType || null,
-          p_limit: 100,
-          p_offset: 0,
-        })
-
-        if (searchError) {
-          throw searchError
-        }
-
-        // Map the RPC result to Document type
-        let mappedDocuments = (data || []).map((doc: any) => ({
-          id: doc.id,
-          title: doc.title,
-          description: doc.description,
-          category: doc.category,
-          tags: doc.tags,
-          file_name: doc.file_name,
-          file_path: doc.file_path,
-          file_size: doc.file_size,
-          file_type: doc.file_type,
-          mime_type: '', // RPC doesn't return this
-          version: null,
-          parent_document_id: null,
-          is_active: true, // Keep for type compatibility, but not used
-          is_featured: false,
-          download_count: doc.download_count,
-          searchable_content: null,
-          created_at: doc.created_at,
-          updated_at: doc.created_at,
-          created_by: null,
-        }))
-
-        // Filter by tags if selected
-        if (filters.tags && filters.tags.length > 0) {
-          mappedDocuments = mappedDocuments.filter((doc: Document) => {
-            if (!doc.tags || !Array.isArray(doc.tags)) return false
-            return filters.tags!.some(selectedTag => doc.tags!.includes(selectedTag))
-          })
-        }
-
-        setDocuments(mappedDocuments)
-        setLoading(false)
-        return
-      }
-
-      // Regular query without search
-      const { data, error: fetchError } = await query
-
-      if (fetchError) {
-        throw fetchError
-      }
-
-      // Filter by tags client-side (documents that contain any of the selected tags)
-      let filteredDocuments = data || []
-      if (filters.tags && filters.tags.length > 0) {
-        filteredDocuments = filteredDocuments.filter((doc: Document) => {
-          if (!doc.tags || !Array.isArray(doc.tags)) return false
-          // Check if document's tags array contains any of the selected tags
-          return filters.tags!.some(selectedTag => doc.tags!.includes(selectedTag))
-        })
-      }
-
-      setDocuments(filteredDocuments)
+      setDocuments(documents)
     } catch (err: any) {
       setError(err.message || 'Failed to fetch documents')
       console.error('Error fetching documents:', err)

@@ -19,38 +19,17 @@ export default function UserList() {
     try {
       setLoading(true)
       setError(null)
-      
-      // First verify user is admin by checking their own profile
-      const { data: currentUser } = await supabase.auth.getUser()
-      if (!currentUser.user) {
-        setError('Not authenticated')
+
+      // Fetch all users with role 'user' via API
+      const response = await fetch('/api/profiles?role=user')
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || 'Failed to fetch users')
         return
       }
 
-      const { data: myProfile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', currentUser.user.id)
-        .single()
-
-      if (myProfile?.role !== 'admin') {
-        setError('Admin access required')
-        return
-      }
-
-      // Fetch all users with role 'user'
-      const { data, error: fetchError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('role', 'user')
-        .order('created_at', { ascending: false })
-
-      if (fetchError) {
-        setError(fetchError.message)
-        return
-      }
-
-      setUsers(data || [])
+      setUsers(Array.isArray(data) ? data : [])
     } catch (err) {
       setError('Failed to fetch users')
       console.error('Error fetching users:', err)

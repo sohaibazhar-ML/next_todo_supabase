@@ -122,82 +122,48 @@ export default function ProfileForm({
       let username = profile.username?.trim()
       if (!username) {
         username = profile.email?.split('@')[0] || `user_${Date.now()}`
-        // Check if username exists and make it unique
-        const { data: existing } = await supabase
-          .from('profiles')
-          .select('username')
-          .eq('username', username)
-          .maybeSingle()
-        
-        if (existing) {
-          username = `${username}_${Date.now().toString().slice(-6)}`
-        }
       }
 
       // Check if username already exists
-      const { data: usernameCheck } = await supabase
-        .from('profiles')
-        .select('username')
-        .eq('username', username)
-        .maybeSingle()
+      const usernameCheckRes = await fetch(`/api/profiles/check-username?username=${encodeURIComponent(username)}`)
+      const usernameCheck = await usernameCheckRes.json()
 
-      if (usernameCheck) {
+      if (usernameCheck.exists) {
         setError('Username already exists. Please choose a different username.')
         setLoading(false)
         return
       }
 
-      // Try to use RPC function if it exists, otherwise use direct insert
-      let createError = null
-      const { error: rpcError } = await supabase.rpc('create_user_profile', {
-        p_id: profile.id,
-        p_username: username,
-        p_first_name: profile.first_name,
-        p_last_name: profile.last_name,
-        p_email: profile.email,
-        p_phone_number: profile.phone_number,
-        p_current_address: profile.current_address,
-        p_country_of_origin: profile.country_of_origin,
-        p_new_address_switzerland: profile.new_address_switzerland,
-        p_number_of_adults: profile.number_of_adults || 1,
-        p_number_of_children: profile.number_of_children || 0,
-        p_pets_type: profile.pets_type || null,
-        p_marketing_consent: profile.marketing_consent || false,
-        p_terms_accepted: profile.terms_accepted || false,
-        p_data_privacy_accepted: profile.data_privacy_accepted || false,
+      // Create profile via API
+      const response = await fetch('/api/profiles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: profile.id,
+          username: username,
+          first_name: profile.first_name,
+          last_name: profile.last_name,
+          email: profile.email,
+          phone_number: profile.phone_number,
+          current_address: profile.current_address,
+          country_of_origin: profile.country_of_origin,
+          new_address_switzerland: profile.new_address_switzerland,
+          number_of_adults: profile.number_of_adults || 1,
+          number_of_children: profile.number_of_children || 0,
+          pets_type: profile.pets_type || null,
+          marketing_consent: profile.marketing_consent || false,
+          terms_accepted: profile.terms_accepted || false,
+          data_privacy_accepted: profile.data_privacy_accepted || false,
+          email_confirmed: true,
+          email_confirmed_at: new Date().toISOString(),
+          role: 'user',
+        })
       })
 
-      // If RPC function doesn't exist or fails, use direct insert
-      if (rpcError) {
-        const { error: insertError } = await supabase
-          .from('profiles')
-          .insert({
-            id: profile.id,
-            username: username,
-            first_name: profile.first_name,
-            last_name: profile.last_name,
-            email: profile.email,
-            phone_number: profile.phone_number,
-            current_address: profile.current_address,
-            country_of_origin: profile.country_of_origin,
-            new_address_switzerland: profile.new_address_switzerland,
-            number_of_adults: profile.number_of_adults || 1,
-            number_of_children: profile.number_of_children || 0,
-            pets_type: profile.pets_type || null,
-            marketing_consent: profile.marketing_consent || false,
-            terms_accepted: profile.terms_accepted || false,
-            data_privacy_accepted: profile.data_privacy_accepted || false,
-            email_confirmed: true,
-            email_confirmed_at: new Date().toISOString(),
-            role: 'user',
-          })
-        createError = insertError
-      } else {
-        createError = rpcError
-      }
+      const data = await response.json()
 
-      if (createError) {
-        setError(createError.message || 'Failed to create profile')
+      if (!response.ok) {
+        setError(data.error || 'Failed to create profile')
         setLoading(false)
         return
       }
@@ -208,10 +174,12 @@ export default function ProfileForm({
         router.refresh()
       }, 1500)
     } else {
-      // Update existing profile
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({
+      // Update existing profile via API
+      const response = await fetch('/api/profiles', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: profile.id,
           first_name: profile.first_name,
           last_name: profile.last_name,
           phone_number: profile.phone_number,
@@ -223,10 +191,12 @@ export default function ProfileForm({
           pets_type: profile.pets_type,
           marketing_consent: profile.marketing_consent,
         })
-        .eq('id', profile.id)
+      })
 
-      if (updateError) {
-        setError(updateError.message)
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || 'Failed to update profile')
         setLoading(false)
         return
       }

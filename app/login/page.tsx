@@ -73,13 +73,8 @@ export default function LoginPage() {
     // Check if profile exists - if not, redirect to profile creation
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', user.id)
-        .maybeSingle()
-      
-      if (!profile) {
+      const response = await fetch(`/api/profiles?userId=${user.id}`)
+      if (!response.ok || response.status === 404) {
         router.push('/profile?setup=true')
         router.refresh()
         return

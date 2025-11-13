@@ -107,13 +107,12 @@ export default function DocumentUpload() {
         throw new Error('You must be logged in to upload documents')
       }
 
-      // Verify user is admin
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single()
-
+      // Verify user is admin via API
+      const profileResponse = await fetch(`/api/profiles?userId=${user.id}`)
+      if (!profileResponse.ok) {
+        throw new Error('Failed to verify admin status')
+      }
+      const profile = await profileResponse.json()
       if (profile?.role !== 'admin') {
         throw new Error('Admin access required')
       }
@@ -141,26 +140,30 @@ export default function DocumentUpload() {
         throw new Error(`Upload failed: ${uploadError.message}`)
       }
 
-      // Insert document record
-      const { error: insertError } = await supabase.from('documents').insert({
-        title: formData.title,
-        description: formData.description || null,
-        category: formData.category,
-        tags: formData.tags && formData.tags.length > 0 ? formData.tags : null,
-        file_name: formData.file.name,
-        file_path: filePath,
-        file_size: formData.file.size,
-        file_type: getFileType(formData.file.name),
-        mime_type: formData.file.type,
-        is_featured: formData.is_featured || false,
-        searchable_content: formData.searchable_content || null,
-        created_by: user.id,
+      // Insert document record via API
+      const docResponse = await fetch('/api/documents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: formData.title,
+          description: formData.description || null,
+          category: formData.category,
+          tags: formData.tags && formData.tags.length > 0 ? formData.tags : [],
+          file_name: formData.file.name,
+          file_path: filePath,
+          file_size: formData.file.size,
+          file_type: getFileType(formData.file.name),
+          mime_type: formData.file.type,
+          is_featured: formData.is_featured || false,
+          searchable_content: formData.searchable_content || null,
+        })
       })
 
-      if (insertError) {
+      if (!docResponse.ok) {
         // If insert fails, try to delete uploaded file
         await supabase.storage.from('documents').remove([filePath])
-        throw new Error(`Failed to create document record: ${insertError.message}`)
+        const data = await docResponse.json()
+        throw new Error(`Failed to create document record: ${data.error || 'Unknown error'}`)
       }
 
       setMessage('Document uploaded successfully!')

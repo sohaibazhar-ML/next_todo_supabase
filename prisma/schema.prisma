@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["public"]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model documents {
+  id                 String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title              String
+  description        String?
+  category           String
+  tags               String[]
+  file_name          String
+  file_path          String
+  file_size          BigInt
+  file_type          String
+  mime_type          String
+  version            String?         @default("1.0")
+  parent_document_id String?         @db.Uuid
+  is_active          Boolean?        @default(true)
+  is_featured        Boolean?        @default(false)
+  download_count     Int?            @default(0)
+  searchable_content String?
+  created_at         DateTime?       @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime?       @default(now()) @db.Timestamptz(6)
+  created_by         String?         @db.Uuid
+  // Note: created_by references auth.users.id, but we don't include auth schema in Prisma
+  // Use Supabase client for auth operations
+  documents          documents?      @relation("documentsTodocuments", fields: [parent_document_id], references: [id], onUpdate: NoAction)
+  other_documents    documents[]     @relation("documentsTodocuments")
+  download_logs      download_logs[]
+
+  @@index([category], map: "idx_documents_category")
+  @@index([category, created_at(sort: Desc)], map: "idx_documents_category_created")
+  @@index([created_by], map: "idx_documents_created_by")
+  @@index([file_type], map: "idx_documents_file_type")
+  @@index([is_active], map: "idx_documents_is_active")
+  @@index([is_featured], map: "idx_documents_is_featured")
+  @@index([tags], map: "idx_documents_tags_gin", type: Gin)
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model download_logs {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  document_id   String    @db.Uuid
+  user_id       String    @db.Uuid
+  downloaded_at DateTime? @default(now()) @db.Timestamptz(6)
+  ip_address    String?   @db.Inet
+  user_agent    String?
+  context       String?
+  metadata      Json?
+  documents     documents @relation(fields: [document_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  // Note: user_id references auth.users.id, but we don't include auth schema in Prisma
+  // Use Supabase client for auth operations
+
+  @@index([document_id, downloaded_at(sort: Desc)], map: "idx_download_logs_document_id")
+  @@index([document_id, user_id], map: "idx_download_logs_document_user")
+  @@index([downloaded_at(sort: Desc)], map: "idx_download_logs_downloaded_at")
+  @@index([user_id, downloaded_at(sort: Desc)], map: "idx_download_logs_user_id")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model profiles {
+  id                      String    @id @db.Uuid
+  username                String    @unique
+  first_name              String
+  last_name               String
+  current_address         String
+  country_of_origin       String
+  email                   String
+  phone_number            String
+  number_of_adults        Int       @default(1)
+  number_of_children      Int       @default(0)
+  pets_type               String?
+  new_address_switzerland String
+  marketing_consent       Boolean   @default(false)
+  terms_accepted          Boolean   @default(false)
+  data_privacy_accepted   Boolean   @default(false)
+  email_confirmed         Boolean   @default(false)
+  email_confirmed_at      DateTime? @db.Timestamptz(6)
+  role                    String    @default("user")
+  created_at              DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime  @default(now()) @db.Timestamptz(6)
+  // Note: id references auth.users.id, but we don't include auth schema in Prisma
+  // Use Supabase client for auth operations
+
+  @@index([email], map: "idx_profiles_email")
+  @@index([role], map: "idx_profiles_role")
+  @@index([role, created_at(sort: Desc)], map: "idx_profiles_role_created")
+  @@index([username], map: "idx_profiles_username")
+  @@schema("public")
+}

@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { isAdmin } from '@/lib/utils/roles'
@@ -26,14 +27,12 @@ export default async function UserProfilePage({
     redirect('/profile')
   }
 
-  // Fetch the profile to view
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', userId)
-    .maybeSingle()
+  // Fetch the profile to view using Prisma
+  const profile = await prisma.profiles.findUnique({
+    where: { id: userId }
+  })
 
-  if (profileError || !profile) {
+  if (!profile) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 py-8">
         <div className="max-w-4xl mx-auto px-4">
