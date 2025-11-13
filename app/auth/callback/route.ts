@@ -30,7 +30,8 @@ export async function GET(request: Request) {
         return NextResponse.redirect(`${origin}/profile?setup=true`)
       }
 
-      // Handle email confirmation flow
+      // Profile exists - this means manual signup (profile was created during signup)
+      // Handle email confirmation flow for manual signup
       // First confirmation - update profile and send second confirmation email
       if (!profile.email_confirmed) {
         // Update profile to mark first confirmation

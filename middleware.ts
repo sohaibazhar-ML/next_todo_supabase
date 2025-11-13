@@ -34,8 +34,10 @@ export async function middleware(request: NextRequest) {
 
   // If authentication fails (expired/invalid token), redirect to login
   if (error || !user) {
-    // Only redirect if not already on a public route
+    // Only redirect if not already on a public route or API route
+    // API routes handle their own authentication and return JSON errors
     if (
+      !request.nextUrl.pathname.startsWith('/api') &&
       !request.nextUrl.pathname.startsWith('/login') &&
       !request.nextUrl.pathname.startsWith('/signup') &&
       !request.nextUrl.pathname.startsWith('/forgot-password') &&

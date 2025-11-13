@@ -97,6 +97,15 @@ export default function SignUpPage() {
     setLoading(true)
 
     try {
+      // Clear any existing session before signup to avoid conflicts
+      // Note: This might fail silently if no session exists, which is fine
+      try {
+        await supabase.auth.signOut()
+      } catch (signOutError) {
+        // Ignore signOut errors (e.g., no session to sign out)
+        console.log('No existing session to clear')
+      }
+      
       // Step 1: Sign up with Supabase Auth (first opt-in)
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
@@ -123,27 +132,67 @@ export default function SignUpPage() {
         return
       }
 
-      // Step 2: Create profile with extended information using database function
-      const { error: profileError } = await supabase.rpc('create_user_profile', {
-        p_id: authData.user.id,
-        p_username: formData.username,
-        p_first_name: formData.firstName,
-        p_last_name: formData.lastName,
-        p_email: formData.email,
-        p_phone_number: formData.phoneNumber,
-        p_current_address: formData.currentAddress,
-        p_country_of_origin: formData.countryOfOrigin,
-        p_new_address_switzerland: formData.newAddressSwitzerland,
-        p_number_of_adults: formData.numberOfAdults,
-        p_number_of_children: formData.numberOfChildren,
-        p_pets_type: formData.petsType || null,
-        p_marketing_consent: formData.marketingConsent,
-        p_terms_accepted: formData.termsAccepted,
-        p_data_privacy_accepted: formData.dataPrivacyAccepted,
-      })
+      // Step 2: Create profile with extended information using API route
+      // Note: Username uniqueness is checked in the API route
+      console.log('Creating profile for user:', authData.user.id)
+      
+      let profileResponse
+      try {
+        profileResponse = await fetch('/api/profiles', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: authData.user.id,
+            username: formData.username,
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            email: formData.email,
+            phone_number: formData.phoneNumber,
+            current_address: formData.currentAddress,
+            country_of_origin: formData.countryOfOrigin,
+            new_address_switzerland: formData.newAddressSwitzerland,
+            number_of_adults: formData.numberOfAdults,
+            number_of_children: formData.numberOfChildren,
+            pets_type: formData.petsType || null,
+            marketing_consent: formData.marketingConsent,
+            terms_accepted: formData.termsAccepted,
+            data_privacy_accepted: formData.dataPrivacyAccepted,
+            email_confirmed: false, // Will be confirmed via email
+            email_confirmed_at: null,
+            role: 'user',
+          })
+        })
+      } catch (fetchError) {
+        console.error('Network error during profile creation:', fetchError)
+        setError(`Network error: ${fetchError instanceof Error ? fetchError.message : 'Failed to connect to server'}`)
+        setLoading(false)
+        return
+      }
 
-      if (profileError) {
-        setError(`Profile creation failed: ${profileError.message}`)
+      if (!profileResponse.ok) {
+        let errorData
+        try {
+          errorData = await profileResponse.json()
+        } catch (jsonError) {
+          errorData = { error: `HTTP ${profileResponse.status}: ${profileResponse.statusText}` }
+        }
+        console.error('Profile creation error:', {
+          status: profileResponse.status,
+          statusText: profileResponse.statusText,
+          error: errorData
+        })
+        setError(`Profile creation failed: ${errorData.error || errorData.details || `HTTP ${profileResponse.status}`}`)
+        setLoading(false)
+        return
+      }
+
+      let profileData
+      try {
+        profileData = await profileResponse.json()
+        console.log('Profile created successfully:', profileData.id)
+      } catch (jsonError) {
+        console.error('Error parsing profile response:', jsonError)
+        setError('Profile created but failed to parse response')
         setLoading(false)
         return
       }
@@ -171,7 +220,9 @@ export default function SignUpPage() {
         dataPrivacyAccepted: false,
       })
     } catch (err) {
-      setError('An unexpected error occurred')
+      console.error('Signup error:', err)
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred'
+      setError(errorMessage)
       setLoading(false)
     }
   }
