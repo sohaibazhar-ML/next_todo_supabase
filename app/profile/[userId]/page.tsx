@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { isAdmin } from '@/lib/utils/roles'
 import UserProfileView from '@/components/UserProfileView'
+import type { UserRole } from '@/types/user'
 
 export default async function UserProfilePage({
   params,
@@ -91,7 +92,16 @@ export default async function UserProfilePage({
               {admin && !isOwnProfile ? 'Back to User List' : 'Back to Dashboard'}
             </Link>
           </div>
-          <UserProfileView profile={profile} isOwnProfile={isOwnProfile} />
+          <UserProfileView 
+            profile={{
+              ...profile,
+              email_confirmed_at: profile.email_confirmed_at?.toISOString() || null,
+              created_at: profile.created_at.toISOString(),
+              updated_at: profile.updated_at.toISOString(),
+              role: profile.role as UserRole,
+            }} 
+            isOwnProfile={isOwnProfile} 
+          />
         </div>
       </div>
     </div>
