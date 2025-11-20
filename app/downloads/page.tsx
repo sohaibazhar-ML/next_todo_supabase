@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import DocumentList from '@/components/DocumentList'
 
 export default async function DownloadsPage() {
@@ -23,6 +24,25 @@ export default async function DownloadsPage() {
               <h1 className="text-3xl font-bold text-gray-900">Download Center</h1>
               <p className="text-gray-600 mt-1">Browse and download document templates</p>
             </div>
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+              </svg>
+              Back to Dashboard
+            </Link>
           </div>
         </div>
 

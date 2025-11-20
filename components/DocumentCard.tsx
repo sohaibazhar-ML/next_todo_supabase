@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Document } from '@/types/document'
 
@@ -15,10 +15,11 @@ export default function DocumentCard({ document }: DocumentCardProps) {
   const [versions, setVersions] = useState<Document[]>([])
   const [loadingVersions, setLoadingVersions] = useState(false)
   const [selectedVersion, setSelectedVersion] = useState<Document | null>(document) // Initialize with current document
+  const [versionCount, setVersionCount] = useState<number | null>(null) // Store version count
   const supabase = createClient()
 
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes'
+  const formatFileSize = (bytes: number | null | undefined): string => {
+    if (!bytes || bytes === 0 || isNaN(bytes)) return '0 Bytes'
     const k = 1024
     const sizes = ['Bytes', 'KB', 'MB', 'GB']
     const i = Math.floor(Math.log(bytes) / Math.log(k))
@@ -60,6 +61,24 @@ export default function DocumentCard({ document }: DocumentCardProps) {
     }
   }
 
+  // Fetch version count on mount (lightweight check)
+  useEffect(() => {
+    const fetchVersionCount = async () => {
+      try {
+        const response = await fetch(`/api/documents/${document.id}/versions`)
+        if (response.ok) {
+          const data = await response.json()
+          const versionsData = Array.isArray(data) ? data : []
+          setVersionCount(versionsData.length)
+        }
+      } catch (err) {
+        // Silently fail - version count is not critical
+        console.error('Error fetching version count:', err)
+      }
+    }
+    fetchVersionCount()
+  }, [document.id])
+
   const fetchVersions = async () => {
     if (showVersions) {
       setShowVersions(false)
@@ -82,6 +101,7 @@ export default function DocumentCard({ document }: DocumentCardProps) {
       })) : []
 
       setVersions(versionsData)
+      setVersionCount(versionsData.length) // Store version count
       // Set selected version to current document (the one being displayed)
       const currentVersion = versionsData.find((v: Document) => v.id === document.id) || document
       
@@ -324,14 +344,28 @@ export default function DocumentCard({ document }: DocumentCardProps) {
             <span>Version:</span>
             <span className="font-medium text-gray-900">{document.version || '1.0'}</span>
           </div>
+          {versionCount !== null && versionCount > 1 && (
+            <div className="flex items-center justify-between">
+              <span>Available Versions:</span>
+              <span className="font-medium text-indigo-600">{versionCount} versions</span>
+            </div>
+          )}
           <div className="flex items-center justify-between">
             <span>Size:</span>
             <span className="font-medium text-gray-900">{formatFileSize(document.file_size)}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span>Downloads:</span>
+            <span>Downloads (This Version):</span>
             <span className="font-medium text-gray-900">{document.download_count}</span>
           </div>
+          {showVersions && versions.length > 1 && (
+            <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+              <span>Total Downloads (All Versions):</span>
+              <span className="font-medium text-indigo-600">
+                {versions.reduce((sum, v) => sum + (v.download_count || 0), 0)}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Version Selector */}
@@ -339,9 +373,14 @@ export default function DocumentCard({ document }: DocumentCardProps) {
           <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
             {versions.length > 1 ? (
               <>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Version to Download:
-                </label>
+                <div className="flex items-center justify-between mb-3">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Select Version to Download:
+                  </label>
+                  <span className="text-xs text-gray-500">
+                    {versions.length} {versions.length === 1 ? 'version' : 'versions'} available
+                  </span>
+                </div>
                 <select
                   value={selectedVersion?.id || document.id}
                   onChange={(e) => {
@@ -364,7 +403,7 @@ export default function DocumentCard({ document }: DocumentCardProps) {
                       setSelectedVersion(document)
                     }
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm text-gray-900 bg-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm text-gray-900 bg-white mb-3"
                 >
                   {versions.map((version) => {
                     // Ensure version has valid ID
@@ -380,6 +419,36 @@ export default function DocumentCard({ document }: DocumentCardProps) {
                     )
                   })}
                 </select>
+                
+                {/* Version Details List */}
+                <div className="mt-3 space-y-2 max-h-48 overflow-y-auto">
+                  <p className="text-xs font-medium text-gray-700 mb-2">Version Details:</p>
+                  {versions.map((version) => (
+                    <div
+                      key={version.id}
+                      className={`p-2 rounded border text-xs ${
+                        version.id === document.id
+                          ? 'bg-indigo-50 border-indigo-200'
+                          : 'bg-white border-gray-200'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-medium text-gray-900">
+                          Version {version.version || '1.0'}
+                          {version.id === document.id && (
+                            <span className="ml-1 text-indigo-600">(Current)</span>
+                          )}
+                        </span>
+                        <span className="text-gray-600">
+                          {version.download_count || 0} downloads
+                        </span>
+                      </div>
+                      <div className="text-gray-500">
+                        {new Date(version.created_at).toLocaleDateString()} • {formatFileSize(version.file_size)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </>
             ) : (
               <p className="text-sm text-gray-600 text-center">

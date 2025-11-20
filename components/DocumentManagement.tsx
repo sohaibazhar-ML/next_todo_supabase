@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Document } from '@/types/document'
+import DocumentEditModal from './DocumentEditModal'
 
 export default function DocumentManagement() {
   const [documents, setDocuments] = useState<Document[]>([])
@@ -149,6 +150,16 @@ export default function DocumentManagement() {
     window.location.href = `/admin/documents?uploadVersion=${documentId}`
   }
 
+  const handleEditSave = () => {
+    // Refresh documents list after editing
+    fetchDocuments()
+    // Also refresh versions if any are expanded
+    const expandedIds = Array.from(expandedVersions)
+    expandedIds.forEach(id => {
+      fetchVersions(id)
+    })
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -185,8 +196,15 @@ export default function DocumentManagement() {
   }
 
   return (
-    <div className="space-y-4">
-      {documents.length === 0 ? (
+    <>
+      <DocumentEditModal
+        document={editingDoc}
+        isOpen={editingDoc !== null}
+        onClose={() => setEditingDoc(null)}
+        onSave={handleEditSave}
+      />
+      <div className="space-y-4">
+        {documents.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-gray-600">No documents uploaded yet</p>
         </div>
@@ -232,6 +250,12 @@ export default function DocumentManagement() {
                   </div>
                 </div>
                 <div className="flex gap-2 ml-4">
+                  <button
+                    onClick={() => setEditingDoc(document)}
+                    className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded text-sm font-medium hover:bg-indigo-200 transition"
+                  >
+                    Edit
+                  </button>
                   <button
                     onClick={() => fetchVersions(document.id)}
                     className="px-3 py-1 bg-blue-100 text-blue-800 rounded text-sm font-medium hover:bg-blue-200 transition"
@@ -301,6 +325,13 @@ export default function DocumentManagement() {
                             </span>
                           </div>
                           <div className="flex gap-2">
+                            <button
+                              onClick={() => setEditingDoc(version)}
+                              className="px-2 py-1 bg-indigo-100 text-indigo-800 rounded text-xs font-medium hover:bg-indigo-200 transition"
+                              title="Edit this version (will update all versions)"
+                            >
+                              Edit
+                            </button>
                             {version.id !== document.id && (
                               <button
                                 onClick={() => handleDelete(version.id, version.file_path)}
@@ -320,7 +351,8 @@ export default function DocumentManagement() {
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </>
   )
 }
 

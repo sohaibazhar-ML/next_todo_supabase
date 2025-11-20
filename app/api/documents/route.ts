@@ -38,39 +38,56 @@ export async function GET(request: Request) {
         0
       )
 
-      // Map results to Document format
-      const documents = results.map((doc: any) => ({
-        id: doc.id,
-        title: doc.title,
-        description: doc.description,
-        category: doc.category,
-        tags: doc.tags,
-        file_name: doc.file_name,
-        file_path: doc.file_path,
-        file_size: typeof doc.file_size === 'bigint' ? Number(doc.file_size) : doc.file_size,
-        file_type: doc.file_type,
-        mime_type: '', // RPC doesn't return this
-        version: null,
-        parent_document_id: null,
-        is_active: true,
-        is_featured: doc.is_featured || false,
-        download_count: doc.download_count,
-        searchable_content: null,
-        created_at: doc.created_at,
-        updated_at: doc.created_at,
-        created_by: null,
-      }))
+      if (!results || results.length === 0) {
+        return NextResponse.json([])
+      }
+
+      // Get IDs from search results
+      const documentIds = results.map((doc: any) => doc.id)
+
+      // Fetch full document data for search results (both root documents and versions)
+      // This allows search to show original files and version files separately
+      const fullDocuments = await prisma.documents.findMany({
+        where: {
+          id: { in: documentIds },
+          // Removed parent_document_id filter to include both root and version documents
+        }
+      })
+
+      // Create a map of search results by ID for ranking
+      const searchResultsMap = new Map(results.map((r: any) => [r.id, r]))
+
+      // Merge search results with full document data, preserving search ranking
+      const documents = fullDocuments
+        .map((doc) => {
+          const searchResult = searchResultsMap.get(doc.id)
+          return {
+            ...doc,
+            // Preserve search rank if available
+            _rank: searchResult?.rank || 0,
+          }
+        })
+        .sort((a, b) => (b as any)._rank - (a as any)._rank) // Sort by search rank
 
       // Filter by tags if provided
       let filteredDocuments = documents
       if (tags && tags.length > 0) {
-        filteredDocuments = documents.filter((doc: any) => {
+        filteredDocuments = documents.filter((doc) => {
           if (!doc.tags || !Array.isArray(doc.tags)) return false
           return tags.some(selectedTag => doc.tags.includes(selectedTag))
         })
       }
 
-      return NextResponse.json(filteredDocuments)
+      // Convert BigInt file_size to Number and remove _rank
+      const serializedDocuments = filteredDocuments.map((doc) => {
+        const { _rank, ...docWithoutRank } = doc as any
+        return {
+          ...docWithoutRank,
+          file_size: typeof doc.file_size === 'bigint' ? Number(doc.file_size) : doc.file_size,
+        }
+      })
+
+      return NextResponse.json(serializedDocuments)
     }
 
     // Regular query - only show root documents (not versions)
