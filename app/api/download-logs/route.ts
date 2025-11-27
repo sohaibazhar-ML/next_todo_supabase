@@ -69,12 +69,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
+    // Extract IP and user agent from request headers (server-side)
+    const forwardedFor = request.headers.get('x-forwarded-for')
+    const ip_address = forwardedFor?.split(',')[0]?.trim() || null
+    const user_agent = request.headers.get('user-agent') || null
+
     const log = await prisma.download_logs.create({
       data: {
         document_id: body.document_id,
         user_id: body.user_id,
-        ip_address: body.ip_address || null,
-        user_agent: body.user_agent || null,
+        ip_address: ip_address,
+        user_agent: user_agent,
         context: body.context || null,
         metadata: body.metadata || null,
       }
