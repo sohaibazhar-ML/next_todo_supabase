@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import type { DocumentSearchFilters, DocumentFileType } from '@/types/document'
 
 interface DocumentSearchProps {
@@ -18,13 +19,13 @@ export default function DocumentSearch({
   fileTypes,
   tags,
 }: DocumentSearchProps) {
+  const t = useTranslations('documentSearch')
   const [searchQuery, setSearchQuery] = useState(filters.searchQuery || '')
   const [localCategory, setLocalCategory] = useState(filters.category || '')
   const [localFileType, setLocalFileType] = useState(filters.fileType || '')
   const [selectedTags, setSelectedTags] = useState<string[]>(filters.tags || [])
   const [featuredOnly, setFeaturedOnly] = useState(filters.featuredOnly || false)
 
-  // Sync selectedTags when filters prop changes
   useEffect(() => {
     setSelectedTags(filters.tags || [])
   }, [filters.tags])
@@ -35,8 +36,6 @@ export default function DocumentSearch({
       : [...selectedTags, tag]
     
     setSelectedTags(newTags)
-    
-    // Apply filter immediately when tag is toggled
     onFilterChange({
       ...filters,
       tags: newTags.length > 0 ? newTags : undefined,
@@ -66,29 +65,18 @@ export default function DocumentSearch({
 
   return (
     <form onSubmit={handleSearch} className="space-y-4">
-      {/* Search Bar */}
       <div className="flex gap-3">
         <div className="flex-1 relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg
-              className="h-5 w-5 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
+            <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search documents by title, description, or content..."
+            placeholder={t('searchPlaceholder')}
             className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder:text-gray-400"
           />
         </div>
@@ -96,7 +84,7 @@ export default function DocumentSearch({
           type="submit"
           className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium"
         >
-          Search
+          {t('search')}
         </button>
         {(searchQuery || localCategory || localFileType || selectedTags.length > 0 || featuredOnly) && (
           <button
@@ -104,48 +92,40 @@ export default function DocumentSearch({
             onClick={handleReset}
             className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all duration-200 font-medium"
           >
-            Reset
+            {t('reset')}
           </button>
         )}
       </div>
 
-      {/* Filters */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Category Filter */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('category')}</label>
           <select
             value={localCategory}
             onChange={(e) => setLocalCategory(e.target.value)}
             className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
           >
-            <option value="">All Categories</option>
+            <option value="">{t('allCategories')}</option>
             {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
+              <option key={category} value={category}>{category}</option>
             ))}
           </select>
         </div>
 
-        {/* File Type Filter */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">File Type</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('fileType')}</label>
           <select
             value={localFileType}
             onChange={(e) => setLocalFileType(e.target.value)}
             className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
           >
-            <option value="">All Types</option>
+            <option value="">{t('allTypes')}</option>
             {fileTypes.map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
+              <option key={type} value={type}>{type}</option>
             ))}
           </select>
         </div>
 
-        {/* Featured Only */}
         <div className="flex items-end">
           <label className="flex items-center gap-2 cursor-pointer">
             <input
@@ -154,15 +134,14 @@ export default function DocumentSearch({
               onChange={(e) => setFeaturedOnly(e.target.checked)}
               className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
             />
-            <span className="text-sm font-medium text-gray-700">Featured Only</span>
+            <span className="text-sm font-medium text-gray-700">{t('featuredOnly')}</span>
           </label>
         </div>
       </div>
 
-      {/* Tags Filter */}
       {tags.length > 0 && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('tags')}</label>
           <div className="flex flex-wrap gap-2">
             {tags.map((tag) => (
               <button
@@ -181,7 +160,7 @@ export default function DocumentSearch({
           </div>
           {selectedTags.length > 0 && (
             <p className="mt-2 text-xs text-gray-500">
-              {selectedTags.length} tag{selectedTags.length !== 1 ? 's' : ''} selected
+              {t('tagsSelected', { count: selectedTags.length })}
             </p>
           )}
         </div>
@@ -189,4 +168,3 @@ export default function DocumentSearch({
     </form>
   )
 }
-

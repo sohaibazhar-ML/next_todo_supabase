@@ -4,8 +4,11 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
 
 export default function LoginPage() {
+  const t = useTranslations()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -29,7 +32,6 @@ export default function LoginPage() {
       setError(socialError.message)
       setSocialLoading(null)
     }
-    // Note: User will be redirected to Google, then back to callback
   }
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -37,12 +39,9 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
 
-    // Check if input is email or username
     const isEmail = email.includes('@')
-    
     let loginEmail = email
     
-    // If username, fetch email from profile
     if (!isEmail) {
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
@@ -51,7 +50,7 @@ export default function LoginPage() {
         .single()
       
       if (profileError || !profile) {
-        setError('Invalid username or password')
+        setError(t('auth.invalidCredentials'))
         setLoading(false)
         return
       }
@@ -70,7 +69,6 @@ export default function LoginPage() {
       return
     }
 
-    // Check if profile exists - if not, redirect to profile creation
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
       const response = await fetch(`/api/profiles?userId=${user.id}`)
@@ -87,6 +85,9 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="absolute top-4 right-4">
+        <LanguageSwitcher />
+      </div>
       <div className="max-w-md w-full">
         {/* Logo/Header Section */}
         <div className="text-center mb-8">
@@ -105,8 +106,8 @@ export default function LoginPage() {
               />
             </svg>
           </div>
-          <h2 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">Welcome back</h2>
-          <p className="text-white/90 drop-shadow-md">Sign in to your account to continue</p>
+          <h2 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">{t('auth.welcomeBack')}</h2>
+          <p className="text-white/90 drop-shadow-md">{t('auth.signInToContinue')}</p>
         </div>
 
         {/* Card */}
@@ -165,7 +166,7 @@ export default function LoginPage() {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       ></path>
                     </svg>
-                    Signing in with Google...
+                    {t('auth.signingInWithGoogle')}
                   </>
                 ) : (
                   <>
@@ -187,7 +188,7 @@ export default function LoginPage() {
                         d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                       />
                     </svg>
-                    Continue with Google
+                    {t('auth.continueWithGoogle')}
                   </>
                 )}
               </button>
@@ -199,14 +200,14 @@ export default function LoginPage() {
                 <div className="w-full border-t border-gray-300"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or continue with email/username</span>
+                <span className="px-2 bg-white text-gray-500">{t('auth.orContinueWithEmail')}</span>
               </div>
             </div>
 
             {/* Email/Username Field */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email or Username
+                {t('auth.emailOrUsername')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -233,7 +234,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out sm:text-sm placeholder:text-gray-500"
-                  placeholder="username or email@example.com"
+                  placeholder={t('auth.emailOrUsernamePlaceholder')}
                 />
               </div>
             </div>
@@ -241,7 +242,7 @@ export default function LoginPage() {
             {/* Password Field */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Password
+                {t('auth.password')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -268,7 +269,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out sm:text-sm placeholder:text-gray-500 text-gray-900"
-                  placeholder="Enter your password"
+                  placeholder={t('auth.passwordPlaceholder')}
                 />
               </div>
             </div>
@@ -283,13 +284,13 @@ export default function LoginPage() {
                   className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                  Remember me
+                  {t('auth.rememberMe')}
                 </label>
               </div>
 
               <div className="text-sm">
                 <Link href="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">
-                  Forgot password?
+                  {t('auth.forgotPassword')}
                 </Link>
               </div>
             </div>
@@ -323,10 +324,10 @@ export default function LoginPage() {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       ></path>
                     </svg>
-                    Signing in...
+                    {t('auth.signingIn')}
                   </>
                 ) : (
-                  'Sign in'
+                  t('common.signIn')
                 )}
               </button>
             </div>
@@ -339,7 +340,7 @@ export default function LoginPage() {
                 <div className="w-full border-t border-gray-300"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">New to our platform?</span>
+                <span className="px-2 bg-white text-gray-500">{t('auth.newToPlatform')}</span>
               </div>
             </div>
 
@@ -348,7 +349,7 @@ export default function LoginPage() {
                 href="/signup"
                 className="w-full inline-flex justify-center items-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out"
               >
-                Create an account
+                {t('auth.createAccount')}
               </Link>
             </div>
           </div>
@@ -356,16 +357,17 @@ export default function LoginPage() {
 
         {/* Footer */}
         <p className="mt-8 text-center text-sm text-white/80 drop-shadow-md">
-          By signing in, you agree to our{' '}
+          {t('auth.bySigningIn')}{' '}
           <a href="#" className="font-medium text-white hover:text-white/80 underline">
-            Terms of Service
+            {t('common.termsOfService')}
           </a>{' '}
-          and{' '}
+          {t('auth.and')}{' '}
           <a href="#" className="font-medium text-white hover:text-white/80 underline">
-            Privacy Policy
+            {t('common.privacyPolicy')}
           </a>
         </p>
       </div>
     </div>
   )
 }
+

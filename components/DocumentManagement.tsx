@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import type { Document } from '@/types/document'
 import DocumentEditModal from './DocumentEditModal'
 
 export default function DocumentManagement() {
+  const t = useTranslations('documentManagement')
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -47,7 +49,7 @@ export default function DocumentManagement() {
   }
 
   const handleDelete = async (documentId: string, filePath: string) => {
-    if (!confirm('Are you sure you want to delete this document? This action cannot be undone.')) {
+    if (!confirm(t('confirmDelete'))) {
       return
     }
 
@@ -206,7 +208,7 @@ export default function DocumentManagement() {
       <div className="space-y-4">
         {documents.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-600">No documents uploaded yet</p>
+          <p className="text-gray-600">{t('noDocuments')}</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -221,7 +223,7 @@ export default function DocumentManagement() {
                     <h3 className="text-lg font-semibold text-gray-900">{document.title}</h3>
                     {document.is_featured && (
                       <span className="px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded text-xs font-medium">
-                        Featured
+                        {t('featured')}
                       </span>
                     )}
                   </div>
@@ -242,11 +244,11 @@ export default function DocumentManagement() {
                     </div>
                   )}
                   <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                    <span>Category: {document.category}</span>
-                    <span>Type: {document.file_type}</span>
-                    <span>Version: {document.version || '1.0'}</span>
-                    <span>Downloads: {document.download_count}</span>
-                    <span>Created: {new Date(document.created_at).toLocaleDateString()}</span>
+                    <span>{t('category')}: {document.category}</span>
+                    <span>{t('type')}: {document.file_type}</span>
+                    <span>{t('version')}: {document.version || '1.0'}</span>
+                    <span>{t('downloads')}: {document.download_count}</span>
+                    <span>{t('created')}: {new Date(document.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
                 <div className="flex gap-2 ml-4">
@@ -254,25 +256,25 @@ export default function DocumentManagement() {
                     onClick={() => setEditingDoc(document)}
                     className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded text-sm font-medium hover:bg-indigo-200 transition"
                   >
-                    Edit
+                    {t('edit')}
                   </button>
                   <button
                     onClick={() => fetchVersions(document.id)}
                     className="px-3 py-1 bg-blue-100 text-blue-800 rounded text-sm font-medium hover:bg-blue-200 transition"
                   >
                     {loadingVersions.has(document.id) ? (
-                      'Loading...'
+                      t('loading')
                     ) : expandedVersions.has(document.id) ? (
-                      'Hide Versions'
+                      t('hideVersions')
                     ) : (
-                      'View Versions'
+                      t('viewVersions')
                     )}
                   </button>
                   <button
                     onClick={() => handleUploadNewVersion(document.id)}
                     className="px-3 py-1 bg-green-100 text-green-800 rounded text-sm font-medium hover:bg-green-200 transition"
                   >
-                    Upload Version
+                    {t('uploadVersion')}
                   </button>
                   <button
                     onClick={() => handleToggleFeatured(document)}
@@ -282,13 +284,13 @@ export default function DocumentManagement() {
                         : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                     }`}
                   >
-                    {document.is_featured ? 'Unfeature' : 'Feature'}
+                    {document.is_featured ? t('unfeature') : t('feature')}
                   </button>
                   <button
                     onClick={() => handleDelete(document.id, document.file_path)}
                     className="px-3 py-1 bg-red-100 text-red-800 rounded text-sm font-medium hover:bg-red-200 transition"
                   >
-                    Delete
+                    {t('delete')}
                   </button>
                 </div>
               </div>
@@ -296,7 +298,7 @@ export default function DocumentManagement() {
               {/* Version History */}
               {expandedVersions.has(document.id) && versions[document.id] && (
                 <div className="mt-4 pt-4 border-t border-gray-200">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Version History</h4>
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3">{t('versionHistory')}</h4>
                   <div className="space-y-2">
                     {versions[document.id].map((version) => (
                       <div
@@ -310,11 +312,11 @@ export default function DocumentManagement() {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <span className="text-sm font-medium text-gray-900">
-                              Version {version.version || '1.0'}
+                              {t('version')} {version.version || '1.0'}
                             </span>
                             {version.id === document.id && (
                               <span className="px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded text-xs font-medium">
-                                Current
+                                {t('current')}
                               </span>
                             )}
                             <span className="text-xs text-gray-500">
@@ -330,14 +332,14 @@ export default function DocumentManagement() {
                               className="px-2 py-1 bg-indigo-100 text-indigo-800 rounded text-xs font-medium hover:bg-indigo-200 transition"
                               title="Edit this version (will update all versions)"
                             >
-                              Edit
+                              {t('edit')}
                             </button>
                             {version.id !== document.id && (
                               <button
                                 onClick={() => handleDelete(version.id, version.file_path)}
                                 className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs font-medium hover:bg-red-200 transition"
                               >
-                                Delete Version
+                                {t('deleteVersion')}
                               </button>
                             )}
                           </div>

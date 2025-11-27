@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import type { DocumentUploadData } from '@/types/document'
 import type { Document } from '@/types/document'
 
 export default function DocumentUpload() {
+  const t = useTranslations('documentUpload')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
@@ -69,13 +71,13 @@ export default function DocumentUpload() {
 
     // Validate file type
     if (!allowedFileTypes.includes(file.type) && !allowedExtensions.some(ext => file.name.toLowerCase().endsWith(ext))) {
-      setError('Invalid file type. Please upload PDF, DOCX, XLSX, or ZIP files only.')
+      setError(t('invalidFileType'))
       return
     }
 
     // Validate file size (max 50MB)
     if (file.size > 50 * 1024 * 1024) {
-      setError('File size exceeds 50MB limit.')
+      setError(t('fileSizeExceeds'))
       return
     }
 
@@ -107,17 +109,17 @@ export default function DocumentUpload() {
 
     // Validation
     if (!formData.title.trim()) {
-      setError('Title is required')
+      setError(t('titleRequired'))
       return
     }
 
     if (!formData.category.trim()) {
-      setError('Category is required')
+      setError(t('categoryRequired'))
       return
     }
 
     if (!formData.file) {
-      setError('Please select a file to upload')
+      setError(t('selectFile'))
       return
     }
 
@@ -160,7 +162,7 @@ export default function DocumentUpload() {
         throw new Error(errorData.error || `Upload failed: HTTP ${docResponse.status}`)
       }
 
-      setMessage(uploadVersionId ? 'New version uploaded successfully!' : 'Document uploaded successfully!')
+      setMessage(uploadVersionId ? t('versionUploadSuccess') : t('uploadSuccess'))
       
       // Reset form
       setFormData({
@@ -211,18 +213,18 @@ export default function DocumentUpload() {
       {uploadVersionId && (
         <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg">
           <p className="text-sm text-blue-700 font-medium mb-2">
-            Uploading New Version
+            {t('uploadingNewVersion')}
           </p>
           {loadingParent ? (
-            <p className="text-xs text-blue-600">Loading parent document...</p>
+            <p className="text-xs text-blue-600">{t('loadingParentDocument')}</p>
           ) : parentDocument ? (
             <div className="text-xs text-blue-600 space-y-1">
-              <p>Parent: {parentDocument.title}</p>
-              <p>Current Version: {parentDocument.version || '1.0'}</p>
-              <p className="mt-2 text-blue-700">The form is pre-filled with parent document details. You can modify them if needed.</p>
+              <p>{t('parent')}: {parentDocument.title}</p>
+              <p>{t('currentVersion')}: {parentDocument.version || '1.0'}</p>
+              <p className="mt-2 text-blue-700">{t('formPrefilled')}</p>
             </div>
           ) : (
-            <p className="text-xs text-blue-600">Failed to load parent document</p>
+            <p className="text-xs text-blue-600">{t('failedToLoadParent')}</p>
           )}
         </div>
       )}
@@ -230,7 +232,7 @@ export default function DocumentUpload() {
       {/* Title */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Title <span className="text-red-500">*</span>
+          {t('title')} <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
@@ -239,26 +241,26 @@ export default function DocumentUpload() {
           required
           disabled={loadingParent}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
-          placeholder="Document title"
+          placeholder={t('titlePlaceholder')}
         />
       </div>
 
       {/* Description */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">{t('description')}</label>
         <textarea
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
           rows={3}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder:text-gray-400"
-          placeholder="Document description"
+          placeholder={t('descriptionPlaceholder')}
         />
       </div>
 
       {/* Category */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Category <span className="text-red-500">*</span>
+          {t('category')} <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
@@ -266,13 +268,13 @@ export default function DocumentUpload() {
           onChange={(e) => setFormData({ ...formData, category: e.target.value })}
           required
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder:text-gray-400"
-          placeholder="e.g., Immigration, Forms, Guides"
+          placeholder={t('categoryPlaceholder')}
         />
       </div>
 
       {/* Tags */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">{t('tags')}</label>
         <div className="flex gap-2 mb-2">
           <input
             type="text"
@@ -285,14 +287,14 @@ export default function DocumentUpload() {
               }
             }}
             className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder:text-gray-400"
-            placeholder="Add tag and press Enter"
+            placeholder={t('addTagPlaceholder')}
           />
           <button
             type="button"
             onClick={handleAddTag}
             className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
           >
-            Add
+            {t('add')}
           </button>
         </div>
         {formData.tags && formData.tags.length > 0 && (
@@ -319,7 +321,7 @@ export default function DocumentUpload() {
       {/* File Upload */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          File <span className="text-red-500">*</span>
+          {t('file')} <span className="text-red-500">*</span>
         </label>
         <input
           id="file-input"
@@ -330,7 +332,7 @@ export default function DocumentUpload() {
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
         />
         <p className="mt-1 text-xs text-gray-500">
-          Allowed: PDF, DOCX, XLSX, ZIP (Max 50MB)
+          {t('allowedFormats')}
         </p>
       </div>
 
@@ -343,7 +345,7 @@ export default function DocumentUpload() {
             onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
             className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
           />
-          <span className="text-sm font-medium text-gray-700">Featured Document</span>
+          <span className="text-sm font-medium text-gray-700">{t('featuredDocument')}</span>
         </label>
       </div>
 
@@ -353,7 +355,7 @@ export default function DocumentUpload() {
         disabled={loading || loadingParent}
         className="w-full px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {loading ? 'Uploading...' : loadingParent ? 'Loading...' : uploadVersionId ? 'Upload New Version' : 'Upload Document'}
+        {loading ? t('uploading') : loadingParent ? t('loading') : uploadVersionId ? t('uploadNewVersion') : t('uploadDocument')}
       </button>
     </form>
   )

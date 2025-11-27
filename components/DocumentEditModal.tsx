@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import type { Document } from '@/types/document'
 
 interface DocumentEditModalProps {
@@ -16,6 +17,7 @@ export default function DocumentEditModal({
   onClose,
   onSave,
 }: DocumentEditModalProps) {
+  const t = useTranslations('documentEditModal')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
@@ -106,10 +108,10 @@ export default function DocumentEditModal({
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold text-gray-900">
-            Edit Document
+            {t('editDocument')}
             {document.version && (
               <span className="ml-2 text-sm font-normal text-gray-500">
-                (Version {document.version})
+                ({t('version')} {document.version})
               </span>
             )}
           </h2>
@@ -134,14 +136,14 @@ export default function DocumentEditModal({
           {/* Info message about version syncing */}
           <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
             <p className="text-sm text-blue-700">
-              <strong>Note:</strong> Editing this document will update the metadata (title, description, category, tags) for all versions in the version tree, following Google Docs behavior. Each version will keep its own file.
+              <strong>Note:</strong> {t('editNote')}
             </p>
           </div>
 
           {/* Title */}
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-              Title <span className="text-red-500">*</span>
+              {t('title')} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -149,34 +151,34 @@ export default function DocumentEditModal({
               required
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder="Enter document title"
+              placeholder={t('titlePlaceholder')}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder:text-gray-700 text-gray-900 bg-white"
               disabled={loading}
             />
-            <p className="mt-1 text-xs text-gray-500">Enter a descriptive title for the document</p>
+            <p className="mt-1 text-xs text-gray-500">{t('titleHelp')}</p>
           </div>
 
           {/* Description */}
           <div>
             <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-              Description
+              {t('description')}
             </label>
             <textarea
               id="description"
               rows={4}
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Enter document description (optional)"
+              placeholder={t('descriptionPlaceholder')}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder:text-gray-700 text-gray-900 bg-white"
               disabled={loading}
             />
-            <p className="mt-1 text-xs text-gray-500">Provide additional details about the document (optional)</p>
+            <p className="mt-1 text-xs text-gray-500">{t('descriptionHelp')}</p>
           </div>
 
           {/* Category */}
           <div>
             <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-              Category <span className="text-red-500">*</span>
+              {t('category')} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -184,17 +186,17 @@ export default function DocumentEditModal({
               required
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              placeholder="Enter document category"
+              placeholder={t('categoryPlaceholder')}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder:text-gray-700 text-gray-900 bg-white"
               disabled={loading}
             />
-            <p className="mt-1 text-xs text-gray-500">Categorize the document (e.g., Visa, Forms, Legal)</p>
+            <p className="mt-1 text-xs text-gray-500">{t('categoryHelp')}</p>
           </div>
 
           {/* Tags */}
           <div>
             <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-2">
-              Tags
+              {t('tags')}
             </label>
             <div className="flex gap-2 mb-2">
               <input
@@ -203,7 +205,7 @@ export default function DocumentEditModal({
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Add a tag and press Enter"
+                placeholder={t('addTagPlaceholder')}
                 className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder:text-gray-700"
                 disabled={loading}
               />
@@ -213,7 +215,7 @@ export default function DocumentEditModal({
                 disabled={loading || !tagInput.trim()}
                 className="px-4 py-2 bg-indigo-100 text-indigo-800 rounded-lg hover:bg-indigo-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Add
+                {t('add')}
               </button>
             </div>
             {formData.tags.length > 0 && (
@@ -251,19 +253,19 @@ export default function DocumentEditModal({
               disabled={loading}
             />
             <label htmlFor="is_featured" className="ml-2 text-sm font-medium text-gray-700">
-              Mark as Featured
+              {t('markAsFeatured')}
             </label>
           </div>
 
           {/* File Info (Read-only) */}
           <div className="bg-gray-50 p-4 rounded-lg">
-            <p className="text-sm font-medium text-gray-700 mb-2">File Information (Cannot be changed)</p>
+            <p className="text-sm font-medium text-gray-700 mb-2">{t('fileInfo')}</p>
             <div className="text-sm text-gray-600 space-y-1">
-              <p><strong>File Name:</strong> {document.file_name}</p>
-              <p><strong>File Type:</strong> {document.file_type}</p>
-              <p><strong>File Size:</strong> {Math.round(document.file_size / 1024)} KB</p>
+              <p><strong>{t('fileName')}:</strong> {document.file_name}</p>
+              <p><strong>{t('fileType')}:</strong> {document.file_type}</p>
+              <p><strong>{t('fileSize')}:</strong> {Math.round(document.file_size / 1024)} KB</p>
               <p className="text-xs text-gray-500 mt-2">
-                To change the file, upload a new version instead.
+                {t('uploadNewVersionHint')}
               </p>
             </div>
           </div>
@@ -276,7 +278,7 @@ export default function DocumentEditModal({
               disabled={loading}
               className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button
               type="submit"
@@ -289,10 +291,10 @@ export default function DocumentEditModal({
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Saving...
+                  {t('saving')}
                 </>
               ) : (
-                'Save Changes'
+                t('saveChanges')
               )}
             </button>
           </div>

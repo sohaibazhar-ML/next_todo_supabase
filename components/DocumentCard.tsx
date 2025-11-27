@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useTranslations } from 'next-intl'
 import type { Document } from '@/types/document'
 
 interface DocumentCardProps {
@@ -9,13 +10,14 @@ interface DocumentCardProps {
 }
 
 export default function DocumentCard({ document }: DocumentCardProps) {
+  const t = useTranslations('documentCard')
   const [downloading, setDownloading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showVersions, setShowVersions] = useState(false)
   const [versions, setVersions] = useState<Document[]>([])
   const [loadingVersions, setLoadingVersions] = useState(false)
-  const [selectedVersion, setSelectedVersion] = useState<Document | null>(document) // Initialize with current document
-  const [versionCount, setVersionCount] = useState<number | null>(null) // Store version count
+  const [selectedVersion, setSelectedVersion] = useState<Document | null>(document)
+  const [versionCount, setVersionCount] = useState<number | null>(null)
   const supabase = createClient()
 
   const formatFileSize = (bytes: number | null | undefined): string => {
@@ -27,52 +29,28 @@ export default function DocumentCard({ document }: DocumentCardProps) {
   }
 
   const getFileIcon = (fileType: string) => {
-    switch (fileType) {
-      case 'PDF':
-        return (
-          <svg className="h-8 w-8 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M4 18h12V6h-4V2H4v16zm-2 1V0h12l4 4v16H2v-1z" />
-          </svg>
-        )
-      case 'DOCX':
-        return (
-          <svg className="h-8 w-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M4 18h12V6h-4V2H4v16zm-2 1V0h12l4 4v16H2v-1z" />
-          </svg>
-        )
-      case 'XLSX':
-        return (
-          <svg className="h-8 w-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M4 18h12V6h-4V2H4v16zm-2 1V0h12l4 4v16H2v-1z" />
-          </svg>
-        )
-      case 'ZIP':
-        return (
-          <svg className="h-8 w-8 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M4 18h12V6h-4V2H4v16zm-2 1V0h12l4 4v16H2v-1z" />
-          </svg>
-        )
-      default:
-        return (
-          <svg className="h-8 w-8 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M4 18h12V6h-4V2H4v16zm-2 1V0h12l4 4v16H2v-1z" />
-          </svg>
-        )
+    const colors: Record<string, string> = {
+      'PDF': 'text-red-600',
+      'DOCX': 'text-blue-600',
+      'XLSX': 'text-green-600',
+      'ZIP': 'text-yellow-600',
     }
+    return (
+      <svg className={`h-8 w-8 ${colors[fileType] || 'text-gray-600'}`} fill="currentColor" viewBox="0 0 20 20">
+        <path d="M4 18h12V6h-4V2H4v16zm-2 1V0h12l4 4v16H2v-1z" />
+      </svg>
+    )
   }
 
-  // Fetch version count on mount (lightweight check)
   useEffect(() => {
     const fetchVersionCount = async () => {
       try {
         const response = await fetch(`/api/documents/${document.id}/versions`)
         if (response.ok) {
           const data = await response.json()
-          const versionsData = Array.isArray(data) ? data : []
-          setVersionCount(versionsData.length)
+          setVersionCount(Array.isArray(data) ? data.length : 0)
         }
       } catch (err) {
-        // Silently fail - version count is not critical
         console.error('Error fetching version count:', err)
       }
     }
@@ -90,69 +68,45 @@ export default function DocumentCard({ document }: DocumentCardProps) {
       const response = await fetch(`/api/documents/${document.id}/versions`)
       const data = await response.json()
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch versions')
-      }
+      if (!response.ok) throw new Error(data.error || 'Failed to fetch versions')
 
-      // Convert BigInt file_size to number
       const versionsData = Array.isArray(data) ? data.map((doc: any) => ({
         ...doc,
         file_size: typeof doc.file_size === 'bigint' ? Number(doc.file_size) : doc.file_size
       })) : []
 
       setVersions(versionsData)
-      setVersionCount(versionsData.length) // Store version count
-      // Set selected version to current document (the one being displayed)
+      setVersionCount(versionsData.length)
       const currentVersion = versionsData.find((v: Document) => v.id === document.id) || document
       
-      // Ensure currentVersion has all required properties
-      if (currentVersion && currentVersion.id) {
+      if (currentVersion?.id) {
         setSelectedVersion(currentVersion)
         setShowVersions(true)
-        console.log('Versions loaded:', versionsData.length, 'Current version:', currentVersion.id, 'Full version:', currentVersion)
       } else {
-        console.error('Current version missing ID:', currentVersion)
         setError('Failed to load version information')
       }
     } catch (err: any) {
       setError(err.message || 'Failed to fetch versions')
-      console.error('Error fetching versions:', err)
     } finally {
       setLoadingVersions(false)
     }
   }
 
   const handleDownload = async (downloadDocument?: Document) => {
-    // Determine which document to download
     const docToDownload = downloadDocument || selectedVersion || document
     
-    // Debug logging
-    console.log('Download attempt:', {
-      hasDownloadDocument: !!downloadDocument,
-      hasSelectedVersion: !!selectedVersion,
-      selectedVersionId: selectedVersion?.id,
-      docToDownloadId: docToDownload?.id,
-      docToDownload: docToDownload
-    })
-    
-    // Validate document exists and is actually a Document object (not an event)
     if (!docToDownload || typeof docToDownload !== 'object' || !('id' in docToDownload)) {
-      console.error('No document to download or invalid object:', docToDownload)
       setError('No document selected. Please select a version and try again.')
       return
     }
 
-    // Validate document ID exists
     if (!docToDownload.id || typeof docToDownload.id !== 'string') {
-      console.error('Document missing ID or invalid ID type:', docToDownload)
       setError('Invalid document selected. Please try again.')
       return
     }
 
-    // Validate UUID format
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
     if (!uuidRegex.test(docToDownload.id)) {
-      console.error('Invalid document ID format:', docToDownload.id, typeof docToDownload.id)
       setError('Invalid document ID. Please refresh and try again.')
       return
     }
@@ -161,15 +115,9 @@ export default function DocumentCard({ document }: DocumentCardProps) {
       setDownloading(true)
       setError(null)
 
-      // Get user info for logging
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        throw new Error('You must be logged in to download documents')
-      }
+      if (!user) throw new Error('You must be logged in to download documents')
 
-      console.log('Starting download for file:', docToDownload.file_path, 'Document ID:', docToDownload.id)
-
-      // Get download URL from API
       const urlResponse = await fetch(`/api/documents/${docToDownload.id}/download-url`)
       const urlData = await urlResponse.json()
 
@@ -177,7 +125,6 @@ export default function DocumentCard({ document }: DocumentCardProps) {
         throw new Error(urlData.error || 'Failed to generate download URL')
       }
 
-      // Log the download BEFORE triggering download (important for count increment)
       let downloadLogged = false
       try {
         const logResponse = await fetch('/api/download-logs', {
@@ -194,32 +141,20 @@ export default function DocumentCard({ document }: DocumentCardProps) {
             },
           })
         })
-
-        if (!logResponse.ok) {
-          console.error('Error logging download:', await logResponse.json())
-        } else {
-          downloadLogged = true
-          console.log('Download logged successfully')
-        }
-      } catch (logErr: any) {
+        downloadLogged = logResponse.ok
+      } catch (logErr) {
         console.error('Error logging download:', logErr)
       }
 
-      // Trigger download using blob method to force download (especially for PDFs)
       try {
-        // Fetch the file as a blob to force download behavior
         const fileResponse = await fetch(urlData.signedUrl)
-        if (!fileResponse.ok) {
-          throw new Error('Failed to fetch file')
-        }
+        if (!fileResponse.ok) throw new Error('Failed to fetch file')
         
         const blob = await fileResponse.blob()
         const blobUrl = window.URL.createObjectURL(blob)
         
-        // Create download link with blob URL
         const link = window.document.createElement('a')
         link.href = blobUrl
-        // Include version in filename if it's not the current version
         const fileName = docToDownload.version && docToDownload.version !== document.version
           ? `${docToDownload.file_name.replace(/\.[^/.]+$/, '')}_v${docToDownload.version}${docToDownload.file_name.match(/\.[^/.]+$/)?.[0] || ''}`
           : docToDownload.file_name
@@ -228,57 +163,20 @@ export default function DocumentCard({ document }: DocumentCardProps) {
         window.document.body.appendChild(link)
         link.click()
         
-        // Clean up: remove link and revoke blob URL
         setTimeout(() => {
-          if (window.document.body.contains(link)) {
-            window.document.body.removeChild(link)
-          }
+          if (window.document.body.contains(link)) window.document.body.removeChild(link)
           window.URL.revokeObjectURL(blobUrl)
         }, 100)
 
-        // Show success - download should start
-        setError(null)
-        
-        // Wait a bit for the trigger to process, then refresh to update download count
-        // Only refresh if download was logged successfully
         if (downloadLogged) {
-          setTimeout(() => {
-            window.location.reload()
-          }, 1500)
+          setTimeout(() => window.location.reload(), 1500)
         }
-      } catch (downloadErr: any) {
-        console.error('Error triggering download:', downloadErr)
-        // Fallback: open in new window if download link method fails
+      } catch (downloadErr) {
         const fallbackWindow = window.open(urlData.signedUrl, '_blank')
-        if (!fallbackWindow) {
-          throw new Error('Download failed and popup was blocked. Please allow popups for this site.')
-        }
-        throw new Error(`Download link failed. File opened in new tab instead.`)
+        if (!fallbackWindow) throw new Error('Download failed and popup was blocked.')
       }
     } catch (err: any) {
-      const errorMessage = err.message || 'Failed to download document'
-      setError(errorMessage)
-      console.error('Download error:', err)
-      
-      // If we have a signed URL but download failed, offer to open in new tab
-      if (err.message && !err.message.includes('generate download URL')) {
-        // Try to get URL again as fallback
-        try {
-          const fallbackResponse = await fetch(`/api/documents/${document.id}/download-url`)
-          const fallbackData = await fallbackResponse.json()
-          
-          if (fallbackData?.signedUrl) {
-            const openNewTab = confirm(
-              'Automatic download failed. Would you like to open the file in a new tab instead?'
-            )
-            if (openNewTab) {
-              window.open(fallbackData.signedUrl, '_blank')
-            }
-          }
-        } catch (fallbackErr) {
-          console.error('Fallback download also failed:', fallbackErr)
-        }
-      }
+      setError(err.message || 'Failed to download document')
     } finally {
       setDownloading(false)
     }
@@ -287,80 +185,69 @@ export default function DocumentCard({ document }: DocumentCardProps) {
   return (
     <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden">
       <div className="p-6">
-        {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3 flex-1">
             {getFileIcon(document.file_type)}
             <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-semibold text-gray-900 truncate">
-                {document.title}
-              </h3>
+              <h3 className="text-lg font-semibold text-gray-900 truncate">{document.title}</h3>
               {document.is_featured && (
                 <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 mt-1">
-                  Featured
+                  {t('featured')}
                 </span>
               )}
             </div>
           </div>
         </div>
 
-        {/* Description */}
         {document.description && (
-          <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-            {document.description}
-          </p>
+          <p className="text-sm text-gray-600 mb-4 line-clamp-2">{document.description}</p>
         )}
 
-        {/* Tags */}
         {document.tags && document.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-4">
             {document.tags.slice(0, 3).map((tag, index) => (
-              <span
-                key={index}
-                className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-indigo-100 text-indigo-800"
-              >
+              <span key={index} className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
                 {tag}
               </span>
             ))}
             {document.tags.length > 3 && (
               <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-600">
-                +{document.tags.length - 3} more
+                {t('more', { count: document.tags.length - 3 })}
               </span>
             )}
           </div>
         )}
 
-        {/* Metadata */}
         <div className="space-y-2 mb-4 text-sm text-gray-500">
           <div className="flex items-center justify-between">
-            <span>Category:</span>
+            <span>{t('category')}:</span>
             <span className="font-medium text-gray-900">{document.category}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span>File Type:</span>
+            <span>{t('fileType')}:</span>
             <span className="font-medium text-gray-900">{document.file_type}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span>Version:</span>
+            <span>{t('version')}:</span>
             <span className="font-medium text-gray-900">{document.version || '1.0'}</span>
           </div>
           {versionCount !== null && versionCount > 1 && (
             <div className="flex items-center justify-between">
-              <span>Available Versions:</span>
-              <span className="font-medium text-indigo-600">{versionCount} versions</span>
+              <span>{t('availableVersions')}:</span>
+              <span className="font-medium text-indigo-600">{versionCount} {t('versions')}</span>
             </div>
           )}
           <div className="flex items-center justify-between">
-            <span>Size:</span>
+            <span>{t('size')}:</span>
             <span className="font-medium text-gray-900">{formatFileSize(document.file_size)}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span>Downloads (This Version):</span>
+            <span>{t('downloadsThisVersion')}:</span>
             <span className="font-medium text-gray-900">{document.download_count}</span>
           </div>
           {showVersions && versions.length > 1 && (
             <div className="flex items-center justify-between pt-2 border-t border-gray-200">
-              <span>Total Downloads (All Versions):</span>
+              <span>{t('totalDownloads')}:</span>
               <span className="font-medium text-indigo-600">
                 {versions.reduce((sum, v) => sum + (v.download_count || 0), 0)}
               </span>
@@ -368,80 +255,49 @@ export default function DocumentCard({ document }: DocumentCardProps) {
           )}
         </div>
 
-        {/* Version Selector */}
         {showVersions && (
           <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
             {versions.length > 1 ? (
               <>
                 <div className="flex items-center justify-between mb-3">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Select Version to Download:
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700">{t('selectVersion')}</label>
                   <span className="text-xs text-gray-500">
-                    {versions.length} {versions.length === 1 ? 'version' : 'versions'} available
+                    {t('versionsAvailable', { count: versions.length })}
                   </span>
                 </div>
                 <select
                   value={selectedVersion?.id || document.id}
                   onChange={(e) => {
-                    const selectedId = e.target.value
-                    const version = versions.find(v => v.id === selectedId)
-                    if (version && version.id) {
-                      console.log('Version selected:', {
-                        id: version.id,
-                        version: version.version,
-                        hasFile: !!version.file_path,
-                        fullVersion: version
-                      })
-                      // Ensure we have a complete version object
-                      setSelectedVersion({
-                        ...version,
-                        id: String(version.id), // Ensure ID is a string
-                      } as Document)
-                    } else {
-                      console.error('Version not found or invalid for ID:', selectedId, 'Available versions:', versions.map(v => ({ id: v.id, version: v.version })))
-                      setSelectedVersion(document)
-                    }
+                    const version = versions.find(v => v.id === e.target.value)
+                    setSelectedVersion(version ? { ...version, id: String(version.id) } as Document : document)
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm text-gray-900 bg-white mb-3"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm text-gray-900 bg-white mb-3"
                 >
-                  {versions.map((version) => {
-                    // Ensure version has valid ID
-                    if (!version.id) {
-                      console.error('Version missing ID:', version)
-                      return null
-                    }
-                    return (
-                      <option key={version.id} value={version.id}>
-                        Version {version.version || '1.0'} - {new Date(version.created_at).toLocaleDateString()} ({formatFileSize(version.file_size)})
-                        {version.id === document.id ? ' (Current)' : ''}
-                      </option>
-                    )
-                  })}
+                  {versions.map((version) => (
+                    <option key={version.id} value={version.id}>
+                      {t('version')} {version.version || '1.0'} - {new Date(version.created_at).toLocaleDateString()} ({formatFileSize(version.file_size)})
+                      {version.id === document.id ? ` (${t('current')})` : ''}
+                    </option>
+                  ))}
                 </select>
                 
-                {/* Version Details List */}
                 <div className="mt-3 space-y-2 max-h-48 overflow-y-auto">
-                  <p className="text-xs font-medium text-gray-700 mb-2">Version Details:</p>
+                  <p className="text-xs font-medium text-gray-700 mb-2">{t('versionDetails')}</p>
                   {versions.map((version) => (
                     <div
                       key={version.id}
                       className={`p-2 rounded border text-xs ${
-                        version.id === document.id
-                          ? 'bg-indigo-50 border-indigo-200'
-                          : 'bg-white border-gray-200'
+                        version.id === document.id ? 'bg-indigo-50 border-indigo-200' : 'bg-white border-gray-200'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-medium text-gray-900">
-                          Version {version.version || '1.0'}
+                          {t('version')} {version.version || '1.0'}
                           {version.id === document.id && (
-                            <span className="ml-1 text-indigo-600">(Current)</span>
+                            <span className="ml-1 text-indigo-600">({t('current')})</span>
                           )}
                         </span>
-                        <span className="text-gray-600">
-                          {version.download_count || 0} downloads
-                        </span>
+                        <span className="text-gray-600">{version.download_count || 0} {t('downloads')}</span>
                       </div>
                       <div className="text-gray-500">
                         {new Date(version.created_at).toLocaleDateString()} • {formatFileSize(version.file_size)}
@@ -451,86 +307,46 @@ export default function DocumentCard({ document }: DocumentCardProps) {
                 </div>
               </>
             ) : (
-              <p className="text-sm text-gray-600 text-center">
-                No other versions available. This is the only version.
-              </p>
+              <p className="text-sm text-gray-600 text-center">{t('noOtherVersions')}</p>
             )}
           </div>
         )}
 
-        {/* View Versions Button */}
         <div className="mb-4">
           <button
             onClick={fetchVersions}
             disabled={loadingVersions}
             className="w-full px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loadingVersions ? (
-              'Loading Versions...'
-            ) : showVersions ? (
-              'Hide Versions'
-            ) : (
-              'View All Versions'
-            )}
+            {loadingVersions ? t('loadingVersions') : showVersions ? t('hideVersions') : t('viewAllVersions')}
           </button>
         </div>
 
-        {/* Error Message */}
         {error && (
           <div className="mb-4 bg-red-50 border-l-4 border-red-500 p-3 rounded">
             <p className="text-sm text-red-700">{error}</p>
           </div>
         )}
 
-        {/* Download Button */}
         <button
-          onClick={(e) => {
-            e.preventDefault()
-            handleDownload()
-          }}
+          onClick={(e) => { e.preventDefault(); handleDownload(); }}
           disabled={downloading}
           className="w-full px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {downloading ? (
             <>
-              <svg
-                className="animate-spin h-5 w-5 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
+              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              Downloading...
+              {t('downloading')}
             </>
           ) : (
             <>
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                />
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>
-              Download
+              {t('download')}
             </>
           )}
         </button>
@@ -538,4 +354,3 @@ export default function DocumentCard({ document }: DocumentCardProps) {
     </div>
   )
 }
-
