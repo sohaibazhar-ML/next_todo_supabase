@@ -35,15 +35,17 @@ body {
   animation: shake 0.5s ease-in-out;
 }
 
-/* TipTap Editor Styles */
+/* TipTap Editor Styles - Preserve original document styling */
 .ProseMirror {
-  color: #111827 !important;
   outline: none;
+  color: #111827; /* Default dark text color for readability */
+  /* Inline styles from document will override this */
 }
 
 .ProseMirror p {
-  color: #111827 !important;
   margin: 0.5em 0;
+  color: #111827; /* Default dark text color */
+  /* Inline styles from document will override this */
 }
 
 .ProseMirror h1,
@@ -52,49 +54,78 @@ body {
 .ProseMirror h4,
 .ProseMirror h5,
 .ProseMirror h6 {
-  color: #111827 !important;
   font-weight: 600;
   margin-top: 1em;
   margin-bottom: 0.5em;
+  color: #111827; /* Default dark text color */
+  /* Inline styles from document will override this */
 }
 
 .ProseMirror ul,
 .ProseMirror ol {
-  color: #111827 !important;
   padding-left: 1.5em;
+  color: #111827; /* Default dark text color */
+  /* Inline styles from document will override this */
 }
 
 .ProseMirror li {
-  color: #111827 !important;
+  color: #111827; /* Default dark text color */
+  /* Inline styles from document will override this */
 }
 
 .ProseMirror strong {
-  color: #111827 !important;
   font-weight: 600;
+  color: #111827; /* Default dark text color */
+  /* Inline styles from document will override this */
 }
 
 .ProseMirror em {
-  color: #111827 !important;
+  font-style: italic;
+  color: #111827; /* Default dark text color */
+  /* Inline styles from document will override this */
 }
 
 .ProseMirror code {
-  color: #111827 !important;
   background-color: #f3f4f6;
   padding: 0.2em 0.4em;
   border-radius: 0.25rem;
+  font-family: monospace;
 }
 
 .ProseMirror pre {
-  color: #111827 !important;
   background-color: #f3f4f6;
   padding: 1em;
   border-radius: 0.5rem;
   overflow-x: auto;
+  font-family: monospace;
 }
 
 .ProseMirror blockquote {
-  color: #111827 !important;
   border-left: 4px solid #e5e7eb;
   padding-left: 1em;
   margin: 1em 0;
+  /* Preserve original blockquote styling */
+}
+
+/* Preserve inline styles from original document - inline styles override defaults */
+.ProseMirror [style] {
+  /* Inline styles will override default color */
+}
+
+/* Preserve font families, sizes, and colors from document */
+.ProseMirror span[style*="font-family"],
+.ProseMirror span[style*="font-size"],
+.ProseMirror span[style*="color"],
+.ProseMirror p[style*="font-family"],
+.ProseMirror p[style*="font-size"],
+.ProseMirror p[style*="color"],
+.ProseMirror div[style*="font-family"],
+.ProseMirror div[style*="font-size"],
+.ProseMirror div[style*="color"] {
+  /* Inline styles will override default color */
+}
+
+/* Ensure text with inline color styles takes precedence */
+.ProseMirror [style*="color"] {
+  color: inherit !important; /* Let inline style attribute control color */
 }

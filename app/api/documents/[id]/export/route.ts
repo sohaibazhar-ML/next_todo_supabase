@@ -1,8 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
-import { Document, Packer, Paragraph, TextRun } from 'docx'
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, UnderlineType } from 'docx'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
+import * as cheerio from 'cheerio'
 
 // Function to decode HTML entities
 function decodeHtmlEntities(text: string): string {
@@ -40,6 +41,375 @@ function decodeHtmlEntities(text: string): string {
   return decoded
 }
 
+// Helper function to parse CSS color to hex
+function parseColor(color: string): string {
+  if (!color) return '000000'
+  
+  // If already hex
+  if (color.startsWith('#')) {
+    return color.substring(1).padStart(6, '0')
+  }
+  
+  // RGB/RGBA format
+  const rgbMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/)
+  if (rgbMatch) {
+    const r = parseInt(rgbMatch[1]).toString(16).padStart(2, '0')
+    const g = parseInt(rgbMatch[2]).toString(16).padStart(2, '0')
+    const b = parseInt(rgbMatch[3]).toString(16).padStart(2, '0')
+    return `${r}${g}${b}`
+  }
+  
+  // Named colors (basic)
+  const namedColors: Record<string, string> = {
+    'black': '000000',
+    'white': 'FFFFFF',
+    'red': 'FF0000',
+    'green': '008000',
+    'blue': '0000FF',
+    'yellow': 'FFFF00',
+    'cyan': '00FFFF',
+    'magenta': 'FF00FF',
+  }
+  
+  return namedColors[color.toLowerCase()] || '000000'
+}
+
+// Helper function to parse font size
+function parseFontSize(size: string): number {
+  if (!size) return 12
+  const match = size.match(/(\d+(?:\.\d+)?)/)
+  if (match) {
+    const value = parseFloat(match[1])
+    // Convert pt to half-points (docx uses half-points)
+    if (size.includes('pt')) return Math.round(value * 2)
+    if (size.includes('px')) return Math.round(value * 1.33) // Approximate conversion
+    return Math.round(value * 2) // Assume points
+  }
+  return 24 // Default 12pt = 24 half-points
+}
+
+// Helper function to parse alignment
+function parseAlignment(align: string): typeof AlignmentType[keyof typeof AlignmentType] {
+  switch (align?.toLowerCase()) {
+    case 'center': return AlignmentType.CENTER
+    case 'right': return AlignmentType.RIGHT
+    case 'justify': return AlignmentType.JUSTIFIED
+    default: return AlignmentType.LEFT
+  }
+}
+
+// Convert HTML to DOCX paragraphs with full styling preservation
+function htmlToDocx(html: string): Paragraph[] {
+  const $ = cheerio.load(html)
+  const paragraphs: Paragraph[] = []
+  
+  // Process body content
+  const body = $('body').length > 0 ? $('body') : $.root()
+  
+  body.contents().each((_, element: any) => {
+    if (element.type === 'text') {
+      const text = $(element).text().trim()
+      if (text) {
+        paragraphs.push(new Paragraph({
+          children: [new TextRun(text)],
+        }))
+      }
+    } else if (element.type === 'tag') {
+      const $el = $(element)
+      const tagName = element.tagName?.toLowerCase()
+      
+      if (tagName === 'p' || tagName === 'div') {
+        const para = processParagraph($el)
+        if (para) paragraphs.push(para)
+      } else if (tagName?.match(/^h[1-6]$/)) {
+        const levelNum = parseInt(tagName[1])
+        let level: typeof HeadingLevel[keyof typeof HeadingLevel]
+        if (levelNum === 1) level = HeadingLevel.HEADING_1
+        else if (levelNum === 2) level = HeadingLevel.HEADING_2
+        else if (levelNum === 3) level = HeadingLevel.HEADING_3
+        else if (levelNum === 4) level = HeadingLevel.HEADING_4
+        else if (levelNum === 5) level = HeadingLevel.HEADING_5
+        else level = HeadingLevel.HEADING_6
+        const para = processHeading($el, level)
+        if (para) paragraphs.push(para)
+      } else if (tagName === 'br') {
+        paragraphs.push(new Paragraph({
+          children: [new TextRun('')],
+        }))
+      } else if (tagName === 'ul' || tagName === 'ol') {
+        $el.find('li').each((_, li: any) => {
+          const para = processListItem($(li), tagName === 'ol')
+          if (para) paragraphs.push(para)
+        })
+      }
+    }
+  })
+  
+  // If no paragraphs found, try to extract from root
+  if (paragraphs.length === 0) {
+    const text = body.text().trim()
+    if (text) {
+      paragraphs.push(new Paragraph({
+        children: [new TextRun(text)],
+      }))
+    }
+  }
+  
+  return paragraphs.length > 0 ? paragraphs : [
+    new Paragraph({
+      children: [new TextRun('Empty document')],
+    })
+  ]
+}
+
+// Process a paragraph element
+function processParagraph($el: any): Paragraph | null {
+  const textRuns: TextRun[] = []
+  const style = $el.attr('style') || ''
+  const align = parseAlignmentFromStyle(style)
+  
+  // Process all text nodes and inline elements
+  const $ = cheerio.load('')
+  $el.contents().each((_idx: number, node: any) => {
+    const runs = processNodeWithFormatting($(node), '', {})
+    textRuns.push(...runs)
+  })
+  
+  if (textRuns.length === 0) {
+    const text = $el.text().trim()
+    if (!text) return null
+    textRuns.push(new TextRun(text))
+  }
+  
+  return new Paragraph({
+    children: textRuns,
+    alignment: align,
+  })
+}
+
+// Process a heading element
+function processHeading($el: any, level: typeof HeadingLevel[keyof typeof HeadingLevel]): Paragraph | null {
+  const textRuns: TextRun[] = []
+  const style = $el.attr('style') || ''
+  const align = parseAlignmentFromStyle(style)
+  const $ = cheerio.load('')
+  
+  $el.contents().each((_idx: number, node: any) => {
+    const runs = processNodeWithFormatting($(node), '', {})
+    textRuns.push(...runs)
+  })
+  
+  if (textRuns.length === 0) {
+    const text = $el.text().trim()
+    if (!text) return null
+    textRuns.push(new TextRun(text))
+  }
+  
+  return new Paragraph({
+    heading: level,
+    children: textRuns,
+    alignment: align,
+  })
+}
+
+// Process a list item
+function processListItem($el: any, ordered: boolean): Paragraph | null {
+  const textRuns: TextRun[] = []
+  const $ = cheerio.load('')
+  
+  $el.contents().each((_idx: number, node: any) => {
+    const runs = processNodeWithFormatting($(node), '', {})
+    textRuns.push(...runs)
+  })
+  
+  if (textRuns.length === 0) {
+    const text = $el.text().trim()
+    if (!text) return null
+    textRuns.push(new TextRun(text))
+  }
+  
+  return new Paragraph({
+    children: textRuns,
+    bullet: ordered ? undefined : { level: 0 },
+    numbering: ordered ? { reference: 'default-numbering', level: 0 } : undefined,
+  })
+}
+
+// Process a node (text or element) and return TextRun array
+function processNode($node: any): TextRun[] {
+  const runs: TextRun[] = []
+  const node = $node[0]
+  
+  if (!node) return runs
+  
+  if (node.type === 'text') {
+    const text = $node.text()
+    if (text.trim()) {
+      runs.push(new TextRun(text))
+    }
+    return runs
+  }
+  
+  if (node.type !== 'tag') return runs
+  
+  const tagName = node.tagName?.toLowerCase()
+  const style = $node.attr('style') || ''
+  const styles = parseStyles(style)
+  
+  // Get text content
+  const text = $node.text()
+  
+  // Process nested elements
+  const nestedRuns: TextRun[] = []
+  const $ = cheerio.load('')
+  
+  $node.contents().each((_idx: number, child: any) => {
+    const childRuns = processNodeWithFormatting($(child), tagName, styles)
+    nestedRuns.push(...childRuns)
+  })
+  
+  if (nestedRuns.length > 0) {
+    return nestedRuns
+  }
+  
+  if (!text.trim()) return runs
+  
+  const runOptions: any = {
+    text: decodeHtmlEntities(text),
+  }
+  
+  // Apply formatting based on tag
+  if (tagName === 'strong' || tagName === 'b') {
+    runOptions.bold = true
+  }
+  if (tagName === 'em' || tagName === 'i') {
+    runOptions.italics = true
+  }
+  if (tagName === 'u') {
+    runOptions.underline = { type: UnderlineType.SINGLE }
+  }
+  if (tagName === 's' || tagName === 'strike') {
+    runOptions.strike = true
+  }
+  
+  // Apply inline styles
+  if (styles.color) {
+    runOptions.color = parseColor(styles.color)
+  }
+  if (styles.fontSize) {
+    runOptions.size = parseFontSize(styles.fontSize)
+  }
+  if (styles.fontFamily) {
+    runOptions.font = styles.fontFamily.split(',')[0].replace(/['"]/g, '').trim()
+  }
+  
+  runs.push(new TextRun(runOptions))
+  return runs
+}
+
+// Process a node with parent formatting applied
+function processNodeWithFormatting($node: any, parentTag: string, parentStyles: Record<string, string>): TextRun[] {
+  const runs: TextRun[] = []
+  const node = $node[0]
+  
+  if (!node) return runs
+  
+  if (node.type === 'text') {
+    const text = $node.text().trim()
+    if (!text) return runs
+    
+    const runOptions: any = {
+      text: decodeHtmlEntities(text),
+    }
+    
+    // Apply parent formatting
+    applyFormatting(runOptions, parentTag, parentStyles)
+    
+    runs.push(new TextRun(runOptions))
+    return runs
+  }
+  
+  if (node.type !== 'tag') return runs
+  
+  const tagName = node.tagName?.toLowerCase()
+  const style = $node.attr('style') || ''
+  const styles = { ...parentStyles, ...parseStyles(style) } // Merge with parent styles
+  
+  // Process nested elements
+  const nestedRuns: TextRun[] = []
+  const $ = cheerio.load('')
+  $node.contents().each((_idx: number, child: any) => {
+    const childRuns = processNodeWithFormatting($(child), tagName, styles)
+    nestedRuns.push(...childRuns)
+  })
+  
+  if (nestedRuns.length > 0) {
+    return nestedRuns
+  }
+  
+  const text = $node.text().trim()
+  if (!text) return runs
+  
+  const runOptions: any = {
+    text: decodeHtmlEntities(text),
+  }
+  
+  // Apply formatting based on tag and styles
+  applyFormatting(runOptions, tagName, styles)
+  
+  runs.push(new TextRun(runOptions))
+  return runs
+}
+
+// Apply formatting to run options
+function applyFormatting(runOptions: any, tagName: string, styles: Record<string, string>) {
+  // Apply formatting based on tag
+  if (tagName === 'strong' || tagName === 'b') {
+    runOptions.bold = true
+  }
+  if (tagName === 'em' || tagName === 'i') {
+    runOptions.italics = true
+  }
+  if (tagName === 'u') {
+    runOptions.underline = { type: UnderlineType.SINGLE }
+  }
+  if (tagName === 's' || tagName === 'strike') {
+    runOptions.strike = true
+  }
+  
+  // Apply inline styles
+  if (styles.color) {
+    runOptions.color = parseColor(styles.color)
+  }
+  if (styles.fontSize) {
+    runOptions.size = parseFontSize(styles.fontSize)
+  }
+  if (styles.fontFamily) {
+    runOptions.font = styles.fontFamily.split(',')[0].replace(/['"]/g, '').trim()
+  }
+}
+
+// Parse inline styles
+function parseStyles(style: string): Record<string, string> {
+  const styles: Record<string, string> = {}
+  if (!style) return styles
+  
+  style.split(';').forEach(declaration => {
+    const [property, value] = declaration.split(':').map(s => s.trim())
+    if (property && value) {
+      styles[property.toLowerCase()] = value
+    }
+  })
+  
+  return styles
+}
+
+// Parse alignment from style
+function parseAlignmentFromStyle(style: string): typeof AlignmentType[keyof typeof AlignmentType] {
+  const styles = parseStyles(style)
+  return parseAlignment(styles['text-align'] || '')
+}
+
 // POST - Export edited document as file (DOCX or PDF)
 export async function POST(
   request: Request,
@@ -58,7 +428,11 @@ export async function POST(
 
     const { version_id, export_format } = body // 'docx' or 'pdf'
 
-    // Get the edited version
+    if (!version_id) {
+      return NextResponse.json({ error: 'Version ID is required. Please save your document first.' }, { status: 400 })
+    }
+
+    // Get the saved version
     const editedVersion = await prisma.user_document_versions.findUnique({
       where: { id: version_id },
       include: {
@@ -72,59 +446,50 @@ export async function POST(
     })
 
     if (!editedVersion || editedVersion.user_id !== user.id) {
-      return NextResponse.json({ error: 'Version not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Version not found. Please save your document first.' }, { status: 404 })
     }
 
+    const htmlContent = editedVersion.html_content
+    const pdfTextContent = editedVersion.pdf_text_content
+    const originalFileType = editedVersion.original_file_type
+    const baseFileName = editedVersion.documents.file_name
+
     let fileBuffer: Buffer
-    let fileName: string
     let mimeType: string
+    let exportFileName: string
 
-    if (editedVersion.original_file_type === 'document' && editedVersion.html_content) {
-      // Export DOCX from HTML content
+    if (originalFileType === 'document' && htmlContent) {
+      // Export DOCX from HTML content with full formatting preservation
       if (export_format === 'docx') {
-        // Convert HTML to DOCX
-        // First, remove HTML tags, then decode HTML entities
-        let textContent = editedVersion.html_content
-          // Remove HTML tags (but preserve line breaks from block elements)
-          .replace(/<br\s*\/?>/gi, '\n')
-          .replace(/<\/p>/gi, '\n')
-          .replace(/<\/div>/gi, '\n')
-          .replace(/<\/h[1-6]>/gi, '\n')
-          .replace(/<[^>]*>/g, '')
-          // Clean up whitespace
-          .replace(/\n+/g, '\n')
-          .trim()
-        
-        // Decode HTML entities
-        textContent = decodeHtmlEntities(textContent)
+        try {
+          // Convert HTML to DOCX paragraphs with all styling preserved
+          const paragraphs = htmlToDocx(htmlContent)
 
-        const paragraphs = textContent.split('\n').filter(p => p.trim()).map(
-          text => new Paragraph({
-            children: [new TextRun(text.trim())],
+          const doc = new Document({
+            sections: [{
+              children: paragraphs,
+            }],
           })
-        )
 
-        const doc = new Document({
-          sections: [{
-            children: paragraphs.length > 0 ? paragraphs : [
-              new Paragraph({
-                children: [new TextRun('Empty document')],
-              }),
-            ],
-          }],
-        })
-
-        const buffer = await Packer.toBuffer(doc)
-        fileBuffer = Buffer.from(buffer)
-        fileName = `${editedVersion.documents.file_name.replace(/\.[^/.]+$/, '')}_edited_v${editedVersion.version_number}.docx`
-        mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+          const buffer = await Packer.toBuffer(doc)
+          fileBuffer = Buffer.from(buffer)
+          const fileNameBase = baseFileName.replace(/\.[^/.]+$/, '')
+          exportFileName = `${fileNameBase}_edited_v${editedVersion.version_number}.docx`
+          mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        } catch (htmlError: any) {
+          console.error('HTML to DOCX conversion error:', htmlError)
+          return NextResponse.json(
+            { error: `Failed to convert HTML to DOCX: ${htmlError.message}` },
+            { status: 500 }
+          )
+        }
       } else {
         return NextResponse.json(
           { error: 'Invalid export format for DOCX document' },
           { status: 400 }
         )
       }
-    } else if (editedVersion.original_file_type === 'pdf' && editedVersion.pdf_text_content) {
+    } else if (originalFileType === 'pdf' && pdfTextContent) {
       // Export PDF from text content
       if (export_format === 'pdf') {
         try {
@@ -140,7 +505,7 @@ export async function POST(
           let y = pageHeight - margin
           let page = pdfDoc.addPage([pageWidth, pageHeight])
 
-          const lines = editedVersion.pdf_text_content.split('\n')
+          const lines = pdfTextContent.split('\n')
           
           // Handle empty content
           if (!lines || lines.length === 0 || lines.every(line => !line.trim())) {
@@ -199,7 +564,8 @@ export async function POST(
 
           const pdfBytes = await pdfDoc.save()
           fileBuffer = Buffer.from(pdfBytes)
-          fileName = `${editedVersion.documents.file_name.replace(/\.[^/.]+$/, '')}_edited_v${editedVersion.version_number}.pdf`
+          const fileNameBase = baseFileName.replace(/\.[^/.]+$/, '')
+          exportFileName = `${fileNameBase}_edited_v${editedVersion.version_number}.pdf`
           mimeType = 'application/pdf'
         } catch (pdfError: any) {
           console.error('PDF generation error:', pdfError)
@@ -222,7 +588,7 @@ export async function POST(
     }
 
     // Upload exported file to Supabase Storage
-    const filePath = `user-edits/${user.id}/${Date.now()}_${fileName}`
+    const filePath = `user-edits/${user.id}/${Date.now()}_${exportFileName}`
     
     try {
       // Ensure fileBuffer is a proper Buffer or Uint8Array
@@ -275,7 +641,7 @@ export async function POST(
 
     return NextResponse.json({
       signedUrl: urlData.signedUrl,
-      fileName,
+      fileName: exportFileName,
       filePath,
     })
   } catch (error: any) {

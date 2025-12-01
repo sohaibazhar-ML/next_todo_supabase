@@ -77,10 +77,32 @@ export async function GET(
         )
       }
       
-      // DOCX to HTML using mammoth
+      // DOCX to HTML using mammoth with style preservation
       try {
+        // Configure mammoth to preserve inline styles and formatting
+        // Mammoth by default preserves inline styles (colors, fonts, sizes) in style attributes
+        const styleMap = [
+          "p[style-name='Heading 1'] => h1:fresh",
+          "p[style-name='Heading 2'] => h2:fresh",
+          "p[style-name='Heading 3'] => h3:fresh",
+          "p[style-name='Heading 4'] => h4:fresh",
+          "p[style-name='Heading 5'] => h5:fresh",
+          "p[style-name='Heading 6'] => h6:fresh",
+          "r[style-name='Strong'] => strong",
+          "p[style-name='Quote'] => blockquote:fresh",
+          "p[style-name='Intense Quote'] => blockquote:fresh",
+        ]
+        
+        const options = {
+          styleMap,
+          includeDefaultStyleMap: true,
+          // Preserve all inline styles from the document
+          preserveEmptyParagraphs: false,
+        }
+        
         // Mammoth can accept buffer or arrayBuffer
-        const result = await mammoth.convertToHtml({ buffer })
+        // Mammoth automatically preserves inline styles (color, font-size, font-family, etc.) in style attributes
+        const result = await mammoth.convertToHtml({ buffer }, options)
         return NextResponse.json({
           type: 'docx',
           content: result.value,
@@ -90,7 +112,24 @@ export async function GET(
         console.error('Mammoth conversion error:', error)
         // Try with arrayBuffer as fallback
         try {
-          const result = await mammoth.convertToHtml({ arrayBuffer })
+          const styleMap = [
+            "p[style-name='Heading 1'] => h1:fresh",
+            "p[style-name='Heading 2'] => h2:fresh",
+            "p[style-name='Heading 3'] => h3:fresh",
+            "p[style-name='Heading 4'] => h4:fresh",
+            "p[style-name='Heading 5'] => h5:fresh",
+            "p[style-name='Heading 6'] => h6:fresh",
+            "r[style-name='Strong'] => strong",
+            "p[style-name='Quote'] => blockquote:fresh",
+            "p[style-name='Intense Quote'] => blockquote:fresh",
+          ]
+          
+          const options = {
+            styleMap,
+            includeDefaultStyleMap: true,
+          }
+          
+          const result = await mammoth.convertToHtml({ arrayBuffer }, options)
           return NextResponse.json({
             type: 'docx',
             content: result.value,

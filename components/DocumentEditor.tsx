@@ -1,10 +1,15 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
+import { TextStyle } from '@tiptap/extension-text-style'
+import { Color } from '@tiptap/extension-color'
+import TextAlign from '@tiptap/extension-text-align'
+import Underline from '@tiptap/extension-underline'
+import Highlight from '@tiptap/extension-highlight'
 import type { Document } from '@/types/document'
 
 interface DocumentEditorProps {
@@ -35,14 +40,39 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
   const [versions, setVersions] = useState<UserVersion[]>([])
   const [versionName, setVersionName] = useState('')
   const [showVersions, setShowVersions] = useState(false)
+  const isSettingContentRef = useRef(false) // Flag to prevent cursor jumping when programmatically setting content
 
-  // TipTap editor for DOCX
+  // TipTap editor for DOCX with style preservation
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [
+      StarterKit.configure({
+        // Disable default heading styles to preserve document styles
+        heading: {
+          levels: [1, 2, 3, 4, 5, 6],
+        },
+      }),
+      TextStyle, // Required for Color extension
+      Color.configure({
+        types: ['textStyle'],
+      }),
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
+      Underline,
+      Highlight.configure({
+        multicolor: true,
+      }),
+    ],
     content: '',
     immediatelyRender: false,
+    parseOptions: {
+      preserveWhitespace: 'full',
+    },
     onUpdate: ({ editor }) => {
-      setContent(editor.getHTML())
+      // Only update content state if we're not programmatically setting content
+      if (!isSettingContentRef.current) {
+        setContent(editor.getHTML())
+      }
     },
   })
 
@@ -76,9 +106,19 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
       setDocumentType(data.type)
 
       if (data.type === 'docx') {
-        setContent(data.content)
+        // Set content state and editor content only when loading document
+        const htmlContent = data.content || ''
         if (editor) {
-          editor.commands.setContent(data.content)
+          // Set flag to prevent onUpdate from updating state
+          isSettingContentRef.current = true
+          editor.commands.setContent(htmlContent)
+          // Reset flag after a brief delay to allow editor to update
+          setTimeout(() => {
+            isSettingContentRef.current = false
+            setContent(htmlContent)
+          }, 0)
+        } else {
+          setContent(htmlContent)
         }
       } else if (data.type === 'pdf') {
         // For PDF, we'll show a text editor
@@ -103,12 +143,20 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
     }
   }
 
-  // Update editor content when it's ready
+  // Initialize editor content only once when editor is ready (only for initial load)
   useEffect(() => {
-    if (editor && content && documentType === 'docx') {
-      editor.commands.setContent(content)
+    if (editor && documentType === 'docx' && content && !loading) {
+      const currentContent = editor.getHTML()
+      // Only set content if editor is empty (initial state)
+      if (currentContent === '<p></p>' || currentContent === '') {
+        isSettingContentRef.current = true
+        editor.commands.setContent(content)
+        setTimeout(() => {
+          isSettingContentRef.current = false
+        }, 0)
+      }
     }
-  }, [editor, content, documentType])
+  }, [editor, documentType, loading]) // Removed 'content' from dependencies to prevent re-setting on every keystroke
 
   const handleSave = async () => {
     try {
@@ -156,20 +204,14 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
       setExporting(true)
       setError(null)
 
-      // First save if there are unsaved changes
-      if (documentType === 'docx' && editor) {
-        const currentContent = editor.getHTML()
-        if (currentContent !== content) {
-          await handleSave()
-        }
-      }
-
-      // Get the latest version
+      // Get the latest saved version - user must save before exporting
       const latestVersion = versions[0]
+      
       if (!latestVersion) {
-        throw new Error(t('noVersionToExport'))
+        throw new Error(t('noVersionToExport') || 'Please save your document first before exporting')
       }
 
+      // Export the latest saved version
       const response = await fetch(`/api/documents/${document.id}/export`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -200,9 +242,17 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
       setError(null)
 
       if (documentType === 'docx' && version.html_content) {
-        setContent(version.html_content)
+        const htmlContent = version.html_content
         if (editor) {
-          editor.commands.setContent(version.html_content)
+          // Set flag to prevent cursor jumping
+          isSettingContentRef.current = true
+          editor.commands.setContent(htmlContent)
+          setTimeout(() => {
+            isSettingContentRef.current = false
+            setContent(htmlContent)
+          }, 0)
+        } else {
+          setContent(htmlContent)
         }
       } else if (documentType === 'pdf' && version.pdf_text_content) {
         setContent(version.pdf_text_content)
@@ -261,7 +311,8 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
                 <button
                   onClick={() => handleExport('docx')}
                   disabled={exporting || versions.length === 0}
-                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  title={versions.length === 0 ? t('noVersionToExport') || 'Please save first' : ''}
                 >
                   {exporting ? t('exporting') : t('exportDocx')}
                 </button>
@@ -270,7 +321,8 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
                 <button
                   onClick={() => handleExport('pdf')}
                   disabled={exporting || versions.length === 0}
-                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  title={versions.length === 0 ? t('noVersionToExport') || 'Please save first' : ''}
                 >
                   {exporting ? t('exporting') : t('exportPdf')}
                 </button>
@@ -338,34 +390,134 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
         {documentType === 'docx' && editor && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="border-b border-gray-200 p-4">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => editor.chain().focus().toggleBold().run()}
-                  className={`px-3 py-1 text-sm rounded font-semibold ${editor.isActive('bold') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-900 hover:bg-gray-100'}`}
-                >
-                  B
-                </button>
-                <button
-                  onClick={() => editor.chain().focus().toggleItalic().run()}
-                  className={`px-3 py-1 text-sm rounded italic ${editor.isActive('italic') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-900 hover:bg-gray-100'}`}
-                >
-                  I
-                </button>
-                <button
-                  onClick={() => editor.chain().focus().toggleBulletList().run()}
-                  className={`px-3 py-1 text-sm rounded ${editor.isActive('bulletList') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-900 hover:bg-gray-100'}`}
-                >
-                  •
-                </button>
-                <button
-                  onClick={() => editor.chain().focus().toggleOrderedList().run()}
-                  className={`px-3 py-1 text-sm rounded ${editor.isActive('orderedList') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-900 hover:bg-gray-100'}`}
-                >
-                  1.
-                </button>
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Text Formatting */}
+                <div className="flex items-center gap-1 border-r border-gray-300 pr-2">
+                  <button
+                    onClick={() => editor.chain().focus().toggleBold().run()}
+                    className={`px-3 py-1.5 text-sm rounded font-semibold transition-colors ${editor.isActive('bold') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-900 hover:bg-gray-100'}`}
+                    title="Bold"
+                  >
+                    B
+                  </button>
+                  <button
+                    onClick={() => editor.chain().focus().toggleItalic().run()}
+                    className={`px-3 py-1.5 text-sm rounded italic transition-colors ${editor.isActive('italic') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-900 hover:bg-gray-100'}`}
+                    title="Italic"
+                  >
+                    I
+                  </button>
+                  <button
+                    onClick={() => editor.chain().focus().toggleUnderline().run()}
+                    className={`px-3 py-1.5 text-sm rounded underline transition-colors ${editor.isActive('underline') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-900 hover:bg-gray-100'}`}
+                    title="Underline"
+                  >
+                    U
+                  </button>
+                  <button
+                    onClick={() => editor.chain().focus().toggleStrike().run()}
+                    className={`px-3 py-1.5 text-sm rounded line-through transition-colors ${editor.isActive('strike') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-900 hover:bg-gray-100'}`}
+                    title="Strikethrough"
+                  >
+                    S
+                  </button>
+                </div>
+
+                {/* Text Alignment */}
+                <div className="flex items-center gap-1 border-r border-gray-300 pr-2">
+                  <button
+                    onClick={() => editor.chain().focus().setTextAlign('left').run()}
+                    className={`px-3 py-1.5 text-sm rounded transition-colors ${editor.isActive({ textAlign: 'left' }) ? 'bg-indigo-100 text-indigo-700' : 'text-gray-900 hover:bg-gray-100'}`}
+                    title="Align Left"
+                  >
+                    ←
+                  </button>
+                  <button
+                    onClick={() => editor.chain().focus().setTextAlign('center').run()}
+                    className={`px-3 py-1.5 text-sm rounded transition-colors ${editor.isActive({ textAlign: 'center' }) ? 'bg-indigo-100 text-indigo-700' : 'text-gray-900 hover:bg-gray-100'}`}
+                    title="Align Center"
+                  >
+                    ↔
+                  </button>
+                  <button
+                    onClick={() => editor.chain().focus().setTextAlign('right').run()}
+                    className={`px-3 py-1.5 text-sm rounded transition-colors ${editor.isActive({ textAlign: 'right' }) ? 'bg-indigo-100 text-indigo-700' : 'text-gray-900 hover:bg-gray-100'}`}
+                    title="Align Right"
+                  >
+                    →
+                  </button>
+                  <button
+                    onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+                    className={`px-3 py-1.5 text-sm rounded transition-colors ${editor.isActive({ textAlign: 'justify' }) ? 'bg-indigo-100 text-indigo-700' : 'text-gray-900 hover:bg-gray-100'}`}
+                    title="Justify"
+                  >
+                    ≡
+                  </button>
+                </div>
+
+                {/* Headings */}
+                <div className="flex items-center gap-1 border-r border-gray-300 pr-2">
+                  <button
+                    onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+                    className={`px-3 py-1.5 text-sm rounded font-bold transition-colors ${editor.isActive('heading', { level: 1 }) ? 'bg-indigo-100 text-indigo-700' : 'text-gray-900 hover:bg-gray-100'}`}
+                    title="Heading 1"
+                  >
+                    H1
+                  </button>
+                  <button
+                    onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+                    className={`px-3 py-1.5 text-sm rounded font-bold transition-colors ${editor.isActive('heading', { level: 2 }) ? 'bg-indigo-100 text-indigo-700' : 'text-gray-900 hover:bg-gray-100'}`}
+                    title="Heading 2"
+                  >
+                    H2
+                  </button>
+                  <button
+                    onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+                    className={`px-3 py-1.5 text-sm rounded font-bold transition-colors ${editor.isActive('heading', { level: 3 }) ? 'bg-indigo-100 text-indigo-700' : 'text-gray-900 hover:bg-gray-100'}`}
+                    title="Heading 3"
+                  >
+                    H3
+                  </button>
+                </div>
+
+                {/* Lists */}
+                <div className="flex items-center gap-1 border-r border-gray-300 pr-2">
+                  <button
+                    onClick={() => editor.chain().focus().toggleBulletList().run()}
+                    className={`px-3 py-1.5 text-sm rounded transition-colors ${editor.isActive('bulletList') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-900 hover:bg-gray-100'}`}
+                    title="Bullet List"
+                  >
+                    •
+                  </button>
+                  <button
+                    onClick={() => editor.chain().focus().toggleOrderedList().run()}
+                    className={`px-3 py-1.5 text-sm rounded transition-colors ${editor.isActive('orderedList') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-900 hover:bg-gray-100'}`}
+                    title="Numbered List"
+                  >
+                    1.
+                  </button>
+                </div>
+
+                {/* Text Color */}
+                <div className="flex items-center gap-1">
+                  <input
+                    type="color"
+                    onChange={(e) => editor.chain().focus().setColor(e.target.value).run()}
+                    value={editor.getAttributes('textStyle').color || '#000000'}
+                    className="w-10 h-8 rounded border border-gray-300 cursor-pointer"
+                    title="Text Color"
+                  />
+                  <button
+                    onClick={() => editor.chain().focus().unsetColor().run()}
+                    className="px-3 py-1.5 text-sm rounded text-gray-900 hover:bg-gray-100 transition-colors"
+                    title="Remove Color"
+                  >
+                    🎨
+                  </button>
+                </div>
               </div>
             </div>
-            <div className="p-8 min-h-[600px] text-gray-900 prose prose-sm max-w-none">
+            <div className="p-8 min-h-[600px] prose prose-sm max-w-none text-gray-900">
               <EditorContent editor={editor} />
             </div>
           </div>
