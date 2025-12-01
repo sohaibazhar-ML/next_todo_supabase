@@ -366,6 +366,45 @@
     "no": "No",
     "marketingConsent": "Consenso marketing",
     "accountCreated": "Account creato"
+  },
+  "documentEditor": {
+    "loading": "Caricamento documento...",
+    "saving": "Salvataggio...",
+    "save": "Salva",
+    "savedSuccessfully": "Documento salvato con successo",
+    "exporting": "Esportazione...",
+    "exportDocx": "Esporta come DOCX",
+    "exportPdf": "Esporta come PDF",
+    "myVersions": "Le mie versioni",
+    "selectVersion": "Seleziona versione",
+    "version": "Versione",
+    "versionNamePlaceholder": "Nome versione (facoltativo)",
+    "pdfEditorPlaceholder": "Modifica il testo PDF qui...",
+    "noVersionToExport": "Nessuna versione trovata da esportare"
+  },
+  "documentCard": {
+    "featured": "In evidenza",
+    "category": "Categoria",
+    "fileType": "Tipo di file",
+    "version": "Versione",
+    "availableVersions": "Versioni disponibili",
+    "versions": "Versioni",
+    "size": "Dimensione",
+    "downloadsThisVersion": "Download (questa versione)",
+    "totalDownloads": "Download totali",
+    "selectVersion": "Seleziona versione",
+    "versionsAvailable": "{count} versioni disponibili",
+    "versionDetails": "Dettagli versione",
+    "current": "Corrente",
+    "downloads": "Download",
+    "noOtherVersions": "Nessun'altra versione disponibile",
+    "viewAllVersions": "Visualizza tutte le versioni",
+    "hideVersions": "Nascondi versioni",
+    "loadingVersions": "Caricamento versioni...",
+    "more": "+{count} in più",
+    "downloading": "Download in corso...",
+    "download": "Scarica",
+    "edit": "Modifica"
   }
 }
 

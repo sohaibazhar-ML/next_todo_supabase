@@ -366,6 +366,45 @@
     "no": "No",
     "marketingConsent": "Marketing Consent",
     "accountCreated": "Account Created"
+  },
+  "documentEditor": {
+    "loading": "Loading document...",
+    "saving": "Saving...",
+    "save": "Save",
+    "savedSuccessfully": "Document saved successfully",
+    "exporting": "Exporting...",
+    "exportDocx": "Export as DOCX",
+    "exportPdf": "Export as PDF",
+    "myVersions": "My Versions",
+    "selectVersion": "Select Version",
+    "version": "Version",
+    "versionNamePlaceholder": "Version name (optional)",
+    "pdfEditorPlaceholder": "Edit PDF text here...",
+    "noVersionToExport": "No version found to export"
+  },
+  "documentCard": {
+    "featured": "Featured",
+    "category": "Category",
+    "fileType": "File Type",
+    "version": "Version",
+    "availableVersions": "Available Versions",
+    "versions": "Versions",
+    "size": "Size",
+    "downloadsThisVersion": "Downloads (this version)",
+    "totalDownloads": "Total Downloads",
+    "selectVersion": "Select Version",
+    "versionsAvailable": "{count} versions available",
+    "versionDetails": "Version Details",
+    "current": "Current",
+    "downloads": "Downloads",
+    "noOtherVersions": "No other versions available",
+    "viewAllVersions": "View All Versions",
+    "hideVersions": "Hide Versions",
+    "loadingVersions": "Loading versions...",
+    "more": "+{count} more",
+    "downloading": "Downloading...",
+    "download": "Download",
+    "edit": "Edit"
   }
 }
 

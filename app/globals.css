@@ -34,3 +34,67 @@ body {
 .animate-shake {
   animation: shake 0.5s ease-in-out;
 }
+
+/* TipTap Editor Styles */
+.ProseMirror {
+  color: #111827 !important;
+  outline: none;
+}
+
+.ProseMirror p {
+  color: #111827 !important;
+  margin: 0.5em 0;
+}
+
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3,
+.ProseMirror h4,
+.ProseMirror h5,
+.ProseMirror h6 {
+  color: #111827 !important;
+  font-weight: 600;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  color: #111827 !important;
+  padding-left: 1.5em;
+}
+
+.ProseMirror li {
+  color: #111827 !important;
+}
+
+.ProseMirror strong {
+  color: #111827 !important;
+  font-weight: 600;
+}
+
+.ProseMirror em {
+  color: #111827 !important;
+}
+
+.ProseMirror code {
+  color: #111827 !important;
+  background-color: #f3f4f6;
+  padding: 0.2em 0.4em;
+  border-radius: 0.25rem;
+}
+
+.ProseMirror pre {
+  color: #111827 !important;
+  background-color: #f3f4f6;
+  padding: 1em;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+}
+
+.ProseMirror blockquote {
+  color: #111827 !important;
+  border-left: 4px solid #e5e7eb;
+  padding-left: 1em;
+  margin: 1em 0;
+}

@@ -366,6 +366,45 @@
     "no": "Nein",
     "marketingConsent": "Marketing-Einwilligung",
     "accountCreated": "Konto erstellt"
+  },
+  "documentEditor": {
+    "loading": "Dokument wird geladen...",
+    "saving": "Speichern...",
+    "save": "Speichern",
+    "savedSuccessfully": "Dokument erfolgreich gespeichert",
+    "exporting": "Exportieren...",
+    "exportDocx": "Als DOCX exportieren",
+    "exportPdf": "Als PDF exportieren",
+    "myVersions": "Meine Versionen",
+    "selectVersion": "Version auswählen",
+    "version": "Version",
+    "versionNamePlaceholder": "Versionsname (optional)",
+    "pdfEditorPlaceholder": "PDF-Text hier bearbeiten...",
+    "noVersionToExport": "Keine Version zum Exportieren gefunden"
+  },
+  "documentCard": {
+    "featured": "Empfohlen",
+    "category": "Kategorie",
+    "fileType": "Dateityp",
+    "version": "Version",
+    "availableVersions": "Verfügbare Versionen",
+    "versions": "Versionen",
+    "size": "Größe",
+    "downloadsThisVersion": "Downloads (diese Version)",
+    "totalDownloads": "Gesamt-Downloads",
+    "selectVersion": "Version auswählen",
+    "versionsAvailable": "{count} Versionen verfügbar",
+    "versionDetails": "Versionsdetails",
+    "current": "Aktuell",
+    "downloads": "Downloads",
+    "noOtherVersions": "Keine anderen Versionen verfügbar",
+    "viewAllVersions": "Alle Versionen anzeigen",
+    "hideVersions": "Versionen ausblenden",
+    "loadingVersions": "Versionen werden geladen...",
+    "more": "+{count} weitere",
+    "downloading": "Herunterladen...",
+    "download": "Herunterladen",
+    "edit": "Bearbeiten"
   }
 }
 

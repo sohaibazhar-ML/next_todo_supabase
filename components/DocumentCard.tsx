@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
 import type { Document } from '@/types/document'
@@ -11,6 +12,7 @@ interface DocumentCardProps {
 
 export default function DocumentCard({ document }: DocumentCardProps) {
   const t = useTranslations('documentCard')
+  const router = useRouter()
   const [downloading, setDownloading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showVersions, setShowVersions] = useState(false)
@@ -19,6 +21,13 @@ export default function DocumentCard({ document }: DocumentCardProps) {
   const [selectedVersion, setSelectedVersion] = useState<Document | null>(document)
   const [versionCount, setVersionCount] = useState<number | null>(null)
   const supabase = createClient()
+
+  const canEdit = document.file_type === 'pdf' || document.file_type === 'document'
+
+  const handleEdit = () => {
+    const locale = window.location.pathname.split('/')[1]
+    router.push(`/${locale}/documents/${document.id}/edit`)
+  }
 
   const formatFileSize = (bytes: number | null | undefined): string => {
     if (!bytes || bytes === 0 || isNaN(bytes)) return '0 Bytes'
@@ -326,6 +335,18 @@ export default function DocumentCard({ document }: DocumentCardProps) {
           <div className="mb-4 bg-red-50 border-l-4 border-red-500 p-3 rounded">
             <p className="text-sm text-red-700">{error}</p>
           </div>
+        )}
+
+        {canEdit && (
+          <button
+            onClick={(e) => { e.preventDefault(); handleEdit(); }}
+            className="w-full mb-3 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium flex items-center justify-center gap-2"
+          >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            {t('edit')}
+          </button>
         )}
 
         <button
