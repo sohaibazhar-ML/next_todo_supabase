@@ -100,7 +100,8 @@
     "successfullyLoggedIn": "Hai effettuato l'accesso con successo. Gestisci qui il tuo profilo e le impostazioni dell'account.",
     "manageProfile": "Gestisci profilo",
     "downloadCenter": "Centro download",
-    "manageDocuments": "Gestisci documenti"
+    "manageDocuments": "Gestisci documenti",
+    "statistics": "Statistiche e Analisi"
   },
   "profile": {
     "myProfile": "Il mio profilo",
@@ -405,6 +406,47 @@
     "downloading": "Download in corso...",
     "download": "Scarica",
     "edit": "Modifica"
+  },
+  "stats": {
+    "title": "Statistiche e Analisi",
+    "description": "Statistiche e analisi complete per la tua piattaforma",
+    "loading": "Caricamento statistiche...",
+    "filters": "Filtri",
+    "clearFilters": "Cancella tutti i filtri",
+    "applyFilters": "Applica filtri",
+    "applying": "Applicazione in corso...",
+    "fromDate": "Da data",
+    "toDate": "A data",
+    "searchByEmail": "Cerca per email",
+    "emailPlaceholder": "Inserisci email utente...",
+    "searchDocuments": "Cerca documenti",
+    "documentPlaceholder": "Cerca per titolo, descrizione o nome file...",
+    "category": "Categoria",
+    "allCategories": "Tutte le categorie",
+    "tags": "Tag",
+    "totalUsers": "Totale utenti",
+    "totalAdmins": "Totale amministratori",
+    "totalDocuments": "Totale documenti",
+    "downloadsPerDocument": "Download per documento",
+    "userDocumentDownloads": "Download documenti utente",
+    "versionDownloads": "Download versioni",
+    "userVersionsCount": "Conteggio versioni utente",
+    "document": "Documento",
+    "totalDownloads": "Totale download",
+    "filteredDownloads": "Download filtrati",
+    "user": "Utente",
+    "downloadedAt": "Scaricato il",
+    "version": "Versione",
+    "fileSize": "Dimensione file",
+    "createdAt": "Creato il",
+    "email": "Email",
+    "versionsCount": "Conteggio versioni",
+    "tabs": {
+      "summary": "Riepilogo",
+      "downloads": "Download",
+      "versions": "Versioni",
+      "users": "Utenti"
+    }
   }
 }
 

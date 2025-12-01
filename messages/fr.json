@@ -100,7 +100,8 @@
     "successfullyLoggedIn": "Vous vous êtes connecté avec succès. Gérez votre profil et vos paramètres ici.",
     "manageProfile": "Gérer le profil",
     "downloadCenter": "Centre de téléchargement",
-    "manageDocuments": "Gérer les documents"
+    "manageDocuments": "Gérer les documents",
+    "statistics": "Statistiques et Analyses"
   },
   "profile": {
     "myProfile": "Mon profil",
@@ -405,6 +406,47 @@
     "downloading": "Téléchargement...",
     "download": "Télécharger",
     "edit": "Modifier"
+  },
+  "stats": {
+    "title": "Statistiques et Analyses",
+    "description": "Statistiques et analyses complètes pour votre plateforme",
+    "loading": "Chargement des statistiques...",
+    "filters": "Filtres",
+    "clearFilters": "Effacer tous les filtres",
+    "applyFilters": "Appliquer les filtres",
+    "applying": "Application en cours...",
+    "fromDate": "Date de début",
+    "toDate": "Date de fin",
+    "searchByEmail": "Rechercher par e-mail",
+    "emailPlaceholder": "Entrer l'e-mail de l'utilisateur...",
+    "searchDocuments": "Rechercher des documents",
+    "documentPlaceholder": "Rechercher par titre, description ou nom de fichier...",
+    "category": "Catégorie",
+    "allCategories": "Toutes les catégories",
+    "tags": "Tags",
+    "totalUsers": "Total des utilisateurs",
+    "totalAdmins": "Total des administrateurs",
+    "totalDocuments": "Total des documents",
+    "downloadsPerDocument": "Téléchargements par document",
+    "userDocumentDownloads": "Téléchargements de documents utilisateur",
+    "versionDownloads": "Téléchargements de versions",
+    "userVersionsCount": "Nombre de versions utilisateur",
+    "document": "Document",
+    "totalDownloads": "Total des téléchargements",
+    "filteredDownloads": "Téléchargements filtrés",
+    "user": "Utilisateur",
+    "downloadedAt": "Téléchargé le",
+    "version": "Version",
+    "fileSize": "Taille du fichier",
+    "createdAt": "Créé le",
+    "email": "E-mail",
+    "versionsCount": "Nombre de versions",
+    "tabs": {
+      "summary": "Résumé",
+      "downloads": "Téléchargements",
+      "versions": "Versions",
+      "users": "Utilisateurs"
+    }
   }
 }
 

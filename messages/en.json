@@ -100,7 +100,8 @@
     "successfullyLoggedIn": "You have successfully logged in. Manage your profile and account settings here.",
     "manageProfile": "Manage Profile",
     "downloadCenter": "Download Center",
-    "manageDocuments": "Manage Documents"
+    "manageDocuments": "Manage Documents",
+    "statistics": "Statistics & Analytics"
   },
   "profile": {
     "myProfile": "My Profile",
@@ -405,6 +406,47 @@
     "downloading": "Downloading...",
     "download": "Download",
     "edit": "Edit"
+  },
+  "stats": {
+    "title": "Statistics & Analytics",
+    "description": "Comprehensive statistics and analytics for your platform",
+    "loading": "Loading statistics...",
+    "filters": "Filters",
+    "clearFilters": "Clear All Filters",
+    "applyFilters": "Apply Filters",
+    "applying": "Applying...",
+    "fromDate": "From Date",
+    "toDate": "To Date",
+    "searchByEmail": "Search by Email",
+    "emailPlaceholder": "Enter user email...",
+    "searchDocuments": "Search Documents",
+    "documentPlaceholder": "Search by title, description, or filename...",
+    "category": "Category",
+    "allCategories": "All Categories",
+    "tags": "Tags",
+    "totalUsers": "Total Users",
+    "totalAdmins": "Total Admins",
+    "totalDocuments": "Total Documents",
+    "downloadsPerDocument": "Downloads per Document",
+    "userDocumentDownloads": "User Document Downloads",
+    "versionDownloads": "Version Downloads",
+    "userVersionsCount": "User Versions Count",
+    "document": "Document",
+    "totalDownloads": "Total Downloads",
+    "filteredDownloads": "Filtered Downloads",
+    "user": "User",
+    "downloadedAt": "Downloaded At",
+    "version": "Version",
+    "fileSize": "File Size",
+    "createdAt": "Created At",
+    "email": "Email",
+    "versionsCount": "Versions Count",
+    "tabs": {
+      "summary": "Summary",
+      "downloads": "Downloads",
+      "versions": "Versions",
+      "users": "Users"
+    }
   }
 }
 

@@ -20,9 +20,10 @@ export default function DocumentCard({ document }: DocumentCardProps) {
   const [loadingVersions, setLoadingVersions] = useState(false)
   const [selectedVersion, setSelectedVersion] = useState<Document | null>(document)
   const [versionCount, setVersionCount] = useState<number | null>(null)
+  const [actualDownloadCount, setActualDownloadCount] = useState<number | null>(null)
   const supabase = createClient()
 
-  const canEdit = document.file_type === 'pdf' || document.file_type === 'document'
+  const canEdit = document.file_type === 'PDF' || document.file_type === 'DOCX'
 
   const handleEdit = () => {
     const locale = window.location.pathname.split('/')[1]
@@ -64,6 +65,22 @@ export default function DocumentCard({ document }: DocumentCardProps) {
       }
     }
     fetchVersionCount()
+  }, [document.id])
+
+  // Fetch actual download count from download_logs
+  useEffect(() => {
+    const fetchActualDownloadCount = async () => {
+      try {
+        const response = await fetch(`/api/download-logs?documentId=${document.id}`)
+        if (response.ok) {
+          const logs = await response.json()
+          setActualDownloadCount(Array.isArray(logs) ? logs.length : 0)
+        }
+      } catch (err) {
+        console.error('Error fetching download count:', err)
+      }
+    }
+    fetchActualDownloadCount()
   }, [document.id])
 
   const fetchVersions = async () => {
@@ -252,7 +269,9 @@ export default function DocumentCard({ document }: DocumentCardProps) {
           </div>
           <div className="flex items-center justify-between">
             <span>{t('downloadsThisVersion')}:</span>
-            <span className="font-medium text-gray-900">{document.download_count}</span>
+            <span className="font-medium text-gray-900">
+              {actualDownloadCount !== null ? actualDownloadCount : (document.download_count || 0)}
+            </span>
           </div>
           {showVersions && versions.length > 1 && (
             <div className="flex items-center justify-between pt-2 border-t border-gray-200">

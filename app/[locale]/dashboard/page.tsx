@@ -25,7 +25,7 @@ export default async function DashboardPage() {
     redirect('/profile?setup=true')
   }
 
-  const displayName = profile ? `${profile.first_name} ${profile.last_name}` : user.email
+  const displayName = profile ? `${profile.first_name} ${profile.last_name}` : (user.email || 'User')
   const admin = await isAdmin(user.id)
 
   return (
@@ -77,9 +77,14 @@ export default async function DashboardPage() {
                 {t('dashboard.downloadCenter')}
               </Link>
               {admin && (
-                <Link href="/admin/documents" className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
-                  {t('dashboard.manageDocuments')}
-                </Link>
+                <>
+                  <Link href="/admin/documents" className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
+                    {t('dashboard.manageDocuments')}
+                  </Link>
+                  <Link href="/admin/stats" className="px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-lg hover:from-orange-700 hover:to-red-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
+                    {t('dashboard.statistics')}
+                  </Link>
+                </>
               )}
             </div>
           </div>
