@@ -10,7 +10,15 @@ import { Color } from '@tiptap/extension-color'
 import TextAlign from '@tiptap/extension-text-align'
 import Underline from '@tiptap/extension-underline'
 import Highlight from '@tiptap/extension-highlight'
+import { Document as PDFDocument, Page as PDFPage, pdfjs } from 'react-pdf'
 import type { Document } from '@/types/document'
+
+// Note: react-pdf v10 includes styles automatically, but if needed, you can import:
+// The CSS files are optional in v10 and may cause build issues in Next.js
+// If styling is needed, add custom CSS or use the built-in styles
+
+// Set up PDF.js worker for Next.js - must be set before any PDF operations
+// We'll set it in useEffect to ensure it's initialized properly
 
 interface DocumentEditorProps {
   document: Document
@@ -28,6 +36,20 @@ interface UserVersion {
   is_draft: boolean
 }
 
+interface PDFAnnotation {
+  id: string
+  page: number
+  type: 'highlight' | 'text' | 'drawing' | 'sticky'
+  x: number // X coordinate (0-1 normalized)
+  y: number // Y coordinate (0-1 normalized)
+  width?: number // Width for highlights/drawings
+  height?: number // Height for highlights/drawings
+  text?: string // Text content for text/sticky notes
+  color?: string // Color for highlights/drawings
+  points?: Array<{ x: number; y: number }> // For drawings
+  createdAt: string
+}
+
 export default function DocumentEditor({ document, onClose }: DocumentEditorProps) {
   const t = useTranslations('documentEditor')
   const router = useRouter()
@@ -41,6 +63,24 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
   const [versionName, setVersionName] = useState('')
   const [showVersions, setShowVersions] = useState(false)
   const isSettingContentRef = useRef(false) // Flag to prevent cursor jumping when programmatically setting content
+  
+  // PDF viewer state
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+  const [numPages, setNumPages] = useState<number | null>(null)
+  const [pageNumber, setPageNumber] = useState(1)
+  const [scale, setScale] = useState(1.0)
+  const [pdfLoading, setPdfLoading] = useState(false)
+  const [extractedText, setExtractedText] = useState<string>('')
+  const [workerReady, setWorkerReady] = useState(false)
+  
+  // Annotation state
+  const [annotations, setAnnotations] = useState<PDFAnnotation[]>([])
+  const [activeTool, setActiveTool] = useState<'select' | 'highlight' | 'text' | 'sticky' | null>(null)
+  const [selectedAnnotation, setSelectedAnnotation] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<Array<{ page: number; text: string }>>([])
+  const [currentSearchIndex, setCurrentSearchIndex] = useState(-1)
+  const pageRefs = useRef<Map<number, HTMLDivElement>>(new Map())
 
   // TipTap editor for DOCX with style preservation
   const editor = useEditor({
@@ -76,11 +116,52 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
     },
   })
 
+
+  // Initialize PDF.js worker - must be done before loading PDFs
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Use local worker file from public folder
+      // Try .mjs first, then .js as fallback
+      const workerPath = '/pdf.worker.min.mjs'
+      pdfjs.GlobalWorkerOptions.workerSrc = workerPath
+      
+      // Verify worker can be loaded
+      fetch(workerPath)
+        .then(() => {
+          console.log('PDF.js worker loaded successfully:', workerPath)
+          setWorkerReady(true)
+        })
+        .catch((err) => {
+          console.error('Failed to load worker from', workerPath, 'trying .js:', err)
+          // Fallback to .js
+          const jsWorkerPath = '/pdf.worker.min.js'
+          pdfjs.GlobalWorkerOptions.workerSrc = jsWorkerPath
+          fetch(jsWorkerPath)
+            .then(() => {
+              console.log('PDF.js worker loaded from .js:', jsWorkerPath)
+              setWorkerReady(true)
+            })
+            .catch((jsErr) => {
+              console.error('Failed to load worker from .js:', jsErr)
+              setWorkerReady(true) // Still try to proceed
+            })
+        })
+    }
+  }, [])
+
   // Load document content
   useEffect(() => {
     loadDocument()
     loadVersions()
   }, [document.id])
+
+  // Re-load PDF document once worker is ready (if it's a PDF)
+  useEffect(() => {
+    if (documentType === 'pdf' && workerReady && pdfUrl) {
+      // Worker is ready, PDF should now work
+      // The PDFDocument component will handle the rendering
+    }
+  }, [workerReady, documentType, pdfUrl])
 
   const loadDocument = async () => {
     try {
@@ -121,8 +202,23 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
           setContent(htmlContent)
         }
       } else if (data.type === 'pdf') {
-        // For PDF, we'll show a text editor
+        // For PDF, set up viewer
+        setPdfUrl(data.pdfUrl || null)
+        setNumPages(data.pageCount || null)
         setContent(data.content || '')
+        setPageNumber(1)
+        setScale(1.0)
+        // Load annotations from latest version if available
+        if (versions.length > 0 && versions[0].pdf_annotations) {
+          try {
+            const loadedAnnotations = Array.isArray(versions[0].pdf_annotations) 
+              ? versions[0].pdf_annotations 
+              : []
+            setAnnotations(loadedAnnotations as PDFAnnotation[])
+          } catch (err) {
+            console.error('Error loading annotations:', err)
+          }
+        }
       }
     } catch (err: any) {
       setError(err.message || 'Failed to load document')
@@ -165,11 +261,13 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
 
       let htmlContent: string | null = null
       let pdfTextContent: string | null = null
+      let pdfAnnotations: PDFAnnotation[] | null = null
 
       if (documentType === 'docx') {
         htmlContent = editor?.getHTML() || content
       } else if (documentType === 'pdf') {
         pdfTextContent = content
+        pdfAnnotations = annotations.length > 0 ? annotations : null
       }
 
       const response = await fetch(`/api/documents/${document.id}/edit`, {
@@ -178,6 +276,7 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
         body: JSON.stringify({
           html_content: htmlContent,
           pdf_text_content: pdfTextContent,
+          pdf_annotations: pdfAnnotations,
           version_name: versionName || null,
         }),
       })
@@ -256,6 +355,20 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
         }
       } else if (documentType === 'pdf' && version.pdf_text_content) {
         setContent(version.pdf_text_content)
+        // Load annotations if available
+        if (version.pdf_annotations) {
+          try {
+            const loadedAnnotations = Array.isArray(version.pdf_annotations) 
+              ? version.pdf_annotations 
+              : []
+            setAnnotations(loadedAnnotations as PDFAnnotation[])
+          } catch (err) {
+            console.error('Error loading annotations:', err)
+            setAnnotations([])
+          }
+        } else {
+          setAnnotations([])
+        }
       }
 
       setShowVersions(false)
@@ -264,6 +377,95 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
     } finally {
       setLoading(false)
     }
+  }
+
+  // Search functionality
+  const handleSearch = async () => {
+    if (!pdfUrl || !searchQuery.trim()) return
+    
+    try {
+      setPdfLoading(true)
+      const loadingTask = pdfjs.getDocument(pdfUrl)
+      const pdf = await loadingTask.promise
+      const results: Array<{ page: number; text: string }> = []
+      
+      for (let i = 1; i <= (numPages || 1); i++) {
+        const page = await pdf.getPage(i)
+        const textContent = await page.getTextContent()
+        const pageText = textContent.items.map((item: any) => item.str).join(' ')
+        
+        if (pageText.toLowerCase().includes(searchQuery.toLowerCase())) {
+          results.push({ page: i, text: pageText })
+        }
+      }
+      
+      setSearchResults(results)
+      if (results.length > 0) {
+        setCurrentSearchIndex(0)
+        setPageNumber(results[0].page)
+      }
+    } catch (err) {
+      console.error('Search error:', err)
+      setError('Failed to search PDF')
+    } finally {
+      setPdfLoading(false)
+    }
+  }
+
+  // Add annotation handler
+  const handlePageClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!activeTool || activeTool === 'select') return
+    
+    // Find the PDF page element
+    const pageElement = event.currentTarget.querySelector('.react-pdf__Page')
+    if (!pageElement) return
+    
+    const pageRect = pageElement.getBoundingClientRect()
+    const clickX = event.clientX - pageRect.left
+    const clickY = event.clientY - pageRect.top
+    
+    // Normalize coordinates (0-1) based on page dimensions
+    const x = Math.max(0, Math.min(1, clickX / pageRect.width))
+    const y = Math.max(0, Math.min(1, clickY / pageRect.height))
+    
+    if (activeTool === 'highlight') {
+      // For highlight, we'll create a simple rectangle
+      const newAnnotation: PDFAnnotation = {
+        id: `annotation-${Date.now()}`,
+        page: pageNumber,
+        type: 'highlight',
+        x: Math.max(0, Math.min(1, x - 0.1)),
+        y: Math.max(0, Math.min(1, y - 0.02)),
+        width: 0.2,
+        height: 0.04,
+        color: '#ffff00',
+        createdAt: new Date().toISOString(),
+      }
+      setAnnotations(prev => [...prev, newAnnotation])
+      setActiveTool(null) // Reset tool after adding
+    } else if (activeTool === 'text' || activeTool === 'sticky') {
+      const text = prompt(t('enterAnnotationText') || 'Enter annotation text:')
+      if (text) {
+        const newAnnotation: PDFAnnotation = {
+          id: `annotation-${Date.now()}`,
+          page: pageNumber,
+          type: activeTool,
+          x: Math.max(0, Math.min(1, x)),
+          y: Math.max(0, Math.min(1, y)),
+          text: text,
+          color: activeTool === 'sticky' ? '#ffff00' : '#ffffff',
+          createdAt: new Date().toISOString(),
+        }
+        setAnnotations(prev => [...prev, newAnnotation])
+        setActiveTool(null) // Reset tool after adding
+      }
+    }
+  }
+
+  // Delete annotation
+  const deleteAnnotation = (id: string) => {
+    setAnnotations(prev => prev.filter(ann => ann.id !== id))
+    setSelectedAnnotation(null)
   }
 
   if (loading && !content) {
@@ -525,11 +727,360 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
 
         {documentType === 'pdf' && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-            <div className="p-8">
+            {/* Annotation Tools */}
+            <div className="border-b border-gray-200 p-3 bg-indigo-50">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-sm font-medium text-gray-700 mr-2">{t('annotationTools') || 'Tools:'}</span>
+                <button
+                  onClick={() => setActiveTool(activeTool === 'select' ? null : 'select')}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                    activeTool === 'select' 
+                      ? 'bg-indigo-600 text-white' 
+                      : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                  }`}
+                  title={t('selectTool') || 'Select'}
+                >
+                  {t('select') || 'Select'}
+                </button>
+                <button
+                  onClick={() => setActiveTool(activeTool === 'highlight' ? null : 'highlight')}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                    activeTool === 'highlight' 
+                      ? 'bg-yellow-500 text-white' 
+                      : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                  }`}
+                  title={t('highlightTool') || 'Highlight'}
+                >
+                  {t('highlight') || 'Highlight'}
+                </button>
+                <button
+                  onClick={() => setActiveTool(activeTool === 'text' ? null : 'text')}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                    activeTool === 'text' 
+                      ? 'bg-blue-500 text-white' 
+                      : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                  }`}
+                  title={t('textAnnotation') || 'Text Annotation'}
+                >
+                  {t('textNote') || 'Text'}
+                </button>
+                <button
+                  onClick={() => setActiveTool(activeTool === 'sticky' ? null : 'sticky')}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                    activeTool === 'sticky' 
+                      ? 'bg-green-500 text-white' 
+                      : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                  }`}
+                  title={t('stickyNote') || 'Sticky Note'}
+                >
+                  {t('sticky') || 'Sticky'}
+                </button>
+                {annotations.length > 0 && (
+                  <button
+                    onClick={() => {
+                      if (confirm(t('clearAllAnnotations') || 'Clear all annotations?')) {
+                        setAnnotations([])
+                      }
+                    }}
+                    className="px-3 py-1.5 text-sm font-medium text-red-600 bg-white border border-red-300 rounded-lg hover:bg-red-50"
+                    title={t('clearAnnotations') || 'Clear All Annotations'}
+                  >
+                    {t('clear') || 'Clear'}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* PDF Viewer Controls */}
+            <div className="border-b border-gray-200 p-4 bg-gray-50">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                {/* Page Navigation */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setPageNumber(prev => Math.max(1, prev - 1))}
+                    disabled={pageNumber <= 1}
+                    className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    ← {t('previous') || 'Previous'}
+                  </button>
+                  <span className="text-sm text-gray-700">
+                    {t('page') || 'Page'} {pageNumber} {numPages !== null && `of ${numPages}`}
+                  </span>
+                  <input
+                    type="number"
+                    min="1"
+                    max={numPages || 1}
+                    value={pageNumber}
+                    onChange={(e) => {
+                      const page = parseInt(e.target.value)
+                      if (page >= 1 && page <= (numPages || 1)) {
+                        setPageNumber(page)
+                      }
+                    }}
+                    className="w-16 px-2 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-900"
+                  />
+                  <button
+                    onClick={() => setPageNumber(prev => Math.min(numPages || 1, prev + 1))}
+                    disabled={pageNumber >= (numPages || 1)}
+                    className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {t('next') || 'Next'} →
+                  </button>
+                </div>
+
+                {/* Zoom Controls */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setScale(prev => Math.max(0.5, prev - 0.25))}
+                    className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                    title="Zoom Out"
+                  >
+                    −
+                  </button>
+                  <span className="text-sm text-gray-700 min-w-[60px] text-center">
+                    {Math.round(scale * 100)}%
+                  </span>
+                  <button
+                    onClick={() => setScale(prev => Math.min(2.0, prev + 0.25))}
+                    className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                    title="Zoom In"
+                  >
+                    +
+                  </button>
+                  <button
+                    onClick={() => setScale(1.0)}
+                    className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                    title="Reset Zoom"
+                  >
+                    {t('reset') || 'Reset'}
+                  </button>
+                </div>
+
+                {/* Extract Text Button */}
+                <button
+                  onClick={async () => {
+                    if (!pdfUrl) return
+                    setPdfLoading(true)
+                    try {
+                      // Extract text from current page using pdfjs
+                      const loadingTask = pdfjs.getDocument(pdfUrl)
+                      const pdf = await loadingTask.promise
+                      const page = await pdf.getPage(pageNumber)
+                      const textContent = await page.getTextContent()
+                      const pageText = textContent.items.map((item: any) => item.str).join(' ')
+                      setExtractedText(prev => prev ? `${prev}\n\n--- Page ${pageNumber} ---\n${pageText}` : `--- Page ${pageNumber} ---\n${pageText}`)
+                      setContent(prev => prev ? `${prev}\n\n--- Page ${pageNumber} ---\n${pageText}` : `--- Page ${pageNumber} ---\n${pageText}`)
+                    } catch (err) {
+                      console.error('Error extracting text:', err)
+                      setError('Failed to extract text from PDF')
+                    } finally {
+                      setPdfLoading(false)
+                    }
+                  }}
+                  disabled={pdfLoading || !pdfUrl}
+                  className="px-4 py-1.5 text-sm font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {pdfLoading ? t('extracting') || 'Extracting...' : t('extractText') || 'Extract Text'}
+                </button>
+              </div>
+              
+              {/* Search Bar */}
+              <div className="mt-3 flex items-center gap-2">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={t('searchInPdf') || 'Search in PDF...'}
+                  className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-500"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && searchQuery.trim()) {
+                      handleSearch()
+                    }
+                  }}
+                />
+                <button
+                  onClick={handleSearch}
+                  disabled={!searchQuery.trim()}
+                  className="px-4 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {t('search') || 'Search'}
+                </button>
+                {searchResults.length > 0 && (
+                  <span className="text-sm text-gray-600">
+                    {t('found') || 'Found'} {searchResults.length} {t('results') || 'results'}
+                    {currentSearchIndex >= 0 && ` (${currentSearchIndex + 1}/${searchResults.length})`}
+                  </span>
+                )}
+                {searchResults.length > 0 && (
+                  <>
+                    <button
+                      onClick={() => {
+                        const prevIndex = currentSearchIndex > 0 ? currentSearchIndex - 1 : searchResults.length - 1
+                        setCurrentSearchIndex(prevIndex)
+                        setPageNumber(searchResults[prevIndex].page)
+                      }}
+                      className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                    >
+                      ↑
+                    </button>
+                    <button
+                      onClick={() => {
+                        const nextIndex = currentSearchIndex < searchResults.length - 1 ? currentSearchIndex + 1 : 0
+                        setCurrentSearchIndex(nextIndex)
+                        setPageNumber(searchResults[nextIndex].page)
+                      }}
+                      className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                    >
+                      ↓
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSearchQuery('')
+                        setSearchResults([])
+                        setCurrentSearchIndex(-1)
+                      }}
+                      className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                    >
+                      ✕
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* PDF Viewer */}
+            <div className="p-4 bg-gray-100 overflow-auto" style={{ maxHeight: 'calc(100vh - 400px)', minHeight: '600px' }}>
+              {pdfUrl && workerReady ? (
+                <div className="flex justify-center">
+                  <div 
+                    className="relative"
+                    onClick={handlePageClick}
+                    ref={(el) => {
+                      if (el) pageRefs.current.set(pageNumber, el)
+                    }}
+                  >
+                    <PDFDocument
+                      file={pdfUrl}
+                      loading={
+                        <div className="flex items-center justify-center p-8">
+                          <div className="text-center">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+                            <p className="text-gray-600">{t('loading')}</p>
+                          </div>
+                        </div>
+                      }
+                      onLoadSuccess={({ numPages }) => {
+                        setNumPages(numPages)
+                      }}
+                      onLoadError={(error) => {
+                        console.error('PDF load error:', error)
+                        setError('Failed to load PDF. Please try again.')
+                      }}
+                      error={
+                        <div className="p-8 text-center">
+                          <p className="text-red-600">{t('pdfLoadError') || 'Failed to load PDF'}</p>
+                        </div>
+                      }
+                    >
+                      <div className="relative">
+                        <PDFPage
+                          pageNumber={pageNumber}
+                          scale={scale}
+                          renderTextLayer={true}
+                          renderAnnotationLayer={true}
+                          className="shadow-lg"
+                        />
+                        {/* Annotation Overlay */}
+                        <div className="absolute inset-0 pointer-events-none">
+                          {annotations
+                            .filter(ann => ann.page === pageNumber)
+                            .map(annotation => {
+                              const pageElement = pageRefs.current.get(pageNumber)?.querySelector('.react-pdf__Page')
+                              if (!pageElement) return null
+                              
+                              const rect = pageElement.getBoundingClientRect()
+                              const left = annotation.x * rect.width
+                              const top = annotation.y * rect.height
+                              
+                              return (
+                                <div
+                                  key={annotation.id}
+                                  className="absolute pointer-events-auto"
+                                  style={{
+                                    left: `${left}px`,
+                                    top: `${top}px`,
+                                    width: annotation.width ? `${annotation.width * rect.width}px` : 'auto',
+                                    height: annotation.height ? `${annotation.height * rect.height}px` : 'auto',
+                                  }}
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setSelectedAnnotation(annotation.id)
+                                  }}
+                                >
+                                  {annotation.type === 'highlight' && (
+                                    <div
+                                      className="absolute opacity-30 rounded"
+                                      style={{
+                                        backgroundColor: annotation.color || '#ffff00',
+                                        width: '100%',
+                                        height: '100%',
+                                      }}
+                                    />
+                                  )}
+                                  {(annotation.type === 'text' || annotation.type === 'sticky') && (
+                                    <div
+                                      className="absolute p-2 rounded shadow-lg border-2 border-gray-400 min-w-[150px] max-w-[250px]"
+                                      style={{
+                                        backgroundColor: annotation.color || '#ffffff',
+                                        zIndex: selectedAnnotation === annotation.id ? 1000 : 100,
+                                      }}
+                                    >
+                                      <div className="flex items-start justify-between gap-2">
+                                        <p className="text-xs text-gray-800 break-words">{annotation.text}</p>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation()
+                                            deleteAnnotation(annotation.id)
+                                          }}
+                                          className="text-red-600 hover:text-red-800 text-xs font-bold"
+                                          title={t('delete') || 'Delete'}
+                                        >
+                                          ×
+                                        </button>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              )
+                            })}
+                        </div>
+                      </div>
+                    </PDFDocument>
+                  </div>
+                </div>
+              ) : pdfUrl && !workerReady ? (
+                <div className="flex items-center justify-center p-8">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">{t('loadingWorker') || 'Loading PDF worker...'}</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center p-8">
+                  <p className="text-gray-600">{t('noPdfUrl') || 'PDF URL not available'}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Text Editor for Notes and Extracted Text */}
+            <div className="border-t border-gray-200 p-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('notesAndExtractedText') || 'Notes and Extracted Text'}
+              </label>
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="w-full min-h-[600px] p-4 border border-gray-300 rounded-lg font-mono text-sm text-gray-900 placeholder:text-gray-500 bg-white"
+                className="w-full min-h-[200px] p-4 border border-gray-300 rounded-lg font-mono text-sm text-gray-900 placeholder:text-gray-500 bg-white"
                 placeholder={t('pdfEditorPlaceholder')}
               />
             </div>

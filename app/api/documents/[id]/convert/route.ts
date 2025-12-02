@@ -144,23 +144,35 @@ export async function GET(
         }
       }
     } else if (document.file_type === 'pdf' || document.mime_type === 'application/pdf') {
-      // PDF to text (extract text for editing)
-      // Note: pdf-lib can get page count, but for text extraction we'll use a client-side approach
-      // For now, return a placeholder that allows users to add their own text/notes
+      // PDF viewer - get page count and signed URL for viewing
       try {
         const pdfDoc = await PDFDocument.load(buffer)
         const pages = pdfDoc.getPages()
         const numPages = pages.length
 
+        // Get signed URL for PDF viewing
+        const { data: urlData, error: urlError } = await supabase.storage
+          .from('documents')
+          .createSignedUrl(document.file_path, 3600) // 1 hour expiry
+
+        if (urlError) {
+          console.error('Error creating signed URL:', urlError)
+          return NextResponse.json(
+            { error: `Failed to generate PDF URL: ${urlError.message}` },
+            { status: 500 }
+          )
+        }
+
         // Since pdf-lib doesn't extract text, we'll provide a template
-        // The actual text extraction can be done client-side if needed
-        const extractedText = `PDF Document with ${numPages} page(s)\n\n[You can add your notes, annotations, or extracted text here. For full text extraction, please use a PDF viewer to copy the text and paste it here.]\n\n--- Start editing below ---\n`
+        // The actual text extraction can be done client-side using pdfjs-dist
+        const extractedText = `PDF Document with ${numPages} page(s)\n\n[You can add your notes, annotations, or extracted text here. Text extraction is available in the PDF viewer.]\n\n--- Start editing below ---\n`
 
         return NextResponse.json({
           type: 'pdf',
           content: extractedText,
           pageCount: numPages,
-          note: 'PDF text extraction is limited. You can manually add text or use a PDF viewer to copy text here.',
+          pdfUrl: urlData?.signedUrl || null,
+          note: 'PDF text extraction is available in the viewer. You can extract text from pages and add annotations.',
         })
       } catch (error: any) {
         console.error('PDF processing error:', error)

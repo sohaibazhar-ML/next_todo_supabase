@@ -23,7 +23,12 @@ export default function DocumentCard({ document }: DocumentCardProps) {
   const [actualDownloadCount, setActualDownloadCount] = useState<number | null>(null)
   const supabase = createClient()
 
-  const canEdit = document.file_type === 'PDF' || document.file_type === 'DOCX'
+  // Check if document can be edited (PDF or DOCX/DOC files)
+  // Database stores: 'pdf' for PDFs, 'document' for DOCX/DOC files
+  // TypeScript type uses: 'PDF' for PDFs, 'DOCX' for DOCX/DOC files
+  const fileTypeLower = document.file_type?.toLowerCase() || ''
+  const canEdit = fileTypeLower === 'pdf' || fileTypeLower === 'document' || 
+                  document.file_type === 'PDF' || document.file_type === 'DOCX'
 
   const handleEdit = () => {
     const locale = window.location.pathname.split('/')[1]
