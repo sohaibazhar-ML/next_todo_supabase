@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { isAdmin } from '@/lib/utils/roles'
+import { isAdmin, hasPermission } from '@/lib/utils/roles'
 import { getTranslations } from 'next-intl/server'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 
@@ -27,6 +27,8 @@ export default async function DashboardPage() {
 
   const displayName = profile ? `${profile.first_name} ${profile.last_name}` : (user.email || 'User')
   const admin = await isAdmin(user.id)
+  const canUpload = await hasPermission(user.id, 'can_upload_documents')
+  const canViewStats = await hasPermission(user.id, 'can_view_stats')
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 py-8">
@@ -76,15 +78,20 @@ export default async function DashboardPage() {
               <Link href="/downloads" className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
                 {t('dashboard.downloadCenter')}
               </Link>
+              {canUpload && (
+                <Link href="/admin/documents" className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
+                  {t('dashboard.manageDocuments')}
+                </Link>
+              )}
+              {canViewStats && (
+                <Link href="/admin/stats" className="px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-lg hover:from-orange-700 hover:to-red-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
+                  {t('dashboard.statistics')}
+                </Link>
+              )}
               {admin && (
-                <>
-                  <Link href="/admin/documents" className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
-                    {t('dashboard.manageDocuments')}
-                  </Link>
-                  <Link href="/admin/stats" className="px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-lg hover:from-orange-700 hover:to-red-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
-                    {t('dashboard.statistics')}
-                  </Link>
-                </>
+                <Link href="/admin/subadmins" className="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
+                  {t('dashboard.manageSubadmins')}
+                </Link>
               )}
             </div>
           </div>

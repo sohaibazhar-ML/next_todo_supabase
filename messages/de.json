@@ -101,7 +101,8 @@
     "manageProfile": "Profil verwalten",
     "downloadCenter": "Download-Center",
     "manageDocuments": "Dokumente verwalten",
-    "statistics": "Statistiken & Analysen"
+    "statistics": "Statistiken & Analysen",
+    "manageSubadmins": "Subadmins verwalten"
   },
   "profile": {
     "myProfile": "Mein Profil",
@@ -444,10 +445,8 @@
     "applying": "Wird angewendet...",
     "fromDate": "Von Datum",
     "toDate": "Bis Datum",
-    "searchByEmail": "Nach E-Mail suchen",
-    "emailPlaceholder": "Benutzer-E-Mail eingeben...",
-    "searchDocuments": "Dokumente suchen",
-    "documentPlaceholder": "Nach Titel, Beschreibung oder Dateiname suchen...",
+    "search": "Suchen",
+    "searchPlaceholder": "Benutzer, Dokumente, E-Mails, Namen suchen...",
     "category": "Kategorie",
     "allCategories": "Alle Kategorien",
     "tags": "Tags",
@@ -474,6 +473,32 @@
       "versions": "Versionen",
       "users": "Benutzer"
     }
+  },
+  "subadmin": {
+    "title": "Subadmin-Verwaltung",
+    "description": "Subadmin-Rollen und Berechtigungen verwalten",
+    "addSubadmin": "Subadmin hinzufügen",
+    "editSubadmin": "Subadmin bearbeiten",
+    "subadminsList": "Subadmin-Liste",
+    "noSubadmins": "Keine Subadmins gefunden",
+    "selectUser": "Benutzer auswählen",
+    "selectUserPlaceholder": "Wählen Sie einen Benutzer aus, um ihn zum Subadmin zu machen",
+    "canUploadDocuments": "Kann Dokumente hochladen",
+    "canViewStats": "Kann Statistiken anzeigen",
+    "isActive": "Aktiv",
+    "active": "Aktiv",
+    "inactive": "Inaktiv",
+    "create": "Erstellen",
+    "update": "Aktualisieren",
+    "edit": "Bearbeiten",
+    "remove": "Entfernen",
+    "cancel": "Abbrechen",
+    "activate": "Aktivieren",
+    "deactivate": "Deaktivieren",
+    "createdSuccessfully": "Subadmin erfolgreich erstellt",
+    "updatedSuccessfully": "Subadmin erfolgreich aktualisiert",
+    "removedSuccessfully": "Subadmin erfolgreich entfernt",
+    "confirmRemove": "Sind Sie sicher, dass Sie diesen Subadmin entfernen möchten? Er wird wieder zu einem normalen Benutzer."
   }
 }
 

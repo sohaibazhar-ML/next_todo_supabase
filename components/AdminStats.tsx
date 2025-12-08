@@ -58,8 +58,7 @@ export default function AdminStats() {
   // Filters
   const [fromDate, setFromDate] = useState('')
   const [toDate, setToDate] = useState('')
-  const [userEmail, setUserEmail] = useState('')
-  const [documentSearch, setDocumentSearch] = useState('')
+  const [search, setSearch] = useState('') // Unified search
   const [category, setCategory] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   
@@ -69,8 +68,7 @@ export default function AdminStats() {
   const fetchStats = useCallback(async (filters?: {
     fromDate?: string
     toDate?: string
-    userEmail?: string
-    documentSearch?: string
+    search?: string
     category?: string
     selectedTags?: string[]
   }) => {
@@ -81,16 +79,14 @@ export default function AdminStats() {
       // Use provided filters or current state
       const filterFromDate = filters?.fromDate !== undefined ? filters.fromDate : fromDate
       const filterToDate = filters?.toDate !== undefined ? filters.toDate : toDate
-      const filterUserEmail = filters?.userEmail !== undefined ? filters.userEmail : userEmail
-      const filterDocumentSearch = filters?.documentSearch !== undefined ? filters.documentSearch : documentSearch
+      const filterSearch = filters?.search !== undefined ? filters.search : search
       const filterCategory = filters?.category !== undefined ? filters.category : category
       const filterSelectedTags = filters?.selectedTags !== undefined ? filters.selectedTags : selectedTags
 
       const params = new URLSearchParams()
       if (filterFromDate) params.append('fromDate', filterFromDate)
       if (filterToDate) params.append('toDate', filterToDate)
-      if (filterUserEmail) params.append('userEmail', filterUserEmail)
-      if (filterDocumentSearch) params.append('documentSearch', filterDocumentSearch)
+      if (filterSearch) params.append('search', filterSearch)
       if (filterCategory) params.append('category', filterCategory)
       if (filterSelectedTags.length > 0) params.append('tags', filterSelectedTags.join(','))
 
@@ -108,7 +104,7 @@ export default function AdminStats() {
     } finally {
       setLoading(false)
     }
-  }, [fromDate, toDate, userEmail, documentSearch, category, selectedTags])
+  }, [fromDate, toDate, search, category, selectedTags])
 
   // Initial load
   useEffect(() => {
@@ -131,16 +127,14 @@ export default function AdminStats() {
   const clearFilters = () => {
     setFromDate('')
     setToDate('')
-    setUserEmail('')
-    setDocumentSearch('')
+    setSearch('')
     setCategory('')
     setSelectedTags([])
     // Apply cleared filters immediately
     fetchStats({
       fromDate: '',
       toDate: '',
-      userEmail: '',
-      documentSearch: '',
+      search: '',
       category: '',
       selectedTags: [],
     })
@@ -235,30 +229,16 @@ export default function AdminStats() {
             />
           </div>
           
-          {/* User Email Search */}
+          {/* Unified Search */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t('searchByEmail')}
+              {t('search')}
             </label>
             <input
               type="text"
-              value={userEmail}
-              onChange={(e) => setUserEmail(e.target.value)}
-              placeholder={t('emailPlaceholder')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900"
-            />
-          </div>
-          
-          {/* Document Search */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t('searchDocuments')}
-            </label>
-            <input
-              type="text"
-              value={documentSearch}
-              onChange={(e) => setDocumentSearch(e.target.value)}
-              placeholder={t('documentPlaceholder')}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t('searchPlaceholder')}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900"
             />
           </div>

@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
-import { isAdmin } from '@/lib/utils/roles'
+import { hasPermission } from '@/lib/utils/roles'
 
 // GET - Get admin statistics with filters
 export async function GET(request: Request) {
@@ -13,17 +13,16 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const admin = await isAdmin(user.id)
-    if (!admin) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    const canViewStats = await hasPermission(user.id, 'can_view_stats')
+    if (!canViewStats) {
+      return NextResponse.json({ error: 'Permission required: can_view_stats' }, { status: 403 })
     }
 
     // Parse query parameters
     const { searchParams } = new URL(request.url)
     const fromDate = searchParams.get('fromDate')
     const toDate = searchParams.get('toDate')
-    const userEmail = searchParams.get('userEmail')
-    const documentSearch = searchParams.get('documentSearch')
+    const search = searchParams.get('search') // Unified search query
     const category = searchParams.get('category')
     const tags = searchParams.get('tags')?.split(',').filter(Boolean) || []
 
@@ -43,11 +42,13 @@ export async function GET(request: Request) {
 
     // Build document filter
     const documentFilter: any = {}
-    if (documentSearch) {
+    if (search) {
       documentFilter.OR = [
-        { title: { contains: documentSearch, mode: 'insensitive' } },
-        { description: { contains: documentSearch, mode: 'insensitive' } },
-        { file_name: { contains: documentSearch, mode: 'insensitive' } },
+        { title: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+        { file_name: { contains: search, mode: 'insensitive' } },
+        { category: { contains: search, mode: 'insensitive' } },
+        { tags: { has: search } },
       ]
     }
     if (category) {
@@ -57,10 +58,15 @@ export async function GET(request: Request) {
       documentFilter.tags = { hasSome: tags }
     }
 
-    // Build user filter
+    // Build user filter - search across all user fields
     const userFilter: any = {}
-    if (userEmail) {
-      userFilter.email = { contains: userEmail, mode: 'insensitive' }
+    if (search) {
+      userFilter.OR = [
+        { email: { contains: search, mode: 'insensitive' } },
+        { first_name: { contains: search, mode: 'insensitive' } },
+        { last_name: { contains: search, mode: 'insensitive' } },
+        { username: { contains: search, mode: 'insensitive' } },
+      ]
     }
 
     // Get total users (with optional email filter)
@@ -81,16 +87,16 @@ export async function GET(request: Request) {
       where: documentFilter,
     })
 
-    // Get user IDs if email filter is set (needed before download logs query)
+    // Get user IDs if search filter is set (needed before download logs query)
     let filteredUserIdsForQueries: string[] | undefined = undefined
-    if (userEmail) {
+    if (search) {
       const filteredUsers = await prisma.profiles.findMany({
         where: userFilter,
         select: { id: true },
       })
       const foundUserIds = filteredUsers.map(u => u.id)
-      if (foundUserIds.length === 0) {
-        // No users match, return empty results early
+      if (foundUserIds.length === 0 && !documentFilter.OR) {
+        // No users or documents match, return empty results early
         return NextResponse.json({
           summary: {
             totalUsers: 0,
@@ -207,6 +213,21 @@ export async function GET(request: Request) {
       },
     })
 
+    // Get all users except admins (for user versions count)
+    const allNonAdminUsers = await prisma.profiles.findMany({
+      where: {
+        role: { not: 'admin' },
+        ...userFilter,
+      },
+      select: {
+        id: true,
+        email: true,
+        first_name: true,
+        last_name: true,
+        username: true,
+      },
+    })
+
     // Get users' edited versions count
     const userVersionsCount = await prisma.user_document_versions.groupBy({
       by: ['user_id'],
@@ -231,32 +252,22 @@ export async function GET(request: Request) {
       },
     })
 
-    // Get user profiles for version counts
-    const versionUserIds = userVersionsCount.map(uv => uv.user_id)
-    const userProfiles = await prisma.profiles.findMany({
-      where: {
-        id: { in: versionUserIds },
-        ...userFilter,
-      },
-      select: {
-        id: true,
-        email: true,
-        first_name: true,
-        last_name: true,
-        username: true,
-      },
-    })
+    // Create a map of user_id to version count
+    const versionsCountMap = new Map(
+      userVersionsCount.map(uv => [uv.user_id, uv._count.id])
+    )
 
-    const userVersionsWithProfiles = userVersionsCount.map(uv => {
-      const profile = userProfiles.find(p => p.id === uv.user_id)
+    // Combine all non-admin users with their version counts (including zero)
+    const userVersionsWithProfiles = allNonAdminUsers.map(profile => {
+      const versions_count = versionsCountMap.get(profile.id) || 0
       return {
-        user_id: uv.user_id,
-        email: profile?.email || 'Unknown',
-        name: profile ? `${profile.first_name} ${profile.last_name}` : 'Unknown',
-        username: profile?.username || 'Unknown',
-        versions_count: uv._count.id,
+        user_id: profile.id,
+        email: profile.email,
+        name: `${profile.first_name} ${profile.last_name}`,
+        username: profile.username,
+        versions_count: versions_count,
       }
-    }).filter(uv => uv.email !== 'Unknown' || !userEmail) // Filter out unknown if email filter is set
+    })
 
     // Get which user downloaded what documents
     const userDocumentDownloads = await prisma.download_logs.findMany({
@@ -314,7 +325,7 @@ export async function GET(request: Request) {
         document_category: download.documents.category,
         downloaded_at: download.downloaded_at,
       }
-    }).filter(d => d.user_email !== 'Unknown' || !userEmail)
+    }).filter(d => d.user_email !== 'Unknown' || !search)
 
     // Get unique categories and tags for filter options
     const categories = await prisma.documents.findMany({

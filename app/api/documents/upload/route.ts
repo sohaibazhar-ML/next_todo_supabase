@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
-import { isAdmin } from '@/lib/utils/roles'
+import { hasPermission } from '@/lib/utils/roles'
 
 function getFileType(fileName: string): string {
   const ext = fileName.split('.').pop()?.toLowerCase()
@@ -21,9 +21,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const admin = await isAdmin(user.id)
-    if (!admin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
+    const canUpload = await hasPermission(user.id, 'can_upload_documents')
+    if (!canUpload) {
+      return NextResponse.json({ error: 'Permission required: can_upload_documents' }, { status: 403 })
     }
 
     const formData = await request.formData()

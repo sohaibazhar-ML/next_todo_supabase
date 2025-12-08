@@ -101,7 +101,8 @@
     "manageProfile": "Manage Profile",
     "downloadCenter": "Download Center",
     "manageDocuments": "Manage Documents",
-    "statistics": "Statistics & Analytics"
+    "statistics": "Statistics & Analytics",
+    "manageSubadmins": "Manage Subadmins"
   },
   "profile": {
     "myProfile": "My Profile",
@@ -444,10 +445,8 @@
     "applying": "Applying...",
     "fromDate": "From Date",
     "toDate": "To Date",
-    "searchByEmail": "Search by Email",
-    "emailPlaceholder": "Enter user email...",
-    "searchDocuments": "Search Documents",
-    "documentPlaceholder": "Search by title, description, or filename...",
+    "search": "Search",
+    "searchPlaceholder": "Search users, documents, emails, names...",
     "category": "Category",
     "allCategories": "All Categories",
     "tags": "Tags",
@@ -474,6 +473,32 @@
       "versions": "Versions",
       "users": "Users"
     }
+  },
+  "subadmin": {
+    "title": "Subadmin Management",
+    "description": "Manage subadmin roles and permissions",
+    "addSubadmin": "Add Subadmin",
+    "editSubadmin": "Edit Subadmin",
+    "subadminsList": "Subadmins List",
+    "noSubadmins": "No subadmins found",
+    "selectUser": "Select User",
+    "selectUserPlaceholder": "Choose a user to make subadmin",
+    "canUploadDocuments": "Can Upload Documents",
+    "canViewStats": "Can View Stats",
+    "isActive": "Active",
+    "active": "Active",
+    "inactive": "Inactive",
+    "create": "Create",
+    "update": "Update",
+    "edit": "Edit",
+    "remove": "Remove",
+    "cancel": "Cancel",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "createdSuccessfully": "Subadmin created successfully",
+    "updatedSuccessfully": "Subadmin updated successfully",
+    "removedSuccessfully": "Subadmin removed successfully",
+    "confirmRemove": "Are you sure you want to remove this subadmin? They will be converted back to a regular user."
   }
 }
 

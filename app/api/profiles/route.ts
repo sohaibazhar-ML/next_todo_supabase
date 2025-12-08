@@ -243,9 +243,28 @@ export async function PUT(request: Request) {
       updated_at: new Date(),
     }
 
-    // Only admins can update role
+    // Only admins can update role, and prevent changing to/from subadmin via this endpoint
+    // Subadmin role changes should go through /api/admin/subadmins
     if (admin && body.role !== undefined) {
+      const currentRole = existing.role
+      const newRole = body.role
+      
+      // Prevent changing to/from subadmin via profile update
+      // Subadmin assignment must go through dedicated subadmin API
+      if ((currentRole === 'subadmin' || newRole === 'subadmin') && currentRole !== newRole) {
+        return NextResponse.json(
+          { error: 'Cannot change role to/from subadmin. Use /api/admin/subadmins endpoint.' },
+          { status: 400 }
+        )
+      }
+      
       updateData.role = body.role
+    } else if (!admin && body.role !== undefined) {
+      // Non-admins cannot change roles at all
+      return NextResponse.json(
+        { error: 'Only admins can change user roles' },
+        { status: 403 }
+      )
     }
 
     const profile = await prisma.profiles.update({

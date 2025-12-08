@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { isAdmin } from '@/lib/utils/roles'
+import { hasPermission } from '@/lib/utils/roles'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
@@ -16,8 +16,8 @@ export default async function AdminStatsPage() {
     redirect('/login')
   }
 
-  const admin = await isAdmin(user.id)
-  if (!admin) {
+  const canViewStats = await hasPermission(user.id, 'can_view_stats')
+  if (!canViewStats) {
     redirect('/dashboard')
   }
 

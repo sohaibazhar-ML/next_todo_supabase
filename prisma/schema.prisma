@@ -4,6 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url       = env("DATABASE_URL")
   schemas  = ["public"]
 }
 
@@ -94,6 +95,8 @@ model profiles {
   // Note: id references auth.users.id, but we don't include auth schema in Prisma
   // Use Supabase client for auth operations
 
+  subadmin_permissions subadmin_permissions?
+
   @@index([email], map: "idx_profiles_email")
   @@index([role], map: "idx_profiles_role")
   @@index([role, created_at(sort: Desc)], map: "idx_profiles_role_created")
@@ -135,5 +138,21 @@ model user_document_versions {
   @@index([user_id])
   @@index([original_document_id, user_id])
   @@index([user_id, created_at(sort: Desc)])
+  @@schema("public")
+}
+
+/// Subadmin permissions for granular access control
+model subadmin_permissions {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id              String    @unique @db.Uuid
+  can_upload_documents Boolean   @default(false)
+  can_view_stats       Boolean   @default(false)
+  is_active            Boolean   @default(true)
+  created_at           DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime  @default(now()) @db.Timestamptz(6)
+  profiles             profiles  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([is_active])
   @@schema("public")
 }

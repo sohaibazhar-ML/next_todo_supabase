@@ -1,4 +1,4 @@
-export type UserRole = 'user' | 'admin'
+export type UserRole = 'user' | 'admin' | 'subadmin'
 
 export interface UserProfile {
   id: string
@@ -47,5 +47,11 @@ export interface SignUpFormData {
   marketingConsent: boolean
   termsAccepted: boolean
   dataPrivacyAccepted: boolean
+}
+
+export interface SubadminPermissions {
+  can_upload_documents: boolean
+  can_view_stats: boolean
+  is_active: boolean
 }
 

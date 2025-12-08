@@ -101,7 +101,8 @@
     "manageProfile": "Gérer le profil",
     "downloadCenter": "Centre de téléchargement",
     "manageDocuments": "Gérer les documents",
-    "statistics": "Statistiques et Analyses"
+    "statistics": "Statistiques et Analyses",
+    "manageSubadmins": "Gérer les sous-administrateurs"
   },
   "profile": {
     "myProfile": "Mon profil",
@@ -444,10 +445,8 @@
     "applying": "Application en cours...",
     "fromDate": "Date de début",
     "toDate": "Date de fin",
-    "searchByEmail": "Rechercher par e-mail",
-    "emailPlaceholder": "Entrer l'e-mail de l'utilisateur...",
-    "searchDocuments": "Rechercher des documents",
-    "documentPlaceholder": "Rechercher par titre, description ou nom de fichier...",
+    "search": "Rechercher",
+    "searchPlaceholder": "Rechercher utilisateurs, documents, e-mails, noms...",
     "category": "Catégorie",
     "allCategories": "Toutes les catégories",
     "tags": "Tags",
@@ -474,6 +473,32 @@
       "versions": "Versions",
       "users": "Utilisateurs"
     }
+  },
+  "subadmin": {
+    "title": "Gestion des sous-administrateurs",
+    "description": "Gérer les rôles et permissions des sous-administrateurs",
+    "addSubadmin": "Ajouter un sous-administrateur",
+    "editSubadmin": "Modifier le sous-administrateur",
+    "subadminsList": "Liste des sous-administrateurs",
+    "noSubadmins": "Aucun sous-administrateur trouvé",
+    "selectUser": "Sélectionner un utilisateur",
+    "selectUserPlaceholder": "Choisissez un utilisateur à promouvoir sous-administrateur",
+    "canUploadDocuments": "Peut télécharger des documents",
+    "canViewStats": "Peut voir les statistiques",
+    "isActive": "Actif",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "create": "Créer",
+    "update": "Mettre à jour",
+    "edit": "Modifier",
+    "remove": "Supprimer",
+    "cancel": "Annuler",
+    "activate": "Activer",
+    "deactivate": "Désactiver",
+    "createdSuccessfully": "Sous-administrateur créé avec succès",
+    "updatedSuccessfully": "Sous-administrateur mis à jour avec succès",
+    "removedSuccessfully": "Sous-administrateur supprimé avec succès",
+    "confirmRemove": "Êtes-vous sûr de vouloir supprimer ce sous-administrateur ? Il redeviendra un utilisateur régulier."
   }
 }
 
