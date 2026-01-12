@@ -221,7 +221,13 @@
     "passwordUpdated": "Password updated successfully!",
     "passwordsDoNotMatch": "New passwords do not match",
     "passwordMinLength": "Password must be at least 6 characters",
-    "usernameExists": "Username already exists. Please choose another."
+    "usernameExists": "Username already exists. Please choose another.",
+    "sessionSettings": "Session Settings",
+    "keepMeLoggedIn": "Keep me logged in",
+    "keepMeLoggedInDescription": "When enabled, you'll stay logged in for 30 days. When disabled, you'll be logged out when you close your browser.",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "preferenceTakesEffectOnNextLogin": "Note: This preference will take effect the next time you log in."
   },
   "userList": {
     "allUsers": "All Users",

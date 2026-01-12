@@ -221,7 +221,13 @@
     "passwordUpdated": "Password aggiornata con successo!",
     "passwordsDoNotMatch": "Le nuove password non corrispondono",
     "passwordMinLength": "La password deve contenere almeno 6 caratteri",
-    "usernameExists": "Questo nome utente esiste già. Scegline un altro."
+    "usernameExists": "Questo nome utente esiste già. Scegline un altro.",
+    "sessionSettings": "Impostazioni sessione",
+    "keepMeLoggedIn": "Mantieni l'accesso",
+    "keepMeLoggedInDescription": "Quando abilitato, rimarrai connesso per 30 giorni. Quando disabilitato, verrai disconnesso quando chiudi il browser.",
+    "enabled": "Abilitato",
+    "disabled": "Disabilitato",
+    "preferenceTakesEffectOnNextLogin": "Nota: Questa preferenza avrà effetto al prossimo accesso."
   },
   "userList": {
     "allUsers": "Tutti gli utenti",

@@ -77,6 +77,14 @@ export default function LoginPage() {
         router.refresh()
         return
       }
+      
+      // Check user preference and set cookie for middleware
+      const profile = await response.json()
+      const keepMeLoggedIn = profile.keep_me_logged_in ?? true
+      
+      // Set preference cookie that middleware can read (as string)
+      // This will be used to adjust cookie expiry
+      document.cookie = `keep_me_logged_in=${String(keepMeLoggedIn)}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`
     }
 
     router.push('/dashboard')

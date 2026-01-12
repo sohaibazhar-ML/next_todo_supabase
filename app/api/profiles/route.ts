@@ -162,6 +162,7 @@ export async function POST(request: Request) {
         data_privacy_accepted: body.data_privacy_accepted || false,
         email_confirmed: body.email_confirmed ?? false,
         email_confirmed_at: body.email_confirmed_at ? new Date(body.email_confirmed_at) : null,
+        keep_me_logged_in: body.keep_me_logged_in ?? true,
         role: body.role || 'user',
       }
     })
@@ -240,6 +241,7 @@ export async function PUT(request: Request) {
       number_of_children: body.number_of_children,
       pets_type: body.pets_type,
       marketing_consent: body.marketing_consent,
+      keep_me_logged_in: body.keep_me_logged_in !== undefined ? body.keep_me_logged_in : existing.keep_me_logged_in,
       updated_at: new Date(),
     }
 

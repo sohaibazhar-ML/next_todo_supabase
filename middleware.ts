@@ -97,6 +97,72 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // Check user preference for session persistence from cookie (set during login)
+  // This avoids Prisma usage in Edge runtime
+  // Default to true (keep logged in) if cookie doesn't exist
+  const keepMeLoggedInCookie = request.cookies.get('keep_me_logged_in')
+  const keepMeLoggedIn = keepMeLoggedInCookie?.value !== 'false' // Defaults to true if cookie missing or value is 'true'
+  
+  // If user doesn't want persistent sessions, modify auth cookies to be session-only
+  if (!keepMeLoggedIn) {
+    try {
+      // Get all Supabase auth cookies from the response
+      const authCookieNames = ['sb-access-token', 'sb-refresh-token']
+      
+      // Create a new response based on the existing one
+      const modifiedResponse = NextResponse.next({
+        request: {
+          headers: request.headers,
+        },
+      })
+      
+      // Copy all existing cookies first
+      supabaseResponse.cookies.getAll().forEach((cookie) => {
+        modifiedResponse.cookies.set(cookie.name, cookie.value, {
+          ...cookie,
+          // Preserve original options
+        })
+      })
+      
+      // Modify each auth cookie to be session-only (no maxAge)
+      authCookieNames.forEach(cookieName => {
+        const cookie = modifiedResponse.cookies.get(cookieName)
+        if (cookie) {
+          modifiedResponse.cookies.set(cookieName, cookie.value, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            path: '/',
+            // No maxAge = session cookie (expires when browser closes)
+          })
+        }
+      })
+      
+      // Also check for any cookies with 'sb-' prefix
+      modifiedResponse.cookies.getAll().forEach((cookie) => {
+        if (cookie.name.startsWith('sb-') || cookie.name.includes('supabase')) {
+          modifiedResponse.cookies.set(cookie.name, cookie.value, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            path: '/',
+            // No maxAge = session cookie
+          })
+        }
+      })
+      
+      // Copy headers and status from original response
+      supabaseResponse.headers.forEach((value, key) => {
+        modifiedResponse.headers.set(key, value)
+      })
+      
+      return modifiedResponse
+    } catch (err) {
+      // If error modifying cookies, just return original response
+      console.error('Error modifying session cookies:', err)
+    }
+  }
+
   return supabaseResponse
 }
 

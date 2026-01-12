@@ -221,7 +221,13 @@
     "passwordUpdated": "Mot de passe mis à jour avec succès!",
     "passwordsDoNotMatch": "Les nouveaux mots de passe ne correspondent pas",
     "passwordMinLength": "Le mot de passe doit contenir au moins 6 caractères",
-    "usernameExists": "Ce nom d'utilisateur existe déjà. Veuillez en choisir un autre."
+    "usernameExists": "Ce nom d'utilisateur existe déjà. Veuillez en choisir un autre.",
+    "sessionSettings": "Paramètres de session",
+    "keepMeLoggedIn": "Rester connecté",
+    "keepMeLoggedInDescription": "Lorsqu'il est activé, vous resterez connecté pendant 30 jours. Lorsqu'il est désactivé, vous serez déconnecté lorsque vous fermerez le navigateur.",
+    "enabled": "Activé",
+    "disabled": "Désactivé",
+    "preferenceTakesEffectOnNextLogin": "Remarque: Cette préférence prendra effet lors de votre prochaine connexion."
   },
   "userList": {
     "allUsers": "Tous les utilisateurs",

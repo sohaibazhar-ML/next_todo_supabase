@@ -18,6 +18,7 @@ export interface UserProfile {
   data_privacy_accepted: boolean
   email_confirmed: boolean
   email_confirmed_at: string | null
+  keep_me_logged_in: boolean
   role: UserRole
   created_at: string
   updated_at: string

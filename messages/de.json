@@ -221,7 +221,13 @@
     "passwordUpdated": "Passwort erfolgreich aktualisiert!",
     "passwordsDoNotMatch": "Neue Passwörter stimmen nicht überein",
     "passwordMinLength": "Passwort muss mindestens 6 Zeichen haben",
-    "usernameExists": "Benutzername existiert bereits. Bitte wählen Sie einen anderen."
+    "usernameExists": "Benutzername existiert bereits. Bitte wählen Sie einen anderen.",
+    "sessionSettings": "Sitzungseinstellungen",
+    "keepMeLoggedIn": "Angemeldet bleiben",
+    "keepMeLoggedInDescription": "Wenn aktiviert, bleiben Sie 30 Tage lang angemeldet. Wenn deaktiviert, werden Sie beim Schließen des Browsers abgemeldet.",
+    "enabled": "Aktiviert",
+    "disabled": "Deaktiviert",
+    "preferenceTakesEffectOnNextLogin": "Hinweis: Diese Einstellung wird beim nächsten Anmelden wirksam."
   },
   "userList": {
     "allUsers": "Alle Benutzer",

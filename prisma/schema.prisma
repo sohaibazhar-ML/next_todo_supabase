@@ -5,6 +5,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
   schemas  = ["public"]
 }
 
@@ -89,6 +90,7 @@ model profiles {
   data_privacy_accepted   Boolean   @default(false)
   email_confirmed         Boolean   @default(false)
   email_confirmed_at      DateTime? @db.Timestamptz(6)
+  keep_me_logged_in       Boolean   @default(true)
   role                    String    @default("user")
   created_at              DateTime  @default(now()) @db.Timestamptz(6)
   updated_at              DateTime  @default(now()) @db.Timestamptz(6)

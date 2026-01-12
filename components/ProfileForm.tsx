@@ -46,6 +46,7 @@ export default function ProfileForm({
       data_privacy_accepted: false,
       email_confirmed: true,
       email_confirmed_at: new Date().toISOString(),
+      keep_me_logged_in: true,
       role: 'user',
     }
   )
@@ -124,6 +125,7 @@ export default function ProfileForm({
           data_privacy_accepted: profile.data_privacy_accepted || false,
           email_confirmed: true,
           email_confirmed_at: new Date().toISOString(),
+          keep_me_logged_in: profile.keep_me_logged_in ?? true,
           role: 'user',
         })
       })
@@ -157,6 +159,7 @@ export default function ProfileForm({
           number_of_children: profile.number_of_children,
           pets_type: profile.pets_type,
           marketing_consent: profile.marketing_consent,
+          keep_me_logged_in: profile.keep_me_logged_in ?? true,
         })
       })
 
@@ -317,6 +320,26 @@ export default function ProfileForm({
               )}
             </p>
           </div>
+
+          <div className="border-t pt-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('sessionSettings')}</h3>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-700">{t('keepMeLoggedIn')}</p>
+                <p className="text-xs text-gray-500 mt-1">{t('keepMeLoggedInDescription')}</p>
+              </div>
+              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                profile.keep_me_logged_in ?? true
+                  ? 'bg-green-100 text-green-800' 
+                  : 'bg-gray-100 text-gray-800'
+              }`}>
+                {profile.keep_me_logged_in ?? true ? t('enabled') : t('disabled')}
+              </span>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              {t('preferenceTakesEffectOnNextLogin')}
+            </p>
+          </div>
         </div>
       ) : (
         <form onSubmit={handleProfileUpdate} className="space-y-6">
@@ -416,6 +439,29 @@ export default function ProfileForm({
                 className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500" />
               <label className="ml-2 text-sm text-gray-700">{t('marketingConsentLabel')}</label>
             </div>
+          </div>
+
+          <div className="border-t pt-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('sessionSettings')}</h3>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-700">{t('keepMeLoggedIn')}</p>
+                <p className="text-xs text-gray-500 mt-1">{t('keepMeLoggedInDescription')}</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="keep_me_logged_in"
+                  checked={profile.keep_me_logged_in ?? true}
+                  onChange={handleInputChange}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+              </label>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              {t('preferenceTakesEffectOnNextLogin')}
+            </p>
           </div>
 
           {isCreating && (
