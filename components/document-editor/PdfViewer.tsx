@@ -7,9 +7,11 @@
 
 import { useTranslations } from 'next-intl'
 import { Document as PDFDocument, Page as PDFPage, pdfjs } from 'react-pdf'
+import { CONSOLE_MESSAGES } from '@/constants/documentEditor'
+import type { PDFAnnotation } from '@/types/documentEditor'
 import PdfToolbar from './PdfToolbar'
 import PdfControls from './PdfControls'
-import PdfAnnotationOverlay, { PDFAnnotation } from './PdfAnnotationOverlay'
+import PdfAnnotationOverlay from './PdfAnnotationOverlay'
 import LoadingSpinner from '../ui/LoadingSpinner'
 
 interface PdfViewerProps {
@@ -123,7 +125,7 @@ export default function PdfViewer({
                   onNumPagesChange(numPages)
                 }}
                 onLoadError={(error) => {
-                  console.error('PDF load error:', error)
+                  console.error(CONSOLE_MESSAGES.PDF_LOAD_ERROR, error)
                 }}
                 error={
                   <div className="p-8 text-center">

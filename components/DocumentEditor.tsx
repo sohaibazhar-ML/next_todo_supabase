@@ -17,22 +17,13 @@ import DocxEditor from './document-editor/DocxEditor'
 import PdfViewer from './document-editor/PdfViewer'
 import ErrorMessage from './ui/ErrorMessage'
 import LoadingSpinner from './ui/LoadingSpinner'
-import { PDFAnnotation } from './document-editor/PdfAnnotationOverlay'
+import type { PDFAnnotation, UserVersion, DocumentType } from '@/types/documentEditor'
+import { API_ENDPOINTS, CONTENT_TYPES, DEFAULT_VALUES, ERROR_MESSAGES, CONSOLE_MESSAGES, DOCUMENT_TYPES } from '@/constants/documentEditor'
+import { isErrorWithMessage, isTextItem } from '@/types/documentEditor'
 
 interface DocumentEditorProps {
   document: Document
   onClose?: () => void
-}
-
-interface UserVersion {
-  id: string
-  version_number: number
-  version_name: string | null
-  html_content: string | null
-  pdf_text_content: string | null
-  pdf_annotations: any
-  created_at: string
-  is_draft: boolean
 }
 
 export default function DocumentEditor({ document, onClose }: DocumentEditorProps) {
@@ -42,7 +33,7 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
   const [exporting, setExporting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [content, setContent] = useState<string>('')
-  const [documentType, setDocumentType] = useState<'docx' | 'pdf' | null>(null)
+  const [documentType, setDocumentType] = useState<DocumentType>(null)
   const [versions, setVersions] = useState<UserVersion[]>([])
   const [versionName, setVersionName] = useState('')
   const [showVersions, setShowVersions] = useState(false)
@@ -52,7 +43,7 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
   const [pdfUrl, setPdfUrl] = useState<string | null>(null)
   const [numPages, setNumPages] = useState<number | null>(null)
   const [pageNumber, setPageNumber] = useState(1)
-  const [scale, setScale] = useState(1.0)
+  const [scale, setScale] = useState<number>(DEFAULT_VALUES.PDF_SCALE)
   const [pdfLoading, setPdfLoading] = useState(false)
   const [workerReady, setWorkerReady] = useState(false)
   
@@ -136,24 +127,24 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
       setLoading(true)
       setError(null)
 
-      const response = await fetch(`/api/documents/${document.id}/convert`)
+      const response = await fetch(API_ENDPOINTS.DOCUMENT_CONVERT(document.id))
       
       const contentType = response.headers.get('content-type')
-      if (!contentType || !contentType.includes('application/json')) {
+      if (!contentType || !contentType.includes(CONTENT_TYPES.JSON)) {
         const text = await response.text()
-        console.error('Non-JSON response:', text.substring(0, 200))
-        throw new Error('Server returned an invalid response. Please try again.')
+        console.error(CONSOLE_MESSAGES.NON_JSON_RESPONSE, text.substring(0, DEFAULT_VALUES.TEXT_PREVIEW_LENGTH))
+        throw new Error(ERROR_MESSAGES.INVALID_RESPONSE)
       }
       
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to load document')
+        throw new Error(data.error || ERROR_MESSAGES.LOAD_DOCUMENT)
       }
 
       setDocumentType(data.type)
 
-      if (data.type === 'docx') {
+      if (data.type === DOCUMENT_TYPES.DOCX) {
         const htmlContent = data.content || ''
         if (editor) {
           isSettingContentRef.current = true
@@ -161,29 +152,30 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
           setTimeout(() => {
             isSettingContentRef.current = false
             setContent(htmlContent)
-          }, 0)
+          }, DEFAULT_VALUES.CONTENT_TIMEOUT)
         } else {
           setContent(htmlContent)
         }
-      } else if (data.type === 'pdf') {
+      } else if (data.type === DOCUMENT_TYPES.PDF) {
         setPdfUrl(data.pdfUrl || null)
         setNumPages(data.pageCount || null)
         setContent(data.content || '')
-        setPageNumber(1)
-        setScale(1.0)
+        setPageNumber(DEFAULT_VALUES.PDF_PAGE_NUMBER)
+        setScale(DEFAULT_VALUES.PDF_SCALE)
         if (versions.length > 0 && versions[0].pdf_annotations) {
           try {
             const loadedAnnotations = Array.isArray(versions[0].pdf_annotations) 
               ? versions[0].pdf_annotations 
               : []
-            setAnnotations(loadedAnnotations as PDFAnnotation[])
+            setAnnotations(loadedAnnotations)
           } catch (err) {
-            console.error('Error loading annotations:', err)
+            console.error(CONSOLE_MESSAGES.ERROR_LOADING_ANNOTATIONS, err)
           }
         }
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load document')
+    } catch (err) {
+      const errorMessage = isErrorWithMessage(err) ? err.message : ERROR_MESSAGES.LOAD_DOCUMENT
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -191,37 +183,37 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
 
   const loadVersions = async () => {
     try {
-      const response = await fetch(`/api/documents/${document.id}/edit`)
+      const response = await fetch(API_ENDPOINTS.DOCUMENT_EDIT(document.id))
       if (response.ok) {
         const data = await response.json()
         setVersions(data)
         // Load annotations from latest version if it's a PDF
-        if (documentType === 'pdf' && data.length > 0 && data[0].pdf_annotations) {
+        if (documentType === DOCUMENT_TYPES.PDF && data.length > 0 && data[0].pdf_annotations) {
           try {
             const loadedAnnotations = Array.isArray(data[0].pdf_annotations) 
               ? data[0].pdf_annotations 
               : []
-            setAnnotations(loadedAnnotations as PDFAnnotation[])
+            setAnnotations(loadedAnnotations)
           } catch (err) {
-            console.error('Error loading annotations:', err)
+            console.error(CONSOLE_MESSAGES.ERROR_LOADING_ANNOTATIONS, err)
           }
         }
       }
     } catch (err) {
-      console.error('Error loading versions:', err)
+      console.error(CONSOLE_MESSAGES.ERROR_LOADING_VERSIONS, err)
     }
   }
 
   // Initialize editor content only once when editor is ready
   useEffect(() => {
-    if (editor && documentType === 'docx' && content && !loading) {
+    if (editor && documentType === DOCUMENT_TYPES.DOCX && content && !loading) {
       const currentContent = editor.getHTML()
       if (currentContent === '<p></p>' || currentContent === '') {
         isSettingContentRef.current = true
         editor.commands.setContent(content)
         setTimeout(() => {
           isSettingContentRef.current = false
-        }, 0)
+        }, DEFAULT_VALUES.CONTENT_TIMEOUT)
       }
     }
   }, [editor, documentType, loading])
@@ -235,16 +227,16 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
       let pdfTextContent: string | null = null
       let pdfAnnotations: PDFAnnotation[] | null = null
 
-      if (documentType === 'docx') {
+      if (documentType === DOCUMENT_TYPES.DOCX) {
         htmlContent = editor?.getHTML() || content
-      } else if (documentType === 'pdf') {
+      } else if (documentType === DOCUMENT_TYPES.PDF) {
         pdfTextContent = content
         pdfAnnotations = annotations.length > 0 ? annotations : null
       }
 
-      const response = await fetch(`/api/documents/${document.id}/edit`, {
+      const response = await fetch(API_ENDPOINTS.DOCUMENT_EDIT(document.id), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': CONTENT_TYPES.JSON },
         body: JSON.stringify({
           html_content: htmlContent,
           pdf_text_content: pdfTextContent,
@@ -256,14 +248,15 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to save document')
+        throw new Error(data.error || ERROR_MESSAGES.LOAD_DOCUMENT)
       }
 
       await loadVersions()
       setVersionName('')
       alert(t('savedSuccessfully'))
-    } catch (err: any) {
-      setError(err.message || 'Failed to save document')
+    } catch (err) {
+      const errorMessage = isErrorWithMessage(err) ? err.message : ERROR_MESSAGES.LOAD_DOCUMENT
+      setError(errorMessage)
     } finally {
       setSaving(false)
     }
@@ -280,9 +273,9 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
         throw new Error(t('noVersionToExport') || 'Please save your document first before exporting')
       }
 
-      const response = await fetch(`/api/documents/${document.id}/export`, {
+      const response = await fetch(API_ENDPOINTS.DOCUMENT_EXPORT(document.id), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': CONTENT_TYPES.JSON },
         body: JSON.stringify({
           version_id: latestVersion.id,
           export_format: format,
@@ -292,12 +285,13 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to export document')
+        throw new Error(data.error || ERROR_MESSAGES.EXPORT_DOCUMENT)
       }
 
       window.open(data.signedUrl, '_blank')
-    } catch (err: any) {
-      setError(err.message || 'Failed to export document')
+    } catch (err) {
+      const errorMessage = isErrorWithMessage(err) ? err.message : ERROR_MESSAGES.EXPORT_DOCUMENT
+      setError(errorMessage)
     } finally {
       setExporting(false)
     }
@@ -308,7 +302,7 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
       setLoading(true)
       setError(null)
 
-      if (documentType === 'docx' && version.html_content) {
+      if (documentType === DOCUMENT_TYPES.DOCX && version.html_content) {
         const htmlContent = version.html_content
         if (editor) {
           isSettingContentRef.current = true
@@ -316,20 +310,20 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
           setTimeout(() => {
             isSettingContentRef.current = false
             setContent(htmlContent)
-          }, 0)
+          }, DEFAULT_VALUES.CONTENT_TIMEOUT)
         } else {
           setContent(htmlContent)
         }
-      } else if (documentType === 'pdf' && version.pdf_text_content) {
+      } else if (documentType === DOCUMENT_TYPES.PDF && version.pdf_text_content) {
         setContent(version.pdf_text_content)
         if (version.pdf_annotations) {
           try {
             const loadedAnnotations = Array.isArray(version.pdf_annotations) 
               ? version.pdf_annotations 
               : []
-            setAnnotations(loadedAnnotations as PDFAnnotation[])
+            setAnnotations(loadedAnnotations)
           } catch (err) {
-            console.error('Error loading annotations:', err)
+            console.error(CONSOLE_MESSAGES.ERROR_LOADING_ANNOTATIONS, err)
             setAnnotations([])
           }
         } else {
@@ -338,8 +332,9 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
       }
 
       setShowVersions(false)
-    } catch (err: any) {
-      setError(err.message || 'Failed to load version')
+    } catch (err) {
+      const errorMessage = isErrorWithMessage(err) ? err.message : ERROR_MESSAGES.LOAD_VERSION
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -358,7 +353,7 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
       for (let i = 1; i <= (numPages || 1); i++) {
         const page = await pdf.getPage(i)
         const textContent = await page.getTextContent()
-        const pageText = textContent.items.map((item: any) => item.str).join(' ')
+        const pageText = textContent.items.filter(isTextItem).map((item) => item.str).join(' ')
         
         if (pageText.toLowerCase().includes(searchQuery.toLowerCase())) {
           results.push({ page: i, text: pageText })
@@ -371,8 +366,8 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
         setPageNumber(results[0].page)
       }
     } catch (err) {
-      console.error('Search error:', err)
-      setError('Failed to search PDF')
+      console.error(CONSOLE_MESSAGES.SEARCH_ERROR, err)
+      setError(ERROR_MESSAGES.SEARCH_FAILED)
     } finally {
       setPdfLoading(false)
     }
@@ -438,7 +433,7 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
       const pdf = await loadingTask.promise
       const page = await pdf.getPage(pageNumber)
       const textContent = await page.getTextContent()
-      const pageText = textContent.items.map((item: any) => item.str).join(' ')
+      const pageText = textContent.items.filter(isTextItem).map((item) => item.str).join(' ')
       setContent(prev => prev ? `${prev}\n\n--- Page ${pageNumber} ---\n${pageText}` : `--- Page ${pageNumber} ---\n${pageText}`)
     } catch (err) {
       console.error('Error extracting text:', err)
@@ -513,11 +508,11 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
       )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {documentType === 'docx' && editor && (
+        {documentType === DOCUMENT_TYPES.DOCX && editor && (
           <DocxEditor editor={editor} />
         )}
 
-        {documentType === 'pdf' && (
+        {documentType === DOCUMENT_TYPES.PDF && (
           <PdfViewer
             pdfUrl={pdfUrl}
             numPages={numPages}

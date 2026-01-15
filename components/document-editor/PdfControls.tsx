@@ -6,6 +6,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
+import { DEFAULT_VALUES } from '@/constants/documentEditor'
 
 interface PdfControlsProps {
   pageNumber: number
@@ -103,7 +104,7 @@ export default function PdfControls({
             +
           </button>
           <button
-            onClick={() => onScaleChange(1.0)}
+            onClick={() => onScaleChange(DEFAULT_VALUES.PDF_SCALE)}
             className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
             title="Reset Zoom"
           >

@@ -6,20 +6,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-
-export interface PDFAnnotation {
-  id: string
-  page: number
-  type: 'highlight' | 'text' | 'drawing' | 'sticky'
-  x: number
-  y: number
-  width?: number
-  height?: number
-  text?: string
-  color?: string
-  points?: Array<{ x: number; y: number }>
-  createdAt: string
-}
+import type { PDFAnnotation } from '@/types/documentEditor'
 
 interface PdfAnnotationOverlayProps {
   annotations: PDFAnnotation[]

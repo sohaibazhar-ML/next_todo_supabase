@@ -6,17 +6,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-
-interface UserVersion {
-  id: string
-  version_number: number
-  version_name: string | null
-  html_content: string | null
-  pdf_text_content: string | null
-  pdf_annotations: any
-  created_at: string
-  is_draft: boolean
-}
+import type { UserVersion } from '@/types/documentEditor'
 
 interface VersionManagerProps {
   versions: UserVersion[]

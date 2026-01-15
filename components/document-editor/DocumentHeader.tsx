@@ -7,6 +7,10 @@
 
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { DOCUMENT_TYPES } from '@/constants/documentEditor'
+import type { DocumentType, UserVersion } from '@/types/documentEditor'
+
+import type { DocumentType, UserVersion } from '@/types/documentEditor'
 
 interface DocumentHeaderProps {
   document: {
@@ -14,8 +18,8 @@ interface DocumentHeaderProps {
     title: string
     file_type: string
   }
-  documentType: 'docx' | 'pdf' | null
-  versions: any[]
+  documentType: DocumentType
+  versions: UserVersion[]
   showVersions: boolean
   onToggleVersions: () => void
   onExport: (format: 'docx' | 'pdf') => void
@@ -72,7 +76,7 @@ export default function DocumentHeader({
                 {t('myVersions')} ({versions.length})
               </button>
             )}
-            {documentType === 'docx' && (
+            {documentType === DOCUMENT_TYPES.DOCX && (
               <button
                 onClick={() => onExport('docx')}
                 disabled={exporting || versions.length === 0}
@@ -82,7 +86,7 @@ export default function DocumentHeader({
                 {exporting ? t('exporting') : t('exportDocx')}
               </button>
             )}
-            {documentType === 'pdf' && (
+            {documentType === DOCUMENT_TYPES.PDF && (
               <button
                 onClick={() => onExport('pdf')}
                 disabled={exporting || versions.length === 0}

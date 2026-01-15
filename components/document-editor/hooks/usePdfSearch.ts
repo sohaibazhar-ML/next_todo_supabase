@@ -4,11 +4,9 @@
 
 import { useState } from 'react'
 import { pdfjs } from 'react-pdf'
-
-interface SearchResult {
-  page: number
-  text: string
-}
+import { CONSOLE_MESSAGES } from '@/constants/documentEditor'
+import type { SearchResult } from '@/types/documentEditor'
+import { isTextItem } from '@/types/documentEditor'
 
 interface UsePdfSearchProps {
   pdfUrl: string | null
@@ -33,7 +31,7 @@ export function usePdfSearch({ pdfUrl, numPages }: UsePdfSearchProps) {
       for (let i = 1; i <= numPages; i++) {
         const page = await pdf.getPage(i)
         const textContent = await page.getTextContent()
-        const pageText = textContent.items.map((item: any) => item.str).join(' ')
+        const pageText = textContent.items.filter(isTextItem).map((item) => item.str).join(' ')
         
         if (pageText.toLowerCase().includes(searchQuery.toLowerCase())) {
           results.push({ page: i, text: pageText })
@@ -45,7 +43,7 @@ export function usePdfSearch({ pdfUrl, numPages }: UsePdfSearchProps) {
         setCurrentSearchIndex(0)
       }
     } catch (err) {
-      console.error('Search error:', err)
+      console.error(CONSOLE_MESSAGES.SEARCH_ERROR, err)
     } finally {
       setSearching(false)
     }
