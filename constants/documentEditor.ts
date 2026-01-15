@@ -23,6 +23,12 @@ export const DEFAULT_VALUES = {
   TEXT_PREVIEW_LENGTH: 200,
 } as const
 
+// PDF Worker Paths
+export const PDF_WORKER_PATHS = {
+  MJS: '/pdf.worker.min.mjs',
+  JS: '/pdf.worker.min.js',
+} as const
+
 // Error Messages
 export const ERROR_MESSAGES = {
   LOAD_VERSIONS: 'Error loading versions:',
@@ -36,6 +42,7 @@ export const ERROR_MESSAGES = {
   SEARCH_FAILED: 'Failed to search PDF',
   PDF_LOAD_ERROR: 'PDF load error:',
   NON_JSON_RESPONSE: 'Non-JSON response:',
+  EXTRACT_TEXT_FAILED: 'Failed to extract text from PDF',
 } as const
 
 // Console Messages
@@ -45,6 +52,11 @@ export const CONSOLE_MESSAGES = {
   ERROR_LOADING_ANNOTATIONS: 'Error loading annotations:',
   SEARCH_ERROR: 'Search error:',
   PDF_LOAD_ERROR: 'PDF load error:',
+  PDF_WORKER_LOADED: 'PDF.js worker loaded successfully:',
+  PDF_WORKER_FAILED: 'Failed to load worker from',
+  PDF_WORKER_LOADED_JS: 'PDF.js worker loaded from .js:',
+  PDF_WORKER_FAILED_JS: 'Failed to load worker from .js:',
+  ERROR_EXTRACTING_TEXT: 'Error extracting text:',
 } as const
 
 // Document Types

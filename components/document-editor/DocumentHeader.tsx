@@ -10,8 +10,6 @@ import { useTranslations } from 'next-intl'
 import { DOCUMENT_TYPES } from '@/constants/documentEditor'
 import type { DocumentType, UserVersion } from '@/types/documentEditor'
 
-import type { DocumentType, UserVersion } from '@/types/documentEditor'
-
 interface DocumentHeaderProps {
   document: {
     id: string

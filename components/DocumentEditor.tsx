@@ -18,7 +18,7 @@ import PdfViewer from './document-editor/PdfViewer'
 import ErrorMessage from './ui/ErrorMessage'
 import LoadingSpinner from './ui/LoadingSpinner'
 import type { PDFAnnotation, UserVersion, DocumentType } from '@/types/documentEditor'
-import { API_ENDPOINTS, CONTENT_TYPES, DEFAULT_VALUES, ERROR_MESSAGES, CONSOLE_MESSAGES, DOCUMENT_TYPES } from '@/constants/documentEditor'
+import { API_ENDPOINTS, CONTENT_TYPES, DEFAULT_VALUES, ERROR_MESSAGES, CONSOLE_MESSAGES, DOCUMENT_TYPES, PDF_WORKER_PATHS } from '@/constants/documentEditor'
 import { isErrorWithMessage, isTextItem } from '@/types/documentEditor'
 
 interface DocumentEditorProps {
@@ -91,25 +91,25 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
   // Initialize PDF.js worker
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const workerPath = '/pdf.worker.min.mjs'
+      const workerPath = PDF_WORKER_PATHS.MJS
       pdfjs.GlobalWorkerOptions.workerSrc = workerPath
       
       fetch(workerPath)
         .then(() => {
-          console.log('PDF.js worker loaded successfully:', workerPath)
+          console.log(CONSOLE_MESSAGES.PDF_WORKER_LOADED, workerPath)
           setWorkerReady(true)
         })
         .catch((err) => {
-          console.error('Failed to load worker from', workerPath, 'trying .js:', err)
-          const jsWorkerPath = '/pdf.worker.min.js'
+          console.error(CONSOLE_MESSAGES.PDF_WORKER_FAILED, workerPath, 'trying .js:', err)
+          const jsWorkerPath = PDF_WORKER_PATHS.JS
           pdfjs.GlobalWorkerOptions.workerSrc = jsWorkerPath
           fetch(jsWorkerPath)
             .then(() => {
-              console.log('PDF.js worker loaded from .js:', jsWorkerPath)
+              console.log(CONSOLE_MESSAGES.PDF_WORKER_LOADED_JS, jsWorkerPath)
               setWorkerReady(true)
             })
             .catch((jsErr) => {
-              console.error('Failed to load worker from .js:', jsErr)
+              console.error(CONSOLE_MESSAGES.PDF_WORKER_FAILED_JS, jsErr)
               setWorkerReady(true)
             })
         })
@@ -436,8 +436,8 @@ export default function DocumentEditor({ document, onClose }: DocumentEditorProp
       const pageText = textContent.items.filter(isTextItem).map((item) => item.str).join(' ')
       setContent(prev => prev ? `${prev}\n\n--- Page ${pageNumber} ---\n${pageText}` : `--- Page ${pageNumber} ---\n${pageText}`)
     } catch (err) {
-      console.error('Error extracting text:', err)
-      setError('Failed to extract text from PDF')
+      console.error(CONSOLE_MESSAGES.ERROR_EXTRACTING_TEXT, err)
+      setError(ERROR_MESSAGES.EXTRACT_TEXT_FAILED)
     } finally {
       setPdfLoading(false)
     }
