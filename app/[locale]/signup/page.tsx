@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 import type { SignUpFormData } from '@/types/user'
+import { API_ENDPOINTS, CONTENT_TYPES } from '@/constants'
 
 export default function SignUpPage() {
   const t = useTranslations()
@@ -95,9 +96,9 @@ export default function SignUpPage() {
       if (signUpError) { setError(signUpError.message); setLoading(false); return }
       if (!authData.user) { setError('Failed to create user account'); setLoading(false); return }
 
-      const profileResponse = await fetch('/api/profiles', {
+      const profileResponse = await fetch(API_ENDPOINTS.PROFILES, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': CONTENT_TYPES.JSON },
         body: JSON.stringify({
           id: authData.user.id, username: formData.username, first_name: formData.firstName,
           last_name: formData.lastName, email: formData.email, phone_number: formData.phoneNumber,

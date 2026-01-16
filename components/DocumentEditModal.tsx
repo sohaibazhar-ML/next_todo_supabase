@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import type { Document } from '@/types/document'
 import { isErrorWithMessage } from '@/types'
-import { ERROR_MESSAGES } from '@/constants'
+import { API_ENDPOINTS, CONTENT_TYPES, ERROR_MESSAGES } from '@/constants'
 
 interface DocumentEditModalProps {
   document: Document | null
@@ -71,9 +71,9 @@ export default function DocumentEditModal({
     setLoading(true)
 
     try {
-      const response = await fetch(`/api/documents/${document.id}`, {
+      const response = await fetch(API_ENDPOINTS.DOCUMENT_BY_ID(document.id), {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': CONTENT_TYPES.JSON },
         body: JSON.stringify({
           title: formData.title.trim(),
           description: formData.description.trim() || null,

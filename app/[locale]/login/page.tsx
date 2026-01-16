@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
+import { API_ENDPOINTS } from '@/constants'
 
 export default function LoginPage() {
   const t = useTranslations()
@@ -71,7 +72,7 @@ export default function LoginPage() {
 
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
-      const response = await fetch(`/api/profiles?userId=${user.id}`)
+      const response = await fetch(API_ENDPOINTS.PROFILE_BY_USER_ID(user.id))
       if (!response.ok || response.status === 404) {
         router.push('/profile?setup=true')
         router.refresh()

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import { isErrorWithMessage } from '@/types'
-import { ERROR_MESSAGES } from '@/constants'
+import { API_ENDPOINTS, ERROR_MESSAGES } from '@/constants'
 
 interface StatsData {
   summary: {
@@ -92,7 +92,7 @@ export default function AdminStats() {
       if (filterCategory) params.append('category', filterCategory)
       if (filterSelectedTags.length > 0) params.append('tags', filterSelectedTags.join(','))
 
-      const response = await fetch(`/api/admin/stats?${params.toString()}`)
+      const response = await fetch(`${API_ENDPOINTS.ADMIN_STATS}?${params.toString()}`)
       const data = await response.json()
 
       if (!response.ok) {

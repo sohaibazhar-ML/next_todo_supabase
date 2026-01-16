@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
-import { API_ENDPOINTS } from '@/constants'
+import { API_ENDPOINTS, CONTENT_TYPES } from '@/constants'
 
 interface Subadmin {
   id: string
@@ -54,7 +54,7 @@ export default function SubadminManagement() {
     try {
       setLoading(true)
       setError(null)
-      const response = await fetch('/api/admin/subadmins')
+      const response = await fetch(API_ENDPOINTS.ADMIN_SUBADMINS)
       if (!response.ok) {
         const data = await response.json()
         setError(data.error || 'Failed to fetch subadmins')
@@ -89,13 +89,13 @@ export default function SubadminManagement() {
 
     try {
       const url = editingId
-        ? `/api/admin/subadmins/${editingId}`
-        : '/api/admin/subadmins'
+        ? API_ENDPOINTS.ADMIN_SUBADMIN_BY_ID(editingId)
+        : API_ENDPOINTS.ADMIN_SUBADMINS
       const method = editingId ? 'PATCH' : 'POST'
 
       const response = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': CONTENT_TYPES.JSON },
         body: JSON.stringify(editingId ? {
           can_upload_documents: formData.can_upload_documents,
           can_view_stats: formData.can_view_stats,
@@ -149,7 +149,7 @@ export default function SubadminManagement() {
     }
 
     try {
-      const response = await fetch(`/api/admin/subadmins/${userId}`, {
+      const response = await fetch(API_ENDPOINTS.ADMIN_SUBADMIN_BY_ID(userId), {
         method: 'DELETE',
       })
 
@@ -170,9 +170,9 @@ export default function SubadminManagement() {
 
   const handleToggleActive = async (subadmin: Subadmin) => {
     try {
-      const response = await fetch(`/api/admin/subadmins/${subadmin.id}`, {
+      const response = await fetch(API_ENDPOINTS.ADMIN_SUBADMIN_BY_ID(subadmin.id), {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': CONTENT_TYPES.JSON },
         body: JSON.stringify({
           is_active: !subadmin.permissions.is_active,
         }),
