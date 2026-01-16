@@ -7,7 +7,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { DOCUMENT_TYPES } from '@/constants/documentEditor'
+import { DOCUMENT_TYPES } from '@/constants'
 import type { DocumentType, UserVersion } from '@/types/documentEditor'
 
 interface DocumentHeaderProps {

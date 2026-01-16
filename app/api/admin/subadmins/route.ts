@@ -1,7 +1,21 @@
+/**
+ * Subadmins API Route
+ * 
+ * Handles subadmin management:
+ * - GET: List all subadmins with permissions
+ * - POST: Create/assign subadmin role
+ * 
+ * This route has been refactored to:
+ * - Use proper TypeScript types (no 'any')
+ * - Improve error handling
+ */
+
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/utils/roles'
+import { isErrorWithMessage } from '@/types'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
 
 // GET - List all subadmins with their permissions
 export async function GET(request: Request) {
@@ -41,12 +55,16 @@ export async function GET(request: Request) {
     }))
 
     return NextResponse.json(result)
-  } catch (error: any) {
-    console.error('Error fetching subadmins:', error)
-    return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: error.message === 'Admin access required' ? 403 : 500 }
-    )
+  } catch (error) {
+    console.error(CONSOLE_MESSAGES.ERROR_FETCHING_SUBADMINS, error)
+    const errorMessage = isErrorWithMessage(error)
+      ? error.message
+      : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+    const statusCode =
+      isErrorWithMessage(error) && error.message === 'Admin access required'
+        ? 403
+        : 500
+    return NextResponse.json({ error: errorMessage }, { status: statusCode })
   }
 }
 
@@ -113,12 +131,16 @@ export async function POST(request: Request) {
       message: 'Subadmin created successfully',
       permissions,
     })
-  } catch (error: any) {
-    console.error('Error creating subadmin:', error)
-    return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: error.message === 'Admin access required' ? 403 : 500 }
-    )
+  } catch (error) {
+    console.error(CONSOLE_MESSAGES.ERROR_CREATING_SUBADMIN, error)
+    const errorMessage = isErrorWithMessage(error)
+      ? error.message
+      : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+    const statusCode =
+      isErrorWithMessage(error) && error.message === 'Admin access required'
+        ? 403
+        : 500
+    return NextResponse.json({ error: errorMessage }, { status: statusCode })
   }
 }
 

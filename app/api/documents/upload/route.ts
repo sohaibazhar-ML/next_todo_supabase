@@ -1,7 +1,20 @@
+/**
+ * Document Upload API Route
+ * 
+ * Handles document upload operations:
+ * - POST: Upload new document or version
+ * 
+ * This route has been refactored to:
+ * - Use proper TypeScript types (no 'any')
+ * - Improve error handling
+ */
+
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { hasPermission } from '@/lib/utils/roles'
+import { isErrorWithMessage } from '@/types'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
 
 function getFileType(fileName: string): string {
   const ext = fileName.split('.').pop()?.toLowerCase()
@@ -140,16 +153,19 @@ export async function POST(request: Request) {
       }
     })
 
-    return NextResponse.json({
-      ...document,
-      file_size: Number(document.file_size)
-    }, { status: 201 })
-  } catch (error: any) {
-    console.error('Error uploading document:', error)
     return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
+      {
+        ...document,
+        file_size: Number(document.file_size),
+      },
+      { status: 201 }
     )
+  } catch (error) {
+    console.error(CONSOLE_MESSAGES.UPLOAD_ERROR, error)
+    const errorMessage = isErrorWithMessage(error)
+      ? error.message
+      : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 

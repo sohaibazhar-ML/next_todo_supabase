@@ -1,67 +1,60 @@
 /**
- * Constants for Document Editor
- * All hardcoded values should be defined here
+ * Document Editor Specific Constants
+ * 
+ * This file contains constants specific to the document editor functionality.
+ * General constants (API endpoints, errors, etc.) are in their respective files.
+ * 
+ * Usage:
+ *   import { PDF_WORKER_PATHS, DOCUMENT_TYPES } from '@/constants/documentEditor'
+ *   import { PDF_WORKER_PATHS, DOCUMENT_TYPES } from '@/constants' // via index
  */
 
-// API Endpoints
-export const API_ENDPOINTS = {
-  DOCUMENT_CONVERT: (documentId: string) => `/api/documents/${documentId}/convert`,
-  DOCUMENT_EDIT: (documentId: string) => `/api/documents/${documentId}/edit`,
-  DOCUMENT_EXPORT: (documentId: string) => `/api/documents/${documentId}/export`,
-} as const
-
-// Content Types
-export const CONTENT_TYPES = {
-  JSON: 'application/json',
-} as const
-
-// Default Values
-export const DEFAULT_VALUES = {
-  PDF_SCALE: 1.0,
-  PDF_PAGE_NUMBER: 1,
-  CONTENT_TIMEOUT: 0,
-  TEXT_PREVIEW_LENGTH: 200,
-} as const
-
+// ============================================================================
 // PDF Worker Paths
+// ============================================================================
+
+/**
+ * PDF.js worker file paths
+ * Used for initializing PDF.js library in the document editor
+ */
 export const PDF_WORKER_PATHS = {
+  /**
+   * Modern ES module worker path (.mjs)
+   * Primary path used for PDF.js worker
+   */
   MJS: '/pdf.worker.min.mjs',
+
+  /**
+   * Fallback worker path (.js)
+   * Used if .mjs path fails to load
+   */
   JS: '/pdf.worker.min.js',
 } as const
 
-// Error Messages
-export const ERROR_MESSAGES = {
-  LOAD_VERSIONS: 'Error loading versions:',
-  LOAD_DOCUMENT: 'Failed to load document',
-  SAVE_DOCUMENT: 'Failed to save document',
-  EXPORT_DOCUMENT: 'Failed to export document',
-  LOAD_VERSION: 'Failed to load version',
-  INVALID_RESPONSE: 'Server returned an invalid response. Please try again.',
-  LOAD_ANNOTATIONS: 'Error loading annotations:',
-  SEARCH_ERROR: 'Search error:',
-  SEARCH_FAILED: 'Failed to search PDF',
-  PDF_LOAD_ERROR: 'PDF load error:',
-  NON_JSON_RESPONSE: 'Non-JSON response:',
-  EXTRACT_TEXT_FAILED: 'Failed to extract text from PDF',
-} as const
-
-// Console Messages
-export const CONSOLE_MESSAGES = {
-  NON_JSON_RESPONSE: 'Non-JSON response:',
-  ERROR_LOADING_VERSIONS: 'Error loading versions:',
-  ERROR_LOADING_ANNOTATIONS: 'Error loading annotations:',
-  SEARCH_ERROR: 'Search error:',
-  PDF_LOAD_ERROR: 'PDF load error:',
-  PDF_WORKER_LOADED: 'PDF.js worker loaded successfully:',
-  PDF_WORKER_FAILED: 'Failed to load worker from',
-  PDF_WORKER_LOADED_JS: 'PDF.js worker loaded from .js:',
-  PDF_WORKER_FAILED_JS: 'Failed to load worker from .js:',
-  ERROR_EXTRACTING_TEXT: 'Error extracting text:',
-} as const
-
+// ============================================================================
 // Document Types
+// ============================================================================
+
+/**
+ * Document type identifiers for the editor
+ * Used to distinguish between different document formats in the editor
+ */
 export const DOCUMENT_TYPES = {
+  /**
+   * DOCX document type (Microsoft Word)
+   * Used for Word documents that can be edited in the rich text editor
+   */
   DOCX: 'docx',
+
+  /**
+   * PDF document type
+   * Used for PDF documents that can be viewed and annotated
+   */
   PDF: 'pdf',
 } as const
+
+/**
+ * Type helper for document types
+ */
+export type DocumentType = typeof DOCUMENT_TYPES[keyof typeof DOCUMENT_TYPES]
 

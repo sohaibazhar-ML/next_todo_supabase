@@ -1,7 +1,24 @@
+/**
+ * Document by ID API Route
+ * 
+ * Handles single document operations:
+ * - GET: Fetch single document
+ * - PUT: Update document (admin only)
+ * - DELETE: Delete document (admin only)
+ * 
+ * This route has been refactored to:
+ * - Use proper TypeScript types (no 'any')
+ * - Use Prisma types for updates
+ * - Improve error handling
+ */
+
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { isAdmin } from '@/lib/utils/roles'
+import type { DocumentUpdateInput } from '@/types/prisma'
+import { isErrorWithMessage } from '@/types'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
 
 // GET - Get single document
 export async function GET(
@@ -28,14 +45,14 @@ export async function GET(
 
     return NextResponse.json({
       ...document,
-      file_size: Number(document.file_size)
+      file_size: Number(document.file_size),
     })
-  } catch (error: any) {
-    console.error('Error fetching document:', error)
-    return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
-    )
+  } catch (error) {
+    console.error(CONSOLE_MESSAGES.ERROR_FETCHING_DOCUMENT, error)
+    const errorMessage = isErrorWithMessage(error)
+      ? error.message
+      : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 
@@ -76,15 +93,17 @@ export async function PUT(
     const rootId = document.parent_document_id || document.id
 
     // Prepare update data (only metadata fields, not file-specific fields)
-    const updateData: any = {}
+    const updateData: DocumentUpdateInput = {
+      updated_at: new Date(),
+    }
     if (body.title !== undefined) updateData.title = body.title
     if (body.description !== undefined) updateData.description = body.description
     if (body.category !== undefined) updateData.category = body.category
     if (body.tags !== undefined) updateData.tags = body.tags
     if (body.is_featured !== undefined) updateData.is_featured = body.is_featured
     if (body.is_active !== undefined) updateData.is_active = body.is_active
-    if (body.searchable_content !== undefined) updateData.searchable_content = body.searchable_content
-    updateData.updated_at = new Date()
+    if (body.searchable_content !== undefined)
+      updateData.searchable_content = body.searchable_content
 
     // Update all versions in the version tree (root + all children)
     // This follows Google Docs behavior where metadata is shared across all versions
@@ -110,14 +129,14 @@ export async function PUT(
     return NextResponse.json({
       ...updatedDocument,
       file_size: Number(updatedDocument.file_size),
-      versionsUpdated: updateResult.count
+      versionsUpdated: updateResult.count,
     })
-  } catch (error: any) {
-    console.error('Error updating document:', error)
-    return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
-    )
+  } catch (error) {
+    console.error(CONSOLE_MESSAGES.ERROR_UPDATING_DOCUMENT, error)
+    const errorMessage = isErrorWithMessage(error)
+      ? error.message
+      : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 
@@ -160,14 +179,14 @@ export async function DELETE(
     // We return the file_path so client can delete it
     return NextResponse.json({ 
       message: 'Document deleted successfully',
-      file_path: document.file_path
+      file_path: document.file_path,
     })
-  } catch (error: any) {
-    console.error('Error deleting document:', error)
-    return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
-    )
+  } catch (error) {
+    console.error(CONSOLE_MESSAGES.ERROR_DELETING_DOCUMENT, error)
+    const errorMessage = isErrorWithMessage(error)
+      ? error.message
+      : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 

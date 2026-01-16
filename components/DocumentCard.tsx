@@ -1,10 +1,30 @@
+/**
+ * Document Card Component
+ * 
+ * Displays a document card with metadata, version management, and download functionality.
+ * 
+ * Features:
+ * - Document metadata display
+ * - Version selection and management
+ * - Download functionality with logging
+ * - Edit button for editable document types
+ * 
+ * This component has been refactored to:
+ * - Use constants from @/constants
+ * - Remove all 'any' types
+ * - Use proper TypeScript types
+ * - Extract utility functions
+ */
+
 'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
-import type { Document } from '@/types/document'
+import type { Document, SerializedDocument } from '@/types/document'
+import { API_ENDPOINTS, CONTENT_TYPES, ERROR_MESSAGES, CONSOLE_MESSAGES, DEFAULT_VALUES } from '@/constants'
+import { isErrorWithMessage } from '@/types'
 
 interface DocumentCardProps {
   document: Document
@@ -35,12 +55,25 @@ export default function DocumentCard({ document }: DocumentCardProps) {
     router.push(`/${locale}/documents/${document.id}/edit`)
   }
 
+  /**
+   * Format file size in bytes to human-readable string
+   * 
+   * @param bytes - File size in bytes
+   * @returns Formatted file size string (e.g., "1.5 MB")
+   */
   const formatFileSize = (bytes: number | null | undefined): string => {
-    if (!bytes || bytes === 0 || isNaN(bytes)) return '0 Bytes'
-    const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    if (!bytes || bytes === 0 || isNaN(bytes)) {
+      return `${DEFAULT_VALUES.FILE_SIZE_ZERO} ${DEFAULT_VALUES.FILE_SIZE_UNITS[0]}`
+    }
+    const k = DEFAULT_VALUES.FILE_SIZE_BASE
+    const sizes = DEFAULT_VALUES.FILE_SIZE_UNITS
     const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
+    return (
+      Math.round((bytes / Math.pow(k, i)) * DEFAULT_VALUES.FILE_SIZE_ROUNDING) /
+        DEFAULT_VALUES.FILE_SIZE_ROUNDING +
+      ' ' +
+      sizes[i]
+    )
   }
 
   const getFileIcon = (fileType: string) => {
@@ -60,13 +93,13 @@ export default function DocumentCard({ document }: DocumentCardProps) {
   useEffect(() => {
     const fetchVersionCount = async () => {
       try {
-        const response = await fetch(`/api/documents/${document.id}/versions`)
+        const response = await fetch(API_ENDPOINTS.DOCUMENT_VERSIONS(document.id))
         if (response.ok) {
           const data = await response.json()
           setVersionCount(Array.isArray(data) ? data.length : 0)
         }
       } catch (err) {
-        console.error('Error fetching version count:', err)
+        console.error(CONSOLE_MESSAGES.ERROR_FETCHING_VERSIONS, err)
       }
     }
     fetchVersionCount()
@@ -76,18 +109,21 @@ export default function DocumentCard({ document }: DocumentCardProps) {
   useEffect(() => {
     const fetchActualDownloadCount = async () => {
       try {
-        const response = await fetch(`/api/download-logs?documentId=${document.id}`)
+        const response = await fetch(`${API_ENDPOINTS.DOWNLOAD_LOGS}?documentId=${document.id}`)
         if (response.ok) {
           const logs = await response.json()
           setActualDownloadCount(Array.isArray(logs) ? logs.length : 0)
         }
       } catch (err) {
-        console.error('Error fetching download count:', err)
+        console.error(CONSOLE_MESSAGES.ERROR_FETCHING_DOWNLOAD_COUNT, err)
       }
     }
     fetchActualDownloadCount()
   }, [document.id])
 
+  /**
+   * Fetch document versions from API
+   */
   const fetchVersions = async () => {
     if (showVersions) {
       setShowVersions(false)
@@ -96,28 +132,46 @@ export default function DocumentCard({ document }: DocumentCardProps) {
 
     try {
       setLoadingVersions(true)
-      const response = await fetch(`/api/documents/${document.id}/versions`)
+      const response = await fetch(API_ENDPOINTS.DOCUMENT_VERSIONS(document.id))
       const data = await response.json()
 
-      if (!response.ok) throw new Error(data.error || 'Failed to fetch versions')
+      if (!response.ok) {
+        throw new Error(
+          (typeof data === 'object' && data !== null && 'error' in data && typeof data.error === 'string')
+            ? data.error
+            : ERROR_MESSAGES.FETCH_VERSIONS_FAILED
+        )
+      }
 
-      const versionsData = Array.isArray(data) ? data.map((doc: any) => ({
-        ...doc,
-        file_size: typeof doc.file_size === 'bigint' ? Number(doc.file_size) : doc.file_size
-      })) : []
+      // Process versions: handle BigInt conversion and type safety
+      const versionsData: Document[] = Array.isArray(data)
+        ? data.map((doc: SerializedDocument | Document) => ({
+            ...doc,
+            file_size:
+              typeof doc.file_size === 'bigint'
+                ? Number(doc.file_size)
+                : typeof doc.file_size === 'number'
+                ? doc.file_size
+                : 0,
+          }))
+        : []
 
       setVersions(versionsData)
       setVersionCount(versionsData.length)
-      const currentVersion = versionsData.find((v: Document) => v.id === document.id) || document
-      
+      const currentVersion =
+        versionsData.find((v: Document) => v.id === document.id) || document
+
       if (currentVersion?.id) {
         setSelectedVersion(currentVersion)
         setShowVersions(true)
       } else {
-        setError('Failed to load version information')
+        setError(ERROR_MESSAGES.LOAD_VERSION_INFO_FAILED)
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch versions')
+    } catch (err) {
+      const errorMessage = isErrorWithMessage(err)
+        ? err.message
+        : ERROR_MESSAGES.FETCH_VERSIONS_FAILED
+      setError(errorMessage)
     } finally {
       setLoadingVersions(false)
     }
@@ -149,32 +203,38 @@ export default function DocumentCard({ document }: DocumentCardProps) {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('You must be logged in to download documents')
 
-      const urlResponse = await fetch(`/api/documents/${docToDownload.id}/download-url`)
+      const urlResponse = await fetch(
+        API_ENDPOINTS.DOCUMENT_DOWNLOAD_URL(docToDownload.id)
+      )
       const urlData = await urlResponse.json()
 
       if (!urlResponse.ok || !urlData.signedUrl) {
-        throw new Error(urlData.error || 'Failed to generate download URL')
+        throw new Error(
+          (typeof urlData === 'object' && urlData !== null && 'error' in urlData && typeof urlData.error === 'string')
+            ? urlData.error
+            : ERROR_MESSAGES.GENERATE_DOWNLOAD_URL_FAILED
+        )
       }
 
       let downloadLogged = false
       try {
-        const logResponse = await fetch('/api/download-logs', {
+        const logResponse = await fetch(API_ENDPOINTS.DOWNLOAD_LOGS, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': CONTENT_TYPES.JSON },
           body: JSON.stringify({
             document_id: docToDownload.id,
             user_id: user.id,
-            context: 'download_center',
+            context: DEFAULT_VALUES.DOWNLOAD_CONTEXT,
             metadata: {
               file_name: docToDownload.file_name,
               file_type: docToDownload.file_type,
-              version: docToDownload.version || '1.0',
+              version: docToDownload.version || DEFAULT_VALUES.DEFAULT_VERSION,
             },
-          })
+          }),
         })
         downloadLogged = logResponse.ok
       } catch (logErr) {
-        console.error('Error logging download:', logErr)
+        console.error(CONSOLE_MESSAGES.ERROR_LOGGING_DOWNLOAD, logErr)
       }
 
       try {
@@ -206,8 +266,11 @@ export default function DocumentCard({ document }: DocumentCardProps) {
         const fallbackWindow = window.open(urlData.signedUrl, '_blank')
         if (!fallbackWindow) throw new Error('Download failed and popup was blocked.')
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to download document')
+    } catch (err) {
+      const errorMessage = isErrorWithMessage(err)
+        ? err.message
+        : ERROR_MESSAGES.DOWNLOAD_DOCUMENT
+      setError(errorMessage)
     } finally {
       setDownloading(false)
     }
@@ -260,7 +323,9 @@ export default function DocumentCard({ document }: DocumentCardProps) {
           </div>
           <div className="flex items-center justify-between">
             <span>{t('version')}:</span>
-            <span className="font-medium text-gray-900">{document.version || '1.0'}</span>
+            <span className="font-medium text-gray-900">
+              {document.version || DEFAULT_VALUES.DEFAULT_VERSION}
+            </span>
           </div>
           {versionCount !== null && versionCount > 1 && (
             <div className="flex items-center justify-between">
@@ -308,7 +373,9 @@ export default function DocumentCard({ document }: DocumentCardProps) {
                 >
                   {versions.map((version) => (
                     <option key={version.id} value={version.id}>
-                      {t('version')} {version.version || '1.0'} - {new Date(version.created_at).toLocaleDateString()} ({formatFileSize(version.file_size)})
+                      {t('version')} {version.version || DEFAULT_VALUES.DEFAULT_VERSION} -{' '}
+                      {new Date(version.created_at).toLocaleDateString()} (
+                      {formatFileSize(version.file_size)})
                       {version.id === document.id ? ` (${t('current')})` : ''}
                     </option>
                   ))}
@@ -325,7 +392,7 @@ export default function DocumentCard({ document }: DocumentCardProps) {
                     >
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-medium text-gray-900">
-                          {t('version')} {version.version || '1.0'}
+                          {t('version')} {version.version || DEFAULT_VALUES.DEFAULT_VERSION}
                           {version.id === document.id && (
                             <span className="ml-1 text-indigo-600">({t('current')})</span>
                           )}

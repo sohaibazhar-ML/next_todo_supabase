@@ -1,3 +1,20 @@
+/**
+ * Profile Form Component
+ * 
+ * Component for creating and editing user profiles.
+ * 
+ * Features:
+ * - Create new profile
+ * - Edit existing profile
+ * - Change password
+ * - Form validation
+ * 
+ * This component has been refactored to:
+ * - Use constants from @/constants
+ * - Use proper TypeScript types
+ * - Improve error handling
+ */
+
 'use client'
 
 import { useState } from 'react'
@@ -5,6 +22,8 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import type { UserProfile } from '@/types/user'
+import { API_ENDPOINTS, CONTENT_TYPES, ERROR_MESSAGES, DEFAULT_VALUES } from '@/constants'
+import { isErrorWithMessage } from '@/types'
 
 interface ProfileFormProps {
   initialProfile: UserProfile | null
@@ -95,7 +114,9 @@ export default function ProfileForm({
         username = profile.email?.split('@')[0] || `user_${Date.now()}`
       }
 
-      const usernameCheckRes = await fetch(`/api/profiles/check-username?username=${encodeURIComponent(username)}`)
+      const usernameCheckRes = await fetch(
+        API_ENDPOINTS.PROFILE_CHECK_USERNAME(username)
+      )
       const usernameCheck = await usernameCheckRes.json()
 
       if (usernameCheck.exists) {
@@ -104,9 +125,9 @@ export default function ProfileForm({
         return
       }
 
-      const response = await fetch('/api/profiles', {
+      const response = await fetch(API_ENDPOINTS.PROFILES, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': CONTENT_TYPES.JSON },
         body: JSON.stringify({
           id: profile.id,
           username: username,
@@ -117,8 +138,10 @@ export default function ProfileForm({
           current_address: profile.current_address,
           country_of_origin: profile.country_of_origin,
           new_address_switzerland: profile.new_address_switzerland,
-          number_of_adults: profile.number_of_adults || 1,
-          number_of_children: profile.number_of_children || 0,
+          number_of_adults:
+            profile.number_of_adults || DEFAULT_VALUES.NUMBER_OF_ADULTS,
+          number_of_children:
+            profile.number_of_children || DEFAULT_VALUES.NUMBER_OF_CHILDREN,
           pets_type: profile.pets_type || null,
           marketing_consent: profile.marketing_consent || false,
           terms_accepted: profile.terms_accepted || false,
@@ -133,7 +156,11 @@ export default function ProfileForm({
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || 'Failed to create profile')
+        setError(
+          (typeof data === 'object' && data !== null && 'error' in data && typeof data.error === 'string')
+            ? data.error
+            : ERROR_MESSAGES.CREATE_PROFILE
+        )
         setLoading(false)
         return
       }
@@ -142,11 +169,11 @@ export default function ProfileForm({
       setTimeout(() => {
         router.push('/dashboard')
         router.refresh()
-      }, 1500)
+      }, DEFAULT_VALUES.REFRESH_DELAY)
     } else {
-      const response = await fetch('/api/profiles', {
+      const response = await fetch(API_ENDPOINTS.PROFILES, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': CONTENT_TYPES.JSON },
         body: JSON.stringify({
           id: profile.id,
           first_name: profile.first_name,
@@ -166,7 +193,11 @@ export default function ProfileForm({
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || 'Failed to update profile')
+        setError(
+          (typeof data === 'object' && data !== null && 'error' in data && typeof data.error === 'string')
+            ? data.error
+            : ERROR_MESSAGES.UPDATE_PROFILE
+        )
         setLoading(false)
         return
       }

@@ -1,7 +1,23 @@
+/**
+ * Download Logs API Route
+ * 
+ * Handles download log operations:
+ * - GET: Fetch download logs
+ * - POST: Create download log
+ * 
+ * This route has been refactored to:
+ * - Use proper TypeScript types (no 'any')
+ * - Use Prisma types for filters
+ * - Improve error handling
+ */
+
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { isAdmin } from '@/lib/utils/roles'
+import type { DownloadLogWhereInput } from '@/types/prisma'
+import { isErrorWithMessage } from '@/types'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
 
 // GET - Get download logs
 export async function GET(request: Request) {
@@ -19,8 +35,8 @@ export async function GET(request: Request) {
 
     const admin = await isAdmin(user.id)
 
-    // Build where clause
-    const where: any = {}
+    // Build where clause with proper typing
+    const where: DownloadLogWhereInput = {}
     if (documentId) where.document_id = documentId
     if (userId) where.user_id = userId
     // Users can only see their own logs unless admin
@@ -43,12 +59,12 @@ export async function GET(request: Request) {
     })
 
     return NextResponse.json(logs)
-  } catch (error: any) {
-    console.error('Error fetching download logs:', error)
-    return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
-    )
+  } catch (error) {
+    console.error(CONSOLE_MESSAGES.ERROR_FETCHING_DOWNLOAD_LOGS, error)
+    const errorMessage = isErrorWithMessage(error)
+      ? error.message
+      : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 
@@ -86,12 +102,12 @@ export async function POST(request: Request) {
     })
 
     return NextResponse.json(log, { status: 201 })
-  } catch (error: any) {
-    console.error('Error creating download log:', error)
-    return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
-    )
+  } catch (error) {
+    console.error(CONSOLE_MESSAGES.ERROR_CREATING_DOWNLOAD_LOG, error)
+    const errorMessage = isErrorWithMessage(error)
+      ? error.message
+      : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 

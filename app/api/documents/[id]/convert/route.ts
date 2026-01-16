@@ -1,8 +1,21 @@
+/**
+ * Document Convert API Route
+ * 
+ * Handles converting documents to editable formats:
+ * - GET: Convert document to HTML (DOCX) or provide PDF URL
+ * 
+ * This route has been refactored to:
+ * - Use proper TypeScript types (no 'any')
+ * - Improve error handling
+ */
+
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import mammoth from 'mammoth'
 import { PDFDocument } from 'pdf-lib'
+import { isErrorWithMessage } from '@/types'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
 
 // GET - Convert document to editable format (HTML for DOCX, text for PDF)
 export async function GET(
@@ -108,8 +121,8 @@ export async function GET(
           content: result.value,
           messages: result.messages,
         })
-      } catch (error: any) {
-        console.error('Mammoth conversion error:', error)
+      } catch (error) {
+        console.error(CONSOLE_MESSAGES.MAMMOTH_CONVERSION_ERROR, error)
         // Try with arrayBuffer as fallback
         try {
           const styleMap = [
@@ -123,22 +136,27 @@ export async function GET(
             "p[style-name='Quote'] => blockquote:fresh",
             "p[style-name='Intense Quote'] => blockquote:fresh",
           ]
-          
+
           const options = {
             styleMap,
             includeDefaultStyleMap: true,
           }
-          
+
           const result = await mammoth.convertToHtml({ arrayBuffer }, options)
           return NextResponse.json({
             type: 'docx',
             content: result.value,
             messages: result.messages,
           })
-        } catch (fallbackError: any) {
-          console.error('Mammoth fallback error:', fallbackError)
+        } catch (fallbackError) {
+          console.error(CONSOLE_MESSAGES.MAMMOTH_FALLBACK_ERROR, fallbackError)
+          const errorMessage = isErrorWithMessage(fallbackError)
+            ? fallbackError.message
+            : ERROR_MESSAGES.CONVERT_DOCUMENT_FAILED
           return NextResponse.json(
-            { error: `Failed to convert document: ${fallbackError.message}. Please ensure the file is a valid .docx format.` },
+            {
+              error: `${ERROR_MESSAGES.CONVERT_DOCUMENT_FAILED}: ${errorMessage}. Please ensure the file is a valid .docx format.`,
+            },
             { status: 500 }
           )
         }
@@ -174,10 +192,13 @@ export async function GET(
           pdfUrl: urlData?.signedUrl || null,
           note: 'PDF text extraction is available in the viewer. You can extract text from pages and add annotations.',
         })
-      } catch (error: any) {
-        console.error('PDF processing error:', error)
+      } catch (error) {
+        console.error(CONSOLE_MESSAGES.PDF_PROCESSING_ERROR, error)
+        const errorMessage = isErrorWithMessage(error)
+          ? error.message
+          : ERROR_MESSAGES.PDF_PROCESSING_FAILED
         return NextResponse.json(
-          { error: `Failed to process PDF: ${error.message}` },
+          { error: `${ERROR_MESSAGES.PDF_PROCESSING_FAILED}: ${errorMessage}` },
           { status: 500 }
         )
       }
@@ -187,12 +208,12 @@ export async function GET(
         { status: 400 }
       )
     }
-  } catch (error: any) {
-    console.error('Error converting document:', error)
-    return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
-    )
+  } catch (error) {
+    console.error(CONSOLE_MESSAGES.ERROR_CONVERTING_DOCUMENT, error)
+    const errorMessage = isErrorWithMessage(error)
+      ? error.message
+      : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 

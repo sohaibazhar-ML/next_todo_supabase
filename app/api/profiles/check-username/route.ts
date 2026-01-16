@@ -1,5 +1,18 @@
+/**
+ * Check Username API Route
+ * 
+ * Handles username availability checking:
+ * - GET: Check if username exists
+ * 
+ * This route has been refactored to:
+ * - Use proper TypeScript types (no 'any')
+ * - Improve error handling
+ */
+
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
+import { isErrorWithMessage } from '@/types'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
 
 export async function GET(request: Request) {
   try {
@@ -16,12 +29,12 @@ export async function GET(request: Request) {
     })
 
     return NextResponse.json({ exists: !!existing })
-  } catch (error: any) {
-    console.error('Error checking username:', error)
-    return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
-    )
+  } catch (error) {
+    console.error(CONSOLE_MESSAGES.ERROR_CHECKING_USERNAME, error)
+    const errorMessage = isErrorWithMessage(error)
+      ? error.message
+      : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 

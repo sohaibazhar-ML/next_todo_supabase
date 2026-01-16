@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
+import { isErrorWithMessage } from '@/types'
+import { ERROR_MESSAGES } from '@/constants'
 
 interface StatsData {
   summary: {
@@ -98,8 +100,11 @@ export default function AdminStats() {
       }
 
       setStats(data)
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch statistics')
+    } catch (err) {
+      const errorMessage = isErrorWithMessage(err)
+        ? err.message
+        : ERROR_MESSAGES.FETCH_STATISTICS
+      setError(errorMessage)
       console.error('Error fetching stats:', err)
     } finally {
       setLoading(false)

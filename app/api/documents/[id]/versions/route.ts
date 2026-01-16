@@ -1,6 +1,19 @@
+/**
+ * Document Versions API Route
+ * 
+ * Handles fetching all versions of a document:
+ * - GET: Get all versions (root + children)
+ * 
+ * This route has been refactored to:
+ * - Use proper TypeScript types (no 'any')
+ * - Improve error handling
+ */
+
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
+import { isErrorWithMessage } from '@/types'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
 
 // GET - Get all versions of a document (including the document itself and its versions)
 export async function GET(
@@ -33,7 +46,16 @@ export async function GET(
     const rootId = rootResult[0].root_id
 
     // Fetch all versions (root + all children) using index on parent_document_id
-    const versions = await prisma.$queryRaw<any[]>`
+    // Type the raw query result
+    interface DocumentRow {
+      id: string
+      file_size: bigint | number
+      created_at: Date | string
+      updated_at: Date | string | null
+      tags: string[] | null
+      [key: string]: unknown
+    }
+    const versions = await prisma.$queryRaw<DocumentRow[]>`
       SELECT d.*
       FROM documents d
       WHERE d.id = ${rootId}::uuid
@@ -49,22 +71,35 @@ export async function GET(
     // Convert BigInt file_size to Number for JSON serialization
     // Ensure all IDs are strings (UUIDs)
     // Raw query returns dates as strings, so we need to handle that
-    const serializedVersions = versions.map((doc: any) => ({
+    const serializedVersions = versions.map((doc) => ({
       ...doc,
       id: String(doc.id), // Ensure ID is a string
-      file_size: typeof doc.file_size === 'bigint' ? Number(doc.file_size) : doc.file_size,
-      created_at: typeof doc.created_at === 'string' ? doc.created_at : doc.created_at?.toISOString() || new Date().toISOString(),
-      updated_at: typeof doc.updated_at === 'string' ? doc.updated_at : doc.updated_at?.toISOString() || null,
+      file_size:
+        typeof doc.file_size === 'bigint'
+          ? Number(doc.file_size)
+          : doc.file_size,
+      created_at:
+        typeof doc.created_at === 'string'
+          ? doc.created_at
+          : doc.created_at instanceof Date
+          ? doc.created_at.toISOString()
+          : new Date().toISOString(),
+      updated_at:
+        typeof doc.updated_at === 'string'
+          ? doc.updated_at
+          : doc.updated_at instanceof Date
+          ? doc.updated_at.toISOString()
+          : null,
       tags: Array.isArray(doc.tags) ? doc.tags : [],
     }))
 
     return NextResponse.json(serializedVersions)
-  } catch (error: any) {
-    console.error('Error fetching document versions:', error)
-    return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
-    )
+  } catch (error) {
+    console.error(CONSOLE_MESSAGES.ERROR_FETCHING_VERSIONS, error)
+    const errorMessage = isErrorWithMessage(error)
+      ? error.message
+      : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 

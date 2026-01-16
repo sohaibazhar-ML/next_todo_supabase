@@ -1,8 +1,28 @@
+/**
+ * Document List Component
+ * 
+ * Displays a list of documents with search and filter functionality.
+ * 
+ * Features:
+ * - Document listing with filters
+ * - Search functionality
+ * - Category, file type, and tag filtering
+ * - Featured documents filter
+ * 
+ * This component has been refactored to:
+ * - Use constants from @/constants
+ * - Remove all 'any' types
+ * - Use proper TypeScript types
+ * - Improve error handling
+ */
+
 'use client'
 
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
-import type { Document, DocumentSearchFilters } from '@/types/document'
+import type { Document, DocumentSearchFilters, SerializedDocument } from '@/types/document'
+import { API_ENDPOINTS, ERROR_MESSAGES, CONSOLE_MESSAGES } from '@/constants'
+import { isErrorWithMessage } from '@/types'
 import DocumentCard from './DocumentCard'
 import DocumentSearch from './DocumentSearch'
 
@@ -25,9 +45,12 @@ export default function DocumentList() {
     fetchDocuments()
   }, [filters])
 
+  /**
+   * Fetch filter options (categories, file types, tags) from API
+   */
   const fetchFilterOptions = async () => {
     try {
-      const response = await fetch('/api/documents/filter-options')
+      const response = await fetch(API_ENDPOINTS.DOCUMENT_FILTER_OPTIONS)
       if (response.ok) {
         const data = await response.json()
         setCategories(data.categories || [])
@@ -35,7 +58,7 @@ export default function DocumentList() {
         setTags(data.tags || [])
       }
     } catch (err) {
-      console.error('Error fetching filter options:', err)
+      console.error(CONSOLE_MESSAGES.ERROR_FETCHING_FILTER_OPTIONS, err)
     }
   }
 
@@ -51,22 +74,39 @@ export default function DocumentList() {
       if (filters.searchQuery) params.append('searchQuery', filters.searchQuery)
       if (filters.tags && filters.tags.length > 0) params.append('tags', filters.tags.join(','))
 
-      const response = await fetch(`/api/documents?${params.toString()}`)
+      const response = await fetch(
+        `${API_ENDPOINTS.DOCUMENTS}?${params.toString()}`
+      )
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch documents')
+        throw new Error(
+          (typeof data === 'object' && data !== null && 'error' in data && typeof data.error === 'string')
+            ? data.error
+            : ERROR_MESSAGES.FETCH_DOCUMENTS
+        )
       }
 
-      const documents = Array.isArray(data) ? data.map((doc: any) => ({
-        ...doc,
-        file_size: typeof doc.file_size === 'bigint' ? Number(doc.file_size) : doc.file_size
-      })) : []
+      // Convert BigInt file_size to number and ensure proper typing
+      const documents: Document[] = Array.isArray(data)
+        ? data.map((doc: SerializedDocument | Document) => ({
+            ...doc,
+            file_size:
+              typeof doc.file_size === 'bigint'
+                ? Number(doc.file_size)
+                : typeof doc.file_size === 'number'
+                ? doc.file_size
+                : 0,
+          }))
+        : []
 
       setDocuments(documents)
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch documents')
-      console.error('Error fetching documents:', err)
+    } catch (err) {
+      const errorMessage = isErrorWithMessage(err)
+        ? err.message
+        : ERROR_MESSAGES.FETCH_DOCUMENTS
+      setError(errorMessage)
+      console.error(CONSOLE_MESSAGES.ERROR_FETCHING_DOCUMENTS, err)
     } finally {
       setLoading(false)
     }

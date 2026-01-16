@@ -6,7 +6,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { DEFAULT_VALUES } from '@/constants/documentEditor'
+import { DEFAULT_VALUES } from '@/constants'
 
 interface PdfControlsProps {
   pageNumber: number

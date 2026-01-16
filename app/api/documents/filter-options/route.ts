@@ -1,6 +1,19 @@
+/**
+ * Document Filter Options API Route
+ * 
+ * Handles fetching filter options:
+ * - GET: Get categories, file types, and tags
+ * 
+ * This route has been refactored to:
+ * - Use proper TypeScript types (no 'any')
+ * - Improve error handling
+ */
+
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
+import { isErrorWithMessage } from '@/types'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
 
 // GET - Get filter options (categories, file types, tags)
 export async function GET(request: Request) {
@@ -57,14 +70,14 @@ export async function GET(request: Request) {
     return NextResponse.json({
       categories: uniqueCategories,
       fileTypes: uniqueFileTypes,
-      tags: uniqueTags
+      tags: uniqueTags,
     })
-  } catch (error: any) {
-    console.error('Error fetching filter options:', error)
-    return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
-    )
+  } catch (error) {
+    console.error(CONSOLE_MESSAGES.ERROR_FETCHING_FILTER_OPTIONS, error)
+    const errorMessage = isErrorWithMessage(error)
+      ? error.message
+      : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 

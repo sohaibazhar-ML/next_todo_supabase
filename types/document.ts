@@ -59,3 +59,70 @@ export interface DocumentWithCreator extends Document {
   }
 }
 
+// ============================================================================
+// Serialization Types
+// ============================================================================
+
+/**
+ * Serialized document with BigInt converted to number
+ * Used when documents are returned from API (BigInt cannot be serialized to JSON)
+ * 
+ * The file_size field is converted from BigInt to number during serialization
+ */
+export interface SerializedDocument extends Omit<Document, 'file_size'> {
+  /**
+   * File size in bytes (converted from BigInt to number)
+   */
+  file_size: number
+}
+
+/**
+ * User document version from database (with BigInt)
+ * This is the raw type from Prisma before serialization
+ */
+export interface UserVersionRaw {
+  id: string
+  original_document_id: string
+  user_id: string
+  version_number: number
+  version_name: string | null
+  html_content: string | null
+  pdf_text_content: string | null
+  pdf_annotations: unknown // JSON field from database
+  exported_file_path: string | null
+  exported_file_size: bigint | null // BigInt from database
+  exported_mime_type: string | null
+  original_file_type: string
+  is_draft: boolean
+  created_at: Date | string
+  updated_at: Date | string
+}
+
+/**
+ * Serialized user document version
+ * Used when versions are returned from API (BigInt cannot be serialized to JSON)
+ * 
+ * The exported_file_size field is converted from BigInt to string during serialization
+ */
+export interface SerializedVersion {
+  id: string
+  original_document_id: string
+  user_id: string
+  version_number: number
+  version_name: string | null
+  html_content: string | null
+  pdf_text_content: string | null
+  pdf_annotations: unknown // JSON field (parsed from database)
+  exported_file_path: string | null
+  /**
+   * Exported file size as string (converted from BigInt)
+   * BigInt values are serialized as strings in JSON
+   */
+  exported_file_size: string | null
+  exported_mime_type: string | null
+  original_file_type: string
+  is_draft: boolean
+  created_at: string
+  updated_at: string
+}
+

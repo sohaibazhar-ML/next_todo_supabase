@@ -1,6 +1,19 @@
+/**
+ * Document Download URL API Route
+ * 
+ * Handles generating signed download URLs:
+ * - GET: Get signed download URL for a document
+ * 
+ * This route has been refactored to:
+ * - Use proper TypeScript types (no 'any')
+ * - Improve error handling
+ */
+
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
+import { isErrorWithMessage } from '@/types'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
 
 // GET - Get signed download URL for a document
 export async function GET(
@@ -65,12 +78,12 @@ export async function GET(
     }
 
     return NextResponse.json({ signedUrl: urlData.signedUrl })
-  } catch (error: any) {
-    console.error('Error generating download URL:', error)
-    return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
-    )
+  } catch (error) {
+    console.error(CONSOLE_MESSAGES.ERROR_GENERATING_DOWNLOAD_URL, error)
+    const errorMessage = isErrorWithMessage(error)
+      ? error.message
+      : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 

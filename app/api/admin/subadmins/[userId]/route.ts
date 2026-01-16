@@ -1,7 +1,24 @@
+/**
+ * Subadmin by User ID API Route
+ * 
+ * Handles subadmin operations by user ID:
+ * - GET: Get specific subadmin's permissions
+ * - PATCH: Update subadmin permissions
+ * - DELETE: Remove subadmin role
+ * 
+ * This route has been refactored to:
+ * - Use proper TypeScript types (no 'any')
+ * - Use Prisma types for updates
+ * - Improve error handling
+ */
+
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/utils/roles'
+import type { SubadminPermissionUpdateInput } from '@/types/prisma'
+import { isErrorWithMessage } from '@/types'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
 
 // GET - Get specific subadmin's permissions
 export async function GET(
@@ -51,12 +68,16 @@ export async function GET(
         is_active: false,
       },
     })
-  } catch (error: any) {
-    console.error('Error fetching subadmin:', error)
-    return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: error.message === 'Admin access required' ? 403 : 500 }
-    )
+  } catch (error) {
+    console.error(CONSOLE_MESSAGES.ERROR_FETCHING_SUBADMIN, error)
+    const errorMessage = isErrorWithMessage(error)
+      ? error.message
+      : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+    const statusCode =
+      isErrorWithMessage(error) && error.message === 'Admin access required'
+        ? 403
+        : 500
+    return NextResponse.json({ error: errorMessage }, { status: statusCode })
   }
 }
 
@@ -95,8 +116,8 @@ export async function PATCH(
       )
     }
 
-    // Update permissions
-    const updateData: any = {
+    // Update permissions with proper typing
+    const updateData: SubadminPermissionUpdateInput = {
       updated_at: new Date(),
     }
 
@@ -119,18 +140,28 @@ export async function PATCH(
       message: 'Subadmin permissions updated successfully',
       permissions,
     })
-  } catch (error: any) {
-    console.error('Error updating subadmin:', error)
-    if (error.code === 'P2025') {
+  } catch (error) {
+    console.error(CONSOLE_MESSAGES.ERROR_UPDATING_SUBADMIN, error)
+    // Handle Prisma not found error
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      (error as { code: string }).code === 'P2025'
+    ) {
       return NextResponse.json(
-        { error: 'Subadmin permissions not found' },
+        { error: ERROR_MESSAGES.SUBADMIN_PERMISSIONS_NOT_FOUND },
         { status: 404 }
       )
     }
-    return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: error.message === 'Admin access required' ? 403 : 500 }
-    )
+    const errorMessage = isErrorWithMessage(error)
+      ? error.message
+      : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+    const statusCode =
+      isErrorWithMessage(error) && error.message === 'Admin access required'
+        ? 403
+        : 500
+    return NextResponse.json({ error: errorMessage }, { status: statusCode })
   }
 }
 
@@ -181,12 +212,16 @@ export async function DELETE(
     return NextResponse.json({
       message: 'Subadmin role removed successfully',
     })
-  } catch (error: any) {
-    console.error('Error removing subadmin:', error)
-    return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: error.message === 'Admin access required' ? 403 : 500 }
-    )
+  } catch (error) {
+    console.error(CONSOLE_MESSAGES.ERROR_REMOVING_SUBADMIN, error)
+    const errorMessage = isErrorWithMessage(error)
+      ? error.message
+      : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+    const statusCode =
+      isErrorWithMessage(error) && error.message === 'Admin access required'
+        ? 403
+        : 500
+    return NextResponse.json({ error: errorMessage }, { status: statusCode })
   }
 }
 

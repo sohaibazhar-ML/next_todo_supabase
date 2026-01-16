@@ -1,27 +1,104 @@
 /**
  * Hook for loading document content from API
+ * 
+ * This hook handles loading document content and converting it to an editable format.
+ * It supports both DOCX (converted to HTML) and PDF (with viewer setup).
+ * 
+ * Usage:
+ *   useDocumentLoader({
+ *     documentId,
+ *     setLoading,
+ *     setError,
+ *     setDocumentType,
+ *     // ... other setters
+ *   })
  */
 
-import { useState, useEffect } from 'react'
-import { API_ENDPOINTS, CONTENT_TYPES, DEFAULT_VALUES, ERROR_MESSAGES, CONSOLE_MESSAGES, DOCUMENT_TYPES } from '@/constants/documentEditor'
+import { useEffect } from 'react'
+import { API_ENDPOINTS, CONTENT_TYPES, DEFAULT_VALUES, ERROR_MESSAGES, CONSOLE_MESSAGES, DOCUMENT_TYPES } from '@/constants'
 import type { DocumentType, TipTapEditor, UserVersion, PDFAnnotation } from '@/types/documentEditor'
 import { isErrorWithMessage } from '@/types/documentEditor'
 
 interface UseDocumentLoaderProps {
+  /**
+   * Document ID to load
+   */
   documentId: string
+
+  /**
+   * Current document type
+   */
   documentType: DocumentType
+
+  /**
+   * Callback to set document type
+   */
   setDocumentType: (type: DocumentType) => void
+
+  /**
+   * Callback to set content
+   */
   setContent: (content: string) => void
+
+  /**
+   * Callback to set PDF URL
+   */
   setPdfUrl: (url: string | null) => void
+
+  /**
+   * Callback to set number of pages
+   */
   setNumPages: (pages: number | null) => void
+
+  /**
+   * Callback to set page number
+   */
   setPageNumber: (page: number) => void
+
+  /**
+   * Callback to set scale
+   */
   setScale: (scale: number) => void
+
+  /**
+   * TipTap editor instance
+   */
   editor: TipTapEditor
+
+  /**
+   * Ref to track if content is being set
+   */
   isSettingContentRef: React.MutableRefObject<boolean>
+
+  /**
+   * Available versions
+   */
   versions: UserVersion[]
+
+  /**
+   * Callback to set annotations
+   */
   setAnnotations: (annotations: PDFAnnotation[]) => void
+
+  /**
+   * Callback to set loading state
+   */
+  setLoading: (loading: boolean) => void
+
+  /**
+   * Callback to set error state
+   */
+  setError: (error: string | null) => void
 }
 
+/**
+ * Hook for loading document content from API
+ * 
+ * Automatically loads document when documentId changes.
+ * Uses external state management for loading and error states.
+ * 
+ * @param props - Hook configuration
+ */
 export function useDocumentLoader({
   documentId,
   documentType,
@@ -35,10 +112,12 @@ export function useDocumentLoader({
   isSettingContentRef,
   versions,
   setAnnotations,
+  setLoading,
+  setError,
 }: UseDocumentLoaderProps) {
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
+  /**
+   * Load document content from API
+   */
   const loadDocument = async () => {
     try {
       setLoading(true)
@@ -50,7 +129,10 @@ export function useDocumentLoader({
       const contentType = response.headers.get('content-type')
       if (!contentType || !contentType.includes(CONTENT_TYPES.JSON)) {
         const text = await response.text()
-        console.error(CONSOLE_MESSAGES.NON_JSON_RESPONSE, text.substring(0, DEFAULT_VALUES.TEXT_PREVIEW_LENGTH))
+        console.error(
+          CONSOLE_MESSAGES.NON_JSON_RESPONSE,
+          text.substring(0, DEFAULT_VALUES.TEXT_PREVIEW_LENGTH)
+        )
         throw new Error(ERROR_MESSAGES.INVALID_RESPONSE)
       }
       
@@ -97,17 +179,19 @@ export function useDocumentLoader({
         }
       }
     } catch (err) {
-      const errorMessage = isErrorWithMessage(err) ? err.message : ERROR_MESSAGES.LOAD_DOCUMENT
+      const errorMessage = isErrorWithMessage(err)
+        ? err.message
+        : ERROR_MESSAGES.LOAD_DOCUMENT
       setError(errorMessage)
     } finally {
       setLoading(false)
     }
   }
 
+  // Load document when documentId changes
   useEffect(() => {
     loadDocument()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [documentId])
-
-  return { loading, error, loadDocument }
 }
 

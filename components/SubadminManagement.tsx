@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
+import { API_ENDPOINTS } from '@/constants'
 
 interface Subadmin {
   id: string
@@ -71,7 +72,7 @@ export default function SubadminManagement() {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('/api/profiles?role=user')
+      const response = await fetch(`${API_ENDPOINTS.PROFILES}?role=user`)
       if (response.ok) {
         const data = await response.json()
         setUsers(data)

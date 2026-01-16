@@ -7,7 +7,7 @@
 
 import { useTranslations } from 'next-intl'
 import { Document as PDFDocument, Page as PDFPage, pdfjs } from 'react-pdf'
-import { CONSOLE_MESSAGES } from '@/constants/documentEditor'
+import { CONSOLE_MESSAGES } from '@/constants'
 import type { PDFAnnotation } from '@/types/documentEditor'
 import PdfToolbar from './PdfToolbar'
 import PdfControls from './PdfControls'

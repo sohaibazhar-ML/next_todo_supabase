@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import type { Document } from '@/types/document'
+import { isErrorWithMessage } from '@/types'
+import { ERROR_MESSAGES } from '@/constants'
 
 interface DocumentEditModalProps {
   document: Document | null
@@ -88,8 +90,11 @@ export default function DocumentEditModal({
 
       onSave()
       onClose()
-    } catch (err: any) {
-      setError(err.message || 'Failed to update document')
+    } catch (err) {
+      const errorMessage = isErrorWithMessage(err)
+        ? err.message
+        : ERROR_MESSAGES.UPDATE_DOCUMENT
+      setError(errorMessage)
       console.error('Update error:', err)
     } finally {
       setLoading(false)

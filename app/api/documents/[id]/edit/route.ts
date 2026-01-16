@@ -1,8 +1,23 @@
+/**
+ * Document Edit API Route
+ * 
+ * Handles saving and fetching edited document versions:
+ * - POST: Save edited document version
+ * - GET: Get user's edited versions of a document
+ * 
+ * This route has been refactored to:
+ * - Use proper TypeScript types (no 'any')
+ * - Improve error handling
+ */
+
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { Document, Packer, Paragraph, TextRun } from 'docx'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
+import type { UserVersionRaw } from '@/types/document'
+import { isErrorWithMessage } from '@/types'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
 
 // POST - Save edited document version
 export async function POST(
@@ -75,20 +90,27 @@ export async function POST(
     }
 
     return NextResponse.json(serializedVersion, { status: 201 })
-  } catch (error: any) {
-    console.error('Error saving edited document:', error)
-    return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
-    )
+  } catch (error) {
+    console.error(CONSOLE_MESSAGES.ERROR_SAVING_EDITED_DOCUMENT, error)
+    const errorMessage = isErrorWithMessage(error)
+      ? error.message
+      : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 
-// Helper function to serialize BigInt values for JSON
-function serializeVersions(versions: any[]) {
-  return versions.map(version => ({
+/**
+ * Helper function to serialize BigInt values for JSON
+ * 
+ * @param versions - Array of user document versions with BigInt values
+ * @returns Array with BigInt values converted to strings
+ */
+function serializeVersions(versions: UserVersionRaw[]) {
+  return versions.map((version) => ({
     ...version,
-    exported_file_size: version.exported_file_size ? version.exported_file_size.toString() : null,
+    exported_file_size: version.exported_file_size
+      ? version.exported_file_size.toString()
+      : null,
   }))
 }
 
@@ -121,12 +143,12 @@ export async function GET(
     const serializedVersions = serializeVersions(versions)
 
     return NextResponse.json(serializedVersions)
-  } catch (error: any) {
-    console.error('Error fetching document versions:', error)
-    return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
-    )
+  } catch (error) {
+    console.error(CONSOLE_MESSAGES.ERROR_FETCHING_VERSIONS, error)
+    const errorMessage = isErrorWithMessage(error)
+      ? error.message
+      : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 

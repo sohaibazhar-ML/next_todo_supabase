@@ -1,9 +1,28 @@
+/**
+ * Document Management Component
+ * 
+ * Admin component for managing documents including:
+ * - Viewing all documents
+ * - Editing document metadata
+ * - Deleting documents
+ * - Toggling featured status
+ * - Managing document versions
+ * 
+ * This component has been refactored to:
+ * - Use constants from @/constants
+ * - Remove all 'any' types
+ * - Use proper TypeScript types
+ * - Improve error handling
+ */
+
 'use client'
 
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
-import type { Document } from '@/types/document'
+import type { Document, SerializedDocument } from '@/types/document'
+import { API_ENDPOINTS, CONTENT_TYPES, ERROR_MESSAGES, CONSOLE_MESSAGES, DEFAULT_VALUES } from '@/constants'
+import { isErrorWithMessage } from '@/types'
 import DocumentEditModal from './DocumentEditModal'
 
 export default function DocumentManagement() {
@@ -21,28 +40,45 @@ export default function DocumentManagement() {
     fetchDocuments()
   }, [])
 
+  /**
+   * Fetch all documents from API
+   */
   const fetchDocuments = async () => {
     try {
       setLoading(true)
       setError(null)
 
-      const response = await fetch('/api/documents')
+      const response = await fetch(API_ENDPOINTS.DOCUMENTS)
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch documents')
+        throw new Error(
+          (typeof data === 'object' && data !== null && 'error' in data && typeof data.error === 'string')
+            ? data.error
+            : ERROR_MESSAGES.FETCH_DOCUMENTS
+        )
       }
 
-      // Convert BigInt file_size to number
-      const docs = Array.isArray(data) ? data.map((doc: any) => ({
-        ...doc,
-        file_size: typeof doc.file_size === 'bigint' ? Number(doc.file_size) : doc.file_size
-      })) : []
+      // Convert BigInt file_size to number and ensure proper typing
+      const docs: Document[] = Array.isArray(data)
+        ? data.map((doc: SerializedDocument | Document) => ({
+            ...doc,
+            file_size:
+              typeof doc.file_size === 'bigint'
+                ? Number(doc.file_size)
+                : typeof doc.file_size === 'number'
+                ? doc.file_size
+                : 0,
+          }))
+        : []
 
       setDocuments(docs)
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch documents')
-      console.error('Error fetching documents:', err)
+    } catch (err) {
+      const errorMessage = isErrorWithMessage(err)
+        ? err.message
+        : ERROR_MESSAGES.FETCH_DOCUMENTS
+      setError(errorMessage)
+      console.error(CONSOLE_MESSAGES.ERROR_FETCHING_DOCUMENTS, err)
     } finally {
       setLoading(false)
     }
@@ -65,42 +101,59 @@ export default function DocumentManagement() {
       }
 
       // Delete from database via API
-      const response = await fetch(`/api/documents/${documentId}`, {
-        method: 'DELETE'
+      const response = await fetch(API_ENDPOINTS.DOCUMENT_BY_ID(documentId), {
+        method: 'DELETE',
       })
 
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.error || 'Failed to delete document')
+        throw new Error(
+          (typeof data === 'object' && data !== null && 'error' in data && typeof data.error === 'string')
+            ? data.error
+            : ERROR_MESSAGES.DELETE_DOCUMENT
+        )
       }
 
       // Refresh list
       fetchDocuments()
-    } catch (err: any) {
-      setError(err.message || 'Failed to delete document')
-      console.error('Delete error:', err)
+    } catch (err) {
+      const errorMessage = isErrorWithMessage(err)
+        ? err.message
+        : ERROR_MESSAGES.DELETE_DOCUMENT
+      setError(errorMessage)
+      console.error(CONSOLE_MESSAGES.DELETE_ERROR, err)
     }
   }
 
+  /**
+   * Toggle featured status of a document
+   */
   const handleToggleFeatured = async (document: Document) => {
     try {
-      const response = await fetch(`/api/documents/${document.id}`, {
+      const response = await fetch(API_ENDPOINTS.DOCUMENT_BY_ID(document.id), {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': CONTENT_TYPES.JSON },
         body: JSON.stringify({
-          is_featured: !document.is_featured
-        })
+          is_featured: !document.is_featured,
+        }),
       })
 
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.error || 'Failed to update document')
+        throw new Error(
+          (typeof data === 'object' && data !== null && 'error' in data && typeof data.error === 'string')
+            ? data.error
+            : ERROR_MESSAGES.UPDATE_DOCUMENT
+        )
       }
 
       fetchDocuments()
-    } catch (err: any) {
-      setError(err.message || 'Failed to update document')
-      console.error('Update error:', err)
+    } catch (err) {
+      const errorMessage = isErrorWithMessage(err)
+        ? err.message
+        : ERROR_MESSAGES.UPDATE_DOCUMENT
+      setError(errorMessage)
+      console.error(CONSOLE_MESSAGES.UPDATE_ERROR, err)
     }
   }
 
@@ -116,30 +169,44 @@ export default function DocumentManagement() {
     }
 
     try {
-      setLoadingVersions(prev => new Set(prev).add(documentId))
-      const response = await fetch(`/api/documents/${documentId}/versions`)
+      setLoadingVersions((prev) => new Set(prev).add(documentId))
+      const response = await fetch(API_ENDPOINTS.DOCUMENT_VERSIONS(documentId))
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch versions')
+        throw new Error(
+          (typeof data === 'object' && data !== null && 'error' in data && typeof data.error === 'string')
+            ? data.error
+            : ERROR_MESSAGES.FETCH_VERSIONS
+        )
       }
 
-      // Convert BigInt file_size to number
-      const versionsData = Array.isArray(data) ? data.map((doc: any) => ({
-        ...doc,
-        file_size: typeof doc.file_size === 'bigint' ? Number(doc.file_size) : doc.file_size
-      })) : []
+      // Convert BigInt file_size to number and ensure proper typing
+      const versionsData: Document[] = Array.isArray(data)
+        ? data.map((doc: SerializedDocument | Document) => ({
+            ...doc,
+            file_size:
+              typeof doc.file_size === 'bigint'
+                ? Number(doc.file_size)
+                : typeof doc.file_size === 'number'
+                ? doc.file_size
+                : 0,
+          }))
+        : []
 
-      setVersions(prev => ({
+      setVersions((prev) => ({
         ...prev,
-        [documentId]: versionsData
+        [documentId]: versionsData,
       }))
-      setExpandedVersions(prev => new Set(prev).add(documentId))
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch versions')
-      console.error('Error fetching versions:', err)
+      setExpandedVersions((prev) => new Set(prev).add(documentId))
+    } catch (err) {
+      const errorMessage = isErrorWithMessage(err)
+        ? err.message
+        : ERROR_MESSAGES.FETCH_VERSIONS
+      setError(errorMessage)
+      console.error(CONSOLE_MESSAGES.ERROR_FETCHING_VERSIONS, err)
     } finally {
-      setLoadingVersions(prev => {
+      setLoadingVersions((prev) => {
         const newSet = new Set(prev)
         newSet.delete(documentId)
         return newSet
@@ -246,7 +313,10 @@ export default function DocumentManagement() {
                   <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                     <span>{t('category')}: {document.category}</span>
                     <span>{t('type')}: {document.file_type}</span>
-                    <span>{t('version')}: {document.version || '1.0'}</span>
+                    <span>
+                      {t('version')}:{' '}
+                      {document.version || DEFAULT_VALUES.DEFAULT_VERSION}
+                    </span>
                     <span>{t('downloads')}: {document.download_count}</span>
                     <span>{t('created')}: {new Date(document.created_at).toLocaleDateString()}</span>
                   </div>
@@ -312,7 +382,8 @@ export default function DocumentManagement() {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <span className="text-sm font-medium text-gray-900">
-                              {t('version')} {version.version || '1.0'}
+                              {t('version')}{' '}
+                              {version.version || DEFAULT_VALUES.DEFAULT_VERSION}
                             </span>
                             {version.id === document.id && (
                               <span className="px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded text-xs font-medium">
@@ -323,7 +394,10 @@ export default function DocumentManagement() {
                               {new Date(version.created_at).toLocaleString()}
                             </span>
                             <span className="text-xs text-gray-500">
-                              {Math.round(version.file_size / 1024)} KB
+                              {Math.round(
+                                version.file_size / DEFAULT_VALUES.FILE_SIZE_BASE
+                              )}{' '}
+                              KB
                             </span>
                           </div>
                           <div className="flex gap-2">

@@ -1,7 +1,27 @@
+/**
+ * Admin Stats API Route
+ * 
+ * Handles admin statistics with filters:
+ * - GET: Get admin statistics (documents, users, downloads, etc.)
+ * 
+ * This route has been refactored to:
+ * - Use proper TypeScript types (no 'any')
+ * - Use Prisma types for filters
+ * - Improve error handling
+ */
+
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { hasPermission } from '@/lib/utils/roles'
+import type {
+  DocumentWhereInput,
+  ProfileWhereInput,
+  DownloadLogWhereInput,
+  DateFilter,
+} from '@/types/prisma'
+import { isErrorWithMessage } from '@/types'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
 
 // GET - Get admin statistics with filters
 export async function GET(request: Request) {
@@ -26,22 +46,19 @@ export async function GET(request: Request) {
     const category = searchParams.get('category')
     const tags = searchParams.get('tags')?.split(',').filter(Boolean) || []
 
-    // Build date filter
-    const dateFilter: any = {}
-    if (fromDate || toDate) {
-      dateFilter.downloaded_at = {}
-      if (fromDate) {
-        dateFilter.downloaded_at.gte = new Date(fromDate)
-      }
-      if (toDate) {
-        const toDateEnd = new Date(toDate)
-        toDateEnd.setHours(23, 59, 59, 999)
-        dateFilter.downloaded_at.lte = toDateEnd
-      }
+    // Build date filter with proper typing
+    const dateFilter: DateFilter = {}
+    if (fromDate) {
+      dateFilter.gte = new Date(fromDate)
+    }
+    if (toDate) {
+      const toDateEnd = new Date(toDate)
+      toDateEnd.setHours(23, 59, 59, 999)
+      dateFilter.lte = toDateEnd
     }
 
-    // Build document filter
-    const documentFilter: any = {}
+    // Build document filter with proper typing
+    const documentFilter: DocumentWhereInput = {}
     if (search) {
       documentFilter.OR = [
         { title: { contains: search, mode: 'insensitive' } },
@@ -59,7 +76,7 @@ export async function GET(request: Request) {
     }
 
     // Build user filter - search across all user fields
-    const userFilter: any = {}
+    const userFilter: ProfileWhereInput = {}
     if (search) {
       userFilter.OR = [
         { email: { contains: search, mode: 'insensitive' } },
@@ -117,11 +134,11 @@ export async function GET(request: Request) {
     }
 
     // Build download logs filter (combining date, document, and user filters)
-    const downloadLogsFilter: any = {
+    const downloadLogsFilter: DownloadLogWhereInput = {
       documents: documentFilter,
     }
     if (Object.keys(dateFilter).length > 0) {
-      downloadLogsFilter.downloaded_at = dateFilter.downloaded_at
+      downloadLogsFilter.downloaded_at = dateFilter
     }
     if (filteredUserIdsForQueries && filteredUserIdsForQueries.length > 0) {
       downloadLogsFilter.user_id = { in: filteredUserIdsForQueries }
@@ -383,12 +400,12 @@ export async function GET(request: Request) {
         tags: uniqueTags,
       },
     })
-  } catch (error: any) {
-    console.error('Error fetching admin stats:', error)
-    return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
-    )
+  } catch (error) {
+    console.error(CONSOLE_MESSAGES.ERROR_FETCHING_ADMIN_STATS, error)
+    const errorMessage = isErrorWithMessage(error)
+      ? error.message
+      : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 

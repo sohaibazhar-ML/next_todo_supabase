@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import type { UserProfile } from '@/types/user'
+import { API_ENDPOINTS } from '@/constants'
 
 export default function UserList() {
   const t = useTranslations('userList')
@@ -22,7 +23,7 @@ export default function UserList() {
       setLoading(true)
       setError(null)
 
-      const response = await fetch('/api/profiles?role=user')
+      const response = await fetch(API_ENDPOINTS.PROFILES + '?role=user')
       const data = await response.json()
 
       if (!response.ok) {

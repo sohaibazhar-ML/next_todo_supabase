@@ -4,7 +4,7 @@
 
 import { useState } from 'react'
 import { pdfjs } from 'react-pdf'
-import { CONSOLE_MESSAGES } from '@/constants/documentEditor'
+import { CONSOLE_MESSAGES } from '@/constants'
 import type { SearchResult } from '@/types/documentEditor'
 import { isTextItem } from '@/types/documentEditor'
 

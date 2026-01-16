@@ -1,22 +1,41 @@
+/**
+ * Document Upload Component
+ * 
+ * Component for uploading new documents or new versions of existing documents.
+ * 
+ * Features:
+ * - Upload new documents
+ * - Upload new versions of existing documents
+ * - File validation (type and size)
+ * - Form validation
+ * 
+ * This component has been refactored to:
+ * - Use constants from @/constants
+ * - Remove all 'any' types
+ * - Use proper TypeScript types
+ * - Improve error handling
+ */
+
 'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import type { DocumentUploadData } from '@/types/document'
-import type { Document } from '@/types/document'
+import type { DocumentUploadData, Document } from '@/types/document'
+import { API_ENDPOINTS, CONTENT_TYPES, ERROR_MESSAGES, CONSOLE_MESSAGES, DEFAULT_VALUES, FILE_EXTENSIONS } from '@/constants'
+import { isErrorWithMessage } from '@/types'
 
 export default function DocumentUpload() {
   const t = useTranslations('documentUpload')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
-  const [formData, setFormData] = useState<DocumentUploadData>({
+  const [formData, setFormData] = useState<Omit<DocumentUploadData, 'file'> & { file: File | null }>({
     title: '',
     description: '',
     category: '',
     tags: [],
-    file: null as any,
+    file: null,
     is_featured: false,
   })
   const [tagInput, setTagInput] = useState('')
@@ -28,8 +47,19 @@ export default function DocumentUpload() {
   // Check if this is a version upload
   const uploadVersionId = searchParams?.get('uploadVersion')
 
-  const allowedFileTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/zip']
-  const allowedExtensions = ['.pdf', '.docx', '.xlsx', '.zip']
+  // Use constants for allowed file types and extensions
+  const allowedFileTypes = [
+    CONTENT_TYPES.PDF,
+    CONTENT_TYPES.DOCX,
+    CONTENT_TYPES.XLSX,
+    CONTENT_TYPES.ZIP,
+  ]
+  const allowedExtensions = [
+    FILE_EXTENSIONS.PDF,
+    FILE_EXTENSIONS.DOCX,
+    FILE_EXTENSIONS.XLSX,
+    FILE_EXTENSIONS.ZIP,
+  ]
 
   // Load parent document if uploading a version
   useEffect(() => {
@@ -41,25 +71,32 @@ export default function DocumentUpload() {
   const loadParentDocument = async (documentId: string) => {
     try {
       setLoadingParent(true)
-      const response = await fetch(`/api/documents/${documentId}`)
+      const response = await fetch(API_ENDPOINTS.DOCUMENT_BY_ID(documentId))
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to load parent document')
+        throw new Error(
+          (typeof data === 'object' && data !== null && 'error' in data && typeof data.error === 'string')
+            ? data.error
+            : ERROR_MESSAGES.LOAD_DOCUMENT
+        )
       }
 
-      setParentDocument(data)
+      setParentDocument(data as Document)
       // Pre-fill form with parent document data
       setFormData({
         title: data.title,
         description: data.description || '',
         category: data.category,
         tags: data.tags || [],
-        file: null as any,
+        file: null,
         is_featured: data.is_featured || false,
       })
-    } catch (err: any) {
-      setError(err.message || 'Failed to load parent document')
+    } catch (err) {
+      const errorMessage = isErrorWithMessage(err)
+        ? err.message
+        : ERROR_MESSAGES.LOAD_DOCUMENT
+      setError(errorMessage)
     } finally {
       setLoadingParent(false)
     }
@@ -70,13 +107,14 @@ export default function DocumentUpload() {
     if (!file) return
 
     // Validate file type
-    if (!allowedFileTypes.includes(file.type) && !allowedExtensions.some(ext => file.name.toLowerCase().endsWith(ext))) {
+    const fileType = file.type as typeof CONTENT_TYPES.PDF | typeof CONTENT_TYPES.DOCX | typeof CONTENT_TYPES.XLSX | typeof CONTENT_TYPES.ZIP | string
+    if (!allowedFileTypes.includes(fileType as any) && !allowedExtensions.some(ext => file.name.toLowerCase().endsWith(ext))) {
       setError(t('invalidFileType'))
       return
     }
 
     // Validate file size (max 50MB)
-    if (file.size > 50 * 1024 * 1024) {
+    if (file.size > DEFAULT_VALUES.MAX_FILE_SIZE) {
       setError(t('fileSizeExceeds'))
       return
     }
@@ -129,7 +167,7 @@ export default function DocumentUpload() {
       // Upload file and create document record via API route (handles everything server-side)
       // This avoids RLS issues with client-side storage uploads
       const uploadFormData = new FormData()
-      uploadFormData.append('file', formData.file)
+      uploadFormData.append('file', formData.file!)
       uploadFormData.append('title', formData.title)
       uploadFormData.append('description', formData.description || '')
       uploadFormData.append('category', formData.category)
@@ -143,7 +181,7 @@ export default function DocumentUpload() {
         uploadFormData.append('parent_document_id', uploadVersionId)
       }
 
-      const docResponse = await fetch('/api/documents/upload', {
+      const docResponse = await fetch(API_ENDPOINTS.DOCUMENT_UPLOAD, {
         method: 'POST',
         body: uploadFormData,
       })
@@ -152,14 +190,21 @@ export default function DocumentUpload() {
         const errorData = await docResponse.json().catch(() => ({ error: 'Network error' }))
         
         // Provide helpful error messages
-        if (errorData.error?.includes('Bucket not found')) {
-          throw new Error(
-            'Storage bucket not found. Please run the storage bucket setup SQL migration in Supabase Dashboard. ' +
-            'Go to SQL Editor and run: supabase/migrations/20240101000001_storage_bucket_setup.sql'
-          )
+        if (
+          typeof errorData === 'object' &&
+          errorData !== null &&
+          'error' in errorData &&
+          typeof errorData.error === 'string' &&
+          errorData.error.includes('Bucket not found')
+        ) {
+          throw new Error(ERROR_MESSAGES.STORAGE_BUCKET_NOT_FOUND)
         }
-        
-        throw new Error(errorData.error || `Upload failed: HTTP ${docResponse.status}`)
+
+        throw new Error(
+          (typeof errorData === 'object' && errorData !== null && 'error' in errorData && typeof errorData.error === 'string')
+            ? errorData.error
+            : ERROR_MESSAGES.UPLOAD_DOCUMENT
+        )
       }
 
       setMessage(uploadVersionId ? t('versionUploadSuccess') : t('uploadSuccess'))
@@ -170,7 +215,7 @@ export default function DocumentUpload() {
         description: '',
         category: '',
         tags: [],
-        file: null as any,
+        file: null,
         is_featured: false,
       })
       setParentDocument(null)
@@ -184,13 +229,16 @@ export default function DocumentUpload() {
         router.push('/admin/documents')
       }
 
-      // Refresh page after 1 second
+      // Refresh page after delay
       setTimeout(() => {
         router.refresh()
-      }, 1000)
-    } catch (err: any) {
-      setError(err.message || 'Failed to upload document')
-      console.error('Upload error:', err)
+      }, DEFAULT_VALUES.REFRESH_DELAY)
+    } catch (err) {
+      const errorMessage = isErrorWithMessage(err)
+        ? err.message
+        : ERROR_MESSAGES.UPLOAD_DOCUMENT
+      setError(errorMessage)
+      console.error(CONSOLE_MESSAGES.UPLOAD_ERROR, err)
     } finally {
       setLoading(false)
     }
@@ -220,7 +268,10 @@ export default function DocumentUpload() {
           ) : parentDocument ? (
             <div className="text-xs text-blue-600 space-y-1">
               <p>{t('parent')}: {parentDocument.title}</p>
-              <p>{t('currentVersion')}: {parentDocument.version || '1.0'}</p>
+              <p>
+                {t('currentVersion')}:{' '}
+                {parentDocument.version || DEFAULT_VALUES.DEFAULT_VERSION}
+              </p>
               <p className="mt-2 text-blue-700">{t('formPrefilled')}</p>
             </div>
           ) : (

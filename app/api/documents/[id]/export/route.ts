@@ -1,9 +1,58 @@
+/**
+ * Document Export API Route
+ * 
+ * Handles exporting documents to DOCX or PDF:
+ * - POST: Export document version to DOCX or PDF
+ * 
+ * This route has been refactored to:
+ * - Use proper TypeScript types (no 'any')
+ * - Type cheerio DOM elements properly
+ * - Type TextRun options properly
+ * - Improve error handling
+ */
+
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, UnderlineType } from 'docx'
+import {
+  Document,
+  Packer,
+  Paragraph,
+  TextRun,
+  HeadingLevel,
+  AlignmentType,
+  UnderlineType,
+  ITextRunOptions,
+} from 'docx'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import * as cheerio from 'cheerio'
+import type { Element, Text } from 'domhandler'
+import { isErrorWithMessage } from '@/types'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
+
+/**
+ * Type for cheerio element (can be Element or Text node)
+ */
+type CheerioElement = Element | Text
+
+/**
+ * Type for cheerio selection (jQuery-like wrapper)
+ */
+type CheerioSelection = cheerio.Cheerio<cheerio.AnyNode>
+
+/**
+ * Type for TextRun options (extends ITextRunOptions from docx)
+ */
+interface TextRunOptions extends Partial<ITextRunOptions> {
+  text: string
+  bold?: boolean
+  italics?: boolean
+  underline?: { type: UnderlineType }
+  strike?: boolean
+  color?: string
+  size?: number
+  font?: string
+}
 
 // Function to decode HTML entities
 function decodeHtmlEntities(text: string): string {
@@ -106,17 +155,19 @@ function htmlToDocx(html: string): Paragraph[] {
   // Process body content
   const body = $('body').length > 0 ? $('body') : $.root()
   
-  body.contents().each((_, element: any) => {
+  body.contents().each((_, element: CheerioElement) => {
     if (element.type === 'text') {
       const text = $(element).text().trim()
       if (text) {
-        paragraphs.push(new Paragraph({
-          children: [new TextRun(text)],
-        }))
+        paragraphs.push(
+          new Paragraph({
+            children: [new TextRun(text)],
+          })
+        )
       }
     } else if (element.type === 'tag') {
       const $el = $(element)
-      const tagName = element.tagName?.toLowerCase()
+      const tagName = (element as Element).tagName?.toLowerCase()
       
       if (tagName === 'p' || tagName === 'div') {
         const para = processParagraph($el)
@@ -137,7 +188,7 @@ function htmlToDocx(html: string): Paragraph[] {
           children: [new TextRun('')],
         }))
       } else if (tagName === 'ul' || tagName === 'ol') {
-        $el.find('li').each((_, li: any) => {
+        $el.find('li').each((_, li: CheerioElement) => {
           const para = processListItem($(li), tagName === 'ol')
           if (para) paragraphs.push(para)
         })
@@ -163,14 +214,14 @@ function htmlToDocx(html: string): Paragraph[] {
 }
 
 // Process a paragraph element
-function processParagraph($el: any): Paragraph | null {
+function processParagraph($el: CheerioSelection): Paragraph | null {
   const textRuns: TextRun[] = []
   const style = $el.attr('style') || ''
   const align = parseAlignmentFromStyle(style)
-  
+
   // Process all text nodes and inline elements
   const $ = cheerio.load('')
-  $el.contents().each((_idx: number, node: any) => {
+  $el.contents().each((_idx: number, node: CheerioElement) => {
     const runs = processNodeWithFormatting($(node), '', {})
     textRuns.push(...runs)
   })
@@ -188,13 +239,16 @@ function processParagraph($el: any): Paragraph | null {
 }
 
 // Process a heading element
-function processHeading($el: any, level: typeof HeadingLevel[keyof typeof HeadingLevel]): Paragraph | null {
+function processHeading(
+  $el: CheerioSelection,
+  level: (typeof HeadingLevel)[keyof typeof HeadingLevel]
+): Paragraph | null {
   const textRuns: TextRun[] = []
   const style = $el.attr('style') || ''
   const align = parseAlignmentFromStyle(style)
   const $ = cheerio.load('')
-  
-  $el.contents().each((_idx: number, node: any) => {
+
+  $el.contents().each((_idx: number, node: CheerioElement) => {
     const runs = processNodeWithFormatting($(node), '', {})
     textRuns.push(...runs)
   })
@@ -213,11 +267,14 @@ function processHeading($el: any, level: typeof HeadingLevel[keyof typeof Headin
 }
 
 // Process a list item
-function processListItem($el: any, ordered: boolean): Paragraph | null {
+function processListItem(
+  $el: CheerioSelection,
+  ordered: boolean
+): Paragraph | null {
   const textRuns: TextRun[] = []
   const $ = cheerio.load('')
-  
-  $el.contents().each((_idx: number, node: any) => {
+
+  $el.contents().each((_idx: number, node: CheerioElement) => {
     const runs = processNodeWithFormatting($(node), '', {})
     textRuns.push(...runs)
   })
@@ -236,12 +293,12 @@ function processListItem($el: any, ordered: boolean): Paragraph | null {
 }
 
 // Process a node (text or element) and return TextRun array
-function processNode($node: any): TextRun[] {
+function processNode($node: CheerioSelection): TextRun[] {
   const runs: TextRun[] = []
   const node = $node[0]
-  
+
   if (!node) return runs
-  
+
   if (node.type === 'text') {
     const text = $node.text()
     if (text.trim()) {
@@ -249,32 +306,32 @@ function processNode($node: any): TextRun[] {
     }
     return runs
   }
-  
+
   if (node.type !== 'tag') return runs
-  
-  const tagName = node.tagName?.toLowerCase()
+
+  const tagName = (node as Element).tagName?.toLowerCase() || ''
   const style = $node.attr('style') || ''
   const styles = parseStyles(style)
-  
+
   // Get text content
   const text = $node.text()
-  
+
   // Process nested elements
   const nestedRuns: TextRun[] = []
   const $ = cheerio.load('')
-  
-  $node.contents().each((_idx: number, child: any) => {
+
+  $node.contents().each((_idx: number, child: CheerioElement) => {
     const childRuns = processNodeWithFormatting($(child), tagName, styles)
     nestedRuns.push(...childRuns)
   })
-  
+
   if (nestedRuns.length > 0) {
     return nestedRuns
   }
-  
+
   if (!text.trim()) return runs
-  
-  const runOptions: any = {
+
+  const runOptions: TextRunOptions = {
     text: decodeHtmlEntities(text),
   }
   
@@ -308,61 +365,69 @@ function processNode($node: any): TextRun[] {
 }
 
 // Process a node with parent formatting applied
-function processNodeWithFormatting($node: any, parentTag: string, parentStyles: Record<string, string>): TextRun[] {
+function processNodeWithFormatting(
+  $node: CheerioSelection,
+  parentTag: string,
+  parentStyles: Record<string, string>
+): TextRun[] {
   const runs: TextRun[] = []
   const node = $node[0]
-  
+
   if (!node) return runs
-  
+
   if (node.type === 'text') {
     const text = $node.text().trim()
     if (!text) return runs
-    
-    const runOptions: any = {
+
+    const runOptions: TextRunOptions = {
       text: decodeHtmlEntities(text),
     }
-    
+
     // Apply parent formatting
     applyFormatting(runOptions, parentTag, parentStyles)
-    
+
     runs.push(new TextRun(runOptions))
     return runs
   }
-  
+
   if (node.type !== 'tag') return runs
-  
-  const tagName = node.tagName?.toLowerCase()
+
+  const tagName = (node as Element).tagName?.toLowerCase() || ''
   const style = $node.attr('style') || ''
   const styles = { ...parentStyles, ...parseStyles(style) } // Merge with parent styles
-  
+
   // Process nested elements
   const nestedRuns: TextRun[] = []
   const $ = cheerio.load('')
-  $node.contents().each((_idx: number, child: any) => {
+  $node.contents().each((_idx: number, child: CheerioElement) => {
     const childRuns = processNodeWithFormatting($(child), tagName, styles)
     nestedRuns.push(...childRuns)
   })
-  
+
   if (nestedRuns.length > 0) {
     return nestedRuns
   }
-  
+
   const text = $node.text().trim()
   if (!text) return runs
-  
-  const runOptions: any = {
+
+  const runOptions: TextRunOptions = {
     text: decodeHtmlEntities(text),
   }
-  
+
   // Apply formatting based on tag and styles
   applyFormatting(runOptions, tagName, styles)
-  
+
   runs.push(new TextRun(runOptions))
   return runs
 }
 
 // Apply formatting to run options
-function applyFormatting(runOptions: any, tagName: string, styles: Record<string, string>) {
+function applyFormatting(
+  runOptions: TextRunOptions,
+  tagName: string,
+  styles: Record<string, string>
+) {
   // Apply formatting based on tag
   if (tagName === 'strong' || tagName === 'b') {
     runOptions.bold = true
@@ -476,10 +541,13 @@ export async function POST(
           const fileNameBase = baseFileName.replace(/\.[^/.]+$/, '')
           exportFileName = `${fileNameBase}_edited_v${editedVersion.version_number}.docx`
           mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-        } catch (htmlError: any) {
-          console.error('HTML to DOCX conversion error:', htmlError)
+        } catch (htmlError) {
+          console.error(CONSOLE_MESSAGES.HTML_TO_DOCX_CONVERSION_ERROR, htmlError)
+          const errorMessage = isErrorWithMessage(htmlError)
+            ? htmlError.message
+            : ERROR_MESSAGES.HTML_TO_DOCX_CONVERSION_FAILED
           return NextResponse.json(
-            { error: `Failed to convert HTML to DOCX: ${htmlError.message}` },
+            { error: `${ERROR_MESSAGES.HTML_TO_DOCX_CONVERSION_FAILED}: ${errorMessage}` },
             { status: 500 }
           )
         }
@@ -567,10 +635,13 @@ export async function POST(
           const fileNameBase = baseFileName.replace(/\.[^/.]+$/, '')
           exportFileName = `${fileNameBase}_edited_v${editedVersion.version_number}.pdf`
           mimeType = 'application/pdf'
-        } catch (pdfError: any) {
-          console.error('PDF generation error:', pdfError)
+        } catch (pdfError) {
+          console.error(CONSOLE_MESSAGES.PDF_CREATION_ERROR, pdfError)
+          const errorMessage = isErrorWithMessage(pdfError)
+            ? pdfError.message
+            : ERROR_MESSAGES.PDF_CREATION_FAILED
           return NextResponse.json(
-            { error: `Failed to generate PDF: ${pdfError.message}` },
+            { error: `${ERROR_MESSAGES.PDF_CREATION_FAILED}: ${errorMessage}` },
             { status: 500 }
           )
         }
@@ -603,16 +674,21 @@ export async function POST(
         })
 
       if (uploadError) {
-        console.error('Storage upload error:', uploadError)
+        console.error(CONSOLE_MESSAGES.STORAGE_UPLOAD_ERROR, uploadError)
         return NextResponse.json(
-          { error: `Failed to upload exported file: ${uploadError.message}` },
+          {
+            error: `${ERROR_MESSAGES.STORAGE_UPLOAD_ERROR}: ${uploadError.message}`,
+          },
           { status: 500 }
         )
       }
-    } catch (uploadErr: any) {
-      console.error('Upload exception:', uploadErr)
+    } catch (uploadErr) {
+      console.error(CONSOLE_MESSAGES.STORAGE_UPLOAD_ERROR, uploadErr)
+      const errorMessage = isErrorWithMessage(uploadErr)
+        ? uploadErr.message
+        : ERROR_MESSAGES.STORAGE_UPLOAD_ERROR
       return NextResponse.json(
-        { error: `Failed to upload file: ${uploadErr.message}` },
+        { error: `${ERROR_MESSAGES.STORAGE_UPLOAD_ERROR}: ${errorMessage}` },
         { status: 500 }
       )
     }
@@ -644,12 +720,12 @@ export async function POST(
       fileName: exportFileName,
       filePath,
     })
-  } catch (error: any) {
-    console.error('Error exporting document:', error)
-    return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
-    )
+  } catch (error) {
+    console.error(CONSOLE_MESSAGES.ERROR_EXPORTING_DOCUMENT, error)
+    const errorMessage = isErrorWithMessage(error)
+      ? error.message
+      : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 

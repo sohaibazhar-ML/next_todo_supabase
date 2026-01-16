@@ -1,7 +1,20 @@
+/**
+ * Sync Download Counts API Route
+ * 
+ * Handles syncing document download counts:
+ * - POST: Sync download_count with actual download_logs counts
+ * 
+ * This route has been refactored to:
+ * - Use proper TypeScript types (no 'any')
+ * - Improve error handling
+ */
+
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { isAdmin } from '@/lib/utils/roles'
+import { isErrorWithMessage } from '@/types'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
 
 // POST - Sync download_count field with actual download_logs counts
 export async function POST() {
@@ -39,8 +52,11 @@ export async function POST() {
         })
 
         syncedCount++
-      } catch (error: any) {
-        errors.push(`Failed to sync document ${doc.id}: ${error.message}`)
+      } catch (error) {
+        const errorMessage = isErrorWithMessage(error)
+          ? error.message
+          : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+        errors.push(`Failed to sync document ${doc.id}: ${errorMessage}`)
         console.error(`Error syncing document ${doc.id}:`, error)
       }
     }
@@ -51,12 +67,12 @@ export async function POST() {
       total: documents.length,
       errors: errors.length > 0 ? errors : undefined,
     })
-  } catch (error: any) {
-    console.error('Error syncing download counts:', error)
-    return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
-    )
+  } catch (error) {
+    console.error(CONSOLE_MESSAGES.ERROR_SYNCING_DOWNLOAD_COUNTS, error)
+    const errorMessage = isErrorWithMessage(error)
+      ? error.message
+      : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 

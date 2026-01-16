@@ -1,7 +1,24 @@
+/**
+ * Profiles API Route
+ * 
+ * Handles profile CRUD operations:
+ * - GET: Fetch profile(s)
+ * - POST: Create profile
+ * - PUT: Update profile
+ * 
+ * This route has been refactored to:
+ * - Use proper TypeScript types (no 'any')
+ * - Use Prisma types for filters and updates
+ * - Improve error handling
+ */
+
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { isAdmin } from '@/lib/utils/roles'
+import type { ProfileUpdateInput } from '@/types/prisma'
+import { isErrorWithMessage } from '@/types'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
 
 // GET - Get profile(s)
 export async function GET(request: Request) {
@@ -58,12 +75,12 @@ export async function GET(request: Request) {
     })
 
     return NextResponse.json(profile)
-  } catch (error: any) {
-    console.error('Error fetching profile:', error)
-    return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
-    )
+  } catch (error) {
+    console.error(CONSOLE_MESSAGES.ERROR_FETCHING_PROFILE, error)
+    const errorMessage = isErrorWithMessage(error)
+      ? error.message
+      : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 
@@ -176,27 +193,32 @@ export async function POST(request: Request) {
     }
 
     console.log('Profile created successfully:', profileResponse.id)
-    return NextResponse.json(profileResponse, { 
+    return NextResponse.json(profileResponse, {
       status: 201,
       headers: {
         'Content-Type': 'application/json',
-      }
+      },
     })
-  } catch (error: any) {
-    console.error('Error creating profile:', error)
-    
-    // Handle unique constraint violations
-    if (error.code === 'P2002') {
+  } catch (error) {
+    console.error(CONSOLE_MESSAGES.ERROR_CREATING_PROFILE, error)
+
+    // Handle unique constraint violations (Prisma error)
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      (error as { code: string }).code === 'P2002'
+    ) {
       return NextResponse.json(
-        { error: 'Username or email already exists' },
+        { error: ERROR_MESSAGES.USERNAME_OR_EMAIL_EXISTS },
         { status: 400 }
       )
     }
 
-    return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
-    )
+    const errorMessage = isErrorWithMessage(error)
+      ? error.message
+      : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 
@@ -230,7 +252,7 @@ export async function PUT(request: Request) {
     }
 
     // Prepare update data (exclude fields that shouldn't be updated)
-    const updateData: any = {
+    const updateData: ProfileUpdateInput = {
       first_name: body.first_name,
       last_name: body.last_name,
       phone_number: body.phone_number,
@@ -241,7 +263,10 @@ export async function PUT(request: Request) {
       number_of_children: body.number_of_children,
       pets_type: body.pets_type,
       marketing_consent: body.marketing_consent,
-      keep_me_logged_in: body.keep_me_logged_in !== undefined ? body.keep_me_logged_in : existing.keep_me_logged_in,
+      keep_me_logged_in:
+        body.keep_me_logged_in !== undefined
+          ? body.keep_me_logged_in
+          : existing.keep_me_logged_in,
       updated_at: new Date(),
     }
 
@@ -275,12 +300,12 @@ export async function PUT(request: Request) {
     })
 
     return NextResponse.json(profile)
-  } catch (error: any) {
-    console.error('Error updating profile:', error)
-    return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
-    )
+  } catch (error) {
+    console.error(CONSOLE_MESSAGES.ERROR_UPDATING_PROFILE, error)
+    const errorMessage = isErrorWithMessage(error)
+      ? error.message
+      : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 
