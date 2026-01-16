@@ -2,17 +2,27 @@
  * Utility functions for file operations and formatting
  */
 
+import { DEFAULT_VALUES } from '@/constants'
+
 /**
  * Format file size in bytes to human-readable string
+ * Uses constants from @/constants for consistency
  * @param bytes - File size in bytes
  * @returns Formatted string (e.g., "1.5 MB")
  */
 export function formatFileSize(bytes: number | null | undefined): string {
-  if (!bytes || bytes === 0 || isNaN(bytes)) return '0 Bytes'
-  const k = 1024
-  const sizes = ['Bytes', 'KB', 'MB', 'GB']
+  if (!bytes || bytes === 0 || isNaN(bytes)) {
+    return `${DEFAULT_VALUES.FILE_SIZE_ZERO} ${DEFAULT_VALUES.FILE_SIZE_UNITS[0]}`
+  }
+  const k = DEFAULT_VALUES.FILE_SIZE_BASE
+  const sizes = DEFAULT_VALUES.FILE_SIZE_UNITS
   const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
+  return (
+    Math.round((bytes / Math.pow(k, i)) * DEFAULT_VALUES.FILE_SIZE_ROUNDING) /
+      DEFAULT_VALUES.FILE_SIZE_ROUNDING +
+    ' ' +
+    sizes[i]
+  )
 }
 
 /**

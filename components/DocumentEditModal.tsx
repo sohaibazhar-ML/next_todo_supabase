@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import type { Document } from '@/types/document'
 import { isErrorWithMessage } from '@/types'
-import { API_ENDPOINTS, CONTENT_TYPES, ERROR_MESSAGES } from '@/constants'
+import { API_ENDPOINTS, CONTENT_TYPES, ERROR_MESSAGES, CONSOLE_MESSAGES } from '@/constants'
 
 interface DocumentEditModalProps {
   document: Document | null
@@ -95,7 +95,7 @@ export default function DocumentEditModal({
         ? err.message
         : ERROR_MESSAGES.UPDATE_DOCUMENT
       setError(errorMessage)
-      console.error('Update error:', err)
+      console.error(CONSOLE_MESSAGES.UPDATE_ERROR, err)
     } finally {
       setLoading(false)
     }

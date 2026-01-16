@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import type { UserProfile } from '@/types/user'
-import { API_ENDPOINTS } from '@/constants'
+import { API_ENDPOINTS, CONSOLE_MESSAGES } from '@/constants'
 
 export default function UserList() {
   const t = useTranslations('userList')
@@ -34,7 +34,7 @@ export default function UserList() {
       setUsers(Array.isArray(data) ? data : [])
     } catch (err) {
       setError('Failed to fetch users')
-      console.error('Error fetching users:', err)
+      console.error(CONSOLE_MESSAGES.ERROR_FETCHING_USERS, err)
     } finally {
       setLoading(false)
     }

@@ -30,7 +30,7 @@ export interface DownloadLog {
   ip_address: string | null
   user_agent: string | null
   context: string | null
-  metadata: Record<string, any> | null
+  metadata: Record<string, unknown> | null
 }
 
 export interface DocumentUploadData {

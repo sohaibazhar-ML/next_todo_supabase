@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
-import { API_ENDPOINTS, CONTENT_TYPES } from '@/constants'
+import { API_ENDPOINTS, CONTENT_TYPES, CONSOLE_MESSAGES } from '@/constants'
 
 interface Subadmin {
   id: string
@@ -64,7 +64,7 @@ export default function SubadminManagement() {
       setSubadmins(data)
     } catch (err) {
       setError('Failed to fetch subadmins')
-      console.error('Error fetching subadmins:', err)
+      console.error(CONSOLE_MESSAGES.ERROR_FETCHING_SUBADMINS, err)
     } finally {
       setLoading(false)
     }
@@ -78,7 +78,7 @@ export default function SubadminManagement() {
         setUsers(data)
       }
     } catch (err) {
-      console.error('Error fetching users:', err)
+      console.error(CONSOLE_MESSAGES.ERROR_FETCHING_USERS, err)
     }
   }
 
@@ -128,7 +128,7 @@ export default function SubadminManagement() {
       fetchUsers()
     } catch (err) {
       setError('Failed to save subadmin')
-      console.error('Error saving subadmin:', err)
+      console.error(CONSOLE_MESSAGES.ERROR_SAVING_SUBADMIN, err)
     }
   }
 
@@ -164,7 +164,7 @@ export default function SubadminManagement() {
       fetchUsers()
     } catch (err) {
       setError('Failed to remove subadmin')
-      console.error('Error removing subadmin:', err)
+      console.error(CONSOLE_MESSAGES.ERROR_REMOVING_SUBADMIN, err)
     }
   }
 
@@ -188,7 +188,7 @@ export default function SubadminManagement() {
       fetchSubadmins()
     } catch (err) {
       setError('Failed to update subadmin')
-      console.error('Error updating subadmin:', err)
+      console.error(CONSOLE_MESSAGES.ERROR_UPDATING_SUBADMIN, err)
     }
   }
 

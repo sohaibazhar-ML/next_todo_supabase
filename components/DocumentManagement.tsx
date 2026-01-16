@@ -96,7 +96,7 @@ export default function DocumentManagement() {
         .remove([filePath])
 
       if (storageError) {
-        console.error('Error deleting file from storage:', storageError)
+        console.error(CONSOLE_MESSAGES.ERROR_DELETING_FILE, storageError)
         // Continue with database deletion even if storage deletion fails
       }
 

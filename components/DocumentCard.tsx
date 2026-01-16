@@ -25,6 +25,7 @@ import { useTranslations } from 'next-intl'
 import type { Document, SerializedDocument } from '@/types/document'
 import { API_ENDPOINTS, CONTENT_TYPES, ERROR_MESSAGES, CONSOLE_MESSAGES, DEFAULT_VALUES } from '@/constants'
 import { isErrorWithMessage } from '@/types'
+import { formatFileSize, getFileIconColor } from '@/lib/utils/file-utils'
 
 interface DocumentCardProps {
   document: Document
@@ -55,36 +56,10 @@ export default function DocumentCard({ document }: DocumentCardProps) {
     router.push(`/${locale}/documents/${document.id}/edit`)
   }
 
-  /**
-   * Format file size in bytes to human-readable string
-   * 
-   * @param bytes - File size in bytes
-   * @returns Formatted file size string (e.g., "1.5 MB")
-   */
-  const formatFileSize = (bytes: number | null | undefined): string => {
-    if (!bytes || bytes === 0 || isNaN(bytes)) {
-      return `${DEFAULT_VALUES.FILE_SIZE_ZERO} ${DEFAULT_VALUES.FILE_SIZE_UNITS[0]}`
-    }
-    const k = DEFAULT_VALUES.FILE_SIZE_BASE
-    const sizes = DEFAULT_VALUES.FILE_SIZE_UNITS
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return (
-      Math.round((bytes / Math.pow(k, i)) * DEFAULT_VALUES.FILE_SIZE_ROUNDING) /
-        DEFAULT_VALUES.FILE_SIZE_ROUNDING +
-      ' ' +
-      sizes[i]
-    )
-  }
-
   const getFileIcon = (fileType: string) => {
-    const colors: Record<string, string> = {
-      'PDF': 'text-red-600',
-      'DOCX': 'text-blue-600',
-      'XLSX': 'text-green-600',
-      'ZIP': 'text-yellow-600',
-    }
+    const colorClass = getFileIconColor(fileType)
     return (
-      <svg className={`h-8 w-8 ${colors[fileType] || 'text-gray-600'}`} fill="currentColor" viewBox="0 0 20 20">
+      <svg className={`h-8 w-8 ${colorClass}`} fill="currentColor" viewBox="0 0 20 20">
         <path d="M4 18h12V6h-4V2H4v16zm-2 1V0h12l4 4v16H2v-1z" />
       </svg>
     )
