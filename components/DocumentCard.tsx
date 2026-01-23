@@ -23,6 +23,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import type { Document } from '@/types/document'
+import { ROUTES } from '@/constants/routes'
 import { useDocumentVersions } from '@/hooks/api/useDocuments'
 import { useDownloadLogs } from '@/hooks/api/useDownloadLogs'
 import { useDocumentDownload } from '@/hooks/useDocumentDownload'
@@ -72,7 +73,7 @@ export default function DocumentCard({ document }: DocumentCardProps) {
 
   const handleEdit = () => {
     const locale = window.location.pathname.split('/')[1]
-    router.push(`/${locale}/documents/${document.id}/edit`)
+    router.push(ROUTES.DOCUMENTS_EDIT(locale, document.id))
   }
 
   const toggleVersions = () => {

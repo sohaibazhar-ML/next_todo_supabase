@@ -289,7 +289,7 @@ export default function SignUpFormFields({
           label={
             <>
               {t('signup.termsAccept')}{' '}
-              <Link href="/terms" className="text-indigo-600 hover:underline">
+              <Link href={ROUTES.TERMS} className="text-indigo-600 hover:underline">
                 {t('signup.termsAndConditions')}
               </Link>
             </>
@@ -304,7 +304,7 @@ export default function SignUpFormFields({
           label={
             <>
               {t('signup.dataPrivacyAccept')}{' '}
-              <Link href="/privacy" className="text-indigo-600 hover:underline">
+              <Link href={ROUTES.PRIVACY} className="text-indigo-600 hover:underline">
                 {t('signup.dataPrivacyPolicy')}
               </Link>
             </>

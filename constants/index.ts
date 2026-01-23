@@ -60,3 +60,9 @@ export {
   type AdminDashboardKey,
 } from './adminDashboard'
 
+// Re-export route constants
+export {
+  ROUTES,
+  type RouteFunction,
+} from './routes'
+

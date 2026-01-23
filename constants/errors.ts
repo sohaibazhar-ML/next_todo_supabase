@@ -221,6 +221,36 @@ export const ERROR_MESSAGES = {
   DOWNLOAD_POPUP_BLOCKED: 'Download failed and popup was blocked.',
 
   /**
+   * Failed to fetch documents (generic)
+   * Used in DocumentManagement component
+   */
+  FETCH_DOCUMENTS_GENERIC: 'Failed to fetch documents',
+
+  /**
+   * Failed to fetch users (generic)
+   * Used in UserList component
+   */
+  FETCH_USERS_GENERIC: 'Failed to fetch users',
+
+  /**
+   * Invalid file type message
+   * Used in document upload schema validation
+   */
+  INVALID_FILE_TYPE: 'Invalid file type. Please upload PDF, DOCX, XLSX, or ZIP files only.',
+
+  /**
+   * Failed to save subadmin
+   * Used in SubadminManagement component
+   */
+  SAVE_SUBADMIN: 'Failed to save subadmin',
+
+  /**
+   * Failed to remove subadmin
+   * Used in SubadminManagement component
+   */
+  REMOVE_SUBADMIN: 'Failed to remove subadmin',
+
+  /**
    * Failed to fetch filter options
    * Used in DocumentList component
    */

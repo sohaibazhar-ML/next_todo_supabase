@@ -43,9 +43,11 @@ export default async function ProfilePage() {
             <ProfileForm 
               userId={user.id}
               initialProfile={null} 
-              userEmail={userEmail}
-              userFirstName={firstName}
-              userLastName={lastName}
+              userInfo={{
+                email: userEmail,
+                firstName: firstName,
+                lastName: lastName,
+              }}
             />
           </div>
         </div>

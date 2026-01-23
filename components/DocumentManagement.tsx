@@ -21,8 +21,9 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import type { Document } from '@/types/document'
-import { ERROR_MESSAGES, CONSOLE_MESSAGES, DEFAULT_VALUES } from '@/constants'
+import { ERROR_MESSAGES, CONSOLE_MESSAGES, DEFAULT_VALUES, ROUTES } from '@/constants'
 import { useDocuments, useDeleteDocument, useUpdateDocument } from '@/hooks/api/useDocuments'
+import { IconChevronDown } from '@/components/ui/icons'
 import DocumentEditModal from './DocumentEditModal'
 import DocumentVersions from './document-management/DocumentVersions'
 
@@ -99,7 +100,8 @@ export default function DocumentManagement() {
 
   const handleUploadNewVersion = (documentId: string) => {
     // Redirect to upload page with parent document ID
-    window.location.href = `/admin/documents?uploadVersion=${documentId}`
+    const locale = window.location.pathname.split('/')[1] || 'en'
+    window.location.href = ROUTES.ADMIN_DOCUMENTS(locale, documentId)
   }
 
   const handleEditSave = () => {
@@ -138,7 +140,7 @@ export default function DocumentManagement() {
     return (
       <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
         <p className="text-sm text-red-700">
-          {error instanceof Error ? error.message : 'Failed to fetch documents'}
+          {error instanceof Error ? error.message : ERROR_MESSAGES.FETCH_DOCUMENTS_GENERIC}
         </p>
       </div>
     )

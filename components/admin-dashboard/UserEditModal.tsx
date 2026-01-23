@@ -40,9 +40,11 @@ export default function UserEditModal({
       <ProfileForm
         userId={user.id}
         initialProfile={user}
-        userEmail={user.email}
-        userFirstName={user.first_name}
-        userLastName={user.last_name}
+        userInfo={{
+          email: user.email,
+          firstName: user.first_name,
+          lastName: user.last_name,
+        }}
         onSuccess={handleSuccess}
       />
     </Modal>

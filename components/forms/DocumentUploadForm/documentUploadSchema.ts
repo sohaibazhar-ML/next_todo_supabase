@@ -6,7 +6,7 @@
  */
 
 import { z } from 'zod'
-import { DEFAULT_VALUES, ALLOWED_FILE_TYPES, ALLOWED_FILE_EXTENSIONS } from '@/constants'
+import { DEFAULT_VALUES, ALLOWED_FILE_TYPES, ALLOWED_FILE_EXTENSIONS, ERROR_MESSAGES } from '@/constants'
 
 /**
  * Zod schema for document upload form
@@ -53,7 +53,7 @@ export const documentUploadSchema = z.object({
         const fileName = file.name.toLowerCase()
         return ALLOWED_FILE_EXTENSIONS.some(ext => fileName.endsWith(ext))
       },
-      'Invalid file type. Please upload PDF, DOCX, XLSX, or ZIP files only.'
+      ERROR_MESSAGES.INVALID_FILE_TYPE
     ),
   
   is_featured: z

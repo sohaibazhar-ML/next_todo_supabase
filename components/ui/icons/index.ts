@@ -19,6 +19,11 @@ export { default as IconView } from './IconView'
 export { default as IconClose } from './IconClose'
 export { default as IconFile } from './IconFile'
 export { default as IconDownload } from './IconDownload'
+export { default as IconSpinner } from './IconSpinner'
+export { default as IconChevronRight } from './IconChevronRight'
+export { default as IconChevronDown } from './IconChevronDown'
+export { default as IconChevronUp } from './IconChevronUp'
+export { default as IconLanguage } from './IconLanguage'
 
 export type { IconProps } from './IconDashboard'
 

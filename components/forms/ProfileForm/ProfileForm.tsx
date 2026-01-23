@@ -25,6 +25,15 @@ import PasswordChangeForm from './PasswordChangeForm'
 import { ErrorMessage, SuccessMessage, Button } from '@/components/ui'
 import type { UserProfile } from '@/types'
 
+/**
+ * User info for pre-filling form during creation
+ */
+export interface UserInfo {
+  email: string
+  firstName: string
+  lastName: string
+}
+
 export interface ProfileFormProps {
   /**
    * User ID
@@ -37,16 +46,24 @@ export interface ProfileFormProps {
   initialProfile: UserProfile | null
   
   /**
+   * User info for pre-filling during creation (grouped props)
+   */
+  userInfo?: UserInfo
+  
+  /**
+   * @deprecated Use userInfo instead
    * User email (for pre-filling during creation)
    */
   userEmail?: string
   
   /**
+   * @deprecated Use userInfo instead
    * User first name (for pre-filling during creation)
    */
   userFirstName?: string
   
   /**
+   * @deprecated Use userInfo instead
    * User last name (for pre-filling during creation)
    */
   userLastName?: string
@@ -65,9 +82,10 @@ export interface ProfileFormProps {
 export default function ProfileForm({
   userId,
   initialProfile,
-  userEmail = '',
-  userFirstName = '',
-  userLastName = '',
+  userInfo,
+  userEmail,
+  userFirstName,
+  userLastName,
   onSuccess,
   onCompleted,
 }: ProfileFormProps) {
@@ -77,11 +95,18 @@ export default function ProfileForm({
   const [isEditing, setIsEditing] = useState(isCreating)
   const [showPasswordChange, setShowPasswordChange] = useState(false)
 
+  // Use userInfo if provided, otherwise fall back to individual props (for backward compatibility)
+  const effectiveUserInfo = userInfo || {
+    email: userEmail || '',
+    firstName: userFirstName || '',
+    lastName: userLastName || '',
+  }
+
   // Prepare default values
   const defaultValues = initialProfile || {
-    first_name: userFirstName,
-    last_name: userLastName,
-    email: userEmail,
+    first_name: effectiveUserInfo.firstName,
+    last_name: effectiveUserInfo.lastName,
+    email: effectiveUserInfo.email,
   }
 
   const {

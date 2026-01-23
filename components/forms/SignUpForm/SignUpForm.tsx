@@ -104,7 +104,7 @@ export default function SignUpForm({ onSuccess }: SignUpFormProps) {
       {/* Login Link */}
       <div className="mt-6 text-center">
         <Link
-          href="/login"
+          href={ROUTES.LOGIN}
           className="text-sm text-indigo-600 hover:underline"
         >
           {t('signup.alreadyHaveAccount')}
