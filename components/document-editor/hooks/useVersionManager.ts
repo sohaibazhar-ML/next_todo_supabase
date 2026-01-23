@@ -80,13 +80,9 @@ export function useVersionManager({
         setLoading(true)
       }
 
-      const response = await fetch(API_ENDPOINTS.DOCUMENT_EDIT(documentId))
-      if (response.ok) {
-        const data = await response.json()
-        setVersions(data)
-        return data
-      }
-      return []
+      const data = await getUserDocumentVersions(documentId)
+      setVersions(data as UserVersion[])
+      return data as UserVersion[]
     } catch (err) {
       console.error(CONSOLE_MESSAGES.ERROR_LOADING_VERSIONS, err)
       return []

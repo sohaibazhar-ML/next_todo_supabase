@@ -12,7 +12,8 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { API_ENDPOINTS, CONTENT_TYPES, ERROR_MESSAGES, CONSOLE_MESSAGES, DOCUMENT_TYPES, DEFAULT_VALUES } from '@/constants'
+import { ERROR_MESSAGES, CONSOLE_MESSAGES, DOCUMENT_TYPES, DEFAULT_VALUES } from '@/constants'
+import { saveDocumentVersion, exportDocument } from '@/services/api/documents'
 import { isErrorWithMessage } from '@/types/documentEditor'
 import type {
   DocumentType,
@@ -176,23 +177,13 @@ export function useDocumentActions({
         pdfAnnotations = annotations.length > 0 ? annotations : null
       }
 
-      // Send save request to API
-      const response = await fetch(API_ENDPOINTS.DOCUMENT_EDIT(documentId), {
-        method: 'POST',
-        headers: { 'Content-Type': CONTENT_TYPES.JSON },
-        body: JSON.stringify({
-          html_content: htmlContent,
-          pdf_text_content: pdfTextContent,
-          pdf_annotations: pdfAnnotations,
-          version_name: versionName || null,
-        }),
+      // Save document version using service layer
+      await saveDocumentVersion(documentId, {
+        html_content: htmlContent,
+        pdf_text_content: pdfTextContent,
+        pdf_annotations: pdfAnnotations,
+        version_name: versionName || null,
       })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || ERROR_MESSAGES.SAVE_DOCUMENT)
-      }
 
       // Reload versions list and clear version name
       await loadVersions()
@@ -227,25 +218,12 @@ export function useDocumentActions({
         )
       }
 
-      // Send export request to API
-      const response = await fetch(API_ENDPOINTS.DOCUMENT_EXPORT(documentId), {
-        method: 'POST',
-        headers: { 'Content-Type': CONTENT_TYPES.JSON },
-        body: JSON.stringify({
-          version_id: latestVersion.id,
-          export_format: format,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || ERROR_MESSAGES.EXPORT_DOCUMENT)
-      }
+      // Export document using service layer
+      const result = await exportDocument(documentId, latestVersion.id, format)
 
       // Open exported file in new window
-      if (data.signedUrl) {
-        window.open(data.signedUrl, '_blank')
+      if (result.signedUrl) {
+        window.open(result.signedUrl, '_blank')
       }
     } catch (err) {
       const errorMessage = isErrorWithMessage(err)

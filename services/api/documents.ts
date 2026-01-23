@@ -383,11 +383,125 @@ export async function getDocumentDownloadUrl(id: string): Promise<string> {
 /**
  * Convert document for editor (returns HTML for DOCX or PDF URL)
  */
+/**
+ * Save a document version (edited content)
+ */
+export async function saveDocumentVersion(
+  id: string,
+  data: {
+    html_content?: string | null
+    pdf_text_content?: string | null
+    pdf_annotations?: unknown[] | null
+    version_name?: string | null
+  }
+): Promise<{ id: string; message: string }> {
+  try {
+    const response = await fetch(API_ENDPOINTS.DOCUMENT_EDIT(id), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      const errorMessage =
+        (typeof result === 'object' &&
+          result !== null &&
+          'error' in result &&
+          typeof result.error === 'string' &&
+          result.error) ||
+        ERROR_MESSAGES.SAVE_DOCUMENT
+
+      throw new Error(errorMessage)
+    }
+
+    return result
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : ERROR_MESSAGES.SAVE_DOCUMENT
+    throw new Error(message)
+  }
+}
+
+/**
+ * Export document to specified format
+ */
+export async function exportDocument(
+  id: string,
+  versionId: string,
+  format: 'docx' | 'pdf'
+): Promise<{ signedUrl: string }> {
+  try {
+    const response = await fetch(API_ENDPOINTS.DOCUMENT_EXPORT(id), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        version_id: versionId,
+        export_format: format,
+      }),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      const errorMessage =
+        (typeof result === 'object' &&
+          result !== null &&
+          'error' in result &&
+          typeof result.error === 'string' &&
+          result.error) ||
+        ERROR_MESSAGES.EXPORT_DOCUMENT
+
+      throw new Error(errorMessage)
+    }
+
+    return result
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : ERROR_MESSAGES.EXPORT_DOCUMENT
+    throw new Error(message)
+  }
+}
+
+/**
+ * Get user's edited versions of a document
+ */
+export async function getUserDocumentVersions(id: string): Promise<SerializedVersion[]> {
+  try {
+    const response = await fetch(API_ENDPOINTS.DOCUMENT_EDIT(id))
+
+    if (!response.ok) {
+      const data = await response.json()
+      const errorMessage =
+        (typeof data === 'object' &&
+          data !== null &&
+          'error' in data &&
+          typeof data.error === 'string' &&
+          data.error) ||
+        'Failed to fetch document versions'
+
+      throw new Error(errorMessage)
+    }
+
+    const data = await response.json()
+    return Array.isArray(data) ? data : []
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'Failed to fetch document versions'
+    throw new Error(message)
+  }
+}
+
 export async function convertDocumentForEditor(id: string): Promise<{
   type: 'docx' | 'pdf'
-  html?: string
+  content?: string
   pdfUrl?: string
-  numPages?: number
+  pageCount?: number
 }> {
   try {
     const response = await fetch(API_ENDPOINTS.DOCUMENT_CONVERT(id))
@@ -413,9 +527,9 @@ export async function convertDocumentForEditor(id: string): Promise<{
 
     return {
       type: data.type || 'docx',
-      html: data.html,
+      content: data.content || data.html, // Support both 'content' and 'html' for backward compatibility
       pdfUrl: data.pdfUrl,
-      numPages: data.numPages,
+      pageCount: data.pageCount || data.numPages, // Support both 'pageCount' and 'numPages'
     }
   } catch (error) {
     const message =

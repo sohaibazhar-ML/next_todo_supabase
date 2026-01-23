@@ -3,9 +3,11 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { ERROR_MESSAGES } from '@/constants'
-import { useSubadmins, useCreateSubadmin, useUpdateSubadmin, useDeleteSubadmin } from '@/hooks/api/useSubadmins'
+import { useSubadmins, useDeleteSubadmin, useUpdateSubadmin } from '@/hooks/api/useSubadmins'
 import { useUsers } from '@/hooks/api/useUsers'
 import { IconSpinner } from '@/components/ui/icons'
+import { SubadminForm } from '@/components/forms/SubadminForm'
+import { SuccessMessage, ErrorMessage } from '@/components/ui'
 import type { Subadmin } from '@/services/api/subadmins'
 
 export default function SubadminManagement() {
@@ -25,60 +27,26 @@ export default function SubadminManagement() {
   const { data: users = [] } = useUsers({ role: 'user' })
   
   // Mutations
-  const createMutation = useCreateSubadmin()
-  const updateMutation = useUpdateSubadmin()
   const deleteMutation = useDeleteSubadmin()
+  const updateMutation = useUpdateSubadmin()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setMessage(null)
+  const editingSubadmin = editingId
+    ? subadmins.find(s => s.id === editingId) || null
+    : null
 
-    try {
-      if (editingId) {
-        await updateMutation.mutateAsync({
-          userId: editingId,
-          updates: {
-            can_upload_documents: formData.can_upload_documents,
-            can_view_stats: formData.can_view_stats,
-            is_active: formData.is_active,
-          },
-        })
-        setMessage(t('updatedSuccessfully'))
-      } else {
-        await createMutation.mutateAsync({
-          userId: formData.userId,
-          can_upload_documents: formData.can_upload_documents,
-          can_view_stats: formData.can_view_stats,
-          is_active: formData.is_active,
-        })
-        setMessage(t('createdSuccessfully'))
-      }
+  const handleFormSuccess = () => {
+    setMessage(t('updatedSuccessfully'))
+    setShowForm(false)
+    setEditingId(null)
+  }
 
-      setShowForm(false)
-      setEditingId(null)
-      setFormData({
-        userId: '',
-        can_upload_documents: false,
-        can_view_stats: false,
-        is_active: true,
-      })
-    } catch (err) {
-      const errorMessage = err instanceof Error
-        ? err.message
-        : ERROR_MESSAGES.SAVE_SUBADMIN
-      setMessage(errorMessage)
-      console.error('Error saving subadmin:', err)
-    }
+  const handleFormCancel = () => {
+    setShowForm(false)
+    setEditingId(null)
   }
 
   const handleEdit = (subadmin: Subadmin) => {
     setEditingId(subadmin.id)
-    setFormData({
-      userId: subadmin.id,
-      can_upload_documents: subadmin.permissions.can_upload_documents,
-      can_view_stats: subadmin.permissions.can_view_stats,
-      is_active: subadmin.permissions.is_active,
-    })
     setShowForm(true)
   }
 
@@ -100,7 +68,11 @@ export default function SubadminManagement() {
   }
 
   const handleToggleActive = async (subadmin: Subadmin) => {
+    // For toggle, we'll need to use the update mutation directly
+    // This is a quick action, so we can keep it simple
     try {
+      const { useUpdateSubadmin } = await import('@/hooks/api/useSubadmins')
+      const updateMutation = useUpdateSubadmin()
       await updateMutation.mutateAsync({
         userId: subadmin.id,
         updates: {
@@ -111,14 +83,13 @@ export default function SubadminManagement() {
     } catch (err) {
       const errorMessage = err instanceof Error
         ? err.message
-        : 'Failed to update subadmin'
+        : ERROR_MESSAGES.SAVE_SUBADMIN
       setMessage(errorMessage)
-      console.error('Error updating subadmin:', err)
     }
   }
 
-  const isAnyLoading = isLoading || createMutation.isPending || updateMutation.isPending || deleteMutation.isPending
-  const mutationError = createMutation.error || updateMutation.error || deleteMutation.error
+  const isAnyLoading = isLoading || deleteMutation.isPending
+  const mutationError = deleteMutation.error
 
   if (isAnyLoading && subadmins.length === 0) {
     return (
@@ -131,25 +102,21 @@ export default function SubadminManagement() {
   return (
     <div className="space-y-6">
       {(error || mutationError) && (
-        <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
-          <p className="text-sm text-red-700">
-            {error instanceof Error ? error.message : mutationError instanceof Error ? mutationError.message : 'An error occurred'}
-          </p>
-        </div>
+        <ErrorMessage
+          message={
+            error instanceof Error
+              ? error.message
+              : mutationError instanceof Error
+              ? mutationError.message
+              : 'An error occurred'
+          }
+        />
       )}
 
       {message && (
-        <div className={`border-l-4 p-4 rounded-lg ${
-          message.includes('Failed') || message.includes('error')
-            ? 'bg-red-50 border-red-500'
-            : 'bg-green-50 border-green-500'
-        }`}>
-          <p className={`text-sm ${
-            message.includes('Failed') || message.includes('error')
-              ? 'text-red-700'
-              : 'text-green-700'
-          }`}>{message}</p>
-        </div>
+        <SuccessMessage
+          message={message}
+        />
       )}
 
       <div className="flex justify-between items-center">
@@ -158,12 +125,6 @@ export default function SubadminManagement() {
           onClick={() => {
             setShowForm(!showForm)
             setEditingId(null)
-            setFormData({
-              userId: '',
-              can_upload_documents: false,
-              can_view_stats: false,
-              is_active: true,
-            })
           }}
           className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
         >
@@ -176,87 +137,13 @@ export default function SubadminManagement() {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             {editingId ? t('editSubadmin') : t('addSubadmin')}
           </h3>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {!editingId && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('selectUser')}
-                </label>
-                <select
-                  value={formData.userId}
-                  onChange={(e) => setFormData({ ...formData, userId: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 bg-white"
-                  required
-                >
-                  <option value="" disabled className="text-gray-500">{t('selectUserPlaceholder')}</option>
-                  {users
-                    .filter(u => !subadmins.some(s => s.id === u.id))
-                    .map(user => (
-                      <option key={user.id} value={user.id} className="text-gray-900">
-                        {user.first_name} {user.last_name} ({user.email})
-                      </option>
-                    ))}
-                </select>
-              </div>
-            )}
-
-            <div className="space-y-3">
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={formData.can_upload_documents}
-                  onChange={(e) => setFormData({ ...formData, can_upload_documents: e.target.checked })}
-                  className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                />
-                <span className="text-sm text-gray-700">{t('canUploadDocuments')}</span>
-              </label>
-
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={formData.can_view_stats}
-                  onChange={(e) => setFormData({ ...formData, can_view_stats: e.target.checked })}
-                  className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                />
-                <span className="text-sm text-gray-700">{t('canViewStats')}</span>
-              </label>
-
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={formData.is_active}
-                  onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                  className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                />
-                <span className="text-sm text-gray-700">{t('isActive')}</span>
-              </label>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                type="submit"
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-              >
-                {editingId ? t('update') : t('create')}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowForm(false)
-                  setEditingId(null)
-                  setFormData({
-                    userId: '',
-                    can_upload_documents: false,
-                    can_view_stats: false,
-                    is_active: true,
-                  })
-                }}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-              >
-                {t('cancel')}
-              </button>
-            </div>
-          </form>
+          <SubadminForm
+            editingSubadmin={editingSubadmin}
+            availableUsers={users}
+            existingSubadmins={subadmins}
+            onSuccess={handleFormSuccess}
+            onCancel={handleFormCancel}
+          />
         </div>
       )}
 

@@ -15,7 +15,8 @@
  */
 
 import { useEffect } from 'react'
-import { API_ENDPOINTS, CONTENT_TYPES, DEFAULT_VALUES, ERROR_MESSAGES, CONSOLE_MESSAGES, DOCUMENT_TYPES } from '@/constants'
+import { CONTENT_TYPES, DEFAULT_VALUES, ERROR_MESSAGES, CONSOLE_MESSAGES, DOCUMENT_TYPES } from '@/constants'
+import { convertDocumentForEditor } from '@/services/api/documents'
 import type { DocumentType, TipTapEditor, UserVersion, PDFAnnotation } from '@/types/documentEditor'
 import { isErrorWithMessage } from '@/types/documentEditor'
 
@@ -123,24 +124,7 @@ export function useDocumentLoader({
       setLoading(true)
       setError(null)
 
-      const response = await fetch(API_ENDPOINTS.DOCUMENT_CONVERT(documentId))
-      
-      // Check if response is JSON
-      const contentType = response.headers.get('content-type')
-      if (!contentType || !contentType.includes(CONTENT_TYPES.JSON)) {
-        const text = await response.text()
-        console.error(
-          CONSOLE_MESSAGES.NON_JSON_RESPONSE,
-          text.substring(0, DEFAULT_VALUES.TEXT_PREVIEW_LENGTH)
-        )
-        throw new Error(ERROR_MESSAGES.INVALID_RESPONSE)
-      }
-      
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || ERROR_MESSAGES.LOAD_DOCUMENT)
-      }
+      const data = await convertDocumentForEditor(documentId)
 
       setDocumentType(data.type)
 
