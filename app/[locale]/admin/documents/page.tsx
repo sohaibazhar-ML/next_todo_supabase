@@ -2,10 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { isAdmin, isSubadmin, hasPermission } from '@/lib/utils/roles'
 import { prisma } from '@/lib/prisma'
-import DocumentUpload from '@/components/DocumentUpload'
-import DocumentManagement from '@/components/DocumentManagement'
 import { getTranslations } from 'next-intl/server'
 import AdminLayout from '@/components/admin-dashboard/AdminLayout'
+import AdminDocumentManagementWithUpload from '@/components/admin-dashboard/AdminDocumentManagementWithUpload'
 import type { UserRole } from '@/types/user'
 
 export default async function AdminDocumentsPage() {
@@ -56,28 +55,9 @@ export default async function AdminDocumentsPage() {
       userName={userName}
       userEmail={userEmail}
     >
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">{t('documents.documentManagement')}</h1>
-          <p className="text-gray-600 mt-1">{t('documents.uploadDocument')}</p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1">
-            <div className="bg-gray-50 rounded-lg p-6 sticky top-8">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">{t('documents.uploadDocument')}</h2>
-              <DocumentUpload />
-            </div>
-          </div>
-
-          <div className="lg:col-span-2">
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">{t('dashboard.manageDocuments')}</h2>
-              <DocumentManagement />
-            </div>
-          </div>
-        </div>
-      </div>
+      <AdminDocumentManagementWithUpload
+        managementTitle={t('dashboard.manageDocuments')}
+      />
     </AdminLayout>
   )
 }

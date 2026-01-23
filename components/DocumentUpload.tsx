@@ -25,7 +25,11 @@ import type { DocumentUploadData, Document } from '@/types/document'
 import { API_ENDPOINTS, CONTENT_TYPES, ERROR_MESSAGES, CONSOLE_MESSAGES, DEFAULT_VALUES, FILE_EXTENSIONS } from '@/constants'
 import { isErrorWithMessage } from '@/types'
 
-export default function DocumentUpload() {
+interface DocumentUploadProps {
+  onSuccess?: () => void
+}
+
+export default function DocumentUpload({ onSuccess }: DocumentUploadProps = {}) {
   const t = useTranslations('documentUpload')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -224,15 +228,22 @@ export default function DocumentUpload() {
       const fileInput = document.getElementById('file-input') as HTMLInputElement
       if (fileInput) fileInput.value = ''
 
-      // Clear URL parameter if it was a version upload
-      if (uploadVersionId) {
-        router.push('/admin/documents')
-      }
+      // Call onSuccess callback if provided (for modal usage)
+      if (onSuccess) {
+        setTimeout(() => {
+          onSuccess()
+        }, 500) // Small delay to show success message
+      } else {
+        // Clear URL parameter if it was a version upload
+        if (uploadVersionId) {
+          router.push('/admin/documents')
+        }
 
-      // Refresh page after delay
-      setTimeout(() => {
-        router.refresh()
-      }, DEFAULT_VALUES.REFRESH_DELAY)
+        // Refresh page after delay (only if not using callback)
+        setTimeout(() => {
+          router.refresh()
+        }, DEFAULT_VALUES.REFRESH_DELAY)
+      }
     } catch (err) {
       const errorMessage = isErrorWithMessage(err)
         ? err.message
