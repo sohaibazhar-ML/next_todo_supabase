@@ -1,5 +1,8 @@
 /**
- * Reusable success message component
+ * Success Message Component
+ * 
+ * Reusable component for displaying success messages.
+ * Similar to ErrorMessage but with success styling.
  */
 
 interface SuccessMessageProps {
@@ -8,10 +11,10 @@ interface SuccessMessageProps {
   onDismiss?: () => void
 }
 
-export default function SuccessMessage({ 
-  message, 
+export default function SuccessMessage({
+  message,
   className = '',
-  onDismiss 
+  onDismiss,
 }: SuccessMessageProps) {
   return (
     <div className={`bg-green-50 border-l-4 border-green-500 p-4 rounded ${className}`}>
@@ -50,4 +53,3 @@ export default function SuccessMessage({
     </div>
   )
 }
-

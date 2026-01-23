@@ -22,32 +22,39 @@ import {
   HeadingLevel,
   AlignmentType,
   UnderlineType,
-  ITextRunOptions,
+  IRunOptions,
 } from 'docx'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import * as cheerio from 'cheerio'
-import type { Element, Text } from 'domhandler'
+import type { Element, Text, AnyNode } from 'domhandler'
 import { isErrorWithMessage } from '@/types'
 import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
 
 /**
- * Type for cheerio element (can be Element or Text node)
+ * Type for cheerio element (can be Element or Text node from domhandler)
  */
 type CheerioElement = Element | Text
 
 /**
- * Type for cheerio selection (jQuery-like wrapper)
+ * Type for cheerio DOM element (cheerio's internal Element type)
  */
-type CheerioSelection = cheerio.Cheerio<cheerio.AnyNode>
+type CheerioDomElement = cheerio.Element
 
 /**
- * Type for TextRun options (extends ITextRunOptions from docx)
+ * Type for cheerio selection (jQuery-like wrapper)
+ * Using a practical type - cheerio.load returns a function that returns Cheerio instances
  */
-interface TextRunOptions extends Partial<ITextRunOptions> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type CheerioSelection = any
+
+/**
+ * Type for TextRun options (extends IRunOptions from docx)
+ */
+interface TextRunOptions extends Partial<IRunOptions> {
   text: string
   bold?: boolean
   italics?: boolean
-  underline?: { type: UnderlineType }
+  underline?: { type: typeof UnderlineType[keyof typeof UnderlineType] }
   strike?: boolean
   color?: string
   size?: number
@@ -155,9 +162,10 @@ function htmlToDocx(html: string): Paragraph[] {
   // Process body content
   const body = $('body').length > 0 ? $('body') : $.root()
   
-  body.contents().each((_, element: CheerioElement) => {
-    if (element.type === 'text') {
-      const text = $(element).text().trim()
+  body.contents().each((_, element) => {
+    const node = element as unknown as AnyNode
+    if (node.type === 'text') {
+      const text = $(node).text().trim()
       if (text) {
         paragraphs.push(
           new Paragraph({
@@ -165,9 +173,9 @@ function htmlToDocx(html: string): Paragraph[] {
           })
         )
       }
-    } else if (element.type === 'tag') {
-      const $el = $(element)
-      const tagName = (element as Element).tagName?.toLowerCase()
+    } else if (node.type === 'tag') {
+      const $el = $(node)
+      const tagName = (node as Element).tagName?.toLowerCase()
       
       if (tagName === 'p' || tagName === 'div') {
         const para = processParagraph($el)
@@ -188,7 +196,7 @@ function htmlToDocx(html: string): Paragraph[] {
           children: [new TextRun('')],
         }))
       } else if (tagName === 'ul' || tagName === 'ol') {
-        $el.find('li').each((_, li: CheerioElement) => {
+        $el.find('li').each((_, li) => {
           const para = processListItem($(li), tagName === 'ol')
           if (para) paragraphs.push(para)
         })
@@ -221,7 +229,7 @@ function processParagraph($el: CheerioSelection): Paragraph | null {
 
   // Process all text nodes and inline elements
   const $ = cheerio.load('')
-  $el.contents().each((_idx: number, node: CheerioElement) => {
+  $el.contents().each((_idx: number, node: CheerioDomElement) => {
     const runs = processNodeWithFormatting($(node), '', {})
     textRuns.push(...runs)
   })
@@ -248,7 +256,7 @@ function processHeading(
   const align = parseAlignmentFromStyle(style)
   const $ = cheerio.load('')
 
-  $el.contents().each((_idx: number, node: CheerioElement) => {
+  $el.contents().each((_idx: number, node: CheerioDomElement) => {
     const runs = processNodeWithFormatting($(node), '', {})
     textRuns.push(...runs)
   })
@@ -274,7 +282,7 @@ function processListItem(
   const textRuns: TextRun[] = []
   const $ = cheerio.load('')
 
-  $el.contents().each((_idx: number, node: CheerioElement) => {
+  $el.contents().each((_idx: number, node: CheerioDomElement) => {
     const runs = processNodeWithFormatting($(node), '', {})
     textRuns.push(...runs)
   })
@@ -309,7 +317,7 @@ function processNode($node: CheerioSelection): TextRun[] {
 
   if (node.type !== 'tag') return runs
 
-  const tagName = (node as Element).tagName?.toLowerCase() || ''
+  const tagName = (node as unknown as Element).tagName?.toLowerCase() || ''
   const style = $node.attr('style') || ''
   const styles = parseStyles(style)
 
@@ -320,7 +328,7 @@ function processNode($node: CheerioSelection): TextRun[] {
   const nestedRuns: TextRun[] = []
   const $ = cheerio.load('')
 
-  $node.contents().each((_idx: number, child: CheerioElement) => {
+  $node.contents().each((_idx: number, child: CheerioDomElement) => {
     const childRuns = processNodeWithFormatting($(child), tagName, styles)
     nestedRuns.push(...childRuns)
   })
@@ -392,14 +400,14 @@ function processNodeWithFormatting(
 
   if (node.type !== 'tag') return runs
 
-  const tagName = (node as Element).tagName?.toLowerCase() || ''
+  const tagName = (node as unknown as Element).tagName?.toLowerCase() || ''
   const style = $node.attr('style') || ''
   const styles = { ...parentStyles, ...parseStyles(style) } // Merge with parent styles
 
   // Process nested elements
   const nestedRuns: TextRun[] = []
   const $ = cheerio.load('')
-  $node.contents().each((_idx: number, child: CheerioElement) => {
+  $node.contents().each((_idx: number, child: CheerioDomElement) => {
     const childRuns = processNodeWithFormatting($(child), tagName, styles)
     nestedRuns.push(...childRuns)
   })

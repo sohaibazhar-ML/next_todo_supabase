@@ -49,6 +49,9 @@ export interface DocumentSearchFilters {
   fileType?: DocumentFileType
   tags?: string[]
   featuredOnly?: boolean
+  fromDate?: string
+  toDate?: string
+  sort?: 'created_at_desc' | 'created_at_asc' | 'title_asc' | 'title_desc' | 'download_count_desc' | 'download_count_asc'
 }
 
 export interface DocumentWithCreator extends Document {

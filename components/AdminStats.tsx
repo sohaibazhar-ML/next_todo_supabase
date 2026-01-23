@@ -1,61 +1,12 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { isErrorWithMessage } from '@/types'
-import { API_ENDPOINTS, ERROR_MESSAGES, CONSOLE_MESSAGES } from '@/constants'
-
-interface StatsData {
-  summary: {
-    totalUsers: number
-    totalAdmins: number
-    totalDocuments: number
-  }
-  downloadsPerDocument: Array<{
-    id: string
-    title: string
-    file_name: string
-    category: string
-    total_downloads: number
-    filtered_downloads: number
-  }>
-  versionDownloads: Array<{
-    id: string
-    version_number: number
-    version_name: string | null
-    document_title: string
-    document_file_name: string
-    exported_file_path: string | null
-    exported_file_size: string | null
-    created_at: string
-  }>
-  userVersionsCount: Array<{
-    user_id: string
-    email: string
-    name: string
-    username: string
-    versions_count: number
-  }>
-  userDocumentDownloads: Array<{
-    id: string
-    user_email: string
-    user_name: string
-    document_title: string
-    document_file_name: string
-    document_category: string
-    downloaded_at: string | null
-  }>
-  filterOptions: {
-    categories: string[]
-    tags: string[]
-  }
-}
+import { useStatistics } from '@/hooks/api/useStats'
+import type { Statistics } from '@/services/api/stats'
 
 export default function AdminStats() {
   const t = useTranslations('stats')
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [stats, setStats] = useState<StatsData | null>(null)
   
   // Filters
   const [fromDate, setFromDate] = useState('')
@@ -67,55 +18,14 @@ export default function AdminStats() {
   // Active tabs
   const [activeTab, setActiveTab] = useState<'summary' | 'downloads' | 'versions' | 'users'>('summary')
 
-  const fetchStats = useCallback(async (filters?: {
-    fromDate?: string
-    toDate?: string
-    search?: string
-    category?: string
-    selectedTags?: string[]
-  }) => {
-    try {
-      setLoading(true)
-      setError(null)
-
-      // Use provided filters or current state
-      const filterFromDate = filters?.fromDate !== undefined ? filters.fromDate : fromDate
-      const filterToDate = filters?.toDate !== undefined ? filters.toDate : toDate
-      const filterSearch = filters?.search !== undefined ? filters.search : search
-      const filterCategory = filters?.category !== undefined ? filters.category : category
-      const filterSelectedTags = filters?.selectedTags !== undefined ? filters.selectedTags : selectedTags
-
-      const params = new URLSearchParams()
-      if (filterFromDate) params.append('fromDate', filterFromDate)
-      if (filterToDate) params.append('toDate', filterToDate)
-      if (filterSearch) params.append('search', filterSearch)
-      if (filterCategory) params.append('category', filterCategory)
-      if (filterSelectedTags.length > 0) params.append('tags', filterSelectedTags.join(','))
-
-      const response = await fetch(`${API_ENDPOINTS.ADMIN_STATS}?${params.toString()}`)
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch stats')
-      }
-
-      setStats(data)
-    } catch (err) {
-      const errorMessage = isErrorWithMessage(err)
-        ? err.message
-        : ERROR_MESSAGES.FETCH_STATISTICS
-      setError(errorMessage)
-      console.error(CONSOLE_MESSAGES.ERROR_FETCHING_STATS, err)
-    } finally {
-      setLoading(false)
-    }
-  }, [fromDate, toDate, search, category, selectedTags])
-
-  // Initial load
-  useEffect(() => {
-    fetchStats()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // Only run on mount
+  // Use React Query hook for data fetching
+  const { data: stats, isLoading, error, refetch } = useStatistics({
+    fromDate: fromDate || undefined,
+    toDate: toDate || undefined,
+    search: search || undefined,
+    category: category || undefined,
+    tags: selectedTags.length > 0 ? selectedTags : undefined,
+  })
 
   const handleTagToggle = (tag: string) => {
     setSelectedTags(prev => 
@@ -126,7 +36,7 @@ export default function AdminStats() {
   }
 
   const handleSubmit = () => {
-    fetchStats()
+    refetch()
   }
 
   const clearFilters = () => {
@@ -135,17 +45,9 @@ export default function AdminStats() {
     setSearch('')
     setCategory('')
     setSelectedTags([])
-    // Apply cleared filters immediately
-    fetchStats({
-      fromDate: '',
-      toDate: '',
-      search: '',
-      category: '',
-      selectedTags: [],
-    })
   }
 
-  if (loading && !stats) {
+  if (isLoading && !stats) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
@@ -159,7 +61,9 @@ export default function AdminStats() {
   if (error) {
     return (
       <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded">
-        <p className="text-sm text-red-700">{error}</p>
+        <p className="text-sm text-red-700">
+          {error instanceof Error ? error.message : 'Failed to fetch statistics'}
+        </p>
       </div>
     )
   }
@@ -169,7 +73,7 @@ export default function AdminStats() {
   return (
     <div className="space-y-6 relative">
       {/* Loading overlay when filters are being applied */}
-      {loading && stats && (
+      {isLoading && stats && (
         <div className="absolute inset-0 bg-white bg-opacity-75 z-50 flex items-center justify-center rounded-lg">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
@@ -179,7 +83,7 @@ export default function AdminStats() {
       )}
       
       {/* Disable pointer events when loading */}
-      <div className={loading && stats ? 'pointer-events-none opacity-60' : ''}>
+      <div className={isLoading && stats ? 'pointer-events-none opacity-60' : ''}>
         {/* Filters */}
         <div className="bg-gray-50 rounded-lg p-4 space-y-4">
           <div className="flex items-center justify-between">
@@ -187,17 +91,17 @@ export default function AdminStats() {
             <div className="flex gap-2">
               <button
                 onClick={clearFilters}
-                disabled={loading}
+                disabled={isLoading}
                 className="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {t('clearFilters')}
               </button>
               <button
                 onClick={handleSubmit}
-                disabled={loading}
+                disabled={isLoading}
                 className="px-4 py-2 text-sm text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
               >
-                {loading ? (
+                {isLoading ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
                     {t('applying') || 'Applying...'}

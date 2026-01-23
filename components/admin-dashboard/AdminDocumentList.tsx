@@ -1,11 +1,10 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { API_ENDPOINTS, CONSOLE_MESSAGES } from '@/constants'
-import type { Document, DocumentFileType, SerializedDocument } from '@/types/document'
-import { isErrorWithMessage } from '@/types'
+import { useDocuments, useDocumentFilterOptions } from '@/hooks/api/useDocuments'
 import { useDebounce } from '@/hooks/useDebounce'
+import type { DocumentSearchFilters } from '@/types/document'
 
 type SortOption = 'created_at_desc' | 'created_at_asc' | 'title_asc' | 'title_desc' | 'download_count_desc' | 'download_count_asc'
 
@@ -27,111 +26,23 @@ const DEFAULT_FILTERS: DocumentFilters = {
 
 export default function AdminDocumentList() {
   const t = useTranslations('adminDocuments')
-  const [documents, setDocuments] = useState<Document[]>([])
-  const [loading, setLoading] = useState<boolean>(false)
-  const [error, setError] = useState<string | null>(null)
   const [filters, setFilters] = useState<DocumentFilters>(DEFAULT_FILTERS)
-  const [categories, setCategories] = useState<string[]>([])
 
   const debouncedSearch = useDebounce(filters.search, 300)
 
-  useEffect(() => {
-    void fetchFilterOptions()
-  }, [])
+  // Use React Query hooks for data fetching
+  const documentFilters: DocumentSearchFilters = useMemo(() => ({
+    searchQuery: debouncedSearch || undefined,
+    category: filters.category || undefined,
+    fromDate: filters.fromDate || undefined,
+    toDate: filters.toDate || undefined,
+    sort: filters.sort || undefined,
+  }), [debouncedSearch, filters.category, filters.fromDate, filters.toDate, filters.sort])
 
-  useEffect(() => {
-    void fetchDocuments()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch, filters.fromDate, filters.toDate, filters.category, filters.sort])
-
-  const fetchFilterOptions = async () => {
-    try {
-      const response = await fetch(API_ENDPOINTS.DOCUMENT_FILTER_OPTIONS)
-      if (response.ok) {
-        const data = await response.json()
-        setCategories(data.categories || [])
-      }
-    } catch (err) {
-      console.error(CONSOLE_MESSAGES.ERROR_FETCHING_FILTER_OPTIONS, err)
-    }
-  }
-
-  const fetchDocuments = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-
-      const params = new URLSearchParams()
-
-      if (debouncedSearch) {
-        params.append('searchQuery', debouncedSearch)
-      }
-
-      if (filters.category) {
-        params.append('category', filters.category)
-      }
-
-      if (filters.fromDate) {
-        params.append('fromDate', filters.fromDate)
-      }
-
-      if (filters.toDate) {
-        params.append('toDate', filters.toDate)
-      }
-
-      if (filters.sort) {
-        params.append('sort', filters.sort)
-      }
-
-      const response = await fetch(
-        `${API_ENDPOINTS.DOCUMENTS}?${params.toString()}`,
-      )
-      const data = await response.json()
-
-      if (!response.ok) {
-        const message =
-          (typeof data === 'object' &&
-            data !== null &&
-            'error' in data &&
-            typeof (data as { error: unknown }).error === 'string' &&
-            (data as { error: string }).error) ||
-          t('errors.fetchFailed')
-
-        setError(message)
-        return
-      }
-
-      const normalized: Document[] = Array.isArray(data)
-        ? data.map((doc: SerializedDocument | Document) => ({
-            ...doc,
-            file_size:
-              typeof doc.file_size === 'bigint'
-                ? Number(doc.file_size)
-                : typeof doc.file_size === 'number'
-                ? doc.file_size
-                : 0,
-            created_at:
-              typeof doc.created_at === 'string'
-                ? doc.created_at
-                : new Date(doc.created_at).toISOString(),
-            updated_at:
-              typeof doc.updated_at === 'string'
-                ? doc.updated_at
-                : new Date(doc.updated_at).toISOString(),
-          }))
-        : []
-
-      setDocuments(normalized)
-    } catch (err) {
-      const errorMessage = isErrorWithMessage(err)
-        ? err.message
-        : t('errors.fetchFailed')
-      setError(errorMessage)
-      console.error(CONSOLE_MESSAGES.ERROR_FETCHING_DOCUMENTS, err)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const { data: documents = [], isLoading, error } = useDocuments(documentFilters)
+  const { data: filterOptions } = useDocumentFilterOptions()
+  
+  const categories = filterOptions?.categories || []
 
   const handleFilterChange = (key: keyof DocumentFilters, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }))
@@ -157,7 +68,7 @@ export default function AdminDocumentList() {
     })
   }
 
-  if (loading && documents.length === 0) {
+  if (isLoading && documents.length === 0) {
     return (
       <div className="flex justify-center items-center py-12">
         <svg
@@ -180,6 +91,17 @@ export default function AdminDocumentList() {
             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
           ></path>
         </svg>
+      </div>
+    )
+  }
+
+  // Display error if any
+  if (error) {
+    return (
+      <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+        <p className="text-sm text-red-700">
+          {error instanceof Error ? error.message : t('errors.fetchFailed')}
+        </p>
       </div>
     )
   }
@@ -383,7 +305,7 @@ export default function AdminDocumentList() {
           </table>
         </div>
 
-        {loading && documents.length > 0 && (
+        {isLoading && documents.length > 0 && (
           <div className="flex justify-center items-center py-4 border-t border-gray-200">
             <svg
               className="animate-spin h-5 w-5 text-indigo-600"

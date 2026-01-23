@@ -17,72 +17,24 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
-import type { Document, SerializedDocument } from '@/types/document'
-import { API_ENDPOINTS, CONTENT_TYPES, ERROR_MESSAGES, CONSOLE_MESSAGES, DEFAULT_VALUES } from '@/constants'
-import { isErrorWithMessage } from '@/types'
+import type { Document } from '@/types/document'
+import { ERROR_MESSAGES, CONSOLE_MESSAGES, DEFAULT_VALUES } from '@/constants'
+import { useDocuments, useDeleteDocument, useUpdateDocument, useDocumentVersions } from '@/hooks/api/useDocuments'
 import DocumentEditModal from './DocumentEditModal'
 
 export default function DocumentManagement() {
   const t = useTranslations('documentManagement')
-  const [documents, setDocuments] = useState<Document[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [editingDoc, setEditingDoc] = useState<Document | null>(null)
   const [expandedVersions, setExpandedVersions] = useState<Set<string>>(new Set())
-  const [versions, setVersions] = useState<Record<string, Document[]>>({})
-  const [loadingVersions, setLoadingVersions] = useState<Set<string>>(new Set())
   const supabase = createClient() // Still needed for storage operations
 
-  useEffect(() => {
-    fetchDocuments()
-  }, [])
-
-  /**
-   * Fetch all documents from API
-   */
-  const fetchDocuments = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-
-      const response = await fetch(API_ENDPOINTS.DOCUMENTS)
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(
-          (typeof data === 'object' && data !== null && 'error' in data && typeof data.error === 'string')
-            ? data.error
-            : ERROR_MESSAGES.FETCH_DOCUMENTS
-        )
-      }
-
-      // Convert BigInt file_size to number and ensure proper typing
-      const docs: Document[] = Array.isArray(data)
-        ? data.map((doc: SerializedDocument | Document) => ({
-            ...doc,
-            file_size:
-              typeof doc.file_size === 'bigint'
-                ? Number(doc.file_size)
-                : typeof doc.file_size === 'number'
-                ? doc.file_size
-                : 0,
-          }))
-        : []
-
-      setDocuments(docs)
-    } catch (err) {
-      const errorMessage = isErrorWithMessage(err)
-        ? err.message
-        : ERROR_MESSAGES.FETCH_DOCUMENTS
-      setError(errorMessage)
-      console.error(CONSOLE_MESSAGES.ERROR_FETCHING_DOCUMENTS, err)
-    } finally {
-      setLoading(false)
-    }
-  }
+  // Use React Query hooks for data fetching
+  const { data: documents = [], isLoading, error } = useDocuments()
+  const deleteMutation = useDeleteDocument()
+  const updateMutation = useUpdateDocument()
 
   const handleDelete = async (documentId: string, filePath: string) => {
     if (!confirm(t('confirmDelete'))) {
@@ -100,28 +52,14 @@ export default function DocumentManagement() {
         // Continue with database deletion even if storage deletion fails
       }
 
-      // Delete from database via API
-      const response = await fetch(API_ENDPOINTS.DOCUMENT_BY_ID(documentId), {
-        method: 'DELETE',
-      })
-
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(
-          (typeof data === 'object' && data !== null && 'error' in data && typeof data.error === 'string')
-            ? data.error
-            : ERROR_MESSAGES.DELETE_DOCUMENT
-        )
-      }
-
-      // Refresh list
-      fetchDocuments()
+      // Delete from database via mutation
+      await deleteMutation.mutateAsync(documentId)
     } catch (err) {
-      const errorMessage = isErrorWithMessage(err)
+      const errorMessage = err instanceof Error
         ? err.message
         : ERROR_MESSAGES.DELETE_DOCUMENT
-      setError(errorMessage)
       console.error(CONSOLE_MESSAGES.DELETE_ERROR, err)
+      alert(errorMessage) // Show error to user
     }
   }
 
@@ -130,88 +68,120 @@ export default function DocumentManagement() {
    */
   const handleToggleFeatured = async (document: Document) => {
     try {
-      const response = await fetch(API_ENDPOINTS.DOCUMENT_BY_ID(document.id), {
-        method: 'PUT',
-        headers: { 'Content-Type': CONTENT_TYPES.JSON },
-        body: JSON.stringify({
+      await updateMutation.mutateAsync({
+        id: document.id,
+        updates: {
           is_featured: !document.is_featured,
-        }),
+        },
       })
-
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(
-          (typeof data === 'object' && data !== null && 'error' in data && typeof data.error === 'string')
-            ? data.error
-            : ERROR_MESSAGES.UPDATE_DOCUMENT
-        )
-      }
-
-      fetchDocuments()
     } catch (err) {
-      const errorMessage = isErrorWithMessage(err)
+      const errorMessage = err instanceof Error
         ? err.message
         : ERROR_MESSAGES.UPDATE_DOCUMENT
-      setError(errorMessage)
       console.error(CONSOLE_MESSAGES.UPDATE_ERROR, err)
+      alert(errorMessage) // Show error to user
     }
   }
 
-  const fetchVersions = async (documentId: string) => {
-    if (expandedVersions.has(documentId)) {
-      // Collapse
-      setExpandedVersions(prev => {
-        const newSet = new Set(prev)
-        newSet.delete(documentId)
-        return newSet
-      })
-      return
+  // Component to handle versions for a single document
+  const DocumentVersions = ({ documentId, onEdit, onDelete }: { 
+    documentId: string
+    onEdit: (doc: Document) => void
+    onDelete: (id: string, filePath: string) => void
+  }) => {
+    const { data: versions = [], isLoading: isLoadingVersions } = useDocumentVersions(
+      expandedVersions.has(documentId) ? documentId : null
+    )
+
+    if (!expandedVersions.has(documentId)) return null
+
+    if (isLoadingVersions) {
+      return (
+        <div className="mt-4 pl-8 border-l-2 border-indigo-200">
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            {t('loadingVersions')}
+          </div>
+        </div>
+      )
     }
 
-    try {
-      setLoadingVersions((prev) => new Set(prev).add(documentId))
-      const response = await fetch(API_ENDPOINTS.DOCUMENT_VERSIONS(documentId))
-      const data = await response.json()
+    if (versions.length === 0) {
+      return (
+        <div className="mt-4 pl-8 border-l-2 border-indigo-200">
+          <p className="text-sm text-gray-500">{t('noVersions')}</p>
+        </div>
+      )
+    }
 
-      if (!response.ok) {
-        throw new Error(
-          (typeof data === 'object' && data !== null && 'error' in data && typeof data.error === 'string')
-            ? data.error
-            : ERROR_MESSAGES.FETCH_VERSIONS
-        )
+    return (
+      <div className="mt-4 pt-4 border-t border-gray-200">
+        <h4 className="text-sm font-semibold text-gray-700 mb-3">{t('versionHistory')}</h4>
+        <div className="space-y-2">
+          {versions.map((version) => (
+            <div
+              key={version.id}
+              className={`p-3 rounded-lg border ${
+                version.id === documentId
+                  ? 'bg-indigo-50 border-indigo-200'
+                  : 'bg-gray-50 border-gray-200'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-medium text-gray-900">
+                    {t('version')} {version.version || 'N/A'}
+                  </span>
+                  {version.id === documentId && (
+                    <span className="px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded text-xs font-medium">
+                      {t('current')}
+                    </span>
+                  )}
+                  <span className="text-xs text-gray-500">
+                    {new Date(version.created_at).toLocaleString()}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    {Math.round(version.file_size / 1024)} KB
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => onEdit(version)}
+                    className="px-2 py-1 bg-indigo-100 text-indigo-800 rounded text-xs font-medium hover:bg-indigo-200 transition"
+                    title="Edit this version (will update all versions)"
+                  >
+                    {t('edit')}
+                  </button>
+                  {version.id !== documentId && (
+                    <button
+                      onClick={() => onDelete(version.id, version.file_path)}
+                      className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs font-medium hover:bg-red-200 transition"
+                    >
+                      {t('deleteVersion')}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  const toggleVersions = (documentId: string) => {
+    setExpandedVersions(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(documentId)) {
+        newSet.delete(documentId)
+      } else {
+        newSet.add(documentId)
       }
-
-      // Convert BigInt file_size to number and ensure proper typing
-      const versionsData: Document[] = Array.isArray(data)
-        ? data.map((doc: SerializedDocument | Document) => ({
-            ...doc,
-            file_size:
-              typeof doc.file_size === 'bigint'
-                ? Number(doc.file_size)
-                : typeof doc.file_size === 'number'
-                ? doc.file_size
-                : 0,
-          }))
-        : []
-
-      setVersions((prev) => ({
-        ...prev,
-        [documentId]: versionsData,
-      }))
-      setExpandedVersions((prev) => new Set(prev).add(documentId))
-    } catch (err) {
-      const errorMessage = isErrorWithMessage(err)
-        ? err.message
-        : ERROR_MESSAGES.FETCH_VERSIONS
-      setError(errorMessage)
-      console.error(CONSOLE_MESSAGES.ERROR_FETCHING_VERSIONS, err)
-    } finally {
-      setLoadingVersions((prev) => {
-        const newSet = new Set(prev)
-        newSet.delete(documentId)
-        return newSet
-      })
-    }
+      return newSet
+    })
   }
 
   const handleUploadNewVersion = (documentId: string) => {
@@ -220,16 +190,11 @@ export default function DocumentManagement() {
   }
 
   const handleEditSave = () => {
-    // Refresh documents list after editing
-    fetchDocuments()
-    // Also refresh versions if any are expanded
-    const expandedIds = Array.from(expandedVersions)
-    expandedIds.forEach(id => {
-      fetchVersions(id)
-    })
+    // React Query will automatically refetch when mutations invalidate the cache
+    setEditingDoc(null)
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center py-12">
         <svg
@@ -259,7 +224,9 @@ export default function DocumentManagement() {
   if (error) {
     return (
       <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
-        <p className="text-sm text-red-700">{error}</p>
+        <p className="text-sm text-red-700">
+          {error instanceof Error ? error.message : 'Failed to fetch documents'}
+        </p>
       </div>
     )
   }
@@ -329,12 +296,10 @@ export default function DocumentManagement() {
                     {t('edit')}
                   </button>
                   <button
-                    onClick={() => fetchVersions(document.id)}
+                    onClick={() => toggleVersions(document.id)}
                     className="px-3 py-1 bg-blue-100 text-blue-800 rounded text-sm font-medium hover:bg-blue-200 transition"
                   >
-                    {loadingVersions.has(document.id) ? (
-                      t('loading')
-                    ) : expandedVersions.has(document.id) ? (
+                    {expandedVersions.has(document.id) ? (
                       t('hideVersions')
                     ) : (
                       t('viewVersions')
@@ -366,63 +331,11 @@ export default function DocumentManagement() {
               </div>
               
               {/* Version History */}
-              {expandedVersions.has(document.id) && versions[document.id] && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-3">{t('versionHistory')}</h4>
-                  <div className="space-y-2">
-                    {versions[document.id].map((version) => (
-                      <div
-                        key={version.id}
-                        className={`p-3 rounded-lg border ${
-                          version.id === document.id
-                            ? 'bg-indigo-50 border-indigo-200'
-                            : 'bg-gray-50 border-gray-200'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <span className="text-sm font-medium text-gray-900">
-                              {t('version')}{' '}
-                              {version.version || DEFAULT_VALUES.DEFAULT_VERSION}
-                            </span>
-                            {version.id === document.id && (
-                              <span className="px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded text-xs font-medium">
-                                {t('current')}
-                              </span>
-                            )}
-                            <span className="text-xs text-gray-500">
-                              {new Date(version.created_at).toLocaleString()}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              {Math.round(
-                                version.file_size / DEFAULT_VALUES.FILE_SIZE_BASE
-                              )}{' '}
-                              KB
-                            </span>
-                          </div>
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => setEditingDoc(version)}
-                              className="px-2 py-1 bg-indigo-100 text-indigo-800 rounded text-xs font-medium hover:bg-indigo-200 transition"
-                              title="Edit this version (will update all versions)"
-                            >
-                              {t('edit')}
-                            </button>
-                            {version.id !== document.id && (
-                              <button
-                                onClick={() => handleDelete(version.id, version.file_path)}
-                                className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs font-medium hover:bg-red-200 transition"
-                              >
-                                {t('deleteVersion')}
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <DocumentVersions 
+                documentId={document.id}
+                onEdit={setEditingDoc}
+                onDelete={handleDelete}
+              />
             </div>
           ))}
         </div>

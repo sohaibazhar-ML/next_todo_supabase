@@ -286,6 +286,12 @@ export const ERROR_MESSAGES = {
    */
   FETCH_PROFILE: 'Failed to fetch profile',
 
+  /**
+   * Failed to fetch profiles (plural)
+   * Used in profiles API service and user management components
+   */
+  FETCH_PROFILES: 'Failed to fetch profiles',
+
   // ============================================================================
   // Subadmin Error Messages
   // ============================================================================

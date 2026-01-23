@@ -1,13 +1,12 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { API_ENDPOINTS, CONSOLE_MESSAGES } from '@/constants'
 import type { UserProfile, UserRole } from '@/types/user'
-import { isErrorWithMessage } from '@/types'
 import UserViewModal from '@/components/admin-dashboard/UserViewModal'
 import UserEditModal from '@/components/admin-dashboard/UserEditModal'
 import { useDebounce } from '@/hooks/useDebounce'
+import { useUsers } from '@/hooks/api/useUsers'
 
 type RoleFilter = UserRole | 'all'
 
@@ -32,87 +31,19 @@ const DEFAULT_FILTERS: UserFilters = {
 
 export default function AdminUserManagement() {
   const t = useTranslations('adminUsers')
-  const [users, setUsers] = useState<UserProfile[]>([])
-  const [loading, setLoading] = useState<boolean>(false)
-  const [error, setError] = useState<string | null>(null)
   const [filters, setFilters] = useState<UserFilters>(DEFAULT_FILTERS)
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null)
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null)
 
   const debouncedSearch = useDebounce(filters.search, 300)
 
-  useEffect(() => {
-    void fetchUsers()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch, filters.fromDate, filters.toDate, filters.role])
-
-  const fetchUsers = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-
-      const params = new URLSearchParams()
-
-      if (filters.role !== 'all') {
-        params.append('role', filters.role)
-      }
-
-      if (filters.fromDate) {
-        params.append('fromDate', filters.fromDate)
-      }
-
-      if (filters.toDate) {
-        params.append('toDate', filters.toDate)
-      }
-
-      if (debouncedSearch) {
-        params.append('search', debouncedSearch)
-      }
-
-      const response = await fetch(
-        `${API_ENDPOINTS.PROFILES}?${params.toString()}`,
-      )
-      const data = await response.json()
-
-      if (!response.ok) {
-        const message =
-          (typeof data === 'object' &&
-            data !== null &&
-            'error' in data &&
-            typeof (data as { error: unknown }).error === 'string' &&
-            (data as { error: string }).error) ||
-          t('errors.fetchFailed')
-
-        setError(message)
-        return
-      }
-
-      const normalized: UserProfile[] = Array.isArray(data)
-        ? data.map((user) => ({
-            ...user,
-            created_at:
-              typeof user.created_at === 'string'
-                ? user.created_at
-                : new Date(user.created_at).toISOString(),
-            updated_at:
-              typeof user.updated_at === 'string'
-                ? user.updated_at
-                : new Date(user.updated_at).toISOString(),
-          }))
-        : []
-
-      setUsers(normalized)
-    } catch (err) {
-      const message = isErrorWithMessage(err)
-        ? err.message
-        : t('errors.fetchFailed')
-      setError(message)
-      // eslint-disable-next-line no-console
-      console.error(CONSOLE_MESSAGES.ERROR_FETCHING_USERS, err)
-    } finally {
-      setLoading(false)
-    }
-  }
+  // Use React Query hook for data fetching
+  const { data: users = [], isLoading, error } = useUsers({
+    role: filters.role !== 'all' ? filters.role : undefined,
+    fromDate: filters.fromDate || undefined,
+    toDate: filters.toDate || undefined,
+    search: debouncedSearch || undefined,
+  })
 
   const handleFilterChange = (updated: Partial<UserFilters>) => {
     setFilters((current) => ({
@@ -138,7 +69,7 @@ export default function AdminUserManagement() {
 
   const handleEditCompleted = () => {
     setEditingUser(null)
-    void fetchUsers()
+    // React Query will automatically refetch when mutations invalidate the cache
   }
 
   const visibleUsers = useMemo(() => users, [users])
@@ -276,7 +207,7 @@ export default function AdminUserManagement() {
           </p>
         </div>
 
-        {loading ? (
+        {isLoading ? (
           <div className="flex justify-center items-center py-8">
             <svg
               className="animate-spin h-6 w-6 text-purple-600"
@@ -302,7 +233,9 @@ export default function AdminUserManagement() {
         ) : error ? (
           <div className="p-4">
             <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
-              <p className="text-sm text-red-700">{error}</p>
+              <p className="text-sm text-red-700">
+                {error instanceof Error ? error.message : t('errors.fetchFailed')}
+              </p>
             </div>
           </div>
         ) : visibleUsers.length === 0 ? (

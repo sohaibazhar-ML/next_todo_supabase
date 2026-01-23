@@ -18,105 +18,30 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import type { Document, DocumentSearchFilters, SerializedDocument } from '@/types/document'
-import { API_ENDPOINTS, ERROR_MESSAGES, CONSOLE_MESSAGES } from '@/constants'
-import { isErrorWithMessage } from '@/types'
+import type { DocumentSearchFilters } from '@/types/document'
+import { useDocuments, useDocumentFilterOptions } from '@/hooks/api/useDocuments'
 import DocumentCard from './DocumentCard'
 import DocumentSearch from './DocumentSearch'
 
 export default function DocumentList() {
   const t = useTranslations('documentList')
-  const [documents, setDocuments] = useState<Document[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [filters, setFilters] = useState<DocumentSearchFilters>({})
-  const [categories, setCategories] = useState<string[]>([])
-  const [fileTypes, setFileTypes] = useState<string[]>([])
-  const [tags, setTags] = useState<string[]>([])
 
-  useEffect(() => {
-    fetchFilterOptions()
-    fetchDocuments()
-  }, [])
-
-  useEffect(() => {
-    fetchDocuments()
-  }, [filters])
-
-  /**
-   * Fetch filter options (categories, file types, tags) from API
-   */
-  const fetchFilterOptions = async () => {
-    try {
-      const response = await fetch(API_ENDPOINTS.DOCUMENT_FILTER_OPTIONS)
-      if (response.ok) {
-        const data = await response.json()
-        setCategories(data.categories || [])
-        setFileTypes(data.fileTypes || [])
-        setTags(data.tags || [])
-      }
-    } catch (err) {
-      console.error(CONSOLE_MESSAGES.ERROR_FETCHING_FILTER_OPTIONS, err)
-    }
-  }
-
-  const fetchDocuments = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-
-      const params = new URLSearchParams()
-      if (filters.category) params.append('category', filters.category)
-      if (filters.fileType) params.append('fileType', filters.fileType)
-      if (filters.featuredOnly) params.append('featuredOnly', 'true')
-      if (filters.searchQuery) params.append('searchQuery', filters.searchQuery)
-      if (filters.tags && filters.tags.length > 0) params.append('tags', filters.tags.join(','))
-
-      const response = await fetch(
-        `${API_ENDPOINTS.DOCUMENTS}?${params.toString()}`
-      )
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(
-          (typeof data === 'object' && data !== null && 'error' in data && typeof data.error === 'string')
-            ? data.error
-            : ERROR_MESSAGES.FETCH_DOCUMENTS
-        )
-      }
-
-      // Convert BigInt file_size to number and ensure proper typing
-      const documents: Document[] = Array.isArray(data)
-        ? data.map((doc: SerializedDocument | Document) => ({
-            ...doc,
-            file_size:
-              typeof doc.file_size === 'bigint'
-                ? Number(doc.file_size)
-                : typeof doc.file_size === 'number'
-                ? doc.file_size
-                : 0,
-          }))
-        : []
-
-      setDocuments(documents)
-    } catch (err) {
-      const errorMessage = isErrorWithMessage(err)
-        ? err.message
-        : ERROR_MESSAGES.FETCH_DOCUMENTS
-      setError(errorMessage)
-      console.error(CONSOLE_MESSAGES.ERROR_FETCHING_DOCUMENTS, err)
-    } finally {
-      setLoading(false)
-    }
-  }
+  // Use React Query hooks for data fetching
+  const { data: documents = [], isLoading, error } = useDocuments(filters)
+  const { data: filterOptions } = useDocumentFilterOptions()
+  
+  const categories = filterOptions?.categories || []
+  const fileTypes = filterOptions?.fileTypes || []
+  const tags = filterOptions?.tags || []
 
   const handleFilterChange = (newFilters: DocumentSearchFilters) => {
     setFilters(newFilters)
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="bg-white rounded-2xl shadow-xl p-12">
         <div className="flex justify-center items-center py-12">
@@ -133,7 +58,9 @@ export default function DocumentList() {
     return (
       <div className="bg-white rounded-2xl shadow-xl p-8">
         <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
-          <p className="text-sm text-red-700">{error}</p>
+          <p className="text-sm text-red-700">
+            {error instanceof Error ? error.message : 'Failed to fetch documents'}
+          </p>
         </div>
       </div>
     )

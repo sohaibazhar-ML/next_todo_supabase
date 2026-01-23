@@ -1,40 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { API_ENDPOINTS, CONTENT_TYPES, CONSOLE_MESSAGES } from '@/constants'
-
-interface Subadmin {
-  id: string
-  username: string
-  email: string
-  first_name: string
-  last_name: string
-  role: string
-  permissions: {
-    can_upload_documents: boolean
-    can_view_stats: boolean
-    is_active: boolean
-  }
-  created_at: string
-  updated_at: string
-}
-
-interface User {
-  id: string
-  username: string
-  email: string
-  first_name: string
-  last_name: string
-  role: string
-}
+import { useSubadmins, useCreateSubadmin, useUpdateSubadmin, useDeleteSubadmin } from '@/hooks/api/useSubadmins'
+import { useUsers } from '@/hooks/api/useUsers'
+import type { Subadmin } from '@/services/api/subadmins'
 
 export default function SubadminManagement() {
   const t = useTranslations('subadmin')
-  const [subadmins, setSubadmins] = useState<Subadmin[]>([])
-  const [users, setUsers] = useState<User[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -45,77 +18,40 @@ export default function SubadminManagement() {
     is_active: true,
   })
 
-  useEffect(() => {
-    fetchSubadmins()
-    fetchUsers()
-  }, [])
-
-  const fetchSubadmins = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const response = await fetch(API_ENDPOINTS.ADMIN_SUBADMINS)
-      if (!response.ok) {
-        const data = await response.json()
-        setError(data.error || 'Failed to fetch subadmins')
-        return
-      }
-      const data = await response.json()
-      setSubadmins(data)
-    } catch (err) {
-      setError('Failed to fetch subadmins')
-      console.error(CONSOLE_MESSAGES.ERROR_FETCHING_SUBADMINS, err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch(`${API_ENDPOINTS.PROFILES}?role=user`)
-      if (response.ok) {
-        const data = await response.json()
-        setUsers(data)
-      }
-    } catch (err) {
-      console.error(CONSOLE_MESSAGES.ERROR_FETCHING_USERS, err)
-    }
-  }
+  // Use React Query hooks for data fetching
+  const { data: subadmins = [], isLoading, error } = useSubadmins()
+  const { data: users = [] } = useUsers({ role: 'user' })
+  
+  // Mutations
+  const createMutation = useCreateSubadmin()
+  const updateMutation = useUpdateSubadmin()
+  const deleteMutation = useDeleteSubadmin()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError(null)
     setMessage(null)
 
     try {
-      const url = editingId
-        ? API_ENDPOINTS.ADMIN_SUBADMIN_BY_ID(editingId)
-        : API_ENDPOINTS.ADMIN_SUBADMINS
-      const method = editingId ? 'PATCH' : 'POST'
-
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': CONTENT_TYPES.JSON },
-        body: JSON.stringify(editingId ? {
-          can_upload_documents: formData.can_upload_documents,
-          can_view_stats: formData.can_view_stats,
-          is_active: formData.is_active,
-        } : {
+      if (editingId) {
+        await updateMutation.mutateAsync({
+          userId: editingId,
+          updates: {
+            can_upload_documents: formData.can_upload_documents,
+            can_view_stats: formData.can_view_stats,
+            is_active: formData.is_active,
+          },
+        })
+        setMessage(t('updatedSuccessfully'))
+      } else {
+        await createMutation.mutateAsync({
           userId: formData.userId,
           can_upload_documents: formData.can_upload_documents,
           can_view_stats: formData.can_view_stats,
           is_active: formData.is_active,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        setError(data.error || 'Failed to save subadmin')
-        return
+        })
+        setMessage(t('createdSuccessfully'))
       }
 
-      setMessage(editingId ? t('updatedSuccessfully') : t('createdSuccessfully'))
       setShowForm(false)
       setEditingId(null)
       setFormData({
@@ -124,11 +60,12 @@ export default function SubadminManagement() {
         can_view_stats: false,
         is_active: true,
       })
-      fetchSubadmins()
-      fetchUsers()
     } catch (err) {
-      setError('Failed to save subadmin')
-      console.error(CONSOLE_MESSAGES.ERROR_SAVING_SUBADMIN, err)
+      const errorMessage = err instanceof Error
+        ? err.message
+        : 'Failed to save subadmin'
+      setMessage(errorMessage)
+      console.error('Error saving subadmin:', err)
     }
   }
 
@@ -149,50 +86,39 @@ export default function SubadminManagement() {
     }
 
     try {
-      const response = await fetch(API_ENDPOINTS.ADMIN_SUBADMIN_BY_ID(userId), {
-        method: 'DELETE',
-      })
-
-      if (!response.ok) {
-        const data = await response.json()
-        setError(data.error || 'Failed to remove subadmin')
-        return
-      }
-
+      await deleteMutation.mutateAsync(userId)
       setMessage(t('removedSuccessfully'))
-      fetchSubadmins()
-      fetchUsers()
     } catch (err) {
-      setError('Failed to remove subadmin')
-      console.error(CONSOLE_MESSAGES.ERROR_REMOVING_SUBADMIN, err)
+      const errorMessage = err instanceof Error
+        ? err.message
+        : 'Failed to remove subadmin'
+      setMessage(errorMessage)
+      console.error('Error removing subadmin:', err)
     }
   }
 
   const handleToggleActive = async (subadmin: Subadmin) => {
     try {
-      const response = await fetch(API_ENDPOINTS.ADMIN_SUBADMIN_BY_ID(subadmin.id), {
-        method: 'PATCH',
-        headers: { 'Content-Type': CONTENT_TYPES.JSON },
-        body: JSON.stringify({
+      await updateMutation.mutateAsync({
+        userId: subadmin.id,
+        updates: {
           is_active: !subadmin.permissions.is_active,
-        }),
+        },
       })
-
-      if (!response.ok) {
-        const data = await response.json()
-        setError(data.error || 'Failed to update subadmin')
-        return
-      }
-
       setMessage(t('updatedSuccessfully'))
-      fetchSubadmins()
     } catch (err) {
-      setError('Failed to update subadmin')
-      console.error(CONSOLE_MESSAGES.ERROR_UPDATING_SUBADMIN, err)
+      const errorMessage = err instanceof Error
+        ? err.message
+        : 'Failed to update subadmin'
+      setMessage(errorMessage)
+      console.error('Error updating subadmin:', err)
     }
   }
 
-  if (loading) {
+  const isAnyLoading = isLoading || createMutation.isPending || updateMutation.isPending || deleteMutation.isPending
+  const mutationError = createMutation.error || updateMutation.error || deleteMutation.error
+
+  if (isAnyLoading && subadmins.length === 0) {
     return (
       <div className="flex justify-center items-center py-12">
         <svg className="animate-spin h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -205,15 +131,25 @@ export default function SubadminManagement() {
 
   return (
     <div className="space-y-6">
-      {error && (
+      {(error || mutationError) && (
         <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
-          <p className="text-sm text-red-700">{error}</p>
+          <p className="text-sm text-red-700">
+            {error instanceof Error ? error.message : mutationError instanceof Error ? mutationError.message : 'An error occurred'}
+          </p>
         </div>
       )}
 
       {message && (
-        <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg">
-          <p className="text-sm text-green-700">{message}</p>
+        <div className={`border-l-4 p-4 rounded-lg ${
+          message.includes('Failed') || message.includes('error')
+            ? 'bg-red-50 border-red-500'
+            : 'bg-green-50 border-green-500'
+        }`}>
+          <p className={`text-sm ${
+            message.includes('Failed') || message.includes('error')
+              ? 'text-red-700'
+              : 'text-green-700'
+          }`}>{message}</p>
         </div>
       )}
 
