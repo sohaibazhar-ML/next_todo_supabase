@@ -22,10 +22,12 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
-import type { Document, SerializedDocument } from '@/types/document'
+import type { Document } from '@/types/document'
 import { API_ENDPOINTS, CONTENT_TYPES, ERROR_MESSAGES, CONSOLE_MESSAGES, DEFAULT_VALUES } from '@/constants'
 import { isErrorWithMessage } from '@/types'
 import { formatFileSize, getFileIconColor } from '@/lib/utils/file-utils'
+import { useDocumentVersions } from '@/hooks/api/useDocuments'
+import { useDownloadLogs } from '@/hooks/api/useDownloadLogs'
 
 interface DocumentCardProps {
   document: Document
@@ -37,12 +39,25 @@ export default function DocumentCard({ document }: DocumentCardProps) {
   const [downloading, setDownloading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showVersions, setShowVersions] = useState(false)
-  const [versions, setVersions] = useState<Document[]>([])
-  const [loadingVersions, setLoadingVersions] = useState(false)
   const [selectedVersion, setSelectedVersion] = useState<Document | null>(document)
-  const [versionCount, setVersionCount] = useState<number | null>(null)
-  const [actualDownloadCount, setActualDownloadCount] = useState<number | null>(null)
   const supabase = createClient()
+
+  // Use React Query hooks for data fetching
+  const { data: versions = [], isLoading: loadingVersions } = useDocumentVersions(
+    showVersions ? document.id : null
+  )
+  const { data: downloadLogs = [] } = useDownloadLogs({ documentId: document.id })
+  
+  const versionCount = versions.length
+  const actualDownloadCount = downloadLogs.length
+
+  // Update selected version when versions are loaded
+  useEffect(() => {
+    if (versions.length > 0 && showVersions) {
+      const currentVersion = versions.find((v: Document) => v.id === document.id) || document
+      setSelectedVersion(currentVersion)
+    }
+  }, [versions, showVersions, document])
 
   // Check if document can be edited (PDF or DOCX/DOC files)
   // Database stores: 'pdf' for PDFs, 'document' for DOCX/DOC files
@@ -65,90 +80,16 @@ export default function DocumentCard({ document }: DocumentCardProps) {
     )
   }
 
-  useEffect(() => {
-    const fetchVersionCount = async () => {
-      try {
-        const response = await fetch(API_ENDPOINTS.DOCUMENT_VERSIONS(document.id))
-        if (response.ok) {
-          const data = await response.json()
-          setVersionCount(Array.isArray(data) ? data.length : 0)
-        }
-      } catch (err) {
-        console.error(CONSOLE_MESSAGES.ERROR_FETCHING_VERSIONS, err)
-      }
-    }
-    fetchVersionCount()
-  }, [document.id])
-
-  // Fetch actual download count from download_logs
-  useEffect(() => {
-    const fetchActualDownloadCount = async () => {
-      try {
-        const response = await fetch(`${API_ENDPOINTS.DOWNLOAD_LOGS}?documentId=${document.id}`)
-        if (response.ok) {
-          const logs = await response.json()
-          setActualDownloadCount(Array.isArray(logs) ? logs.length : 0)
-        }
-      } catch (err) {
-        console.error(CONSOLE_MESSAGES.ERROR_FETCHING_DOWNLOAD_COUNT, err)
-      }
-    }
-    fetchActualDownloadCount()
-  }, [document.id])
 
   /**
-   * Fetch document versions from API
+   * Toggle versions display
    */
-  const fetchVersions = async () => {
+  const toggleVersions = () => {
     if (showVersions) {
       setShowVersions(false)
-      return
-    }
-
-    try {
-      setLoadingVersions(true)
-      const response = await fetch(API_ENDPOINTS.DOCUMENT_VERSIONS(document.id))
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(
-          (typeof data === 'object' && data !== null && 'error' in data && typeof data.error === 'string')
-            ? data.error
-            : ERROR_MESSAGES.FETCH_VERSIONS_FAILED
-        )
-      }
-
-      // Process versions: handle BigInt conversion and type safety
-      const versionsData: Document[] = Array.isArray(data)
-        ? data.map((doc: SerializedDocument | Document) => ({
-            ...doc,
-            file_size:
-              typeof doc.file_size === 'bigint'
-                ? Number(doc.file_size)
-                : typeof doc.file_size === 'number'
-                ? doc.file_size
-                : 0,
-          }))
-        : []
-
-      setVersions(versionsData)
-      setVersionCount(versionsData.length)
-      const currentVersion =
-        versionsData.find((v: Document) => v.id === document.id) || document
-
-      if (currentVersion?.id) {
-        setSelectedVersion(currentVersion)
-        setShowVersions(true)
-      } else {
-        setError(ERROR_MESSAGES.LOAD_VERSION_INFO_FAILED)
-      }
-    } catch (err) {
-      const errorMessage = isErrorWithMessage(err)
-        ? err.message
-        : ERROR_MESSAGES.FETCH_VERSIONS_FAILED
-      setError(errorMessage)
-    } finally {
-      setLoadingVersions(false)
+    } else {
+      setShowVersions(true)
+      // Versions will be fetched automatically by useDocumentVersions hook
     }
   }
 
@@ -389,7 +330,7 @@ export default function DocumentCard({ document }: DocumentCardProps) {
 
         <div className="mb-4">
           <button
-            onClick={fetchVersions}
+            onClick={toggleVersions}
             disabled={loadingVersions}
             className="w-full px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >

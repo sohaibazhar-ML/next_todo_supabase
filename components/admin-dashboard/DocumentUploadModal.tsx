@@ -1,7 +1,8 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import DocumentUpload from '@/components/DocumentUpload'
+import { DocumentUploadForm } from '@/components/forms/DocumentUploadForm'
+import { IconClose } from '@/components/ui/icons'
 
 interface DocumentUploadModalProps {
   isOpen: boolean
@@ -38,15 +39,17 @@ export default function DocumentUploadModal({
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition"
             type="button"
+            aria-label="Close"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <IconClose className="w-6 h-6" />
           </button>
         </div>
 
         <div className="p-6">
-          <DocumentUpload onSuccess={handleSuccess} />
+          <DocumentUploadForm 
+            onSuccess={handleSuccess}
+            parentDocumentId={parentDocumentId}
+          />
         </div>
       </div>
     </div>

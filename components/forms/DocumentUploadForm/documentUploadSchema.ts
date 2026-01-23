@@ -44,8 +44,9 @@ export const documentUploadSchema = z.object({
     )
     .refine(
       (file) => {
-        // Check MIME type
-        if (ALLOWED_FILE_TYPES.includes(file.type as any)) {
+        // Check MIME type - ALLOWED_FILE_TYPES is readonly array
+        const allowedTypes = ALLOWED_FILE_TYPES as readonly string[]
+        if (allowedTypes.includes(file.type)) {
           return true
         }
         // Check file extension as fallback

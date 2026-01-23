@@ -1,46 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import type { UserProfile } from '@/types/user'
-import { API_ENDPOINTS, CONSOLE_MESSAGES } from '@/constants'
+import { useUsers } from '@/hooks/api/useUsers'
 
 export default function UserList() {
   const t = useTranslations('userList')
-  const [users, setUsers] = useState<UserProfile[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const supabase = createClient()
+  
+  // Use React Query hook for data fetching
+  const { data: users = [], isLoading, error } = useUsers({ role: 'user' })
 
-  useEffect(() => {
-    fetchUsers()
-  }, [])
-
-  const fetchUsers = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-
-      const response = await fetch(API_ENDPOINTS.PROFILES + '?role=user')
-      const data = await response.json()
-
-      if (!response.ok) {
-        setError(data.error || 'Failed to fetch users')
-        return
-      }
-
-      setUsers(Array.isArray(data) ? data : [])
-    } catch (err) {
-      setError('Failed to fetch users')
-      console.error(CONSOLE_MESSAGES.ERROR_FETCHING_USERS, err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center py-12">
         <svg className="animate-spin h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -54,7 +24,9 @@ export default function UserList() {
   if (error) {
     return (
       <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
-        <p className="text-sm text-red-700">{error}</p>
+        <p className="text-sm text-red-700">
+          {error instanceof Error ? error.message : 'Failed to fetch users'}
+        </p>
       </div>
     )
   }
