@@ -309,10 +309,22 @@ export const ADMIN_DASHBOARD = {
   ROUTE_ADMIN_DASHBOARD: '/admin/dashboard',
 
   /**
-   * Admin documents route
+   * Admin documents list route
+   * Used in AdminSidebar component
+   */
+  ROUTE_ADMIN_DOCUMENTS_LIST: '/admin/documents-list',
+
+  /**
+   * Admin documents route (upload/manage)
    * Used in AdminSidebar component
    */
   ROUTE_ADMIN_DOCUMENTS: '/admin/documents',
+
+  /**
+   * Admin users route
+   * Used in AdminSidebar component
+   */
+  ROUTE_ADMIN_USERS: '/admin/users',
 
   /**
    * Admin stats route

@@ -62,12 +62,22 @@ export default function AdminSidebar({ userRole, permissions }: AdminSidebarProp
       ),
     },
     {
+      id: 'documents-list',
+      label: t('dashboard.documents'),
+      href: ADMIN_DASHBOARD.ROUTE_ADMIN_DOCUMENTS_LIST,
+      icon: (
+        <svg className={ADMIN_DASHBOARD.ICON_SIZE_MEDIUM} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      ),
+    },
+    {
       id: 'documents',
       label: t('dashboard.manageDocuments'),
       href: ADMIN_DASHBOARD.ROUTE_ADMIN_DOCUMENTS,
       icon: (
         <svg className={ADMIN_DASHBOARD.ICON_SIZE_MEDIUM} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
         </svg>
       ),
       children: permissions.canUpload ? undefined : undefined,
@@ -84,6 +94,16 @@ export default function AdminSidebar({ userRole, permissions }: AdminSidebarProp
     },
     ...(userRole === 'admin'
       ? [
+          {
+            id: 'users',
+            label: t('dashboard.users'),
+            href: ADMIN_DASHBOARD.ROUTE_ADMIN_USERS,
+            icon: (
+              <svg className={ADMIN_DASHBOARD.ICON_SIZE_MEDIUM} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            ),
+          } as NavItem,
           {
             id: 'subadmins',
             label: t('dashboard.manageSubadmins'),
@@ -214,8 +234,11 @@ export default function AdminSidebar({ userRole, permissions }: AdminSidebarProp
         <nav className={isCollapsed ? ADMIN_DASHBOARD.NAV_SPACING_COLLAPSED : ADMIN_DASHBOARD.NAV_SPACING_EXPANDED}>
           {navItems
             .filter((item) => {
+              // Hide manage documents (upload) if user doesn't have upload permission
               if (item.id === 'documents' && !permissions.canUpload) return false
+              // Hide statistics if user doesn't have view stats permission
               if (item.id === 'stats' && !permissions.canViewStats) return false
+              // documents-list is visible to all admins/subadmins (view-only)
               return true
             })
             .map((item) => renderNavItem(item))}

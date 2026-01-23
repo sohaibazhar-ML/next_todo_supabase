@@ -35,12 +35,29 @@ export async function GET(request: Request) {
     const featuredOnly = searchParams.get('featuredOnly') === 'true'
     const searchQuery = searchParams.get('searchQuery')
     const tags = searchParams.get('tags')?.split(',').filter(Boolean)
+    const fromDate = searchParams.get('fromDate')
+    const toDate = searchParams.get('toDate')
+    const sort = searchParams.get('sort') || 'created_at_desc'
 
     // Build where clause with proper typing
     const where: DocumentWhereInput = {}
     if (category) where.category = category
     if (fileType) where.file_type = fileType
     if (featuredOnly) where.is_featured = true
+    
+    // Date range filters
+    if (fromDate || toDate) {
+      where.created_at = {}
+      if (fromDate) {
+        where.created_at.gte = new Date(fromDate)
+      }
+      if (toDate) {
+        // Add one day to include the entire toDate
+        const toDateEnd = new Date(toDate)
+        toDateEnd.setHours(23, 59, 59, 999)
+        where.created_at.lte = toDateEnd
+      }
+    }
 
     // If search query exists, use RPC function
     if (searchQuery && searchQuery.trim()) {
@@ -67,13 +84,29 @@ export async function GET(request: Request) {
       // Get IDs from search results
       const documentIds = results.map((doc) => doc.id)
 
+      // Build where clause for fetching full documents
+      const searchWhere: DocumentWhereInput = {
+        id: { in: documentIds },
+        // Removed parent_document_id filter to include both root and version documents
+      }
+      
+      // Add date range filters if provided
+      if (fromDate || toDate) {
+        searchWhere.created_at = {}
+        if (fromDate) {
+          searchWhere.created_at.gte = new Date(fromDate)
+        }
+        if (toDate) {
+          const toDateEnd = new Date(toDate)
+          toDateEnd.setHours(23, 59, 59, 999)
+          searchWhere.created_at.lte = toDateEnd
+        }
+      }
+
       // Fetch full document data for search results (both root documents and versions)
       // This allows search to show original files and version files separately
       const fullDocuments = await prisma.documents.findMany({
-        where: {
-          id: { in: documentIds },
-          // Removed parent_document_id filter to include both root and version documents
-        },
+        where: searchWhere,
       })
 
       // Create a map of search results by ID for ranking
@@ -120,6 +153,23 @@ export async function GET(request: Request) {
       return NextResponse.json(serializedDocuments)
     }
 
+    // Build orderBy clause based on sort parameter
+    let orderBy: { [key: string]: 'asc' | 'desc' } = { created_at: 'desc' }
+    
+    if (sort === 'created_at_asc') {
+      orderBy = { created_at: 'asc' }
+    } else if (sort === 'created_at_desc') {
+      orderBy = { created_at: 'desc' }
+    } else if (sort === 'title_asc') {
+      orderBy = { title: 'asc' }
+    } else if (sort === 'title_desc') {
+      orderBy = { title: 'desc' }
+    } else if (sort === 'download_count_asc') {
+      orderBy = { download_count: 'asc' }
+    } else if (sort === 'download_count_desc') {
+      orderBy = { download_count: 'desc' }
+    }
+
     // Regular query - only show root documents (not versions)
     // Versions have parent_document_id set, so we filter those out
     const documents = await prisma.documents.findMany({
@@ -127,7 +177,7 @@ export async function GET(request: Request) {
         ...where,
         parent_document_id: null, // Only root documents
       },
-      orderBy: { created_at: 'desc' }
+      orderBy
     })
 
     // Filter by tags client-side if provided

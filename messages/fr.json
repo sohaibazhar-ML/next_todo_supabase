@@ -101,8 +101,10 @@
     "successfullyLoggedIn": "Vous vous êtes connecté avec succès. Gérez votre profil et vos paramètres ici.",
     "manageProfile": "Gérer le profil",
     "downloadCenter": "Centre de téléchargement",
+    "documents": "Documents",
     "manageDocuments": "Gérer les documents",
     "statistics": "Statistiques",
+    "users": "Utilisateurs",
     "manageSubadmins": "Gérer les sous-administrateurs"
   },
   "profile": {
@@ -520,6 +522,105 @@
     "changeLanguageDescription": "Sélectionnez votre langue préférée pour l'interface",
     "selectLanguage": "Sélectionner la langue",
     "languageNote": "Changer la langue mettra à jour la langue de l'interface immédiatement. Vous pouvez la modifier à tout moment depuis les paramètres."
+  },
+  "adminDocuments": {
+    "title": "Liste des documents",
+    "description": "Afficher et filtrer tous les documents du système",
+    "noDocuments": "Aucun document trouvé",
+    "resultsCount": "Affichage de {count} document(s)",
+    "filters": {
+      "title": "Filtres",
+      "search": "Rechercher",
+      "searchPlaceholder": "Rechercher des documents...",
+      "category": "Catégorie",
+      "allCategories": "Toutes les catégories",
+      "fromDate": "Date de début",
+      "toDate": "Date de fin",
+      "sort": "Trier par",
+      "sortNewest": "Plus récent d'abord",
+      "sortOldest": "Plus ancien d'abord",
+      "sortTitleAsc": "Titre (A-Z)",
+      "sortTitleDesc": "Titre (Z-A)",
+      "sortDownloadsDesc": "Plus de téléchargements",
+      "sortDownloadsAsc": "Moins de téléchargements",
+      "reset": "Réinitialiser les filtres"
+    },
+    "table": {
+      "title": "Titre",
+      "category": "Catégorie",
+      "fileType": "Type de fichier",
+      "fileSize": "Taille du fichier",
+      "downloads": "Téléchargements",
+      "createdAt": "Créé le",
+      "status": "Statut",
+      "active": "Actif",
+      "inactive": "Inactif"
+    },
+    "errors": {
+      "fetchFailed": "Échec de la récupération des documents"
+    }
+  },
+  "adminUsers": {
+    "title": "Gestion des utilisateurs",
+    "description": "Afficher et gérer tous les utilisateurs du système",
+    "noUsers": "Aucun utilisateur trouvé",
+    "resultsCount": "Affichage de {count} utilisateur(s)",
+    "summary": {
+      "count": "Affichage de {count} utilisateur(s)",
+      "noResults": "Aucun utilisateur ne correspond aux filtres actuels"
+    },
+    "filters": {
+      "title": "Filtres",
+      "search": "Rechercher",
+      "searchPlaceholder": "Rechercher par nom, e-mail, nom d'utilisateur...",
+      "role": "Rôle",
+      "allRoles": "Tous les rôles",
+      "roleUser": "Utilisateurs",
+      "roleSubadmin": "Sous-administrateurs",
+      "roleAdmin": "Administrateurs",
+      "roleAll": "Tous",
+      "fromDate": "Date de début",
+      "toDate": "Date de fin",
+      "reset": "Réinitialiser les filtres"
+    },
+    "table": {
+      "name": "Nom",
+      "firstName": "Prénom",
+      "lastName": "Nom de famille",
+      "email": "E-mail",
+      "phoneNumber": "Numéro de téléphone",
+      "username": "Nom d'utilisateur",
+      "role": "Rôle",
+      "createdAt": "Créé le",
+      "status": "Statut",
+      "actions": "Actions",
+      "view": "Voir",
+      "edit": "Modifier",
+      "active": "Actif",
+      "inactive": "Inactif"
+    },
+    "actions": {
+      "view": "Voir",
+      "edit": "Modifier",
+      "export": "Exporter CSV"
+    },
+    "export": {
+      "button": "Exporter CSV",
+      "fileName": "utilisateurs.csv",
+      "success": "Utilisateurs exportés avec succès",
+      "error": "Échec de l'exportation des utilisateurs"
+    },
+    "details": {
+      "title": "Détails de l'utilisateur"
+    },
+    "edit": {
+      "title": "Modifier l'utilisateur",
+      "close": "Fermer"
+    },
+    "errors": {
+      "fetchFailed": "Échec de la récupération des utilisateurs",
+      "updateFailed": "Échec de la mise à jour de l'utilisateur"
+    }
   }
 }
 

@@ -33,6 +33,9 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
     const role = searchParams.get('role')
+    const search = searchParams.get('search')
+    const fromDate = searchParams.get('fromDate')
+    const toDate = searchParams.get('toDate')
 
     // If userId is provided, get specific profile
     if (userId) {
@@ -54,27 +57,66 @@ export async function GET(request: Request) {
       return NextResponse.json(profile)
     }
 
-    // If role filter is provided, get profiles by role (admin only)
-    if (role) {
-      const admin = await isAdmin(user.id)
-      if (!admin) {
-        return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
-      }
-
-      const profiles = await prisma.profiles.findMany({
-        where: { role },
-        orderBy: { created_at: 'desc' }
+    // Admin-only: Get all profiles with filters (role, search, date range)
+    const admin = await isAdmin(user.id)
+    if (!admin) {
+      // Non-admin: get current user's profile only
+      const profile = await prisma.profiles.findUnique({
+        where: { id: user.id }
       })
-
-      return NextResponse.json(profiles)
+      return NextResponse.json(profile)
     }
 
-    // Default: get current user's profile
-    const profile = await prisma.profiles.findUnique({
-      where: { id: user.id }
+    // Build where clause for filtering
+    const where: {
+      role?: string
+      created_at?: {
+        gte?: Date
+        lte?: Date
+      }
+      OR?: Array<{
+        username?: { contains: string; mode: 'insensitive' }
+        email?: { contains: string; mode: 'insensitive' }
+        first_name?: { contains: string; mode: 'insensitive' }
+        last_name?: { contains: string; mode: 'insensitive' }
+      }>
+    } = {}
+
+    // Role filter
+    if (role && role !== 'all') {
+      where.role = role
+    }
+
+    // Date range filter
+    if (fromDate || toDate) {
+      where.created_at = {}
+      if (fromDate) {
+        where.created_at.gte = new Date(fromDate)
+      }
+      if (toDate) {
+        const toDateEnd = new Date(toDate)
+        toDateEnd.setHours(23, 59, 59, 999)
+        where.created_at.lte = toDateEnd
+      }
+    }
+
+    // Search filter (search across username, email, first_name, last_name)
+    if (search && search.trim()) {
+      const searchTerm = search.trim()
+      where.OR = [
+        { username: { contains: searchTerm, mode: 'insensitive' } },
+        { email: { contains: searchTerm, mode: 'insensitive' } },
+        { first_name: { contains: searchTerm, mode: 'insensitive' } },
+        { last_name: { contains: searchTerm, mode: 'insensitive' } },
+      ]
+    }
+
+    const profiles = await prisma.profiles.findMany({
+      where,
+      orderBy: { created_at: 'desc' }
     })
 
-    return NextResponse.json(profile)
+    return NextResponse.json(profiles)
   } catch (error) {
     console.error(CONSOLE_MESSAGES.ERROR_FETCHING_PROFILE, error)
     const errorMessage = isErrorWithMessage(error)

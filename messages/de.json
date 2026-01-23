@@ -101,8 +101,10 @@
     "successfullyLoggedIn": "Sie haben sich erfolgreich angemeldet. Verwalten Sie hier Ihr Profil und Ihre Kontoeinstellungen.",
     "manageProfile": "Profil verwalten",
     "downloadCenter": "Download-Center",
+    "documents": "Dokumente",
     "manageDocuments": "Dokumente verwalten",
     "statistics": "Statistiken",
+    "users": "Benutzer",
     "manageSubadmins": "Subadmins verwalten"
   },
   "profile": {
@@ -520,6 +522,105 @@
     "changeLanguageDescription": "Wählen Sie Ihre bevorzugte Sprache für die Benutzeroberfläche",
     "selectLanguage": "Sprache auswählen",
     "languageNote": "Das Ändern der Sprache aktualisiert die Benutzeroberflächensprache sofort. Sie können sie jederzeit in den Einstellungen ändern."
+  },
+  "adminDocuments": {
+    "title": "Dokumentenliste",
+    "description": "Alle Dokumente im System anzeigen und filtern",
+    "noDocuments": "Keine Dokumente gefunden",
+    "resultsCount": "{count} Dokument(e) angezeigt",
+    "filters": {
+      "title": "Filter",
+      "search": "Suchen",
+      "searchPlaceholder": "Dokumente suchen...",
+      "category": "Kategorie",
+      "allCategories": "Alle Kategorien",
+      "fromDate": "Von Datum",
+      "toDate": "Bis Datum",
+      "sort": "Sortieren nach",
+      "sortNewest": "Neueste zuerst",
+      "sortOldest": "Älteste zuerst",
+      "sortTitleAsc": "Titel (A-Z)",
+      "sortTitleDesc": "Titel (Z-A)",
+      "sortDownloadsDesc": "Meiste Downloads",
+      "sortDownloadsAsc": "Wenigste Downloads",
+      "reset": "Filter zurücksetzen"
+    },
+    "table": {
+      "title": "Titel",
+      "category": "Kategorie",
+      "fileType": "Dateityp",
+      "fileSize": "Dateigröße",
+      "downloads": "Downloads",
+      "createdAt": "Erstellt am",
+      "status": "Status",
+      "active": "Aktiv",
+      "inactive": "Inaktiv"
+    },
+    "errors": {
+      "fetchFailed": "Dokumente konnten nicht abgerufen werden"
+    }
+  },
+  "adminUsers": {
+    "title": "Benutzerverwaltung",
+    "description": "Alle Benutzer im System anzeigen und verwalten",
+    "noUsers": "Keine Benutzer gefunden",
+    "resultsCount": "{count} Benutzer angezeigt",
+    "summary": {
+      "count": "{count} Benutzer angezeigt",
+      "noResults": "Keine Benutzer entsprechen den aktuellen Filtern"
+    },
+    "filters": {
+      "title": "Filter",
+      "search": "Suchen",
+      "searchPlaceholder": "Nach Name, E-Mail, Benutzername suchen...",
+      "role": "Rolle",
+      "allRoles": "Alle Rollen",
+      "roleUser": "Benutzer",
+      "roleSubadmin": "Subadmins",
+      "roleAdmin": "Admins",
+      "roleAll": "Alle",
+      "fromDate": "Von Datum",
+      "toDate": "Bis Datum",
+      "reset": "Filter zurücksetzen"
+    },
+    "table": {
+      "name": "Name",
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "email": "E-Mail",
+      "phoneNumber": "Telefonnummer",
+      "username": "Benutzername",
+      "role": "Rolle",
+      "createdAt": "Erstellt am",
+      "status": "Status",
+      "actions": "Aktionen",
+      "view": "Anzeigen",
+      "edit": "Bearbeiten",
+      "active": "Aktiv",
+      "inactive": "Inaktiv"
+    },
+    "actions": {
+      "view": "Anzeigen",
+      "edit": "Bearbeiten",
+      "export": "CSV exportieren"
+    },
+    "export": {
+      "button": "CSV exportieren",
+      "fileName": "benutzer.csv",
+      "success": "Benutzer erfolgreich exportiert",
+      "error": "Benutzer konnten nicht exportiert werden"
+    },
+    "details": {
+      "title": "Benutzerdetails"
+    },
+    "edit": {
+      "title": "Benutzer bearbeiten",
+      "close": "Schließen"
+    },
+    "errors": {
+      "fetchFailed": "Benutzer konnten nicht abgerufen werden",
+      "updateFailed": "Benutzer konnte nicht aktualisiert werden"
+    }
   }
 }
 
