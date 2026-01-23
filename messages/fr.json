@@ -5,6 +5,7 @@
     "signOut": "Se déconnecter",
     "profile": "Profil",
     "dashboard": "Tableau de bord",
+    "settings": "Paramètres",
     "save": "Enregistrer",
     "cancel": "Annuler",
     "delete": "Supprimer",
@@ -101,7 +102,7 @@
     "manageProfile": "Gérer le profil",
     "downloadCenter": "Centre de téléchargement",
     "manageDocuments": "Gérer les documents",
-    "statistics": "Statistiques et Analyses",
+    "statistics": "Statistiques",
     "manageSubadmins": "Gérer les sous-administrateurs"
   },
   "profile": {
@@ -505,6 +506,20 @@
     "updatedSuccessfully": "Sous-administrateur mis à jour avec succès",
     "removedSuccessfully": "Sous-administrateur supprimé avec succès",
     "confirmRemove": "Êtes-vous sûr de vouloir supprimer ce sous-administrateur ? Il redeviendra un utilisateur régulier."
+  },
+  "adminDashboard": {
+    "projects": "Projets",
+    "createNewProject": "Créer un nouveau projet"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "description": "Gérez les paramètres et préférences de votre compte",
+    "editProfile": "Modifier le profil",
+    "editProfileDescription": "Mettez à jour vos informations personnelles et les détails de votre profil",
+    "changeLanguage": "Changer la langue",
+    "changeLanguageDescription": "Sélectionnez votre langue préférée pour l'interface",
+    "selectLanguage": "Sélectionner la langue",
+    "languageNote": "Changer la langue mettra à jour la langue de l'interface immédiatement. Vous pouvez la modifier à tout moment depuis les paramètres."
   }
 }
 

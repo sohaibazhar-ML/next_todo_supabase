@@ -1,35 +1,26 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 import { isAdmin, isSubadmin, hasPermission } from '@/lib/utils/roles'
 import { prisma } from '@/lib/prisma'
-import { getTranslations } from 'next-intl/server'
-import AdminStats from '@/components/AdminStats'
-import AdminLayout from '@/components/admin-dashboard/AdminLayout'
+import AdminLayoutSkeleton from '@/components/admin-dashboard/AdminLayoutSkeleton'
 import type { UserRole } from '@/types/user'
 
-export default async function AdminStatsPage() {
-  const t = await getTranslations()
+export default async function Loading() {
   const supabase = await createClient()
-
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/login')
+    return <AdminLayoutSkeleton userRole="user" permissions={{ canUpload: false, canViewStats: false }} />
   }
 
   const admin = await isAdmin(user.id)
   const subadmin = await isSubadmin(user.id)
 
   if (!admin && !subadmin) {
-    redirect('/dashboard')
+    return <AdminLayoutSkeleton userRole="user" permissions={{ canUpload: false, canViewStats: false }} />
   }
 
   const canUpload = await hasPermission(user.id, 'can_upload_documents')
   const canViewStats = await hasPermission(user.id, 'can_view_stats')
-
-  if (!canViewStats) {
-    redirect('/dashboard')
-  }
 
   // Get user profile for display
   const profile = await prisma.profiles.findUnique({
@@ -46,7 +37,7 @@ export default async function AdminStatsPage() {
   const userRole: UserRole = admin ? 'admin' : 'subadmin'
 
   return (
-    <AdminLayout
+    <AdminLayoutSkeleton
       userRole={userRole}
       permissions={{
         canUpload,
@@ -54,15 +45,7 @@ export default async function AdminStatsPage() {
       }}
       userName={userName}
       userEmail={userEmail}
-    >
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">{t('stats.title')}</h1>
-          <p className="text-gray-600 mt-1">{t('stats.description')}</p>
-        </div>
-        <AdminStats />
-      </div>
-    </AdminLayout>
+    />
   )
 }
 

@@ -5,6 +5,7 @@
     "signOut": "Abmelden",
     "profile": "Profil",
     "dashboard": "Dashboard",
+    "settings": "Einstellungen",
     "save": "Speichern",
     "cancel": "Abbrechen",
     "delete": "Löschen",
@@ -101,7 +102,7 @@
     "manageProfile": "Profil verwalten",
     "downloadCenter": "Download-Center",
     "manageDocuments": "Dokumente verwalten",
-    "statistics": "Statistiken & Analysen",
+    "statistics": "Statistiken",
     "manageSubadmins": "Subadmins verwalten"
   },
   "profile": {
@@ -505,6 +506,20 @@
     "updatedSuccessfully": "Subadmin erfolgreich aktualisiert",
     "removedSuccessfully": "Subadmin erfolgreich entfernt",
     "confirmRemove": "Sind Sie sicher, dass Sie diesen Subadmin entfernen möchten? Er wird wieder zu einem normalen Benutzer."
+  },
+  "adminDashboard": {
+    "projects": "Projekte",
+    "createNewProject": "Neues Projekt erstellen"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "description": "Verwalten Sie Ihre Kontoeinstellungen und Präferenzen",
+    "editProfile": "Profil bearbeiten",
+    "editProfileDescription": "Aktualisieren Sie Ihre persönlichen Informationen und Profildetails",
+    "changeLanguage": "Sprache ändern",
+    "changeLanguageDescription": "Wählen Sie Ihre bevorzugte Sprache für die Benutzeroberfläche",
+    "selectLanguage": "Sprache auswählen",
+    "languageNote": "Das Ändern der Sprache aktualisiert die Benutzeroberflächensprache sofort. Sie können sie jederzeit in den Einstellungen ändern."
   }
 }
 

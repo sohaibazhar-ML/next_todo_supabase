@@ -5,6 +5,7 @@
     "signOut": "Sign Out",
     "profile": "Profile",
     "dashboard": "Dashboard",
+    "settings": "Settings",
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
@@ -101,7 +102,7 @@
     "manageProfile": "Manage Profile",
     "downloadCenter": "Download Center",
     "manageDocuments": "Manage Documents",
-    "statistics": "Statistics & Analytics",
+    "statistics": "Statistics",
     "manageSubadmins": "Manage Subadmins"
   },
   "profile": {
@@ -505,6 +506,20 @@
     "updatedSuccessfully": "Subadmin updated successfully",
     "removedSuccessfully": "Subadmin removed successfully",
     "confirmRemove": "Are you sure you want to remove this subadmin? They will be converted back to a regular user."
+  },
+  "adminDashboard": {
+    "projects": "Projects",
+    "createNewProject": "Create New Project"
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Manage your account settings and preferences",
+    "editProfile": "Edit Profile",
+    "editProfileDescription": "Update your personal information and profile details",
+    "changeLanguage": "Change Language",
+    "changeLanguageDescription": "Select your preferred language for the interface",
+    "selectLanguage": "Select Language",
+    "languageNote": "Changing the language will update the interface language immediately. You can change it anytime from the settings."
   }
 }
 

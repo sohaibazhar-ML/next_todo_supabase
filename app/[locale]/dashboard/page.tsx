@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { isAdmin, hasPermission } from '@/lib/utils/roles'
+import { isAdmin, isSubadmin, hasPermission } from '@/lib/utils/roles'
 import { getTranslations } from 'next-intl/server'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 
@@ -25,8 +25,15 @@ export default async function DashboardPage() {
     redirect('/profile?setup=true')
   }
 
-  const displayName = profile ? `${profile.first_name} ${profile.last_name}` : (user.email || 'User')
+  // Redirect admin and subadmin to new admin dashboard
   const admin = await isAdmin(user.id)
+  const subadmin = await isSubadmin(user.id)
+  
+  if (admin || subadmin) {
+    redirect('/admin/dashboard')
+  }
+
+  const displayName = profile ? `${profile.first_name} ${profile.last_name}` : (user.email || 'User')
   const canUpload = await hasPermission(user.id, 'can_upload_documents')
   const canViewStats = await hasPermission(user.id, 'can_view_stats')
 

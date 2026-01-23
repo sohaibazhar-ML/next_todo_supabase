@@ -54,3 +54,9 @@ export {
   type DocumentType,
 } from './documentEditor'
 
+// Re-export admin dashboard specific constants
+export {
+  ADMIN_DASHBOARD,
+  type AdminDashboardKey,
+} from './adminDashboard'
+

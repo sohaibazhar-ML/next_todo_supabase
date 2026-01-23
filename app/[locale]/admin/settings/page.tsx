@@ -2,16 +2,15 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { isAdmin, isSubadmin, hasPermission } from '@/lib/utils/roles'
 import { prisma } from '@/lib/prisma'
-import DocumentUpload from '@/components/DocumentUpload'
-import DocumentManagement from '@/components/DocumentManagement'
 import { getTranslations } from 'next-intl/server'
+import { serializeProfile } from '@/lib/utils/serialization'
 import AdminLayout from '@/components/admin-dashboard/AdminLayout'
+import SettingsContent from '@/components/admin-dashboard/SettingsContent'
 import type { UserRole } from '@/types/user'
 
-export default async function AdminDocumentsPage() {
+export default async function AdminSettingsPage() {
   const t = await getTranslations()
   const supabase = await createClient()
-
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
@@ -28,15 +27,17 @@ export default async function AdminDocumentsPage() {
   const canUpload = await hasPermission(user.id, 'can_upload_documents')
   const canViewStats = await hasPermission(user.id, 'can_view_stats')
 
-  if (!canUpload) {
-    redirect('/dashboard')
-  }
-
-  // Get user profile for display
+  // Get user profile
   const profile = await prisma.profiles.findUnique({
     where: { id: user.id },
-    select: { first_name: true, last_name: true, email: true },
   })
+
+  if (!profile) {
+    redirect('/profile?setup=true')
+  }
+
+  // Convert Prisma profile to UserProfile type (serialize dates to strings)
+  const userProfile = serializeProfile(profile)
 
   const userName = profile
     ? `${profile.first_name} ${profile.last_name}`
@@ -56,27 +57,12 @@ export default async function AdminDocumentsPage() {
       userName={userName}
       userEmail={userEmail}
     >
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+      <div className="bg-white rounded-lg shadow-md p-6">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">{t('documents.documentManagement')}</h1>
-          <p className="text-gray-600 mt-1">{t('documents.uploadDocument')}</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('settings.title')}</h1>
+          <p className="text-gray-600 mt-1">{t('settings.description')}</p>
         </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1">
-            <div className="bg-gray-50 rounded-lg p-6 sticky top-8">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">{t('documents.uploadDocument')}</h2>
-              <DocumentUpload />
-            </div>
-          </div>
-
-          <div className="lg:col-span-2">
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">{t('dashboard.manageDocuments')}</h2>
-              <DocumentManagement />
-            </div>
-          </div>
-        </div>
+        <SettingsContent profile={userProfile} />
       </div>
     </AdminLayout>
   )
