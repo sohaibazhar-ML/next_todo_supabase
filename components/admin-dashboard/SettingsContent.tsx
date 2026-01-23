@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { ADMIN_DASHBOARD } from '@/constants/adminDashboard'
-import ProfileForm from '@/components/ProfileForm'
+import { ProfileForm } from '@/components/forms/ProfileForm'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 import type { UserProfile } from '@/types/user'
 
@@ -62,11 +62,11 @@ export default function SettingsContent({ profile }: SettingsContentProps) {
               <p className="text-gray-600 text-sm mb-6">{t('editProfileDescription')}</p>
               <div className="bg-gray-50 rounded-lg p-6">
                 <ProfileForm
+                  userId={profile.id}
                   initialProfile={profile}
                   userEmail={profile.email}
                   userFirstName={profile.first_name}
                   userLastName={profile.last_name}
-                  userId={profile.id}
                 />
               </div>
             </div>

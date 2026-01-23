@@ -76,6 +76,18 @@ export const DEFAULT_VALUES = {
   REFRESH_DELAY: 1000,
 
   /**
+   * Cleanup delay in milliseconds
+   * Used for DOM cleanup operations (e.g., removing temporary download links)
+   */
+  CLEANUP_DELAY: 100,
+
+  /**
+   * Reload delay in milliseconds
+   * Used before page reload after download operations
+   */
+  RELOAD_DELAY: 1500,
+
+  /**
    * Default version number
    * Used when version is not specified
    */

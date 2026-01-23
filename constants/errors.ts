@@ -185,6 +185,42 @@ export const ERROR_MESSAGES = {
   DOWNLOAD_DOCUMENT: 'Failed to download document',
 
   /**
+   * No document selected for download
+   * Used in DocumentCard component
+   */
+  NO_DOCUMENT_SELECTED: 'No document selected. Please select a version and try again.',
+
+  /**
+   * Invalid document selected
+   * Used in DocumentCard component
+   */
+  INVALID_DOCUMENT_SELECTED: 'Invalid document selected. Please try again.',
+
+  /**
+   * Invalid document ID format
+   * Used in DocumentCard component
+   */
+  INVALID_DOCUMENT_ID: 'Invalid document ID. Please refresh and try again.',
+
+  /**
+   * User must be logged in to download
+   * Used in DocumentCard component
+   */
+  MUST_BE_LOGGED_IN: 'You must be logged in to download documents',
+
+  /**
+   * Failed to fetch file for download
+   * Used in DocumentCard component
+   */
+  FAILED_TO_FETCH_FILE: 'Failed to fetch file',
+
+  /**
+   * Download popup was blocked
+   * Used in DocumentCard component
+   */
+  DOWNLOAD_POPUP_BLOCKED: 'Download failed and popup was blocked.',
+
+  /**
    * Failed to fetch filter options
    * Used in DocumentList component
    */
