@@ -5,8 +5,8 @@ import { useTranslations } from 'next-intl'
 import { API_ENDPOINTS, CONSOLE_MESSAGES } from '@/constants'
 import type { UserProfile, UserRole } from '@/types/user'
 import { isErrorWithMessage } from '@/types'
-import UserProfileView from '@/components/UserProfileView'
-import ProfileForm from '@/components/ProfileForm'
+import UserViewModal from '@/components/admin-dashboard/UserViewModal'
+import UserEditModal from '@/components/admin-dashboard/UserEditModal'
 import { useDebounce } from '@/hooks/useDebounce'
 
 type RoleFilter = UserRole | 'all'
@@ -131,7 +131,8 @@ export default function AdminUserManagement() {
   }
 
   const handleEditUser = (user: UserProfile) => {
-    setSelectedUser(user)
+    // When editing, close the view modal and open only the edit modal
+    setSelectedUser(null)
     setEditingUser(user)
   }
 
@@ -387,42 +388,18 @@ export default function AdminUserManagement() {
         )}
       </div>
 
-      {selectedUser && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              {t('details.title')}
-            </h2>
-            <UserProfileView profile={selectedUser} isOwnProfile={false} />
-          </div>
+      <UserViewModal
+        user={selectedUser}
+        isOpen={selectedUser !== null}
+        onClose={() => setSelectedUser(null)}
+      />
 
-          {editingUser && (
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                {t('edit.title')}
-              </h2>
-              <ProfileForm
-                initialProfile={editingUser}
-                userEmail={editingUser.email}
-                userFirstName={editingUser.first_name}
-                userLastName={editingUser.last_name}
-                userId={editingUser.id}
-              />
-              <div className="mt-4">
-                <button
-                  type="button"
-                  onClick={() => {
-                    handleEditCompleted()
-                  }}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  {t('edit.close')}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+      <UserEditModal
+        user={editingUser}
+        isOpen={editingUser !== null}
+        onClose={() => setEditingUser(null)}
+        onSaved={handleEditCompleted}
+      />
     </div>
   )
 }
