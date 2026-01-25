@@ -12,23 +12,14 @@ import type {
   DownloadLogFilters,
 } from '@/services/api/downloadLogs'
 import * as downloadLogsApi from '@/services/api/downloadLogs'
-
-/**
- * Query keys for download log-related queries
- */
-export const downloadLogKeys = {
-  all: ['downloadLogs'] as const,
-  lists: () => [...downloadLogKeys.all, 'list'] as const,
-  list: (filters?: DownloadLogFilters) =>
-    [...downloadLogKeys.lists(), filters] as const,
-}
+import { QUERY_KEYS } from '@/constants/queryKeys'
 
 /**
  * Fetch download logs with filters
  */
 export function useDownloadLogs(filters?: DownloadLogFilters) {
   return useQuery({
-    queryKey: downloadLogKeys.list(filters),
+    queryKey: QUERY_KEYS.downloadLogs.list(filters),
     queryFn: () => downloadLogsApi.fetchDownloadLogs(filters),
     staleTime: 30 * 1000, // 30 seconds
   })
@@ -45,7 +36,7 @@ export function useCreateDownloadLog() {
       downloadLogsApi.createDownloadLog(data),
     onSuccess: () => {
       // Invalidate download log lists to refetch
-      queryClient.invalidateQueries({ queryKey: downloadLogKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.downloadLogs.lists() })
     },
   })
 }

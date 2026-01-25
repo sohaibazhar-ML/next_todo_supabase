@@ -72,19 +72,17 @@ export default function SubadminFormFields({
         <Select
           {...register('userId')}
           label={t('selectUser')}
-          error={errors.userId?.message}
+          error={'userId' in errors ? errors.userId?.message : undefined}
           disabled={isLoading}
           required
-        >
-          <option value="" disabled className="text-gray-500">
-            {t('selectUserPlaceholder')}
-          </option>
-          {selectableUsers.map((user) => (
-            <option key={user.id} value={user.id} className="text-gray-900">
-              {user.first_name} {user.last_name} ({user.email})
-            </option>
-          ))}
-        </Select>
+          options={[
+            { value: '', label: t('selectUserPlaceholder'), disabled: true },
+            ...selectableUsers.map((user) => ({
+              value: user.id,
+              label: `${user.first_name} ${user.last_name} (${user.email})`,
+            })),
+          ]}
+        />
       )}
 
       {/* Permissions */}

@@ -14,8 +14,9 @@
  *   const { loadVersions } = useVersionManager({ documentId, setVersions })
  */
 
-import { useState, useEffect } from 'react'
-import { API_ENDPOINTS, CONSOLE_MESSAGES } from '@/constants'
+import { useState, useEffect, useCallback } from 'react'
+import { CONSOLE_MESSAGES } from '@/constants'
+import { getUserDocumentVersions } from '@/services/api/documents'
 import type { UserVersion } from '@/types/documentEditor'
 
 interface UseVersionManagerProps {
@@ -74,7 +75,7 @@ export function useVersionManager({
    * 
    * @returns Array of loaded versions
    */
-  const loadVersions = async (): Promise<UserVersion[]> => {
+  const loadVersions = useCallback(async (): Promise<UserVersion[]> => {
     try {
       if (!externalSetVersions) {
         setLoading(true)
@@ -91,15 +92,14 @@ export function useVersionManager({
         setLoading(false)
       }
     }
-  }
+  }, [documentId, externalSetVersions, setVersions])
 
   // Auto-load on mount if using internal state
   useEffect(() => {
     if (!externalSetVersions) {
       loadVersions()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [documentId])
+  }, [externalSetVersions, loadVersions])
 
   // Return appropriate values based on usage mode
   if (externalSetVersions) {

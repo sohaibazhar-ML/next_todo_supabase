@@ -22,6 +22,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useSignUpForm } from './useSignUpForm'
 import SignUpFormFields from './SignUpFormFields'
 import { ErrorMessage, SuccessMessage } from '@/components/ui'
+import { ROUTES } from '@/constants/routes'
 
 export interface SignUpFormProps {
   /**

@@ -19,7 +19,7 @@
 
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useTranslations } from 'next-intl'
 import { useDocumentEditForm } from './useDocumentEditForm'
 import DocumentEditFields from './DocumentEditFields'
@@ -68,16 +68,30 @@ export default function DocumentEditForm({
 }: DocumentEditFormProps) {
   const t = useTranslations('documentEditModal')
 
-  // Use document data or defaultValues for initial form values
-  const initialValues = defaultValues || (document
-    ? {
+  // Memoize initial values to prevent infinite loops
+  const initialValues = useMemo(() => {
+    if (defaultValues) {
+      return defaultValues
+    }
+    if (document) {
+      return {
         title: document.title,
         description: document.description || '',
         category: document.category,
         tags: document.tags || [],
         is_featured: document.is_featured || false,
       }
-    : undefined)
+    }
+    return undefined
+  }, [
+    defaultValues,
+    document?.id,
+    document?.title,
+    document?.description,
+    document?.category,
+    document?.tags,
+    document?.is_featured,
+  ])
 
   const { form, onSubmit, isLoading, error, isSuccess } = useDocumentEditForm({
     documentId,
@@ -85,12 +99,14 @@ export default function DocumentEditForm({
     defaultValues: initialValues,
   })
 
-  // Reset form when document changes
+  // Reset form when document changes (using memoized initialValues)
   useEffect(() => {
     if (initialValues) {
       form.reset(initialValues)
     }
-  }, [document?.id, form, initialValues])
+    // form.reset is stable from react-hook-form, so we don't need it in deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialValues])
 
   // Show success message
   useEffect(() => {

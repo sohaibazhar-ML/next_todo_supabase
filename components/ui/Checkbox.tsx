@@ -19,9 +19,9 @@ import { cn } from '@/lib/utils/cn'
 
 export interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
   /**
-   * Label text to display next to checkbox
+   * Label text or React node to display next to checkbox
    */
-  label?: string
+  label?: string | React.ReactNode
   
   /**
    * Error message to display below checkbox

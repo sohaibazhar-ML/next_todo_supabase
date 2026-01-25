@@ -11,7 +11,7 @@ import { useMutation } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { documentUploadSchema, type DocumentUploadFormData } from './documentUploadSchema'
 import { uploadDocument } from '@/services/api/documents'
-import { documentKeys } from '@/hooks/api/useDocuments'
+import { QUERY_KEYS } from '@/constants/queryKeys'
 import { useQueryClient } from '@tanstack/react-query'
 
 export interface UseDocumentUploadFormOptions {
@@ -68,8 +68,8 @@ export function useDocumentUploadForm({
     },
     onSuccess: () => {
       // Invalidate document queries to refetch
-      queryClient.invalidateQueries({ queryKey: documentKeys.lists() })
-      queryClient.invalidateQueries({ queryKey: documentKeys.filterOptions() })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.documents.lists() })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.documents.filterOptions() })
       
       // Reset form
       form.reset()

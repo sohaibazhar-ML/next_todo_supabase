@@ -136,9 +136,32 @@ export async function PATCH(
       data: updateData,
     })
 
+    // Fetch the updated profile to return full subadmin object
+    const updatedProfile = await prisma.profiles.findUnique({
+      where: { id: userId },
+      include: {
+        subadmin_permissions: true,
+      },
+    })
+
+    if (!updatedProfile) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
     return NextResponse.json({
-      message: 'Subadmin permissions updated successfully',
-      permissions,
+      id: updatedProfile.id,
+      username: updatedProfile.username,
+      email: updatedProfile.email,
+      first_name: updatedProfile.first_name,
+      last_name: updatedProfile.last_name,
+      role: updatedProfile.role,
+      permissions: updatedProfile.subadmin_permissions || {
+        can_upload_documents: false,
+        can_view_stats: false,
+        is_active: false,
+      },
+      created_at: updatedProfile.created_at,
+      updated_at: updatedProfile.updated_at,
     })
   } catch (error) {
     console.error(CONSOLE_MESSAGES.ERROR_UPDATING_SUBADMIN, error)

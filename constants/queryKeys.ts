@@ -65,7 +65,7 @@ export const QUERY_KEYS = {
   // ============================================================================
   admin: {
     all: ADMIN_BASE,
-    stats: (filters?: Record<string, unknown>) => 
+    stats: (filters?: unknown) => 
       [...ADMIN_BASE, 'stats', filters] as const,
     dashboardStats: () => [...ADMIN_BASE, 'dashboardStats'] as const,
     subadmins: {
@@ -81,7 +81,7 @@ export const QUERY_KEYS = {
   downloadLogs: {
     all: DOWNLOAD_LOGS_BASE,
     lists: () => [...DOWNLOAD_LOGS_BASE, 'list'] as const,
-    list: (filters?: Record<string, unknown>) => 
+    list: (filters?: unknown) => 
       [...DOWNLOAD_LOGS_BASE, 'list', filters] as const,
   },
 } as const

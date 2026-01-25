@@ -62,14 +62,12 @@ export default function SubadminManagement() {
   }
 
   const handleToggleActive = async (subadmin: Subadmin) => {
-    // For toggle, we'll need to use the update mutation directly
-    // This is a quick action, so we can keep it simple
     try {
-      const { useUpdateSubadmin } = await import('@/hooks/api/useSubadmins')
-      const updateMutation = useUpdateSubadmin()
       await updateMutation.mutateAsync({
         userId: subadmin.id,
         updates: {
+          can_upload_documents: subadmin.permissions.can_upload_documents,
+          can_view_stats: subadmin.permissions.can_view_stats,
           is_active: !subadmin.permissions.is_active,
         },
       })
@@ -79,11 +77,12 @@ export default function SubadminManagement() {
         ? err.message
         : ERROR_MESSAGES.SAVE_SUBADMIN
       setMessage(errorMessage)
+      console.error('Error toggling subadmin active status:', err)
     }
   }
 
-  const isAnyLoading = isLoading || deleteMutation.isPending
-  const mutationError = deleteMutation.error
+  const isAnyLoading = isLoading || deleteMutation.isPending || updateMutation.isPending
+  const mutationError = deleteMutation.error || updateMutation.error
 
   if (isAnyLoading && subadmins.length === 0) {
     return (

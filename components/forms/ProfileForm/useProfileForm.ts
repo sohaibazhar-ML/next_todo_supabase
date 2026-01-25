@@ -19,7 +19,7 @@ import {
   passwordChangeSchema,
 } from './profileFormSchema'
 import { updateProfile, checkUsernameAvailability } from '@/services/api/profiles'
-import { userKeys } from '@/hooks/api/useUsers'
+import { QUERY_KEYS } from '@/constants/queryKeys'
 import { DEFAULT_VALUES } from '@/constants'
 import type { UserProfile } from '@/types'
 
@@ -150,9 +150,10 @@ export function useProfileForm({
       }
     },
     onSuccess: () => {
-      // Invalidate user queries
-      queryClient.invalidateQueries({ queryKey: userKeys.detail(userId) })
-      queryClient.invalidateQueries({ queryKey: userKeys.lists() })
+      // Invalidate user and profile queries
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.profiles.byUserId(userId) })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.users.lists() })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.profiles.lists() })
       
       // Call success callback
       onSuccess?.()

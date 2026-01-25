@@ -23,6 +23,25 @@ import { ERROR_MESSAGES } from '@/constants'
  * Converts SerializedDocument to Document format
  */
 function normalizeDocument(doc: SerializedDocument | Document): Document {
+  // Helper to safely convert date to ISO string
+  const toISOString = (date: string | Date | null | undefined): string => {
+    if (!date) {
+      return new Date().toISOString() // Default to current date if missing
+    }
+    if (typeof date === 'string') {
+      return date
+    }
+    try {
+      const dateObj = new Date(date)
+      if (isNaN(dateObj.getTime())) {
+        return new Date().toISOString() // Invalid date, use current date
+      }
+      return dateObj.toISOString()
+    } catch {
+      return new Date().toISOString() // Fallback to current date
+    }
+  }
+
   return {
     ...doc,
     file_size:
@@ -31,14 +50,8 @@ function normalizeDocument(doc: SerializedDocument | Document): Document {
         : typeof doc.file_size === 'number'
         ? doc.file_size
         : 0,
-    created_at:
-      typeof doc.created_at === 'string'
-        ? doc.created_at
-        : new Date(doc.created_at).toISOString(),
-    updated_at:
-      typeof doc.updated_at === 'string'
-        ? doc.updated_at
-        : new Date(doc.updated_at).toISOString(),
+    created_at: toISOString(doc.created_at),
+    updated_at: toISOString(doc.updated_at),
   }
 }
 

@@ -11,6 +11,7 @@ import Link from 'next/link'
 import type { UseFormReturn } from 'react-hook-form'
 import type { SignUpFormData } from './signUpFormSchema'
 import { Input, Textarea, Checkbox, Button, IconSpinner, IconGoogle } from '@/components/ui'
+import { ROUTES } from '@/constants/routes'
 
 export interface SignUpFormFieldsProps {
   /**

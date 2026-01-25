@@ -14,7 +14,7 @@
  *   })
  */
 
-import { useEffect } from 'react'
+import { useEffect, useCallback } from 'react'
 import { CONTENT_TYPES, DEFAULT_VALUES, ERROR_MESSAGES, CONSOLE_MESSAGES, DOCUMENT_TYPES } from '@/constants'
 import { convertDocumentForEditor } from '@/services/api/documents'
 import type { DocumentType, TipTapEditor, UserVersion, PDFAnnotation } from '@/types/documentEditor'
@@ -119,7 +119,7 @@ export function useDocumentLoader({
   /**
    * Load document content from API
    */
-  const loadDocument = async () => {
+  const loadDocument = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -170,12 +170,25 @@ export function useDocumentLoader({
     } finally {
       setLoading(false)
     }
-  }
+  }, [
+    documentId,
+    setDocumentType,
+    setContent,
+    setPdfUrl,
+    setNumPages,
+    setPageNumber,
+    setScale,
+    editor,
+    isSettingContentRef,
+    versions,
+    setAnnotations,
+    setLoading,
+    setError,
+  ])
 
   // Load document when documentId changes
   useEffect(() => {
     loadDocument()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [documentId])
+  }, [loadDocument])
 }
 

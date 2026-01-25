@@ -44,12 +44,28 @@ export interface DownloadLogWithDocument extends DownloadLog {
  * Normalize a download log from API response
  */
 function normalizeDownloadLog(log: DownloadLogWithDocument): DownloadLogWithDocument {
+  // Helper to safely convert date to ISO string
+  const toISOString = (date: string | Date | null | undefined): string => {
+    if (!date) {
+      return new Date().toISOString() // Default to current date if missing
+    }
+    if (typeof date === 'string') {
+      return date
+    }
+    try {
+      const dateObj = new Date(date)
+      if (isNaN(dateObj.getTime())) {
+        return new Date().toISOString() // Invalid date, use current date
+      }
+      return dateObj.toISOString()
+    } catch {
+      return new Date().toISOString() // Fallback to current date
+    }
+  }
+
   return {
     ...log,
-    downloaded_at:
-      typeof log.downloaded_at === 'string'
-        ? log.downloaded_at
-        : new Date(log.downloaded_at).toISOString(),
+    downloaded_at: toISOString(log.downloaded_at),
   }
 }
 

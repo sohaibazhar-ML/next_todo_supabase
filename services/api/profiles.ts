@@ -14,16 +14,29 @@ import { ERROR_MESSAGES } from '@/constants'
  * Ensures dates are strings and all fields are properly typed
  */
 function normalizeProfile(profile: UserProfile): UserProfile {
+  // Helper to safely convert date to ISO string
+  const toISOString = (date: string | Date | null | undefined): string => {
+    if (!date) {
+      return new Date().toISOString() // Default to current date if missing
+    }
+    if (typeof date === 'string') {
+      return date
+    }
+    try {
+      const dateObj = new Date(date)
+      if (isNaN(dateObj.getTime())) {
+        return new Date().toISOString() // Invalid date, use current date
+      }
+      return dateObj.toISOString()
+    } catch {
+      return new Date().toISOString() // Fallback to current date
+    }
+  }
+
   return {
     ...profile,
-    created_at:
-      typeof profile.created_at === 'string'
-        ? profile.created_at
-        : new Date(profile.created_at).toISOString(),
-    updated_at:
-      typeof profile.updated_at === 'string'
-        ? profile.updated_at
-        : new Date(profile.updated_at).toISOString(),
+    created_at: toISOString(profile.created_at),
+    updated_at: toISOString(profile.updated_at),
   }
 }
 

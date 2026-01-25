@@ -26,9 +26,9 @@ export interface UseDocumentEditorStateReturn {
   error: string | null
   setError: (error: string | null) => void
   content: string
-  setContent: (content: string) => void
-  documentType: DocumentType
-  setDocumentType: (type: DocumentType) => void
+  setContent: React.Dispatch<React.SetStateAction<string>>
+  documentType: DocumentType | null
+  setDocumentType: (type: DocumentType | null) => void
 
   // Version state
   versions: import('@/types/documentEditor').UserVersion[]
@@ -44,7 +44,7 @@ export interface UseDocumentEditorStateReturn {
   numPages: number | null
   setNumPages: (pages: number | null) => void
   pageNumber: number
-  setPageNumber: (page: number) => void
+  setPageNumber: React.Dispatch<React.SetStateAction<number>>
   scale: number
   setScale: (scale: number) => void
   pdfLoading: boolean
@@ -52,7 +52,7 @@ export interface UseDocumentEditorStateReturn {
 
   // Annotation state
   annotations: PDFAnnotation[]
-  setAnnotations: (annotations: PDFAnnotation[]) => void
+  setAnnotations: React.Dispatch<React.SetStateAction<PDFAnnotation[]>>
   activeTool: 'select' | 'highlight' | 'text' | 'sticky' | null
   setActiveTool: (tool: 'select' | 'highlight' | 'text' | 'sticky' | null) => void
   selectedAnnotation: string | null
@@ -80,10 +80,10 @@ export interface UseDocumentEditorStateReturn {
  */
 export function useDocumentEditorState(): UseDocumentEditorStateReturn {
   // Document state
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
   const [content, setContent] = useState<string>('')
-  const [documentType, setDocumentType] = useState<DocumentType>(null)
+  const [documentType, setDocumentType] = useState<DocumentType | null>(null)
 
   // Version state
   const [versions, setVersions] = useState<
@@ -95,7 +95,7 @@ export function useDocumentEditorState(): UseDocumentEditorStateReturn {
   // PDF viewer state
   const [pdfUrl, setPdfUrl] = useState<string | null>(null)
   const [numPages, setNumPages] = useState<number | null>(null)
-  const [pageNumber, setPageNumber] = useState(DEFAULT_VALUES.PDF_PAGE_NUMBER)
+  const [pageNumber, setPageNumber] = useState<number>(DEFAULT_VALUES.PDF_PAGE_NUMBER)
   const [scale, setScale] = useState<number>(DEFAULT_VALUES.PDF_SCALE)
   const [pdfLoading, setPdfLoading] = useState(false)
 

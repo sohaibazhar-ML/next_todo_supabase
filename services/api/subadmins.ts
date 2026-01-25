@@ -47,16 +47,29 @@ export interface UpdateSubadminData {
  * Normalize a subadmin from API response
  */
 function normalizeSubadmin(subadmin: Subadmin): Subadmin {
+  // Helper to safely convert date to ISO string
+  const toISOString = (date: string | Date | null | undefined): string => {
+    if (!date) {
+      return new Date().toISOString() // Default to current date if missing
+    }
+    if (typeof date === 'string') {
+      return date
+    }
+    try {
+      const dateObj = new Date(date)
+      if (isNaN(dateObj.getTime())) {
+        return new Date().toISOString() // Invalid date, use current date
+      }
+      return dateObj.toISOString()
+    } catch {
+      return new Date().toISOString() // Fallback to current date
+    }
+  }
+
   return {
     ...subadmin,
-    created_at:
-      typeof subadmin.created_at === 'string'
-        ? subadmin.created_at
-        : new Date(subadmin.created_at).toISOString(),
-    updated_at:
-      typeof subadmin.updated_at === 'string'
-        ? subadmin.updated_at
-        : new Date(subadmin.updated_at).toISOString(),
+    created_at: toISOString(subadmin.created_at),
+    updated_at: toISOString(subadmin.updated_at),
   }
 }
 

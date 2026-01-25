@@ -10,7 +10,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import { documentEditSchema, type DocumentEditFormData } from './documentEditSchema'
 import { updateDocument } from '@/services/api/documents'
-import { documentKeys } from '@/hooks/api/useDocuments'
+import { QUERY_KEYS } from '@/constants/queryKeys'
 import { useQueryClient } from '@tanstack/react-query'
 
 export interface UseDocumentEditFormOptions {
@@ -61,10 +61,10 @@ export function useDocumentEditForm({
     },
     onSuccess: (updatedDocument) => {
       // Update the specific document in cache
-      queryClient.setQueryData(documentKeys.detail(documentId), updatedDocument)
+      queryClient.setQueryData(QUERY_KEYS.documents.detail(documentId), updatedDocument)
       
       // Invalidate document lists to refetch
-      queryClient.invalidateQueries({ queryKey: documentKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.documents.lists() })
       
       // Call success callback
       onSuccess?.()

@@ -375,18 +375,6 @@ export const ERROR_MESSAGES = {
   FETCH_SUBADMINS: 'Failed to fetch subadmins',
 
   /**
-   * Failed to save subadmin
-   * Used in SubadminManagement component
-   */
-  SAVE_SUBADMIN: 'Failed to save subadmin',
-
-  /**
-   * Failed to remove subadmin
-   * Used in SubadminManagement component
-   */
-  REMOVE_SUBADMIN: 'Failed to remove subadmin',
-
-  /**
    * Failed to update subadmin
    * Used in SubadminManagement component
    */

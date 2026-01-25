@@ -72,7 +72,7 @@ interface UsePdfHandlersProps {
   /**
    * Callback to set content
    */
-  setContent: (content: string) => void
+  setContent: React.Dispatch<React.SetStateAction<string>>
 
   /**
    * Callback to set error
@@ -82,7 +82,7 @@ interface UsePdfHandlersProps {
   /**
    * Callback to set annotations
    */
-  setAnnotations: (annotations: PDFAnnotation[]) => void
+  setAnnotations: React.Dispatch<React.SetStateAction<PDFAnnotation[]>>
 
   /**
    * Callback to set active tool
@@ -97,7 +97,7 @@ interface UsePdfHandlersProps {
   /**
    * Callback to set page number
    */
-  setPageNumber: (page: number) => void
+  setPageNumber: React.Dispatch<React.SetStateAction<number>>
 
   /**
    * Callback to set search results

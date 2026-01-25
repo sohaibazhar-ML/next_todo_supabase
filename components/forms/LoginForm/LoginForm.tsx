@@ -74,9 +74,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         {(error || googleError) && (
           <ErrorMessage
             message={
-              error instanceof Error
-                ? error.message
-                : googleError || t('auth.loginFailed') || 'Login failed'
+              error || googleError || t('auth.loginFailed') || 'Login failed'
             }
           />
         )}

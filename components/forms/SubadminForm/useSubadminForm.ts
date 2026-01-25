@@ -15,6 +15,7 @@ import {
   type CreateSubadminFormData,
   type UpdateSubadminFormData,
 } from './subadminFormSchema'
+import { QUERY_KEYS } from '@/constants/queryKeys'
 import type { Subadmin } from '@/services/api/subadmins'
 
 export interface UseSubadminFormOptions {
@@ -36,9 +37,9 @@ export interface UseSubadminFormReturn {
   form: ReturnType<typeof useForm<CreateSubadminFormData | UpdateSubadminFormData>>
   
   /**
-   * Form submission handler
+   * Form submission handler (wrapped with handleSubmit)
    */
-  onSubmit: (data: CreateSubadminFormData | UpdateSubadminFormData) => Promise<void>
+  onSubmit: (e?: React.BaseSyntheticEvent) => Promise<void>
   
   /**
    * Whether form is in loading state
@@ -97,8 +98,8 @@ export function useSubadminForm({
       }
 
       // Invalidate queries to refetch data
-      await queryClient.invalidateQueries({ queryKey: ['subadmins'] })
-      await queryClient.invalidateQueries({ queryKey: ['users'] })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.admin.subadmins.list() })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.users.lists() })
 
       // Reset form
       form.reset()
