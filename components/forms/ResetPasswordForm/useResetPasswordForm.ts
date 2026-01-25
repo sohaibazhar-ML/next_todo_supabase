@@ -16,6 +16,7 @@ export interface UseResetPasswordFormOptions {
 }
 
 export function useResetPasswordForm({ onSuccess }: UseResetPasswordFormOptions = {}) {
+  const t = useTranslations()
   const router = useRouter()
   const supabase = createClient()
   const [isLoading, setIsLoading] = useState(false)
@@ -53,7 +54,7 @@ export function useResetPasswordForm({ onSuccess }: UseResetPasswordFormOptions 
         return
       }
 
-      setMessage('Password reset successfully')
+      setMessage(t('resetPassword.passwordReset') || 'Password reset successfully')
       setTimeout(() => {
         if (onSuccess) {
           onSuccess()

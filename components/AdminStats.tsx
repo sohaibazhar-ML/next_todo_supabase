@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import { useStatistics } from '@/hooks/api/useStats'
 import type { Statistics } from '@/services/api/stats'
 import { IconSpinner } from '@/components/ui/icons'
+import { ERROR_MESSAGES } from '@/constants'
 
 export default function AdminStats() {
   const t = useTranslations('stats')
@@ -63,7 +64,7 @@ export default function AdminStats() {
     return (
       <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded">
         <p className="text-sm text-red-700">
-          {error instanceof Error ? error.message : 'Failed to fetch statistics'}
+          {error instanceof Error ? error.message : ERROR_MESSAGES.FETCH_STATISTICS}
         </p>
       </div>
     )

@@ -15,6 +15,7 @@ export interface UseForgotPasswordFormOptions {
 }
 
 export function useForgotPasswordForm({ onSuccess }: UseForgotPasswordFormOptions = {}) {
+  const t = useTranslations()
   const supabase = createClient()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -43,7 +44,7 @@ export function useForgotPasswordForm({ onSuccess }: UseForgotPasswordFormOption
         return
       }
 
-      setMessage('Password reset email sent. Please check your inbox.')
+      setMessage(t('forgotPassword.emailSent') || 'Password reset email sent. Please check your inbox.')
       if (onSuccess) {
         onSuccess()
       }
