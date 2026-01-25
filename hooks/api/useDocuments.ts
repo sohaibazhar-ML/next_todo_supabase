@@ -13,27 +13,14 @@ import type {
   SerializedVersion,
 } from '@/types'
 import * as documentsApi from '@/services/api/documents'
-
-/**
- * Query keys for document-related queries
- */
-export const documentKeys = {
-  all: ['documents'] as const,
-  lists: () => [...documentKeys.all, 'list'] as const,
-  list: (filters?: DocumentSearchFilters) =>
-    [...documentKeys.lists(), filters] as const,
-  details: () => [...documentKeys.all, 'detail'] as const,
-  detail: (id: string) => [...documentKeys.details(), id] as const,
-  versions: (id: string) => [...documentKeys.detail(id), 'versions'] as const,
-  filterOptions: () => [...documentKeys.all, 'filterOptions'] as const,
-}
+import { QUERY_KEYS } from '@/constants/queryKeys'
 
 /**
  * Fetch documents with filters
  */
 export function useDocuments(filters?: DocumentSearchFilters) {
   return useQuery({
-    queryKey: documentKeys.list(filters),
+    queryKey: QUERY_KEYS.documents.list(filters),
     queryFn: () => documentsApi.fetchDocuments(filters),
     staleTime: 30 * 1000, // 30 seconds
   })
@@ -44,7 +31,7 @@ export function useDocuments(filters?: DocumentSearchFilters) {
  */
 export function useDocument(id: string | null) {
   return useQuery({
-    queryKey: documentKeys.detail(id || ''),
+    queryKey: QUERY_KEYS.documents.detail(id || ''),
     queryFn: () => {
       if (!id) throw new Error('Document ID is required')
       return documentsApi.fetchDocumentById(id)
@@ -59,7 +46,7 @@ export function useDocument(id: string | null) {
  */
 export function useDocumentVersions(id: string | null) {
   return useQuery({
-    queryKey: documentKeys.versions(id || ''),
+    queryKey: QUERY_KEYS.documents.versions(id || ''),
     queryFn: () => {
       if (!id) throw new Error('Document ID is required')
       return documentsApi.fetchDocumentVersions(id)
@@ -74,7 +61,7 @@ export function useDocumentVersions(id: string | null) {
  */
 export function useDocumentFilterOptions() {
   return useQuery({
-    queryKey: documentKeys.filterOptions(),
+    queryKey: QUERY_KEYS.documents.filterOptions(),
     queryFn: () => documentsApi.fetchDocumentFilterOptions(),
     staleTime: 5 * 60 * 1000, // 5 minutes (filter options don't change often)
   })
@@ -91,8 +78,8 @@ export function useUploadDocument() {
       documentsApi.uploadDocument(data),
     onSuccess: () => {
       // Invalidate document lists to refetch
-      queryClient.invalidateQueries({ queryKey: documentKeys.lists() })
-      queryClient.invalidateQueries({ queryKey: documentKeys.filterOptions() })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.documents.lists() })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.documents.filterOptions() })
     },
   })
 }
@@ -108,9 +95,9 @@ export function useUpdateDocument() {
       documentsApi.updateDocument(id, updates),
     onSuccess: (data, variables) => {
       // Update the specific document in cache
-      queryClient.setQueryData(documentKeys.detail(variables.id), data)
+      queryClient.setQueryData(QUERY_KEYS.documents.detail(variables.id), data)
       // Invalidate lists to refetch
-      queryClient.invalidateQueries({ queryKey: documentKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.documents.lists() })
     },
   })
 }
@@ -125,9 +112,9 @@ export function useDeleteDocument() {
     mutationFn: (id: string) => documentsApi.deleteDocument(id),
     onSuccess: (_, id) => {
       // Remove from cache
-      queryClient.removeQueries({ queryKey: documentKeys.detail(id) })
+      queryClient.removeQueries({ queryKey: QUERY_KEYS.documents.detail(id) })
       // Invalidate lists to refetch
-      queryClient.invalidateQueries({ queryKey: documentKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.documents.lists() })
     },
   })
 }
@@ -137,7 +124,7 @@ export function useDeleteDocument() {
  */
 export function useDocumentDownloadUrl(id: string | null) {
   return useQuery({
-    queryKey: [...documentKeys.detail(id || ''), 'downloadUrl'],
+    queryKey: QUERY_KEYS.documents.downloadUrl(id || ''),
     queryFn: () => {
       if (!id) throw new Error('Document ID is required')
       return documentsApi.getDocumentDownloadUrl(id)
@@ -152,7 +139,7 @@ export function useDocumentDownloadUrl(id: string | null) {
  */
 export function useConvertDocumentForEditor(id: string | null) {
   return useQuery({
-    queryKey: [...documentKeys.detail(id || ''), 'convert'],
+    queryKey: QUERY_KEYS.documents.convert(id || ''),
     queryFn: () => {
       if (!id) throw new Error('Document ID is required')
       return documentsApi.convertDocumentForEditor(id)

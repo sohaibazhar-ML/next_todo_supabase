@@ -60,6 +60,9 @@ export {
   type AdminDashboardKey,
 } from './adminDashboard'
 
+// Re-export query keys
+export { QUERY_KEYS } from './queryKeys'
+
 // Re-export route constants
 export {
   ROUTES,

@@ -8,22 +8,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import type { UserProfile } from '@/types'
 import * as profilesApi from '@/services/api/profiles'
-
-/**
- * Query keys for user/profile-related queries
- */
-export const userKeys = {
-  all: ['users'] as const,
-  lists: () => [...userKeys.all, 'list'] as const,
-  list: (filters?: {
-    role?: string
-    fromDate?: string
-    toDate?: string
-    search?: string
-  }) => [...userKeys.lists(), filters] as const,
-  details: () => [...userKeys.all, 'detail'] as const,
-  detail: (userId: string) => [...userKeys.details(), userId] as const,
-}
+import { QUERY_KEYS } from '@/constants/queryKeys'
 
 /**
  * Fetch users with filters
@@ -35,7 +20,7 @@ export function useUsers(filters?: {
   search?: string
 }) {
   return useQuery({
-    queryKey: userKeys.list(filters),
+    queryKey: QUERY_KEYS.users.list(filters),
     queryFn: () => profilesApi.fetchProfiles(filters),
     staleTime: 30 * 1000, // 30 seconds
   })
@@ -46,7 +31,7 @@ export function useUsers(filters?: {
  */
 export function useUser(userId: string | null) {
   return useQuery({
-    queryKey: userKeys.detail(userId || ''),
+    queryKey: QUERY_KEYS.profiles.byUserId(userId || ''),
     queryFn: () => {
       if (!userId) throw new Error('User ID is required')
       return profilesApi.fetchProfileByUserId(userId)
@@ -72,9 +57,10 @@ export function useUpdateUser() {
     }) => profilesApi.updateProfile(userId, updates),
     onSuccess: (data, variables) => {
       // Update the specific user in cache
-      queryClient.setQueryData(userKeys.detail(variables.userId), data)
+      queryClient.setQueryData(QUERY_KEYS.profiles.byUserId(variables.userId), data)
       // Invalidate lists to refetch
-      queryClient.invalidateQueries({ queryKey: userKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.users.lists() })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.profiles.lists() })
     },
   })
 }
@@ -84,7 +70,7 @@ export function useUpdateUser() {
  */
 export function useCheckUsername(username: string | null) {
   return useQuery({
-    queryKey: [...userKeys.all, 'checkUsername', username],
+    queryKey: QUERY_KEYS.profiles.checkUsername(username || ''),
     queryFn: () => {
       if (!username) throw new Error('Username is required')
       return profilesApi.checkUsernameAvailability(username)

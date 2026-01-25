@@ -12,23 +12,14 @@ import type {
   UpdateSubadminData,
 } from '@/services/api/subadmins'
 import * as subadminsApi from '@/services/api/subadmins'
-
-/**
- * Query keys for subadmin-related queries
- */
-export const subadminKeys = {
-  all: ['subadmins'] as const,
-  lists: () => [...subadminKeys.all, 'list'] as const,
-  details: () => [...subadminKeys.all, 'detail'] as const,
-  detail: (userId: string) => [...subadminKeys.details(), userId] as const,
-}
+import { QUERY_KEYS } from '@/constants/queryKeys'
 
 /**
  * Fetch all subadmins
  */
 export function useSubadmins() {
   return useQuery({
-    queryKey: subadminKeys.lists(),
+    queryKey: QUERY_KEYS.admin.subadmins.list(),
     queryFn: () => subadminsApi.fetchSubadmins(),
     staleTime: 60 * 1000, // 1 minute
   })
@@ -39,7 +30,7 @@ export function useSubadmins() {
  */
 export function useSubadmin(userId: string | null) {
   return useQuery({
-    queryKey: subadminKeys.detail(userId || ''),
+    queryKey: QUERY_KEYS.admin.subadmins.detail(userId || ''),
     queryFn: () => {
       if (!userId) throw new Error('User ID is required')
       return subadminsApi.fetchSubadminById(userId)
@@ -60,7 +51,7 @@ export function useCreateSubadmin() {
       subadminsApi.createSubadmin(data),
     onSuccess: () => {
       // Invalidate subadmin lists to refetch
-      queryClient.invalidateQueries({ queryKey: subadminKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.admin.subadmins.list() })
     },
   })
 }
@@ -81,9 +72,9 @@ export function useUpdateSubadmin() {
     }) => subadminsApi.updateSubadmin(userId, updates),
     onSuccess: (data, variables) => {
       // Update the specific subadmin in cache
-      queryClient.setQueryData(subadminKeys.detail(variables.userId), data)
+      queryClient.setQueryData(QUERY_KEYS.admin.subadmins.detail(variables.userId), data)
       // Invalidate lists to refetch
-      queryClient.invalidateQueries({ queryKey: subadminKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.admin.subadmins.list() })
     },
   })
 }
@@ -98,9 +89,9 @@ export function useDeleteSubadmin() {
     mutationFn: (userId: string) => subadminsApi.deleteSubadmin(userId),
     onSuccess: (_, userId) => {
       // Remove from cache
-      queryClient.removeQueries({ queryKey: subadminKeys.detail(userId) })
+      queryClient.removeQueries({ queryKey: QUERY_KEYS.admin.subadmins.detail(userId) })
       // Invalidate lists to refetch
-      queryClient.invalidateQueries({ queryKey: subadminKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.admin.subadmins.list() })
     },
   })
 }

@@ -24,6 +24,10 @@ export { default as IconChevronRight } from './IconChevronRight'
 export { default as IconChevronDown } from './IconChevronDown'
 export { default as IconChevronUp } from './IconChevronUp'
 export { default as IconLanguage } from './IconLanguage'
+export { default as IconLock } from './IconLock'
+export { default as IconUser } from './IconUser'
+export { default as IconSearch } from './IconSearch'
+export { default as IconGoogle } from './IconGoogle'
 
 export type { IconProps } from './IconDashboard'
 
