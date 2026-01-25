@@ -15,12 +15,6 @@ export default function SubadminManagement() {
   const [message, setMessage] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [formData, setFormData] = useState({
-    userId: '',
-    can_upload_documents: false,
-    can_view_stats: false,
-    is_active: true,
-  })
 
   // Use React Query hooks for data fetching
   const { data: subadmins = [], isLoading, error } = useSubadmins()

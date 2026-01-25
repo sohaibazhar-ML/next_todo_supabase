@@ -29,6 +29,8 @@ export { default as IconUser } from './IconUser'
 export { default as IconSearch } from './IconSearch'
 export { default as IconGoogle } from './IconGoogle'
 export { default as IconKey } from './IconKey'
+export { default as IconCheck } from './IconCheck'
+export { default as IconX } from './IconX'
 
 export type { IconProps } from './IconDashboard'
 
