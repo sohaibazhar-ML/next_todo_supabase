@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useStatistics } from '@/hooks/api/useStats'
 import type { Statistics } from '@/services/api/stats'
+import { IconSpinner } from '@/components/ui/icons'
 
 export default function AdminStats() {
   const t = useTranslations('stats')
@@ -51,7 +52,7 @@ export default function AdminStats() {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <IconSpinner className="h-12 w-12 text-indigo-600 mx-auto mb-4" />
           <p className="text-gray-600">{t('loading')}</p>
         </div>
       </div>
@@ -76,7 +77,7 @@ export default function AdminStats() {
       {isLoading && stats && (
         <div className="absolute inset-0 bg-white bg-opacity-75 z-50 flex items-center justify-center rounded-lg">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+            <IconSpinner className="h-12 w-12 text-indigo-600 mx-auto mb-4" />
             <p className="text-gray-600 font-medium">{t('loading')}</p>
           </div>
         </div>
@@ -103,7 +104,7 @@ export default function AdminStats() {
               >
                 {isLoading ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                    <IconSpinner className="h-4 w-4 text-white" />
                     {t('applying') || 'Applying...'}
                   </>
                 ) : (

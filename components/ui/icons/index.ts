@@ -28,6 +28,7 @@ export { default as IconLock } from './IconLock'
 export { default as IconUser } from './IconUser'
 export { default as IconSearch } from './IconSearch'
 export { default as IconGoogle } from './IconGoogle'
+export { default as IconKey } from './IconKey'
 
 export type { IconProps } from './IconDashboard'
 
