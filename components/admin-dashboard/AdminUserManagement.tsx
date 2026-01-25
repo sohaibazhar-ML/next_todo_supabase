@@ -94,7 +94,7 @@ export default function AdminUserManagement() {
     }
 
     const headerRow = csvHeaders.map((h) => h.label).join(',')
-    const rows = visibleUsers.map((user) =>
+    const rows = visibleUsers.map((user: UserProfile) =>
       csvHeaders
         .map((header) => {
           const raw = user[header.key]
@@ -268,7 +268,7 @@ export default function AdminUserManagement() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {visibleUsers.map((user) => (
+                {visibleUsers.map((user: UserProfile) => (
                   <tr key={user.id}>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
                       {user.first_name} {user.last_name}

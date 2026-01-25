@@ -165,7 +165,7 @@ export default function AdminStats() {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900"
             >
               <option value="">{t('allCategories')}</option>
-              {stats.filterOptions.categories.map(cat => (
+              {stats.filterOptions.categories.map((cat: string) => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
@@ -179,7 +179,7 @@ export default function AdminStats() {
               {t('tags')}
             </label>
             <div className="flex flex-wrap gap-2">
-              {stats.filterOptions.tags.slice(0, 20).map(tag => (
+              {stats.filterOptions.tags.slice(0, 20).map((tag: string) => (
                 <button
                   key={tag}
                   onClick={() => handleTagToggle(tag)}
@@ -272,7 +272,7 @@ export default function AdminStats() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {stats.downloadsPerDocument.slice(0, 20).map(doc => (
+                    {stats.downloadsPerDocument.slice(0, 20).map((doc: Statistics['downloadsPerDocument'][0]) => (
                       <tr key={doc.id}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">{doc.title}</div>
@@ -304,7 +304,7 @@ export default function AdminStats() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {stats.userDocumentDownloads.slice(0, 50).map(download => (
+                  {stats.userDocumentDownloads.slice(0, 50).map((download: Statistics['userDocumentDownloads'][0]) => (
                     <tr key={download.id}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">{download.user_name}</div>
@@ -340,7 +340,7 @@ export default function AdminStats() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {stats.versionDownloads.slice(0, 50).map(version => (
+                  {stats.versionDownloads.slice(0, 50).map((version: Statistics['versionDownloads'][0]) => (
                     <tr key={version.id}>
                       <td className="px-6 py-4">
                         <div className="text-sm font-medium text-gray-900">{version.document_title}</div>

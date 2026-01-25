@@ -347,6 +347,12 @@ export const ERROR_MESSAGES = {
   USERNAME_EXISTS: 'Username already exists',
 
   /**
+   * Username or email already exists
+   * Used in profiles API route when unique constraint violation occurs
+   */
+  USERNAME_OR_EMAIL_EXISTS: 'Username or email already exists',
+
+  /**
    * Failed to fetch profile
    * Used in various profile-related components
    */

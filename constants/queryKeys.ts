@@ -11,60 +11,67 @@
 
 import type { DocumentSearchFilters } from '@/types/document'
 
+// Base key arrays (defined first to avoid circular references)
+const DOCUMENTS_BASE = ['documents'] as const
+const PROFILES_BASE = ['profiles'] as const
+const USERS_BASE = ['users'] as const
+const ADMIN_BASE = ['admin'] as const
+const DOWNLOAD_LOGS_BASE = ['downloadLogs'] as const
+
 export const QUERY_KEYS = {
   // ============================================================================
   // Documents
   // ============================================================================
   documents: {
-    all: ['documents'] as const,
-    lists: () => [...QUERY_KEYS.documents.all, 'list'] as const,
+    all: DOCUMENTS_BASE,
+    lists: () => [...DOCUMENTS_BASE, 'list'] as const,
     list: (filters?: DocumentSearchFilters) => 
-      [...QUERY_KEYS.documents.lists(), filters] as const,
-    details: () => [...QUERY_KEYS.documents.all, 'detail'] as const,
-    detail: (id: string) => [...QUERY_KEYS.documents.details(), id] as const,
-    versions: (id: string) => [...QUERY_KEYS.documents.detail(id), 'versions'] as const,
-    filterOptions: () => [...QUERY_KEYS.documents.all, 'filterOptions'] as const,
-    downloadUrl: (id: string) => [...QUERY_KEYS.documents.detail(id), 'downloadUrl'] as const,
-    convert: (id: string) => [...QUERY_KEYS.documents.detail(id), 'convert'] as const,
+      [...DOCUMENTS_BASE, 'list', filters] as const,
+    details: () => [...DOCUMENTS_BASE, 'detail'] as const,
+    detail: (id: string) => [...DOCUMENTS_BASE, 'detail', id] as const,
+    versions: (id: string) => [...DOCUMENTS_BASE, 'detail', id, 'versions'] as const,
+    filterOptions: () => [...DOCUMENTS_BASE, 'filterOptions'] as const,
+    downloadUrl: (id: string) => [...DOCUMENTS_BASE, 'detail', id, 'downloadUrl'] as const,
+    convert: (id: string) => [...DOCUMENTS_BASE, 'detail', id, 'convert'] as const,
   },
   
   // ============================================================================
   // Profiles
   // ============================================================================
   profiles: {
-    all: ['profiles'] as const,
-    lists: () => [...QUERY_KEYS.profiles.all, 'list'] as const,
+    all: PROFILES_BASE,
+    lists: () => [...PROFILES_BASE, 'list'] as const,
     list: (filters?: Record<string, unknown>) => 
-      [...QUERY_KEYS.profiles.lists(), filters] as const,
-    details: () => [...QUERY_KEYS.profiles.all, 'detail'] as const,
-    detail: (id: string) => [...QUERY_KEYS.profiles.details(), id] as const,
-    byUserId: (userId: string) => [...QUERY_KEYS.profiles.details(), 'user', userId] as const,
+      [...PROFILES_BASE, 'list', filters] as const,
+    details: () => [...PROFILES_BASE, 'detail'] as const,
+    detail: (id: string) => [...PROFILES_BASE, 'detail', id] as const,
+    byUserId: (userId: string) => [...PROFILES_BASE, 'detail', 'user', userId] as const,
     checkUsername: (username: string) => 
-      [...QUERY_KEYS.profiles.all, 'checkUsername', username] as const,
+      [...PROFILES_BASE, 'checkUsername', username] as const,
   },
   
   // ============================================================================
   // Users
   // ============================================================================
   users: {
-    all: ['users'] as const,
-    lists: () => [...QUERY_KEYS.users.all, 'list'] as const,
+    all: USERS_BASE,
+    lists: () => [...USERS_BASE, 'list'] as const,
     list: (filters?: Record<string, unknown>) => 
-      [...QUERY_KEYS.users.lists(), filters] as const,
+      [...USERS_BASE, 'list', filters] as const,
   },
   
   // ============================================================================
   // Admin
   // ============================================================================
   admin: {
-    all: ['admin'] as const,
+    all: ADMIN_BASE,
     stats: (filters?: Record<string, unknown>) => 
-      [...QUERY_KEYS.admin.all, 'stats', filters] as const,
-    dashboardStats: () => [...QUERY_KEYS.admin.all, 'dashboardStats'] as const,
+      [...ADMIN_BASE, 'stats', filters] as const,
+    dashboardStats: () => [...ADMIN_BASE, 'dashboardStats'] as const,
     subadmins: {
-      all: [...QUERY_KEYS.admin.all, 'subadmins'] as const,
-      list: () => [...QUERY_KEYS.admin.subadmins.all, 'list'] as const,
-      detail: (id: string) => [...QUERY_KEYS.admin.subadmins.all, 'detail', id] as const,
+      all: [...ADMIN_BASE, 'subadmins'] as const,
+      list: () => [...ADMIN_BASE, 'subadmins', 'list'] as const,
+      detail: (id: string) => [...ADMIN_BASE, 'subadmins', 'detail', id] as const,
     },
   },
   
@@ -72,9 +79,9 @@ export const QUERY_KEYS = {
   // Download Logs
   // ============================================================================
   downloadLogs: {
-    all: ['downloadLogs'] as const,
-    lists: () => [...QUERY_KEYS.downloadLogs.all, 'list'] as const,
+    all: DOWNLOAD_LOGS_BASE,
+    lists: () => [...DOWNLOAD_LOGS_BASE, 'list'] as const,
     list: (filters?: Record<string, unknown>) => 
-      [...QUERY_KEYS.downloadLogs.lists(), filters] as const,
+      [...DOWNLOAD_LOGS_BASE, 'list', filters] as const,
   },
 } as const

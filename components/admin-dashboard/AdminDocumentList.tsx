@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useDocuments, useDocumentFilterOptions } from '@/hooks/api/useDocuments'
 import { useDebounce } from '@/hooks/useDebounce'
-import type { DocumentSearchFilters } from '@/types/document'
+import type { DocumentSearchFilters, Document } from '@/types/document'
 import { IconSpinner } from '@/components/ui/icons'
 
 type SortOption = 'created_at_desc' | 'created_at_asc' | 'title_asc' | 'title_desc' | 'download_count_desc' | 'download_count_asc'
@@ -124,7 +124,7 @@ export default function AdminDocumentList() {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 bg-white"
             >
               <option value="">{t('filters.allCategories')}</option>
-              {categories.map((cat) => (
+              {categories.map((cat: string) => (
                 <option key={cat} value={cat}>
                   {cat}
                 </option>
@@ -240,7 +240,7 @@ export default function AdminDocumentList() {
                   </td>
                 </tr>
               ) : (
-                documents.map((doc) => (
+                documents.map((doc: Document) => (
                   <tr key={doc.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">

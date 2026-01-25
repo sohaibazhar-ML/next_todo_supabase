@@ -55,7 +55,7 @@ export function useUpdateUser() {
       userId: string
       updates: Partial<Omit<UserProfile, 'id' | 'created_at' | 'updated_at'>>
     }) => profilesApi.updateProfile(userId, updates),
-    onSuccess: (data, variables) => {
+    onSuccess: (data: UserProfile, variables: { userId: string; updates: Partial<Omit<UserProfile, 'id' | 'created_at' | 'updated_at'>> }) => {
       // Update the specific user in cache
       queryClient.setQueryData(QUERY_KEYS.profiles.byUserId(variables.userId), data)
       // Invalidate lists to refetch
