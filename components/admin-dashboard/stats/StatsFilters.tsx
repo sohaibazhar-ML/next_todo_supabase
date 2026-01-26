@@ -2,6 +2,7 @@
  * Stats Filters Component
  * 
  * Reusable component for statistics filter inputs.
+ * Refactored to use grouped filter props for better maintainability.
  */
 
 'use client'
@@ -9,37 +10,23 @@
 import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui'
 import { IconSpinner } from '@/components/ui/icons'
-import type { Statistics } from '@/services/api/stats'
+import type { StatsFiltersState, StatsFilterOptions } from '@/types'
 
 export interface StatsFiltersProps {
-  fromDate: string
-  toDate: string
-  search: string
-  category: string
-  selectedTags: string[]
-  filterOptions: Statistics['filterOptions']
+  filters: StatsFiltersState
+  filterOptions: StatsFilterOptions
   isLoading: boolean
-  onFromDateChange: (value: string) => void
-  onToDateChange: (value: string) => void
-  onSearchChange: (value: string) => void
-  onCategoryChange: (value: string) => void
+  onFiltersChange: (updates: Partial<StatsFiltersState>) => void
   onTagToggle: (tag: string) => void
   onClearFilters: () => void
   onApplyFilters: () => void
 }
 
 export default function StatsFilters({
-  fromDate,
-  toDate,
-  search,
-  category,
-  selectedTags,
+  filters,
   filterOptions,
   isLoading,
-  onFromDateChange,
-  onToDateChange,
-  onSearchChange,
-  onCategoryChange,
+  onFiltersChange,
   onTagToggle,
   onClearFilters,
   onApplyFilters,
@@ -74,8 +61,8 @@ export default function StatsFilters({
           </label>
           <input
             type="date"
-            value={fromDate}
-            onChange={(e) => onFromDateChange(e.target.value)}
+            value={filters.fromDate}
+            onChange={(e) => onFiltersChange({ fromDate: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900"
           />
         </div>
@@ -85,8 +72,8 @@ export default function StatsFilters({
           </label>
           <input
             type="date"
-            value={toDate}
-            onChange={(e) => onToDateChange(e.target.value)}
+            value={filters.toDate}
+            onChange={(e) => onFiltersChange({ toDate: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900"
           />
         </div>
@@ -96,8 +83,8 @@ export default function StatsFilters({
           </label>
           <input
             type="text"
-            value={search}
-            onChange={(e) => onSearchChange(e.target.value)}
+            value={filters.search}
+            onChange={(e) => onFiltersChange({ search: e.target.value })}
             placeholder={t('searchPlaceholder')}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900"
           />
@@ -107,8 +94,8 @@ export default function StatsFilters({
             {t('category')}
           </label>
           <select
-            value={category}
-            onChange={(e) => onCategoryChange(e.target.value)}
+            value={filters.category}
+            onChange={(e) => onFiltersChange({ category: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900"
           >
             <option value="">{t('allCategories')}</option>
@@ -133,7 +120,7 @@ export default function StatsFilters({
                 type="button"
                 onClick={() => onTagToggle(tag)}
                 className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                  selectedTags.includes(tag)
+                  filters.selectedTags.includes(tag)
                     ? 'bg-indigo-600 text-white'
                     : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
                 }`}

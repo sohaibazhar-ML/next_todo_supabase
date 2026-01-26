@@ -49,6 +49,13 @@ export type {
 
 export { isErrorWithMessage } from './api'
 
+// Re-export stats types
+export type {
+  StatsFiltersState,
+  StatsFilterOptions,
+  Statistics,
+} from './stats'
+
 // Re-export Prisma types
 export type {
   DocumentWhereInput,

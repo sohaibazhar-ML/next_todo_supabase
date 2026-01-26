@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useStatistics } from '@/hooks/api/useStats'
-import type { Statistics } from '@/services/api/stats'
+import type { StatsFiltersState } from '@/types'
 import { IconSpinner } from '@/components/ui/icons'
 import { ErrorMessage, LoadingOverlay } from '@/components/ui'
 import { ERROR_MESSAGES } from '@/constants'
@@ -19,31 +19,38 @@ import {
 export default function AdminStats() {
   const t = useTranslations('stats')
   
-  // Filters
-  const [fromDate, setFromDate] = useState('')
-  const [toDate, setToDate] = useState('')
-  const [search, setSearch] = useState('') // Unified search
-  const [category, setCategory] = useState('')
-  const [selectedTags, setSelectedTags] = useState<string[]>([])
+  // Grouped filter state
+  const [filters, setFilters] = useState<StatsFiltersState>({
+    fromDate: '',
+    toDate: '',
+    search: '',
+    category: '',
+    selectedTags: [],
+  })
   
   // Active tabs
   const [activeTab, setActiveTab] = useState<'summary' | 'downloads' | 'versions' | 'users'>('summary')
 
   // Use React Query hook for data fetching
   const { data: stats, isLoading, error, refetch } = useStatistics({
-    fromDate: fromDate || undefined,
-    toDate: toDate || undefined,
-    search: search || undefined,
-    category: category || undefined,
-    tags: selectedTags.length > 0 ? selectedTags : undefined,
+    fromDate: filters.fromDate || undefined,
+    toDate: filters.toDate || undefined,
+    search: filters.search || undefined,
+    category: filters.category || undefined,
+    tags: filters.selectedTags.length > 0 ? filters.selectedTags : undefined,
   })
 
+  const handleFiltersChange = (updates: Partial<StatsFiltersState>) => {
+    setFilters(prev => ({ ...prev, ...updates }))
+  }
+
   const handleTagToggle = (tag: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tag) 
-        ? prev.filter(t => t !== tag)
-        : [...prev, tag]
-    )
+    setFilters(prev => ({
+      ...prev,
+      selectedTags: prev.selectedTags.includes(tag)
+        ? prev.selectedTags.filter(t => t !== tag)
+        : [...prev.selectedTags, tag],
+    }))
   }
 
   const handleSubmit = () => {
@@ -51,11 +58,13 @@ export default function AdminStats() {
   }
 
   const clearFilters = () => {
-    setFromDate('')
-    setToDate('')
-    setSearch('')
-    setCategory('')
-    setSelectedTags([])
+    setFilters({
+      fromDate: '',
+      toDate: '',
+      search: '',
+      category: '',
+      selectedTags: [],
+    })
   }
 
   if (isLoading && !stats) {
@@ -84,17 +93,10 @@ export default function AdminStats() {
   return (
     <LoadingOverlay isLoading={isLoading && !!stats} message={t('loading')} className="space-y-6">
       <StatsFilters
-        fromDate={fromDate}
-        toDate={toDate}
-        search={search}
-        category={category}
-        selectedTags={selectedTags}
+        filters={filters}
         filterOptions={stats.filterOptions}
         isLoading={isLoading}
-        onFromDateChange={setFromDate}
-        onToDateChange={setToDate}
-        onSearchChange={setSearch}
-        onCategoryChange={setCategory}
+        onFiltersChange={handleFiltersChange}
         onTagToggle={handleTagToggle}
         onClearFilters={clearFilters}
         onApplyFilters={handleSubmit}
