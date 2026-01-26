@@ -52,8 +52,10 @@ export default async function AdminDocumentsPage() {
         canUpload,
         canViewStats,
       }}
-      userName={userName}
-      userEmail={userEmail}
+      user={{
+        name: userName,
+        email: userEmail,
+      }}
     >
       <AdminDocumentManagementWithUpload
         managementTitle={t('dashboard.manageDocuments')}

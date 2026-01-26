@@ -4,7 +4,7 @@ import { ADMIN_DASHBOARD } from '@/constants/adminDashboard'
 import AdminSidebar from './AdminSidebar'
 import AdminTopNav from './AdminTopNav'
 import { SidebarProvider, useSidebar } from './SidebarContext'
-import type { UserRole } from '@/types/user'
+import type { UserRole, UserInfo } from '@/types/user'
 
 interface AdminLayoutSkeletonProps {
   userRole: UserRole
@@ -12,17 +12,13 @@ interface AdminLayoutSkeletonProps {
     canUpload: boolean
     canViewStats: boolean
   }
-  userName?: string
-  userAvatar?: string
-  userEmail?: string
+  user?: UserInfo
 }
 
 function AdminLayoutSkeletonContent({
   userRole,
   permissions,
-  userName,
-  userAvatar,
-  userEmail,
+  user = {},
 }: AdminLayoutSkeletonProps) {
   const { isCollapsed } = useSidebar()
 
@@ -39,9 +35,7 @@ function AdminLayoutSkeletonContent({
       }`}>
           {/* Real Top Nav - not skeleton */}
           <AdminTopNav 
-            userName={userName} 
-            userAvatar={userAvatar}
-            userEmail={userEmail}
+            user={user}
             userRole={userRole}
           />
 

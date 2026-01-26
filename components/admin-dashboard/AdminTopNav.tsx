@@ -6,16 +6,14 @@ import { useLocale } from 'next-intl'
 import Link from 'next/link'
 import { useSidebar } from './SidebarContext'
 import { ADMIN_DASHBOARD } from '@/constants/adminDashboard'
-import type { UserRole } from '@/types/user'
+import type { UserRole, UserInfo } from '@/types/user'
 
 interface AdminTopNavProps {
-  userName?: string
-  userAvatar?: string
-  userEmail?: string
+  user: UserInfo
   userRole?: UserRole
 }
 
-export default function AdminTopNav({ userName, userAvatar, userEmail, userRole }: AdminTopNavProps) {
+export default function AdminTopNav({ user, userRole }: AdminTopNavProps) {
   const t = useTranslations()
   const locale = useLocale()
   const { toggleSidebar } = useSidebar()
@@ -101,15 +99,15 @@ export default function AdminTopNav({ userName, userAvatar, userEmail, userRole 
             aria-label="User menu"
             aria-expanded={showDropdown}
           >
-            {userAvatar ? (
+            {user.avatar ? (
               <img
-                src={userAvatar}
-                alt={userName || ADMIN_DASHBOARD.DEFAULT_USER_TEXT}
+                src={user.avatar}
+                alt={user.name || ADMIN_DASHBOARD.DEFAULT_USER_TEXT}
                 className={`${ADMIN_DASHBOARD.AVATAR_SIZE} rounded-full object-cover`}
               />
             ) : (
               <div className={`${ADMIN_DASHBOARD.AVATAR_SIZE} rounded-full ${ADMIN_DASHBOARD.COLOR_PRIMARY_SOLID} flex items-center justify-center ${ADMIN_DASHBOARD.COLOR_WHITE_TEXT} font-medium`}>
-                {userName ? userName.charAt(0).toUpperCase() : ADMIN_DASHBOARD.DEFAULT_USER_TEXT.charAt(0)}
+                {user.name ? user.name.charAt(0).toUpperCase() : ADMIN_DASHBOARD.DEFAULT_USER_TEXT.charAt(0)}
               </div>
             )}
             <svg
@@ -129,9 +127,9 @@ export default function AdminTopNav({ userName, userAvatar, userEmail, userRole 
             <div className={`absolute right-0 mt-2 ${ADMIN_DASHBOARD.DROPDOWN_WIDTH} bg-white rounded-lg shadow-lg border border-gray-200 py-2 ${ADMIN_DASHBOARD.Z_INDEX_DROPDOWN}`}>
               {/* User Info */}
               <div className="px-4 py-3 border-b border-gray-200">
-                <p className="text-sm font-semibold text-gray-900">{userName || ADMIN_DASHBOARD.DEFAULT_USER_TEXT}</p>
-                {userEmail && (
-                  <p className="text-xs text-gray-500 mt-1 truncate">{userEmail}</p>
+                <p className="text-sm font-semibold text-gray-900">{user.name || ADMIN_DASHBOARD.DEFAULT_USER_TEXT}</p>
+                {user.email && (
+                  <p className="text-xs text-gray-500 mt-1 truncate">{user.email}</p>
                 )}
                 {userRole && (
                   <span className={`inline-block mt-2 px-2 py-1 text-xs font-medium rounded ${ADMIN_DASHBOARD.COLOR_PRIMARY_LIGHT_BG} ${ADMIN_DASHBOARD.COLOR_PRIMARY_LIGHT_TEXT}`}>

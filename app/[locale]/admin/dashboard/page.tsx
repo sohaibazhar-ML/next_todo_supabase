@@ -46,8 +46,10 @@ export default async function AdminDashboardPage() {
         canUpload,
         canViewStats,
       }}
-      userName={userName}
-      userEmail={userEmail}
+      user={{
+        name: userName,
+        email: userEmail,
+      }}
     >
       <div className="bg-white rounded-lg shadow-md p-6">
         <h1 className="text-3xl font-bold text-gray-900">{t('common.dashboard')}</h1>

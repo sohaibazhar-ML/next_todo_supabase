@@ -43,8 +43,10 @@ export default async function Loading() {
         canUpload,
         canViewStats,
       }}
-      userName={userName}
-      userEmail={userEmail}
+      user={{
+        name: userName,
+        email: userEmail,
+      }}
     />
   )
 }

@@ -33,17 +33,17 @@ export interface SignUpFormData {
   phoneNumber: string
   password: string
   confirmPassword: string
-  
+
   // Address Information
   currentAddress: string
   countryOfOrigin: string
   newAddressSwitzerland: string
-  
+
   // Family Information
   numberOfAdults: number
   numberOfChildren: number
   petsType: string
-  
+
   // Consents
   marketingConsent: boolean
   termsAccepted: boolean
@@ -54,5 +54,15 @@ export interface SubadminPermissions {
   can_upload_documents: boolean
   can_view_stats: boolean
   is_active: boolean
+}
+
+/**
+ * User information for display purposes
+ * Used in admin layouts and navigation components
+ */
+export interface UserInfo {
+  name?: string
+  email?: string
+  avatar?: string
 }
 
