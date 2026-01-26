@@ -15,7 +15,7 @@
 
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useDocumentUploadForm } from './useDocumentUploadForm'
@@ -77,13 +77,6 @@ export default function DocumentUploadForm({
         }
       : defaultValues,
   })
-
-  // Show success message
-  useEffect(() => {
-    if (isSuccess && onSuccess) {
-      // Success callback is handled in the hook
-    }
-  }, [isSuccess, onSuccess])
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">

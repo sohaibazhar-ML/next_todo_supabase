@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl'
 import { useStatistics } from '@/hooks/api/useStats'
 import type { Statistics } from '@/services/api/stats'
 import { IconSpinner } from '@/components/ui/icons'
-import { ErrorMessage } from '@/components/ui'
+import { ErrorMessage, LoadingOverlay } from '@/components/ui'
 import { ERROR_MESSAGES } from '@/constants'
 import {
   StatsFilters,
@@ -82,37 +82,25 @@ export default function AdminStats() {
   if (!stats) return null
 
   return (
-    <div className="space-y-6 relative">
-      {/* Loading overlay when filters are being applied */}
-      {isLoading && stats && (
-        <div className="absolute inset-0 bg-white bg-opacity-75 z-50 flex items-center justify-center rounded-lg">
-          <div className="text-center">
-            <IconSpinner className="h-12 w-12 text-indigo-600 mx-auto mb-4" />
-            <p className="text-gray-600 font-medium">{t('loading')}</p>
-          </div>
-        </div>
-      )}
-      
-      {/* Disable pointer events when loading */}
-      <div className={isLoading && stats ? 'pointer-events-none opacity-60' : ''}>
-        <StatsFilters
-          fromDate={fromDate}
-          toDate={toDate}
-          search={search}
-          category={category}
-          selectedTags={selectedTags}
-          filterOptions={stats.filterOptions}
-          isLoading={isLoading}
-          onFromDateChange={setFromDate}
-          onToDateChange={setToDate}
-          onSearchChange={setSearch}
-          onCategoryChange={setCategory}
-          onTagToggle={handleTagToggle}
-          onClearFilters={clearFilters}
-          onApplyFilters={handleSubmit}
-        />
+    <LoadingOverlay isLoading={isLoading && !!stats} message={t('loading')} className="space-y-6">
+      <StatsFilters
+        fromDate={fromDate}
+        toDate={toDate}
+        search={search}
+        category={category}
+        selectedTags={selectedTags}
+        filterOptions={stats.filterOptions}
+        isLoading={isLoading}
+        onFromDateChange={setFromDate}
+        onToDateChange={setToDate}
+        onSearchChange={setSearch}
+        onCategoryChange={setCategory}
+        onTagToggle={handleTagToggle}
+        onClearFilters={clearFilters}
+        onApplyFilters={handleSubmit}
+      />
 
-        <StatsSummaryCards stats={stats} />
+      <StatsSummaryCards stats={stats} />
 
       {/* Tabs */}
       <div className="border-b border-gray-200">
@@ -140,8 +128,7 @@ export default function AdminStats() {
         {activeTab === 'versions' && <StatsVersionsTab stats={stats} />}
         {activeTab === 'users' && <StatsUsersTab stats={stats} />}
       </div>
-      </div>
-    </div>
+    </LoadingOverlay>
   )
 }
 

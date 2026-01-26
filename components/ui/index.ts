@@ -29,6 +29,8 @@ export type { ModalProps } from './Modal'
 export { default as ErrorMessage } from './ErrorMessage'
 export { default as SuccessMessage } from './SuccessMessage'
 export { default as LoadingSpinner } from './LoadingSpinner'
+export { LoadingOverlay } from './LoadingOverlay'
+export type { LoadingOverlayProps } from './LoadingOverlay'
 
 // Re-export icon components
 export * from './icons'
