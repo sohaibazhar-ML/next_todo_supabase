@@ -24,7 +24,7 @@ import type { DocumentSearchFilters } from '@/types/document'
 import { useDocuments, useDocumentFilterOptions } from '@/hooks/api/useDocuments'
 import { IconSpinner, IconFile } from '@/components/ui/icons'
 import DocumentCard from './DocumentCard'
-import DocumentSearch from './DocumentSearch'
+import { DocumentSearch } from './DocumentSearch'
 
 export default function DocumentList() {
   const t = useTranslations('documentList')

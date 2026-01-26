@@ -88,6 +88,12 @@ export const DEFAULT_VALUES = {
   RELOAD_DELAY: 1500,
 
   /**
+   * Debounce delay in milliseconds for search inputs
+   * Used in AdminUserManagement, AdminDocumentList, DocumentSearch
+   */
+  DEBOUNCE_DELAY: 300,
+
+  /**
    * Default version number
    * Used when version is not specified
    */
