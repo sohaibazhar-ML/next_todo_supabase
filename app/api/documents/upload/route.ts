@@ -14,7 +14,7 @@ import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { hasPermission } from '@/lib/utils/roles'
 import { isErrorWithMessage } from '@/types'
-import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES, STORAGE_BUCKETS, STORAGE_CONFIG } from '@/constants'
 
 function getFileType(fileName: string): string {
   const ext = fileName.split('.').pop()?.toLowerCase()
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
     // If uploading a new version, validate parent document exists and get version number
     let versionNumber = '1.0'
     let parentDocumentId: string | null = null
-    
+
     if (parent_document_id) {
       // Get parent document to determine next version
       const parentDoc = await prisma.documents.findUnique({
@@ -92,7 +92,7 @@ export async function POST(request: Request) {
       const versionNumbers = existingVersions
         .map(v => parseFloat(v.version || '1.0'))
         .filter(v => !isNaN(v))
-      
+
       const maxVersion = versionNumbers.length > 0 ? Math.max(...versionNumbers) : 0
       versionNumber = (maxVersion + 0.1).toFixed(1) // Increment by 0.1
       parentDocumentId = rootId
@@ -103,13 +103,11 @@ export async function POST(request: Request) {
     const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`
     const filePath = `${user.id}/${fileName}`
 
-    // Upload file to Supabase Storage using server client
-    // Note: The storage policy uses is_user_admin_for_documents function
-    // which bypasses RLS, so this should work correctly
+    // Upload file to Supabase Storage using centralized bucket configuration
     const { error: uploadError } = await supabase.storage
-      .from('documents')
+      .from(STORAGE_BUCKETS.DOCUMENTS)
       .upload(filePath, file, {
-        cacheControl: '3600',
+        cacheControl: STORAGE_CONFIG.CACHE_CONTROL,
         upsert: false,
       })
 

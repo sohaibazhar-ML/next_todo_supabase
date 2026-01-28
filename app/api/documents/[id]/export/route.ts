@@ -28,7 +28,7 @@ import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import * as cheerio from 'cheerio'
 import type { Element, Text, AnyNode } from 'domhandler'
 import { isErrorWithMessage } from '@/types'
-import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES, STORAGE_BUCKETS, STORAGE_CONFIG } from '@/constants'
 
 /**
  * Type for cheerio element (can be Element or Text node from domhandler)
@@ -78,34 +78,34 @@ function decodeHtmlEntities(text: string): string {
     '&mdash;': '—',
     '&ndash;': '–',
   }
-  
+
   // Decode named entities
   let decoded = text
   for (const [entity, char] of Object.entries(entityMap)) {
     decoded = decoded.replace(new RegExp(entity, 'g'), char)
   }
-  
+
   // Decode numeric entities (&#123; and &#x1F;)
   decoded = decoded.replace(/&#(\d+);/g, (match, dec) => {
     return String.fromCharCode(parseInt(dec, 10))
   })
-  
+
   decoded = decoded.replace(/&#x([0-9a-fA-F]+);/g, (match, hex) => {
     return String.fromCharCode(parseInt(hex, 16))
   })
-  
+
   return decoded
 }
 
 // Helper function to parse CSS color to hex
 function parseColor(color: string): string {
   if (!color) return '000000'
-  
+
   // If already hex
   if (color.startsWith('#')) {
     return color.substring(1).padStart(6, '0')
   }
-  
+
   // RGB/RGBA format
   const rgbMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/)
   if (rgbMatch) {
@@ -114,7 +114,7 @@ function parseColor(color: string): string {
     const b = parseInt(rgbMatch[3]).toString(16).padStart(2, '0')
     return `${r}${g}${b}`
   }
-  
+
   // Named colors (basic)
   const namedColors: Record<string, string> = {
     'black': '000000',
@@ -126,7 +126,7 @@ function parseColor(color: string): string {
     'cyan': '00FFFF',
     'magenta': 'FF00FF',
   }
-  
+
   return namedColors[color.toLowerCase()] || '000000'
 }
 
@@ -158,10 +158,10 @@ function parseAlignment(align: string): typeof AlignmentType[keyof typeof Alignm
 function htmlToDocx(html: string): Paragraph[] {
   const $ = cheerio.load(html)
   const paragraphs: Paragraph[] = []
-  
+
   // Process body content
   const body = $('body').length > 0 ? $('body') : $.root()
-  
+
   body.contents().each((_, element) => {
     const node = element as unknown as AnyNode
     if (node.type === 'text') {
@@ -176,7 +176,7 @@ function htmlToDocx(html: string): Paragraph[] {
     } else if (node.type === 'tag') {
       const $el = $(node)
       const tagName = (node as Element).tagName?.toLowerCase()
-      
+
       if (tagName === 'p' || tagName === 'div') {
         const para = processParagraph($el)
         if (para) paragraphs.push(para)
@@ -203,7 +203,7 @@ function htmlToDocx(html: string): Paragraph[] {
       }
     }
   })
-  
+
   // If no paragraphs found, try to extract from root
   if (paragraphs.length === 0) {
     const text = body.text().trim()
@@ -213,7 +213,7 @@ function htmlToDocx(html: string): Paragraph[] {
       }))
     }
   }
-  
+
   return paragraphs.length > 0 ? paragraphs : [
     new Paragraph({
       children: [new TextRun('Empty document')],
@@ -233,13 +233,13 @@ function processParagraph($el: CheerioSelection): Paragraph | null {
     const runs = processNodeWithFormatting($(node), '', {})
     textRuns.push(...runs)
   })
-  
+
   if (textRuns.length === 0) {
     const text = $el.text().trim()
     if (!text) return null
     textRuns.push(new TextRun(text))
   }
-  
+
   return new Paragraph({
     children: textRuns,
     alignment: align,
@@ -260,13 +260,13 @@ function processHeading(
     const runs = processNodeWithFormatting($(node), '', {})
     textRuns.push(...runs)
   })
-  
+
   if (textRuns.length === 0) {
     const text = $el.text().trim()
     if (!text) return null
     textRuns.push(new TextRun(text))
   }
-  
+
   return new Paragraph({
     heading: level,
     children: textRuns,
@@ -286,13 +286,13 @@ function processListItem(
     const runs = processNodeWithFormatting($(node), '', {})
     textRuns.push(...runs)
   })
-  
+
   if (textRuns.length === 0) {
     const text = $el.text().trim()
     if (!text) return null
     textRuns.push(new TextRun(text))
   }
-  
+
   return new Paragraph({
     children: textRuns,
     bullet: ordered ? undefined : { level: 0 },
@@ -342,7 +342,7 @@ function processNode($node: CheerioSelection): TextRun[] {
   const runOptions: TextRunOptions = {
     text: decodeHtmlEntities(text),
   }
-  
+
   // Apply formatting based on tag
   if (tagName === 'strong' || tagName === 'b') {
     runOptions.bold = true
@@ -356,7 +356,7 @@ function processNode($node: CheerioSelection): TextRun[] {
   if (tagName === 's' || tagName === 'strike') {
     runOptions.strike = true
   }
-  
+
   // Apply inline styles
   if (styles.color) {
     runOptions.color = parseColor(styles.color)
@@ -367,7 +367,7 @@ function processNode($node: CheerioSelection): TextRun[] {
   if (styles.fontFamily) {
     runOptions.font = styles.fontFamily.split(',')[0].replace(/['"]/g, '').trim()
   }
-  
+
   runs.push(new TextRun(runOptions))
   return runs
 }
@@ -449,7 +449,7 @@ function applyFormatting(
   if (tagName === 's' || tagName === 'strike') {
     runOptions.strike = true
   }
-  
+
   // Apply inline styles
   if (styles.color) {
     runOptions.color = parseColor(styles.color)
@@ -466,14 +466,14 @@ function applyFormatting(
 function parseStyles(style: string): Record<string, string> {
   const styles: Record<string, string> = {}
   if (!style) return styles
-  
+
   style.split(';').forEach(declaration => {
     const [property, value] = declaration.split(':').map(s => s.trim())
     if (property && value) {
       styles[property.toLowerCase()] = value
     }
   })
-  
+
   return styles
 }
 
@@ -582,7 +582,7 @@ export async function POST(
           let page = pdfDoc.addPage([pageWidth, pageHeight])
 
           const lines = pdfTextContent.split('\n')
-          
+
           // Handle empty content
           if (!lines || lines.length === 0 || lines.every(line => !line.trim())) {
             page.drawText('No content to export', {
@@ -600,11 +600,11 @@ export async function POST(
 
               const words = line.split(' ')
               let currentLine = ''
-              
+
               for (const word of words) {
                 const testLine = currentLine ? `${currentLine} ${word}` : word
                 const textWidth = font.widthOfTextAtSize(testLine, fontSize)
-                
+
                 if (textWidth > maxWidth && currentLine) {
                   page.drawText(currentLine, {
                     x: margin,
@@ -614,7 +614,7 @@ export async function POST(
                   })
                   y -= lineHeight
                   currentLine = word
-                  
+
                   if (y < margin) {
                     page = pdfDoc.addPage([pageWidth, pageHeight])
                     y = pageHeight - margin
@@ -623,7 +623,7 @@ export async function POST(
                   currentLine = testLine
                 }
               }
-              
+
               if (currentLine) {
                 page.drawText(currentLine, {
                   x: margin,
@@ -668,16 +668,16 @@ export async function POST(
 
     // Upload exported file to Supabase Storage
     const filePath = `user-edits/${user.id}/${Date.now()}_${exportFileName}`
-    
+
     try {
       // Ensure fileBuffer is a proper Buffer or Uint8Array
       const bufferToUpload = fileBuffer instanceof Buffer ? fileBuffer : Buffer.from(fileBuffer)
-      
+
       const { error: uploadError } = await supabase.storage
-        .from('documents')
+        .from(STORAGE_BUCKETS.DOCUMENTS)
         .upload(filePath, bufferToUpload, {
           contentType: mimeType,
-          cacheControl: '3600',
+          cacheControl: STORAGE_CONFIG.CACHE_CONTROL,
           upsert: false,
         })
 
@@ -713,8 +713,8 @@ export async function POST(
 
     // Get signed URL for download
     const { data: urlData, error: urlError } = await supabase.storage
-      .from('documents')
-      .createSignedUrl(filePath, 3600)
+      .from(STORAGE_BUCKETS.DOCUMENTS)
+      .createSignedUrl(filePath, STORAGE_CONFIG.SIGNED_URL_EXPIRY)
 
     if (urlError || !urlData) {
       return NextResponse.json(

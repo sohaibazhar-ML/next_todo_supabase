@@ -15,7 +15,7 @@ import { NextResponse } from 'next/server'
 import mammoth from 'mammoth'
 import { PDFDocument } from 'pdf-lib'
 import { isErrorWithMessage } from '@/types'
-import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES, STORAGE_BUCKETS, STORAGE_CONFIG } from '@/constants'
 
 // GET - Convert document to editable format (HTML for DOCX, text for PDF)
 export async function GET(
@@ -50,7 +50,7 @@ export async function GET(
 
     // Get file from Supabase Storage
     const { data: fileData, error: fileError } = await supabase.storage
-      .from('documents')
+      .from(STORAGE_BUCKETS.DOCUMENTS)
       .download(document.file_path)
 
     if (fileError) {
@@ -76,12 +76,12 @@ export async function GET(
     const fileName = document.file_name.toLowerCase()
     const isDocx = fileName.endsWith('.docx')
     const isDoc = fileName.endsWith('.doc')
-    
+
     if (document.file_type === 'document' || document.mime_type?.includes('word') || isDocx || isDoc) {
       // Check if it's old .doc format (not supported by mammoth)
       if (isDoc && !isDocx) {
         return NextResponse.json(
-          { 
+          {
             error: 'Legacy .doc format is not supported. Please convert the file to .docx format to edit it.',
             type: 'doc',
             unsupported: true
@@ -89,7 +89,7 @@ export async function GET(
           { status: 400 }
         )
       }
-      
+
       // DOCX to HTML using mammoth with style preservation
       try {
         // Configure mammoth to preserve inline styles and formatting
@@ -105,14 +105,14 @@ export async function GET(
           "p[style-name='Quote'] => blockquote:fresh",
           "p[style-name='Intense Quote'] => blockquote:fresh",
         ]
-        
+
         const options = {
           styleMap,
           includeDefaultStyleMap: true,
           // Preserve all inline styles from the document
           preserveEmptyParagraphs: false,
         }
-        
+
         // Mammoth can accept buffer or arrayBuffer
         // Mammoth automatically preserves inline styles (color, font-size, font-family, etc.) in style attributes
         const result = await mammoth.convertToHtml({ buffer }, options)
@@ -170,8 +170,8 @@ export async function GET(
 
         // Get signed URL for PDF viewing
         const { data: urlData, error: urlError } = await supabase.storage
-          .from('documents')
-          .createSignedUrl(document.file_path, 3600) // 1 hour expiry
+          .from(STORAGE_BUCKETS.DOCUMENTS)
+          .createSignedUrl(document.file_path, STORAGE_CONFIG.SIGNED_URL_EXPIRY)
 
         if (urlError) {
           console.error('Error creating signed URL:', urlError)

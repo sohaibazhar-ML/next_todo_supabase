@@ -69,3 +69,10 @@ export {
   type RouteFunction,
 } from './routes'
 
+// Re-export storage configuration
+export {
+  STORAGE_BUCKETS,
+  STORAGE_PATHS,
+  STORAGE_CONFIG,
+} from './storage'
+

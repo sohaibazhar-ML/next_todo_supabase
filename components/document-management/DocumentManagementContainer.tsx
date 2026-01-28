@@ -18,7 +18,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useDocuments, useDeleteDocument, useUpdateDocument } from '@/hooks/api/useDocuments'
 import { useModal } from '@/hooks'
 import type { Document } from '@/types/document'
-import { ERROR_MESSAGES, CONSOLE_MESSAGES, ROUTES } from '@/constants'
+import { ERROR_MESSAGES, CONSOLE_MESSAGES, ROUTES, STORAGE_BUCKETS } from '@/constants'
 import DocumentManagementView from './DocumentManagementView'
 
 export default function DocumentManagementContainer() {
@@ -40,9 +40,9 @@ export default function DocumentManagementContainer() {
    */
   const handleDelete = async (documentId: string, filePath: string) => {
     try {
-      // Delete from storage
+      // Delete from storage using centralized bucket configuration
       const { error: storageError } = await supabase.storage
-        .from('documents')
+        .from(STORAGE_BUCKETS.DOCUMENTS)
         .remove([filePath])
 
       if (storageError) {
