@@ -493,7 +493,7 @@ export async function POST(
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
     }
 
     const { id } = await params
@@ -502,7 +502,7 @@ export async function POST(
     const { version_id, export_format } = body // 'docx' or 'pdf'
 
     if (!version_id) {
-      return NextResponse.json({ error: 'Version ID is required. Please save your document first.' }, { status: 400 })
+      return NextResponse.json({ error: ERROR_MESSAGES.VERSION_ID_REQUIRED }, { status: 400 })
     }
 
     // Get the saved version
@@ -519,7 +519,7 @@ export async function POST(
     })
 
     if (!editedVersion || editedVersion.user_id !== user.id) {
-      return NextResponse.json({ error: 'Version not found. Please save your document first.' }, { status: 404 })
+      return NextResponse.json({ error: ERROR_MESSAGES.VERSION_NOT_FOUND }, { status: 404 })
     }
 
     const htmlContent = editedVersion.html_content
@@ -561,7 +561,7 @@ export async function POST(
         }
       } else {
         return NextResponse.json(
-          { error: 'Invalid export format for DOCX document' },
+          { error: `${ERROR_MESSAGES.INVALID_EXPORT_FORMAT} for DOCX document` },
           { status: 400 }
         )
       }
@@ -655,13 +655,13 @@ export async function POST(
         }
       } else {
         return NextResponse.json(
-          { error: 'Invalid export format for PDF document' },
+          { error: `${ERROR_MESSAGES.INVALID_EXPORT_FORMAT} for PDF document` },
           { status: 400 }
         )
       }
     } else {
       return NextResponse.json(
-        { error: 'No editable content found for this version' },
+        { error: ERROR_MESSAGES.NO_EDITABLE_CONTENT },
         { status: 400 }
       )
     }
@@ -718,7 +718,7 @@ export async function POST(
 
     if (urlError || !urlData) {
       return NextResponse.json(
-        { error: 'Failed to generate download URL' },
+        { error: ERROR_MESSAGES.GENERATE_DOWNLOAD_URL_FAILED },
         { status: 500 }
       )
     }

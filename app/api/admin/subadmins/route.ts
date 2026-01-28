@@ -24,7 +24,7 @@ export async function GET(request: Request) {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
     }
 
     await requireAdmin(user.id)
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
     }
 
     await requireAdmin(user.id)
@@ -84,7 +84,7 @@ export async function POST(request: Request) {
     const { userId, can_upload_documents, can_view_stats, is_active } = body
 
     if (!userId) {
-      return NextResponse.json({ error: 'userId is required' }, { status: 400 })
+      return NextResponse.json({ error: ERROR_MESSAGES.USER_ID_REQUIRED }, { status: 400 })
     }
 
     // Verify the target user exists
@@ -93,13 +93,13 @@ export async function POST(request: Request) {
     })
 
     if (!targetUser) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+      return NextResponse.json({ error: ERROR_MESSAGES.USER_NOT_FOUND }, { status: 404 })
     }
 
     // Prevent assigning subadmin to admin
     if (targetUser.role === 'admin') {
       return NextResponse.json(
-        { error: 'Cannot assign subadmin role to an admin' },
+        { error: ERROR_MESSAGES.CANNOT_ASSIGN_SUBADMIN_TO_ADMIN },
         { status: 400 }
       )
     }

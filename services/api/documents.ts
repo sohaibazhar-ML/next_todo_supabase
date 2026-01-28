@@ -48,8 +48,8 @@ function normalizeDocument(doc: SerializedDocument | Document): Document {
       typeof doc.file_size === 'bigint'
         ? Number(doc.file_size)
         : typeof doc.file_size === 'number'
-        ? doc.file_size
-        : 0,
+          ? doc.file_size
+          : 0,
     created_at: toISOString(doc.created_at),
     updated_at: toISOString(doc.updated_at),
   }
@@ -167,7 +167,7 @@ export async function fetchDocumentVersions(
           'error' in data &&
           typeof data.error === 'string' &&
           data.error) ||
-        'Failed to fetch document versions'
+        ERROR_MESSAGES.FETCH_VERSIONS
 
       throw new Error(errorMessage)
     }
@@ -175,13 +175,13 @@ export async function fetchDocumentVersions(
     const documents: Document[] = Array.isArray(data)
       ? data.map(normalizeDocument)
       : []
-    
+
     return documents
   } catch (error) {
     const message =
       error instanceof Error
         ? error.message
-        : 'Failed to fetch document versions'
+        : ERROR_MESSAGES.FETCH_VERSIONS
     throw new Error(message)
   }
 }
@@ -225,7 +225,7 @@ export async function uploadDocument(
           'error' in data &&
           typeof data.error === 'string' &&
           data.error) ||
-        'Failed to upload document'
+        ERROR_MESSAGES.UPLOAD_DOCUMENT
 
       throw new Error(errorMessage)
     }
@@ -233,7 +233,7 @@ export async function uploadDocument(
     return normalizeDocument(data)
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : 'Failed to upload document'
+      error instanceof Error ? error.message : ERROR_MESSAGES.UPLOAD_DOCUMENT
     throw new Error(message)
   }
 }
@@ -286,7 +286,7 @@ export async function updateDocument(
           'error' in data &&
           typeof data.error === 'string' &&
           data.error) ||
-        'Failed to update document'
+        ERROR_MESSAGES.UPDATE_DOCUMENT
 
       throw new Error(errorMessage)
     }
@@ -294,7 +294,7 @@ export async function updateDocument(
     return normalizeDocument(data)
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : 'Failed to update document'
+      error instanceof Error ? error.message : ERROR_MESSAGES.UPDATE_DOCUMENT
     throw new Error(message)
   }
 }
@@ -316,13 +316,13 @@ export async function deleteDocument(id: string): Promise<void> {
           'error' in data &&
           typeof data.error === 'string' &&
           data.error) ||
-        'Failed to delete document'
+        ERROR_MESSAGES.DELETE_DOCUMENT
 
       throw new Error(errorMessage)
     }
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : 'Failed to delete document'
+      error instanceof Error ? error.message : ERROR_MESSAGES.DELETE_DOCUMENT
     throw new Error(message)
   }
 }
@@ -346,7 +346,7 @@ export async function fetchDocumentFilterOptions(): Promise<{
           'error' in data &&
           typeof data.error === 'string' &&
           data.error) ||
-        'Failed to fetch filter options'
+        ERROR_MESSAGES.FETCH_FILTER_OPTIONS
 
       throw new Error(errorMessage)
     }
@@ -360,7 +360,7 @@ export async function fetchDocumentFilterOptions(): Promise<{
     const message =
       error instanceof Error
         ? error.message
-        : 'Failed to fetch filter options'
+        : ERROR_MESSAGES.FETCH_FILTER_OPTIONS
     throw new Error(message)
   }
 }
@@ -380,7 +380,7 @@ export async function getDocumentDownloadUrl(id: string): Promise<string> {
           'error' in data &&
           typeof data.error === 'string' &&
           data.error) ||
-        'Failed to get download URL'
+        ERROR_MESSAGES.GENERATE_DOWNLOAD_URL_FAILED
 
       throw new Error(errorMessage)
     }
@@ -388,7 +388,7 @@ export async function getDocumentDownloadUrl(id: string): Promise<string> {
     return typeof data.url === 'string' ? data.url : ''
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : 'Failed to get download URL'
+      error instanceof Error ? error.message : ERROR_MESSAGES.GENERATE_DOWNLOAD_URL_FAILED
     throw new Error(message)
   }
 }
@@ -496,7 +496,7 @@ export async function getUserDocumentVersions(id: string): Promise<SerializedVer
           'error' in data &&
           typeof data.error === 'string' &&
           data.error) ||
-        'Failed to fetch document versions'
+        ERROR_MESSAGES.FETCH_VERSIONS
 
       throw new Error(errorMessage)
     }
@@ -505,7 +505,7 @@ export async function getUserDocumentVersions(id: string): Promise<SerializedVer
     return Array.isArray(data) ? data : []
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : 'Failed to fetch document versions'
+      error instanceof Error ? error.message : ERROR_MESSAGES.FETCH_VERSIONS
     throw new Error(message)
   }
 }
@@ -521,7 +521,7 @@ export async function convertDocumentForEditor(id: string): Promise<{
 
     const contentType = response.headers.get('content-type')
     if (!contentType || !contentType.includes('application/json')) {
-      throw new Error('Invalid response format')
+      throw new Error(ERROR_MESSAGES.INVALID_RESPONSE_FORMAT)
     }
 
     const data = await response.json()
@@ -533,7 +533,7 @@ export async function convertDocumentForEditor(id: string): Promise<{
           'error' in data &&
           typeof data.error === 'string' &&
           data.error) ||
-        'Failed to convert document'
+        ERROR_MESSAGES.CONVERT_DOCUMENT_FAILED
 
       throw new Error(errorMessage)
     }
@@ -546,7 +546,7 @@ export async function convertDocumentForEditor(id: string): Promise<{
     }
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : 'Failed to convert document'
+      error instanceof Error ? error.message : ERROR_MESSAGES.CONVERT_DOCUMENT_FAILED
     throw new Error(message)
   }
 }

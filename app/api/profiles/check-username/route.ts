@@ -20,7 +20,7 @@ export async function GET(request: Request) {
     const username = searchParams.get('username')
 
     if (!username) {
-      return NextResponse.json({ error: 'Username is required' }, { status: 400 })
+      return NextResponse.json({ error: ERROR_MESSAGES.USERNAME_REQUIRED }, { status: 400 })
     }
 
     const existing = await prisma.profiles.findUnique({

@@ -25,7 +25,7 @@ export async function GET(
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
     }
 
     const { id } = await params
@@ -40,7 +40,7 @@ export async function GET(
     `
 
     if (!rootResult || rootResult.length === 0) {
-      return NextResponse.json({ error: 'Document not found' }, { status: 404 })
+      return NextResponse.json({ error: ERROR_MESSAGES.DOCUMENT_NOT_FOUND }, { status: 404 })
     }
 
     const rootId = rootResult[0].root_id
@@ -65,7 +65,7 @@ export async function GET(
 
     // If no versions returned, document doesn't exist
     if (!versions || versions.length === 0) {
-      return NextResponse.json({ error: 'Document not found' }, { status: 404 })
+      return NextResponse.json({ error: ERROR_MESSAGES.DOCUMENT_NOT_FOUND }, { status: 404 })
     }
 
     // Convert BigInt file_size to Number for JSON serialization
@@ -82,14 +82,14 @@ export async function GET(
         typeof doc.created_at === 'string'
           ? doc.created_at
           : doc.created_at instanceof Date
-          ? doc.created_at.toISOString()
-          : new Date().toISOString(),
+            ? doc.created_at.toISOString()
+            : new Date().toISOString(),
       updated_at:
         typeof doc.updated_at === 'string'
           ? doc.updated_at
           : doc.updated_at instanceof Date
-          ? doc.updated_at.toISOString()
-          : null,
+            ? doc.updated_at.toISOString()
+            : null,
       tags: Array.isArray(doc.tags) ? doc.tags : [],
     }))
 

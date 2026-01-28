@@ -31,12 +31,12 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
     }
 
     const canUpload = await hasPermission(user.id, 'can_upload_documents')
     if (!canUpload) {
-      return NextResponse.json({ error: 'Permission required: can_upload_documents' }, { status: 403 })
+      return NextResponse.json({ error: ERROR_MESSAGES.PERMISSION_REQUIRED_UPLOAD_DOCUMENTS }, { status: 403 })
     }
 
     const formData = await request.formData()
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
 
     if (!file || !title || !category) {
       return NextResponse.json(
-        { error: 'Missing required fields: file, title, category' },
+        { error: ERROR_MESSAGES.MISSING_REQUIRED_FIELDS },
         { status: 400 }
       )
     }
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
 
       if (!parentDoc) {
         return NextResponse.json(
-          { error: 'Parent document not found' },
+          { error: ERROR_MESSAGES.PARENT_DOCUMENT_NOT_FOUND },
           { status: 404 }
         )
       }

@@ -23,12 +23,12 @@ export async function POST() {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
     }
 
     const admin = await isAdmin(user.id)
     if (!admin) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      return NextResponse.json({ error: ERROR_MESSAGES.FORBIDDEN }, { status: 403 })
     }
 
     // Get all documents

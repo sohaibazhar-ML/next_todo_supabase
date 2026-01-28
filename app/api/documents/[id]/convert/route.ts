@@ -27,7 +27,7 @@ export async function GET(
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
     }
 
     const { id } = await params
@@ -45,7 +45,7 @@ export async function GET(
     })
 
     if (!document) {
-      return NextResponse.json({ error: 'Document not found' }, { status: 404 })
+      return NextResponse.json({ error: ERROR_MESSAGES.DOCUMENT_NOT_FOUND }, { status: 404 })
     }
 
     // Get file from Supabase Storage
@@ -64,7 +64,7 @@ export async function GET(
     if (!fileData) {
       console.error('No file data returned for path:', document.file_path)
       return NextResponse.json(
-        { error: 'File not found in storage' },
+        { error: ERROR_MESSAGES.FILE_NOT_FOUND_IN_STORAGE },
         { status: 404 }
       )
     }
@@ -82,7 +82,7 @@ export async function GET(
       if (isDoc && !isDocx) {
         return NextResponse.json(
           {
-            error: 'Legacy .doc format is not supported. Please convert the file to .docx format to edit it.',
+            error: ERROR_MESSAGES.LEGACY_DOC_FORMAT_NOT_SUPPORTED,
             type: 'doc',
             unsupported: true
           },
@@ -204,7 +204,7 @@ export async function GET(
       }
     } else {
       return NextResponse.json(
-        { error: 'Unsupported file type for editing' },
+        { error: ERROR_MESSAGES.UNSUPPORTED_FILE_TYPE },
         { status: 400 }
       )
     }

@@ -88,7 +88,7 @@ export async function fetchSubadmins(): Promise<Subadmin[]> {
           'error' in data &&
           typeof data.error === 'string' &&
           data.error) ||
-        'Failed to fetch subadmins'
+        ERROR_MESSAGES.FETCH_SUBADMINS
 
       throw new Error(errorMessage)
     }
@@ -100,7 +100,7 @@ export async function fetchSubadmins(): Promise<Subadmin[]> {
     return subadmins
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : 'Failed to fetch subadmins'
+      error instanceof Error ? error.message : ERROR_MESSAGES.FETCH_SUBADMINS
     throw new Error(message)
   }
 }
@@ -120,7 +120,7 @@ export async function fetchSubadminById(userId: string): Promise<Subadmin | null
           'error' in data &&
           typeof data.error === 'string' &&
           data.error) ||
-        'Failed to fetch subadmin'
+        ERROR_MESSAGES.FETCH_SUBADMIN
 
       throw new Error(errorMessage)
     }
@@ -128,7 +128,7 @@ export async function fetchSubadminById(userId: string): Promise<Subadmin | null
     return data ? normalizeSubadmin(data) : null
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : 'Failed to fetch subadmin'
+      error instanceof Error ? error.message : ERROR_MESSAGES.FETCH_SUBADMIN
     throw new Error(message)
   }
 }
@@ -157,7 +157,7 @@ export async function createSubadmin(
           'error' in data &&
           typeof data.error === 'string' &&
           data.error) ||
-        'Failed to create subadmin'
+        ERROR_MESSAGES.CREATE_SUBADMIN
 
       throw new Error(errorMessage)
     }
@@ -165,7 +165,7 @@ export async function createSubadmin(
     return normalizeSubadmin(data)
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : 'Failed to create subadmin'
+      error instanceof Error ? error.message : ERROR_MESSAGES.CREATE_SUBADMIN
     throw new Error(message)
   }
 }
@@ -195,7 +195,7 @@ export async function updateSubadmin(
           'error' in data &&
           typeof data.error === 'string' &&
           data.error) ||
-        'Failed to update subadmin'
+        ERROR_MESSAGES.UPDATE_SUBADMIN
 
       throw new Error(errorMessage)
     }
@@ -203,7 +203,7 @@ export async function updateSubadmin(
     return normalizeSubadmin(data)
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : 'Failed to update subadmin'
+      error instanceof Error ? error.message : ERROR_MESSAGES.UPDATE_SUBADMIN
     throw new Error(message)
   }
 }
@@ -225,13 +225,13 @@ export async function deleteSubadmin(userId: string): Promise<void> {
           'error' in data &&
           typeof data.error === 'string' &&
           data.error) ||
-        'Failed to delete subadmin'
+        ERROR_MESSAGES.REMOVE_SUBADMIN
 
       throw new Error(errorMessage)
     }
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : 'Failed to delete subadmin'
+      error instanceof Error ? error.message : ERROR_MESSAGES.REMOVE_SUBADMIN
     throw new Error(message)
   }
 }
