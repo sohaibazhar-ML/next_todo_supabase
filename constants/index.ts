@@ -76,3 +76,14 @@ export {
   STORAGE_CONFIG,
 } from './storage'
 
+// Phase 2 Refactoring: UI text and theme constants
+export {
+  UI_TEXT,
+  type UITextKeys,
+} from './text'
+
+export {
+  THEME,
+  type ThemeKeys,
+} from './theme'
+
