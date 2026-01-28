@@ -142,7 +142,7 @@ export async function updateProfile(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        userId,
+        id: userId,
         ...updates,
       }),
     })
@@ -156,7 +156,7 @@ export async function updateProfile(
           'error' in data &&
           typeof data.error === 'string' &&
           data.error) ||
-        'Failed to update profile'
+        ERROR_MESSAGES.UPDATE_PROFILE
 
       throw new Error(errorMessage)
     }
@@ -164,7 +164,7 @@ export async function updateProfile(
     return normalizeProfile(data)
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : 'Failed to update profile'
+      error instanceof Error ? error.message : ERROR_MESSAGES.UPDATE_PROFILE
     throw new Error(message)
   }
 }
@@ -188,7 +188,7 @@ export async function checkUsernameAvailability(
           'error' in data &&
           typeof data.error === 'string' &&
           data.error) ||
-        'Failed to check username availability'
+        ERROR_MESSAGES.CHECK_USERNAME_FAILED
 
       throw new Error(errorMessage)
     }
@@ -198,7 +198,7 @@ export async function checkUsernameAvailability(
     const message =
       error instanceof Error
         ? error.message
-        : 'Failed to check username availability'
+        : ERROR_MESSAGES.CHECK_USERNAME_FAILED
     throw new Error(message)
   }
 }

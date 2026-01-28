@@ -66,6 +66,26 @@ export const ERROR_MESSAGES = {
    */
   INVALID_RESPONSE: 'Server returned an invalid response. Please try again.',
 
+  /**
+   * Unauthorized access
+   */
+  UNAUTHORIZED: 'Unauthorized',
+
+  /**
+   * Forbidden access
+   */
+  FORBIDDEN: 'Forbidden',
+
+  /**
+   * Missing required fields
+   */
+  MISSING_REQUIRED_FIELDS: 'Missing required fields',
+
+  /**
+   * Invalid format
+   */
+  INVALID_FORMAT: 'Invalid format',
+
   // ============================================================================
   // Document Error Messages
   // ============================================================================
@@ -363,6 +383,26 @@ export const ERROR_MESSAGES = {
    * Used in profiles API service and user management components
    */
   FETCH_PROFILES: 'Failed to fetch profiles',
+
+  /**
+   * Failed to check username availability
+   */
+  CHECK_USERNAME_FAILED: 'Failed to check username availability',
+
+  /**
+   * Profile not found
+   */
+  PROFILE_NOT_FOUND: 'Profile not found',
+
+  /**
+   * Profile already exists
+   */
+  PROFILE_ALREADY_EXISTS: 'Profile already exists',
+
+  /**
+   * Invalid user ID format
+   */
+  INVALID_USER_ID_FORMAT: 'Invalid user ID format',
 
   // ============================================================================
   // Subadmin Error Messages

@@ -27,7 +27,7 @@ export async function GET(request: Request) {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
     }
 
     const { searchParams } = new URL(request.url)
@@ -40,10 +40,10 @@ export async function GET(request: Request) {
     // If userId is provided, get specific profile
     if (userId) {
       const admin = await isAdmin(user.id)
-      
+
       // Users can only view their own profile unless they're admin
       if (!admin && user.id !== userId) {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+        return NextResponse.json({ error: ERROR_MESSAGES.FORBIDDEN }, { status: 403 })
       }
 
       const profile = await prisma.profiles.findUnique({
@@ -51,7 +51,7 @@ export async function GET(request: Request) {
       })
 
       if (!profile) {
-        return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
+        return NextResponse.json({ error: ERROR_MESSAGES.PROFILE_NOT_FOUND }, { status: 404 })
       }
 
       return NextResponse.json(profile)
@@ -134,14 +134,14 @@ export async function POST(request: Request) {
     // Validate required fields
     if (!body.id || !body.username || !body.email) {
       return NextResponse.json(
-        { error: 'Missing required fields: id, username, email' },
+        { error: `${ERROR_MESSAGES.MISSING_REQUIRED_FIELDS}: id, username, email` },
         { status: 400 }
       )
     }
 
     // Validate user ID format (must be valid UUID)
     if (!body.id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
-      return NextResponse.json({ error: 'Invalid user ID format' }, { status: 400 })
+      return NextResponse.json({ error: ERROR_MESSAGES.INVALID_USER_ID_FORMAT }, { status: 400 })
     }
 
     // Check if profile already exists
@@ -151,7 +151,7 @@ export async function POST(request: Request) {
 
     if (existingProfile) {
       return NextResponse.json(
-        { error: 'Profile already exists' },
+        { error: ERROR_MESSAGES.PROFILE_ALREADY_EXISTS },
         { status: 400 }
       )
     }
@@ -162,24 +162,24 @@ export async function POST(request: Request) {
     // 1. User just signed up and might not have a session yet
     // 2. The user.id is from Supabase's signUp response (trusted source)
     // 3. We've validated UUID format and checked profile doesn't exist
-    
+
     // Check authentication status (for logging and security)
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    
+
     // Security check: If user is authenticated and IDs match, allow (normal flow)
     // If user is authenticated but IDs don't match, still allow IF profile doesn't exist
     // This handles the case where there's a stale session from another user during signup
     // The profile doesn't exist check above ensures we're not overwriting existing profiles
     if (user && body.id !== user.id) {
       // Log the mismatch but allow it during signup (profile doesn't exist = signup flow)
-      console.warn('Profile creation with different authenticated user (likely signup with stale session):', { 
-        authenticatedUserId: user.id, 
-        requestedUserId: body.id 
+      console.warn('Profile creation with different authenticated user (likely signup with stale session):', {
+        authenticatedUserId: user.id,
+        requestedUserId: body.id
       })
       // Don't block - this is a signup flow and the profile doesn't exist
     }
-    
+
     console.log('Creating profile:', {
       userId: body.id,
       username: body.username,
@@ -196,7 +196,7 @@ export async function POST(request: Request) {
 
       if (existing) {
         return NextResponse.json(
-          { error: 'Username already exists' },
+          { error: ERROR_MESSAGES.USERNAME_EXISTS },
           { status: 400 }
         )
       }
@@ -271,7 +271,7 @@ export async function PUT(request: Request) {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
     }
 
     const body = await request.json()
@@ -281,7 +281,7 @@ export async function PUT(request: Request) {
 
     // Users can only update their own profile unless they're admin
     if (!admin && user.id !== profileId) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      return NextResponse.json({ error: ERROR_MESSAGES.FORBIDDEN }, { status: 403 })
     }
 
     // Check if profile exists
@@ -290,7 +290,7 @@ export async function PUT(request: Request) {
     })
 
     if (!existing) {
-      return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
+      return NextResponse.json({ error: ERROR_MESSAGES.PROFILE_NOT_FOUND }, { status: 404 })
     }
 
     // Prepare update data (exclude fields that shouldn't be updated)
@@ -317,21 +317,21 @@ export async function PUT(request: Request) {
     if (admin && body.role !== undefined) {
       const currentRole = existing.role
       const newRole = body.role
-      
+
       // Prevent changing to/from subadmin via profile update
       // Subadmin assignment must go through dedicated subadmin API
       if ((currentRole === 'subadmin' || newRole === 'subadmin') && currentRole !== newRole) {
         return NextResponse.json(
-          { error: 'Cannot change role to/from subadmin. Use /api/admin/subadmins endpoint.' },
+          { error: ERROR_MESSAGES.CANNOT_CHANGE_SUBADMIN_ROLE },
           { status: 400 }
         )
       }
-      
+
       updateData.role = body.role
     } else if (!admin && body.role !== undefined) {
       // Non-admins cannot change roles at all
       return NextResponse.json(
-        { error: 'Only admins can change user roles' },
+        { error: ERROR_MESSAGES.ONLY_ADMINS_CAN_CHANGE_ROLES },
         { status: 403 }
       )
     }
