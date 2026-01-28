@@ -11,6 +11,7 @@ import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { resetPasswordFormSchema, type ResetPasswordFormData } from './resetPasswordFormSchema'
+import { DEFAULT_VALUES } from '@/constants/defaults'
 
 export interface UseResetPasswordFormOptions {
   onSuccess?: () => void
@@ -62,7 +63,7 @@ export function useResetPasswordForm({ onSuccess }: UseResetPasswordFormOptions 
         } else {
           router.push('/login')
         }
-      }, 2000)
+      }, DEFAULT_VALUES.TIMEOUTS.REDIRECT)
     } catch (err) {
       setError(
         err instanceof Error

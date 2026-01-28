@@ -2,13 +2,14 @@ import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+import { CONSOLE_MESSAGES } from '@/constants/console'
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
   const type = requestUrl.searchParams.get('type')
   const origin = requestUrl.origin
-  
+
   // Get the locale from cookie or default to 'de'
   const cookieStore = await cookies()
   const locale = cookieStore.get('NEXT_LOCALE')?.value || 'de'
@@ -16,9 +17,9 @@ export async function GET(request: Request) {
   if (code) {
     const supabase = await createClient()
     const { data, error } = await supabase.auth.exchangeCodeForSession(code)
-    
+
     if (error) {
-      console.error('Error exchanging code for session:', error)
+      console.error(CONSOLE_MESSAGES.ERROR_SESSION_EXCHANGE, error)
       return NextResponse.redirect(`${origin}/${locale}/login?error=${encodeURIComponent(error.message)}`)
     }
 
@@ -57,7 +58,7 @@ export async function GET(request: Request) {
         if (!emailError) {
           return NextResponse.redirect(`${origin}/${locale}/login?message=${encodeURIComponent('First confirmation successful. Please check your email for the second confirmation.')}`)
         }
-      } 
+      }
       // Second confirmation - mark as fully confirmed
       else if (profile.email_confirmed && !profile.email_confirmed_at) {
         await prisma.profiles.update({

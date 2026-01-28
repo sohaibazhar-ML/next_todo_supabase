@@ -10,6 +10,7 @@
  */
 
 import { useState, useMemo } from 'react'
+import { DEFAULT_VALUES } from '@/constants/defaults'
 
 export interface UsePaginationProps {
     totalItems: number
@@ -33,8 +34,8 @@ export interface UsePaginationReturn {
 
 export function usePagination({
     totalItems,
-    itemsPerPage = 10,
-    initialPage = 1,
+    itemsPerPage = DEFAULT_VALUES.PAGINATION.ITEMS_PER_PAGE,
+    initialPage = DEFAULT_VALUES.PAGINATION.INITIAL_PAGE,
 }: UsePaginationProps): UsePaginationReturn {
     const [currentPage, setCurrentPage] = useState(initialPage)
 

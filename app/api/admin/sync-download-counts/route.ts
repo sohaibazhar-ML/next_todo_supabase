@@ -57,7 +57,7 @@ export async function POST() {
           ? error.message
           : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
         errors.push(`Failed to sync document ${doc.id}: ${errorMessage}`)
-        console.error(`Error syncing document ${doc.id}:`, error)
+        console.error(`${CONSOLE_MESSAGES.ERROR_SYNCING_DOCUMENT} ${doc.id}`, error)
       }
     }
 

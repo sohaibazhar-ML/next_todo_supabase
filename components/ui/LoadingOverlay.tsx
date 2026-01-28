@@ -15,6 +15,7 @@
 'use client'
 
 import { IconSpinner } from './icons'
+import { THEME } from '@/constants/theme'
 
 export interface LoadingOverlayProps {
   /**
@@ -51,7 +52,7 @@ export function LoadingOverlay({
     <div className={`relative ${className}`}>
       {/* Loading overlay */}
       {isLoading && (
-        <div className="absolute inset-0 bg-white bg-opacity-75 z-50 flex items-center justify-center rounded-lg">
+        <div className={`absolute inset-0 bg-white bg-opacity-75 ${THEME.Z_INDEX.MODAL} flex items-center justify-center rounded-lg`}>
           <div className="text-center">
             <IconSpinner className="h-12 w-12 text-indigo-600 mx-auto mb-4" />
             {message && (

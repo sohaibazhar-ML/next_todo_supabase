@@ -29,7 +29,7 @@ import DocxEditorView from './DocxEditorView'
 import PdfEditorView from './PdfEditorView'
 import ErrorMessage from '../ui/ErrorMessage'
 import LoadingSpinner from '../ui/LoadingSpinner'
-import { DOCUMENT_TYPES } from '@/constants'
+import { DOCUMENT_TYPES, DEFAULT_VALUES } from '@/constants'
 import { useDocumentEditorState } from './hooks/useDocumentEditorState'
 import { usePdfWorker } from './hooks/usePdfWorker'
 import { useDocumentLoader } from './hooks/useDocumentLoader'
@@ -173,7 +173,7 @@ export default function DocumentEditorContainer({
         editor.commands.setContent(editorState.content)
         setTimeout(() => {
           editorState.isSettingContentRef.current = false
-        }, 0)
+        }, DEFAULT_VALUES.TIMEOUTS.ZERO)
       }
     }
   }, [editor, editorState.documentType, editorState.loading, editorState.content])

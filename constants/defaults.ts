@@ -248,6 +248,19 @@ export const DEFAULT_VALUES = {
    * Used in document search API
    */
   DEFAULT_PAGE_OFFSET: 0,
+  TIMEOUTS: {
+    DEBOUNCE: 500,
+    ANIMATION: 300,
+    REDIRECT: 2000, // Added for reset password
+    CLEANUP: 100,
+    RELOAD: 500,
+    CONTENT_UPDATE: 100, // For editor update
+    ZERO: 0,
+  },
+  PAGINATION: {
+    ITEMS_PER_PAGE: 10,
+    INITIAL_PAGE: 1,
+  }
 } as const
 
 /**

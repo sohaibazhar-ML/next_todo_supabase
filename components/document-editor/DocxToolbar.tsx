@@ -7,6 +7,7 @@
 
 import { Editor } from '@tiptap/react'
 import { IconButton } from '@/components/ui'
+import { THEME } from '@/constants/theme'
 
 interface DocxToolbarProps {
   editor: Editor
@@ -128,7 +129,7 @@ export default function DocxToolbar({ editor }: DocxToolbarProps) {
           <input
             type="color"
             onChange={(e) => editor.chain().focus().setColor(e.target.value).run()}
-            value={editor.getAttributes('textStyle').color || '#000000'}
+            value={editor.getAttributes('textStyle').color || THEME.COLORS.ANNOTATION.BLACK}
             className="w-10 h-8 rounded border border-gray-300 cursor-pointer"
             title="Text Color"
           />

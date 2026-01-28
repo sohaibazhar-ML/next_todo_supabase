@@ -21,7 +21,7 @@ import { useUsers } from '@/hooks/api/useUsers'
 import { useModal } from '@/hooks'
 import { useSubadminActions } from '@/hooks/useSubadminActions'
 import type { Subadmin } from '@/services/api/subadmins'
-import { ERROR_MESSAGES } from '@/constants'
+import { ERROR_MESSAGES, CONSOLE_MESSAGES } from '@/constants'
 import SubadminManagementView from './SubadminManagementView'
 
 export default function SubadminManagementContainer() {
@@ -82,7 +82,7 @@ export default function SubadminManagementContainer() {
         ? err.message
         : ERROR_MESSAGES.REMOVE_SUBADMIN
       setMessage(errorMessage)
-      console.error('Error removing subadmin:', err)
+      console.error(CONSOLE_MESSAGES.ERROR_REMOVING_SUBADMIN, err)
     }
   }
 
@@ -107,7 +107,7 @@ export default function SubadminManagementContainer() {
         ? err.message
         : ERROR_MESSAGES.SAVE_SUBADMIN
       setMessage(errorMessage)
-      console.error('Error toggling subadmin active status:', err)
+      console.error(CONSOLE_MESSAGES.ERROR_TOGGLING_SUBADMIN_STATUS, err)
     }
   }
 

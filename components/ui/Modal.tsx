@@ -19,6 +19,8 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
+import { THEME } from '@/constants/theme'
 import { cn } from '@/lib/utils/cn'
 
 export interface ModalProps {
@@ -142,7 +144,7 @@ export default function Modal({
   return (
     <div
       ref={modalRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+      className={`fixed inset-0 ${THEME.Z_INDEX.MODAL} flex items-center justify-center bg-black bg-opacity-50 p-4`}
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
@@ -159,7 +161,7 @@ export default function Modal({
       >
         {/* Header */}
         {(title || header) && (
-          <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
+          <div className={`sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between ${THEME.Z_INDEX.DEFAULT}`}>
             {header ? (
               header
             ) : (

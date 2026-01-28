@@ -8,9 +8,11 @@
  * ```tsx
  * const upload = useFileUpload({
  *   maxSize: 10 * 1024 * 1024, // 10MB
- *   acceptedTypes: ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
- *   onSuccess: (file) => console.log('Uploaded:', file)
- * })
+ *   acceptedTypes: ['application/pdf', 'application/vnd.op   * @example
+   * const { upload, isUploading } = useFileUpload({
+   *   bucket: 'documents',
+   *   onSuccess: (file) => console.log(CONSOLE_MESSAGES.UPLOAD_COMPLETE, file)
+   * })
  * 
  * // Use in component
  * <input
@@ -23,6 +25,8 @@
  */
 
 import { useState, useCallback } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { CONSOLE_MESSAGES } from '@/constants/console'
 
 export interface FileUploadConfig {
     maxSize?: number // in bytes

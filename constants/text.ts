@@ -90,6 +90,7 @@ export const UI_TEXT = {
         NAME: 'Enter name',
         TITLE: 'Enter title',
         DESCRIPTION: 'Enter description',
+        TEXT: 'Enter text',
         SELECT: 'Select an option',
         SELECT_FILE: 'Select a file',
         SELECT_DATE: 'Select a date',

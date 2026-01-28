@@ -364,6 +364,36 @@ export const CONSOLE_MESSAGES = {
    * Used in SubadminManagement component
    */
   ERROR_FETCHING_USERS: 'Error fetching users:',
+
+  /**
+   * Action completed logs
+   */
+  UPLOAD_COMPLETE: 'Uploaded:',
+  UPDATE_COMPLETE: 'Updated!',
+
+  /**
+   * Error modifying session cookies
+   * Used in middleware
+   */
+  ERROR_MODIFYING_SESSION_COOKIES: 'Error modifying session cookies:',
+
+  /**
+   * Error exchanging code for session
+   * Used in auth callback
+   */
+  ERROR_SESSION_EXCHANGE: 'Error exchanging code for session:',
+
+  /**
+   * Error syncing document
+   * Used in sync-download-counts API
+   */
+  ERROR_SYNCING_DOCUMENT: 'Error syncing document:',
+
+  /**
+   * Error toggling subadmin status
+   * Used in SubadminManagement component
+   */
+  ERROR_TOGGLING_SUBADMIN_STATUS: 'Error toggling subadmin active status:',
 } as const
 
 /**

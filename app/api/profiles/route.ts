@@ -173,14 +173,14 @@ export async function POST(request: Request) {
     // The profile doesn't exist check above ensures we're not overwriting existing profiles
     if (user && body.id !== user.id) {
       // Log the mismatch but allow it during signup (profile doesn't exist = signup flow)
-      console.warn('Profile creation with different authenticated user (likely signup with stale session):', {
+      console.warn(CONSOLE_MESSAGES.PROFILE_CREATION_STALE_SESSION, {
         authenticatedUserId: user.id,
         requestedUserId: body.id
       })
       // Don't block - this is a signup flow and the profile doesn't exist
     }
 
-    console.log('Creating profile:', {
+    console.log(CONSOLE_MESSAGES.CREATING_PROFILE, {
       userId: body.id,
       username: body.username,
       email: body.email,
@@ -234,7 +234,7 @@ export async function POST(request: Request) {
       updated_at: profile.updated_at.toISOString(),
     }
 
-    console.log('Profile created successfully:', profileResponse.id)
+    console.log(CONSOLE_MESSAGES.PROFILE_CREATED, profileResponse.id)
     return NextResponse.json(profileResponse, {
       status: 201,
       headers: {

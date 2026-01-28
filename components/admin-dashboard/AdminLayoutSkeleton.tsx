@@ -1,6 +1,7 @@
 'use client'
 
 import { ADMIN_DASHBOARD } from '@/constants/adminDashboard'
+import { THEME } from '@/constants/theme'
 import AdminSidebar from './AdminSidebar'
 import AdminTopNav from './AdminTopNav'
 import { SidebarProvider, useSidebar } from './SidebarContext'
@@ -60,7 +61,7 @@ function AdminLayoutSkeletonContent({
                   <div className="absolute top-0 right-0 p-4">
                     <div className={`${ADMIN_DASHBOARD.SKELETON_DIMENSIONS.STATS_ICON} ${ADMIN_DASHBOARD.COLOR_GRAY_LIGHTER_BG} rounded animate-pulse`}></div>
                   </div>
-                  <div className="relative z-10">
+                  <div className={`relative ${THEME.Z_INDEX.DEFAULT}`}>
                     <div className={`${ADMIN_DASHBOARD.SKELETON_DIMENSIONS.STATS_TITLE} ${ADMIN_DASHBOARD.COLOR_GRAY_LIGHTER_BG} rounded animate-pulse mb-2`}></div>
                     <div className={`${ADMIN_DASHBOARD.SKELETON_DIMENSIONS.STATS_VALUE} ${ADMIN_DASHBOARD.COLOR_GRAY_LIGHTER_BG} rounded animate-pulse mb-1`}></div>
                     <div className={`${ADMIN_DASHBOARD.SKELETON_DIMENSIONS.STATS_SUBTITLE} ${ADMIN_DASHBOARD.COLOR_GRAY_LIGHTER_BG} rounded animate-pulse`}></div>
