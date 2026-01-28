@@ -5,6 +5,8 @@
  * Similar to ErrorMessage but with success styling.
  */
 
+import { CloseButton } from '@/components/ui'
+
 interface SuccessMessageProps {
   message: string
   className?: string
@@ -36,18 +38,11 @@ export default function SuccessMessage({
           <p className="text-sm text-green-700">{message}</p>
         </div>
         {onDismiss && (
-          <button
+          <CloseButton
             onClick={onDismiss}
-            className="ml-3 flex-shrink-0 text-green-400 hover:text-green-600"
-          >
-            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fillRule="evenodd"
-                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </button>
+            className="ml-3 text-green-400 hover:text-green-600"
+            size="sm"
+          />
         )}
       </div>
     </div>

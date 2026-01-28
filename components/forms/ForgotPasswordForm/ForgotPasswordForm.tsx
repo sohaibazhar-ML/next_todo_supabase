@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl'
 import { FormProvider } from 'react-hook-form'
 import Link from 'next/link'
 import { useForgotPasswordForm } from './useForgotPasswordForm'
-import { ErrorMessage, SuccessMessage } from '@/components/ui'
+import { Input, Button, ErrorMessage, SuccessMessage } from '@/components/ui'
 import { IconSpinner } from '@/components/ui/icons'
 import { ROUTES } from '@/constants/routes'
 
@@ -42,14 +42,17 @@ export default function ForgotPasswordForm() {
           )}
         </div>
 
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 font-medium transition-all flex items-center justify-center gap-2"
-        >
-          {isLoading && <IconSpinner className="h-5 w-5" />}
-          {isLoading ? t('common.loading') : t('forgotPassword.sendResetLink')}
-        </button>
+        {/* Submit Button */}
+      <Button
+        type="submit"
+        variant="primary"
+        size="lg"
+        fullWidth
+        loading={isLoading}
+        disabled={isLoading}
+      >
+        {isLoading ? t('auth.sendingResetLink') : t('auth.sendResetLink')}
+      </Button>
       </form>
 
       <div className="mt-6 text-center">

@@ -7,9 +7,7 @@
  *   import { Button, Input, Modal } from '@/components/ui'
  */
 
-export { default as Button } from './Button'
-export type { ButtonProps } from './Button'
-
+// Form Components
 export { default as Input } from './Input'
 export type { InputProps } from './Input'
 
@@ -22,16 +20,30 @@ export type { TextareaProps } from './Textarea'
 export { default as Checkbox } from './Checkbox'
 export type { CheckboxProps } from './Checkbox'
 
-export { default as Modal } from './Modal'
-export type { ModalProps } from './Modal'
+// Button Components
+export { default as Button } from './Button'
+export type { ButtonProps } from './Button'
 
-// Re-export existing components
+export { default as ActionButton } from './ActionButton'
+export type { ActionButtonVariant } from './ActionButton'
+
+export { default as IconButton } from './IconButton'
+export type { IconButtonSize, IconButtonVariant } from './IconButton'
+
+export { default as ToolbarButton } from './ToolbarButton'
+
+export { default as CloseButton } from './CloseButton'
+
+// Feedback Components
 export { default as ErrorMessage } from './ErrorMessage'
 export { default as SuccessMessage } from './SuccessMessage'
 export { default as LoadingSpinner } from './LoadingSpinner'
 export { LoadingOverlay } from './LoadingOverlay'
 export type { LoadingOverlayProps } from './LoadingOverlay'
 
+// Layout Components
+export { default as Modal } from './Modal'
+export type { ModalProps } from './Modal'
+
 // Re-export icon components
 export * from './icons'
-

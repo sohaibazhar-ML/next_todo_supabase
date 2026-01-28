@@ -15,8 +15,10 @@ export { useDocumentDownload } from './useDocumentDownload'
 export { useModal } from './useModal'
 export { usePagination } from './usePagination'
 export { useSort } from './useSort'
+export { useSubadminActions } from './useSubadminActions'
 
 // Re-export types
 export type { UseModalReturn } from './useModal'
 export type { UsePaginationProps, UsePaginationReturn } from './usePagination'
 export type { SortDirection, UseSortProps, UseSortReturn } from './useSort'
+export type { SubadminActionType } from './useSubadminActions'

@@ -22,8 +22,8 @@ import { FormProvider } from 'react-hook-form'
 import { createClient } from '@/lib/supabase/client'
 import { useLoginForm } from './useLoginForm'
 import LoginFormFields from './LoginFormFields'
-import { ErrorMessage } from '@/components/ui'
-import { IconGoogle, IconSpinner } from '@/components/ui/icons'
+import { ErrorMessage, Button } from '@/components/ui'
+import { IconGoogle } from '@/components/ui/icons'
 import { ROUTES } from '@/constants/routes'
 
 export interface LoginFormProps {
@@ -81,24 +81,19 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
 
         {/* Social Login */}
         <div className="space-y-3">
-          <button
+          <Button
             type="button"
-            onClick={handleGoogleLogin}
+            variant="outline"
+            size="lg"
+            fullWidth
+            loading={socialLoading === 'google'}
             disabled={isLoading || socialLoading !== null}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-gray-200 rounded-xl shadow-md hover:shadow-lg text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
+            onClick={handleGoogleLogin}
+            icon={<IconGoogle className="h-5 w-5" />}
+            className="shadow-md hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98]"
           >
-            {socialLoading === 'google' ? (
-              <>
-                <IconSpinner className="h-5 w-5 text-gray-400" />
-                {t('auth.signingInWithGoogle')}
-              </>
-            ) : (
-              <>
-                <IconGoogle className="h-5 w-5" />
-                {t('auth.continueWithGoogle')}
-              </>
-            )}
-          </button>
+            {socialLoading === 'google' ? t('auth.signingInWithGoogle') : t('auth.continueWithGoogle')}
+          </Button>
         </div>
 
         {/* Divider */}
@@ -116,20 +111,17 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
 
         {/* Submit Button */}
         <div>
-          <button
+          <Button
             type="submit"
+            variant="primary"
+            size="lg"
+            fullWidth
+            loading={isLoading}
             disabled={isLoading || socialLoading !== null}
-            className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
+            className="transform hover:scale-[1.02] active:scale-[0.98]"
           >
-            {isLoading ? (
-              <>
-                <IconSpinner className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" />
-                {t('auth.signingIn')}
-              </>
-            ) : (
-              t('common.signIn')
-            )}
-          </button>
+            {isLoading ? t('auth.signingIn') : t('common.signIn')}
+          </Button>
         </div>
       </form>
 

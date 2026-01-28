@@ -7,7 +7,7 @@
  * Responsibilities:
  * - Render document cards
  * - Render document metadata
- * - Render action buttons
+ * - Render action buttons with loading states
  * - Render version history sections
  */
 
@@ -16,11 +16,18 @@
 import { useTranslations } from 'next-intl'
 import type { Document } from '@/types/document'
 import { DEFAULT_VALUES } from '@/constants'
+import { ActionButton } from '@/components/ui'
 import DocumentVersions from './DocumentVersions'
 
 interface DocumentListTableProps {
   documents: Document[]
   expandedVersions: Set<string>
+  loadingStates?: {
+    [documentId: string]: {
+      delete?: boolean
+      feature?: boolean
+    }
+  }
   onEdit: (document: Document) => void
   onDelete: (documentId: string, filePath: string) => Promise<void>
   onToggleFeatured: (document: Document) => Promise<void>
@@ -31,6 +38,7 @@ interface DocumentListTableProps {
 export default function DocumentListTable({
   documents,
   expandedVersions,
+  loadingStates = {},
   onEdit,
   onDelete,
   onToggleFeatured,
@@ -97,44 +105,42 @@ export default function DocumentListTable({
 
             {/* Action Buttons */}
             <div className="flex gap-2 ml-4">
-              <button
+              <ActionButton
+                variant="edit"
                 onClick={() => onEdit(document)}
-                className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded text-sm font-medium hover:bg-indigo-200 transition"
               >
                 {t('edit')}
-              </button>
-              <button
+              </ActionButton>
+              <ActionButton
+                variant="view"
                 onClick={() => onToggleVersions(document.id)}
-                className="px-3 py-1 bg-blue-100 text-blue-800 rounded text-sm font-medium hover:bg-blue-200 transition"
               >
                 {expandedVersions.has(document.id) ? (
                   t('hideVersions')
                 ) : (
                   t('viewVersions')
                 )}
-              </button>
-              <button
+              </ActionButton>
+              <ActionButton
+                variant="upload"
                 onClick={() => onUploadNewVersion(document.id)}
-                className="px-3 py-1 bg-green-100 text-green-800 rounded text-sm font-medium hover:bg-green-200 transition"
               >
                 {t('uploadVersion')}
-              </button>
-              <button
+              </ActionButton>
+              <ActionButton
+                variant={document.is_featured ? 'feature' : 'unfeature'}
+                loading={loadingStates[document.id]?.feature}
                 onClick={() => onToggleFeatured(document)}
-                className={`px-3 py-1 rounded text-sm font-medium transition ${
-                  document.is_featured
-                    ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
-                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                }`}
               >
                 {document.is_featured ? t('unfeature') : t('feature')}
-              </button>
-              <button
+              </ActionButton>
+              <ActionButton
+                variant="delete"
+                loading={loadingStates[document.id]?.delete}
                 onClick={() => handleDeleteClick(document.id, document.file_path)}
-                className="px-3 py-1 bg-red-100 text-red-800 rounded text-sm font-medium hover:bg-red-200 transition"
               >
                 {t('delete')}
-              </button>
+              </ActionButton>
             </div>
           </div>
           

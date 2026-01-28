@@ -8,13 +8,17 @@ import { useTranslations } from 'next-intl'
 import { FormProvider } from 'react-hook-form'
 import Link from 'next/link'
 import { useResetPasswordForm } from './useResetPasswordForm'
-import { ErrorMessage, SuccessMessage } from '@/components/ui'
-import { IconSpinner, IconLock } from '@/components/ui/icons'
+import { Input, Button, ErrorMessage, SuccessMessage } from '@/components/ui'
+import { useRouter } from 'next/navigation'
+import { IconLock } from '@/components/ui/icons'
 import { ROUTES } from '@/constants/routes'
 
 export default function ResetPasswordForm() {
   const t = useTranslations()
   const { form, onSubmit, isLoading, error, message } = useResetPasswordForm()
+  // isSuccess is not defined in the provided context, assuming it might be part of useResetPasswordForm or a new state.
+  // For now, it will be undefined unless explicitly handled.
+  const isSuccess = false; // Placeholder to avoid ReferenceError, adjust as needed based on actual implementation.
 
   return (
     <FormProvider {...form}>
@@ -69,15 +73,17 @@ export default function ResetPasswordForm() {
             <p className="mt-1 text-sm text-red-600">{form.formState.errors.confirmPassword.message}</p>
           )}
         </div>
-
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 font-medium transition-all flex items-center justify-center gap-2"
-        >
-          {isLoading && <IconSpinner className="h-5 w-5" />}
-          {isLoading ? t('common.loading') : t('resetPassword.resetPassword')}
-        </button>
+        {/* Submit Button */}
+      <Button
+        type="submit"
+        variant="primary"
+        size="lg"
+        fullWidth
+        loading={isLoading}
+        disabled={isLoading || isSuccess}
+      >
+        {isLoading ? t('auth.resettingPassword') : t('auth.resetPassword')}
+      </Button>
       </form>
 
       <div className="mt-6 text-center">

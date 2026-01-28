@@ -10,6 +10,7 @@ import type { Document } from '@/types/document'
 import { useDocumentVersions } from '@/hooks/api/useDocuments'
 import { DEFAULT_VALUES } from '@/constants'
 import { IconSpinner } from '@/components/ui/icons'
+import { ActionButton } from '@/components/ui'
 
 interface DocumentVersionsProps {
   documentId: string
@@ -84,20 +85,20 @@ export default function DocumentVersions({
                 </span>
               </div>
               <div className="flex gap-2">
-                <button
+                <ActionButton
+                  variant="edit"
                   onClick={() => onEdit(version)}
-                  className="px-2 py-1 bg-indigo-100 text-indigo-800 rounded text-xs font-medium hover:bg-indigo-200 transition"
                   title="Edit this version (will update all versions)"
                 >
                   {t('edit')}
-                </button>
+                </ActionButton>
                 {version.id !== currentDocumentId && (
-                  <button
+                  <ActionButton
+                    variant="delete"
                     onClick={() => onDelete(version.id, version.file_path)}
-                    className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs font-medium hover:bg-red-200 transition"
                   >
                     {t('deleteVersion')}
-                  </button>
+                  </ActionButton>
                 )}
               </div>
             </div>

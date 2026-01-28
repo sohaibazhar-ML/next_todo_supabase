@@ -7,16 +7,19 @@
  * Responsibilities:
  * - Render subadmin cards
  * - Render subadmin metadata and permissions
- * - Render action buttons
+ * - Render action buttons with loading states
  */
 
 'use client'
 
 import { useTranslations } from 'next-intl'
 import type { Subadmin } from '@/services/api/subadmins'
+import type { SubadminActionType } from '@/hooks/useSubadminActions'
+import { ActionButton } from '@/components/ui'
 
 interface SubadminListTableProps {
   subadmins: Subadmin[]
+  isActionLoading: (subadminId: string, action: SubadminActionType) => boolean
   onEdit: (subadmin: Subadmin) => void
   onDelete: (userId: string) => Promise<void>
   onToggleActive: (subadmin: Subadmin) => Promise<void>
@@ -24,6 +27,7 @@ interface SubadminListTableProps {
 
 export default function SubadminListTable({
   subadmins,
+  isActionLoading,
   onEdit,
   onDelete,
   onToggleActive,
@@ -95,28 +99,26 @@ export default function SubadminListTable({
 
                 {/* Action Buttons */}
                 <div className="flex items-center gap-2">
-                  <button
+                  <ActionButton
+                    variant={subadmin.permissions.is_active ? 'deactivate' : 'activate'}
+                    loading={isActionLoading(subadmin.id, 'toggle')}
                     onClick={() => onToggleActive(subadmin)}
-                    className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
-                      subadmin.permissions.is_active
-                        ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
-                        : 'bg-green-100 text-green-800 hover:bg-green-200'
-                    }`}
                   >
                     {subadmin.permissions.is_active ? t('deactivate') : t('activate')}
-                  </button>
-                  <button
+                  </ActionButton>
+                  <ActionButton
+                    variant="edit"
                     onClick={() => onEdit(subadmin)}
-                    className="px-3 py-1.5 text-xs bg-indigo-100 text-indigo-800 rounded-lg hover:bg-indigo-200 transition-colors"
                   >
                     {t('edit')}
-                  </button>
-                  <button
+                  </ActionButton>
+                  <ActionButton
+                    variant="remove"
+                    loading={isActionLoading(subadmin.id, 'delete')}
                     onClick={() => handleDeleteClick(subadmin.id)}
-                    className="px-3 py-1.5 text-xs bg-red-100 text-red-800 rounded-lg hover:bg-red-200 transition-colors"
                   >
                     {t('remove')}
-                  </button>
+                  </ActionButton>
                 </div>
               </div>
             </div>

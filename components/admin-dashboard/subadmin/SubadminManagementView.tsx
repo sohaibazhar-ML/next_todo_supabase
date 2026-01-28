@@ -16,8 +16,10 @@
 import { useTranslations } from 'next-intl'
 import type { Subadmin } from '@/services/api/subadmins'
 import type { UserProfile } from '@/types/user'
+import type { SubadminActionType } from '@/hooks/useSubadminActions'
 import { IconSpinner } from '@/components/ui/icons'
 import { SuccessMessage, ErrorMessage } from '@/components/ui'
+import { Button } from '@/components/ui'
 import { SubadminForm } from '@/components/forms/SubadminForm'
 import SubadminListTable from './SubadminListTable'
 
@@ -30,6 +32,7 @@ interface SubadminManagementViewProps {
   message: string | null
   showForm: boolean
   editingSubadmin: Subadmin | null
+  isActionLoading: (subadminId: string, action: SubadminActionType) => boolean
   onFormSuccess: () => void
   onFormCancel: () => void
   onEdit: (subadmin: Subadmin) => void
@@ -47,6 +50,7 @@ export default function SubadminManagementView({
   message,
   showForm,
   editingSubadmin,
+  isActionLoading,
   onFormSuccess,
   onFormCancel,
   onEdit,
@@ -88,12 +92,12 @@ export default function SubadminManagementView({
       {/* Header */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">{t('title')}</h2>
-        <button
+        <Button
+          variant="primary"
           onClick={onToggleForm}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
         >
           {showForm ? t('cancel') : t('addSubadmin')}
-        </button>
+        </Button>
       </div>
 
       {/* Form */}
@@ -115,6 +119,7 @@ export default function SubadminManagementView({
       {/* Subadmin List */}
       <SubadminListTable
         subadmins={subadmins}
+        isActionLoading={isActionLoading}
         onEdit={onEdit}
         onDelete={onDelete}
         onToggleActive={onToggleActive}
