@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl'
 import type { UseFormReturn } from 'react-hook-form'
 import type { PasswordChangeFormData } from './profileFormSchema'
 import { Input, Button, ErrorMessage, SuccessMessage } from '@/components/ui'
+import { UI_TEXT } from '@/constants'
 
 export interface PasswordChangeFormProps {
   /**
@@ -64,7 +65,7 @@ export default function PasswordChangeForm({
           message={
             error instanceof Error
               ? error.message
-              : t('passwordUpdateFailed') || 'Failed to update password'
+              : t('passwordUpdateFailed') || UI_TEXT.MESSAGES.PASSWORD_UPDATE_FAILED
           }
         />
       )}

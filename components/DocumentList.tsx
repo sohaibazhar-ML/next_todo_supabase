@@ -23,6 +23,7 @@ import { useTranslations } from 'next-intl'
 import type { DocumentSearchFilters } from '@/types/document'
 import { useDocuments, useDocumentFilterOptions } from '@/hooks/api/useDocuments'
 import { IconSpinner, IconFile } from '@/components/ui/icons'
+import { UI_TEXT } from '@/constants'
 import DocumentCard from './DocumentCard'
 import { DocumentSearch } from './DocumentSearch'
 
@@ -57,7 +58,7 @@ export default function DocumentList() {
       <div className="bg-white rounded-2xl shadow-xl p-8">
         <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
           <p className="text-sm text-red-700">
-            {error instanceof Error ? error.message : 'Failed to fetch documents'}
+            {error instanceof Error ? error.message : UI_TEXT.MESSAGES.FETCH_DOCUMENTS_FAILED}
           </p>
         </div>
       </div>

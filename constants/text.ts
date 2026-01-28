@@ -115,6 +115,15 @@ export const UI_TEXT = {
         CONFIRM_DELETE: 'Are you sure you want to delete this item?',
         CONFIRM_CANCEL: 'Are you sure you want to cancel? Unsaved changes will be lost.',
         UNSAVED_CHANGES: 'You have unsaved changes',
+        // Auth & User messages
+        REGISTRATION_SUCCESS: 'Registration successful! Please check your email for confirmation.',
+        PASSWORD_UPDATE_SUCCESS: 'Password updated successfully',
+        PASSWORD_UPDATE_FAILED: 'Failed to update password',
+        // Admin messages
+        SAVE_SUBADMIN_FAILED: 'Failed to save subadmin',
+        // Document messages
+        FETCH_DOCUMENTS_FAILED: 'Failed to fetch documents',
+        LOAD_PDF_FAILED: 'Failed to load PDF',
     },
 
     // Labels

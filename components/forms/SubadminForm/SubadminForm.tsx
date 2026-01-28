@@ -12,6 +12,7 @@ import { useTranslations } from 'next-intl'
 import { useSubadminForm } from './useSubadminForm'
 import SubadminFormFields from './SubadminFormFields'
 import { ErrorMessage } from '@/components/ui'
+import { UI_TEXT } from '@/constants'
 import type { Subadmin } from '@/services/api/subadmins'
 import type { UserProfile } from '@/types/user'
 
@@ -82,7 +83,7 @@ export default function SubadminForm({
           message={
             error instanceof Error
               ? error.message
-              : t('saveFailed') || 'Failed to save subadmin'
+              : t('saveFailed') || UI_TEXT.MESSAGES.SAVE_SUBADMIN_FAILED
           }
         />
       )}

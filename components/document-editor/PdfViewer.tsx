@@ -7,7 +7,7 @@
 
 import { useTranslations } from 'next-intl'
 import { Document as PDFDocument, Page as PDFPage, pdfjs } from 'react-pdf'
-import { CONSOLE_MESSAGES } from '@/constants'
+import { CONSOLE_MESSAGES, UI_TEXT } from '@/constants'
 import type { PDFAnnotation } from '@/types/documentEditor'
 import PdfToolbar from './PdfToolbar'
 import PdfControls from './PdfControls'
@@ -129,7 +129,7 @@ export default function PdfViewer({
                 }}
                 error={
                   <div className="p-8 text-center">
-                    <p className="text-red-600">{t('pdfLoadError') || 'Failed to load PDF'}</p>
+                    <p className="text-red-600">{t('pdfLoadError') || UI_TEXT.MESSAGES.LOAD_PDF_FAILED}</p>
                   </div>
                 }
               >
