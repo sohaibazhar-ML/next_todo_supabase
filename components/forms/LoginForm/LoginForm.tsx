@@ -14,13 +14,12 @@
 
 'use client'
 
-import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { FormProvider } from 'react-hook-form'
-import { createClient } from '@/lib/supabase/client'
 import { useLoginForm } from './useLoginForm'
+import { useSocialAuth } from '@/hooks'
 import LoginFormFields from './LoginFormFields'
 import { ErrorMessage, Button } from '@/components/ui'
 import { IconGoogle } from '@/components/ui/icons'
@@ -36,36 +35,9 @@ export interface LoginFormProps {
 export default function LoginForm({ onSuccess }: LoginFormProps) {
   const t = useTranslations()
   const router = useRouter()
-  const supabase = createClient()
   
-  const [socialLoading, setSocialLoading] = useState<string | null>(null)
-  const [googleError, setGoogleError] = useState<string | null>(null)
-
   const { form, onSubmit, isLoading, error } = useLoginForm({ onSuccess })
-
-  const handleGoogleLogin = async () => {
-    setSocialLoading('google')
-    setGoogleError(null)
-
-    try {
-      const { error: socialError } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
-      })
-
-      if (socialError) {
-        setGoogleError(socialError.message)
-        setSocialLoading(null)
-      }
-    } catch (err) {
-      setGoogleError(
-        err instanceof Error ? err.message : 'Failed to sign in with Google'
-      )
-      setSocialLoading(null)
-    }
-  }
+  const { handleGoogleAuth, isLoading: socialLoading, error: googleError } = useSocialAuth()
 
   return (
     <FormProvider {...form}>
@@ -88,7 +60,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
             fullWidth
             loading={socialLoading === 'google'}
             disabled={isLoading || socialLoading !== null}
-            onClick={handleGoogleLogin}
+            onClick={handleGoogleAuth}
             icon={<IconGoogle className="h-5 w-5" />}
             className="shadow-md hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98]"
           >

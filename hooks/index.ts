@@ -26,6 +26,8 @@ export {
     useOptimisticPartialUpdate,
     useOptimisticArrayUpdate,
 } from './useOptimisticUpdate'
+export { useSocialAuth } from './useSocialAuth'
+export { useTagInput } from './useTagInput'
 
 // Re-export types
 export type { UseModalReturn } from './useModal'

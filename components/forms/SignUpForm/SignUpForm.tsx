@@ -14,12 +14,11 @@
 
 'use client'
 
-import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { createClient } from '@/lib/supabase/client'
 import { useSignUpForm } from './useSignUpForm'
+import { useSocialAuth } from '@/hooks'
 import SignUpFormFields from './SignUpFormFields'
 import { ErrorMessage, SuccessMessage } from '@/components/ui'
 import { ROUTES } from '@/constants/routes'
@@ -34,38 +33,11 @@ export interface SignUpFormProps {
 export default function SignUpForm({ onSuccess }: SignUpFormProps) {
   const t = useTranslations()
   const router = useRouter()
-  const supabase = createClient()
   
-  const [socialLoading, setSocialLoading] = useState<string | null>(null)
-  const [googleError, setGoogleError] = useState<string | null>(null)
-
   const { form, onSubmit, isLoading, error, isSuccess } = useSignUpForm({
     onSuccess,
   })
-
-  const handleGoogleSignUp = async () => {
-    setSocialLoading('google')
-    setGoogleError(null)
-    
-    try {
-      const { error: socialError } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
-      })
-      
-      if (socialError) {
-        setGoogleError(socialError.message)
-        setSocialLoading(null)
-      }
-    } catch (err) {
-      setGoogleError(
-        err instanceof Error ? err.message : 'Failed to sign up with Google'
-      )
-      setSocialLoading(null)
-    }
-  }
+  const { handleGoogleAuth, isLoading: socialLoading, error: googleError, clearError } = useSocialAuth()
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
@@ -83,7 +55,7 @@ export default function SignUpForm({ onSuccess }: SignUpFormProps) {
       {googleError && (
         <ErrorMessage
           message={googleError}
-          onDismiss={() => setGoogleError(null)}
+          onDismiss={clearError}
         />
       )}
 
@@ -99,7 +71,7 @@ export default function SignUpForm({ onSuccess }: SignUpFormProps) {
         form={form}
         isLoading={isLoading}
         isGoogleLoading={socialLoading === 'google'}
-        onGoogleSignUp={handleGoogleSignUp}
+        onGoogleSignUp={handleGoogleAuth}
       />
 
       {/* Login Link */}
