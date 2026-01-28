@@ -37,5 +37,8 @@ export { default as IconX } from './IconX'
 export { default as IconSuccess } from './IconSuccess'
 export { default as IconError } from './IconError'
 export { default as IconMenu } from './IconMenu'
+export { default as IconLogout } from './IconLogout'
+export { default as IconBell } from './IconBell'
+export { default as IconSubadmins } from './IconSubadmins'
 
 export type { IconProps } from './IconDashboard'

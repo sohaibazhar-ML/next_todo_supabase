@@ -12,6 +12,7 @@ import type { DocumentUploadFormData } from './documentUploadSchema'
 import { Input, Textarea, Select, Checkbox, Button } from '@/components/ui'
 import { useDocumentFilterOptions } from '@/hooks/api/useDocuments'
 import { DEFAULT_VALUES, FILE_EXTENSIONS } from '@/constants'
+import { useTagInput } from '@/hooks/useTagInput'
 
 export interface DocumentUploadFieldsProps {
   /**
@@ -49,43 +50,25 @@ export default function DocumentUploadFields({
   
   const {
     register,
-    control,
     formState: { errors },
     setValue,
-    watch,
   } = form
 
-  // Watch tags to display them
-  const tags = watch('tags') || []
-  const [tagInput, setTagInput] = React.useState('')
+  // Use centralized tag input hook
+  const {
+    tagInput,
+    setTagInput,
+    tags,
+    handleAddTag,
+    handleRemoveTag,
+    handleTagKeyPress,
+  } = useTagInput({ form })
 
   // Get categories for select dropdown
   const categoryOptions = filterOptions?.categories.map((cat) => ({
     value: cat,
     label: cat,
   })) || []
-
-  const handleAddTag = () => {
-    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-      setValue('tags', [...tags, tagInput.trim()], { shouldValidate: true })
-      setTagInput('')
-    }
-  }
-
-  const handleRemoveTag = (tagToRemove: string) => {
-    setValue(
-      'tags',
-      tags.filter((tag) => tag !== tagToRemove),
-      { shouldValidate: true }
-    )
-  }
-
-  const handleTagKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      handleAddTag()
-    }
-  }
 
   return (
     <div className="space-y-4">

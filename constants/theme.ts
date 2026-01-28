@@ -96,6 +96,23 @@ export const THEME = {
         WHITE: 'white',
         BLACK: 'black',
         TRANSPARENT: 'transparent',
+
+        // Brand colors (Hex values)
+        BRAND: {
+            GOOGLE: {
+                BLUE: '#4285F4',
+                GREEN: '#34A853',
+                YELLOW: '#FBBC05',
+                RED: '#EA4335',
+            },
+        },
+
+        // Annotation colors (Hex values)
+        ANNOTATION: {
+            HIGHLIGHT: '#ffff00', // Yellow
+            WHITE: '#ffffff',
+            BLACK: '#000000',
+        },
     },
 
     // Spacing (Tailwind classes)
