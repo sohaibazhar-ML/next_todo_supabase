@@ -203,3 +203,63 @@ export async function checkUsernameAvailability(
   }
 }
 
+/**
+ * Create a new profile record
+ * Used by signup and profile-completion flows.
+ */
+export interface CreateProfileRequest {
+  id: string
+  username: string
+  first_name: string
+  last_name: string
+  email: string
+  phone_number: string
+  current_address: string
+  country_of_origin: string
+  new_address_switzerland: string
+  number_of_adults: number
+  number_of_children: number
+  pets_type: string | null
+  marketing_consent: boolean
+  terms_accepted: boolean
+  data_privacy_accepted: boolean
+  email_confirmed: boolean
+  email_confirmed_at?: string
+  role?: UserProfile['role']
+  keep_me_logged_in?: boolean
+}
+
+export async function createProfile(
+  payload: CreateProfileRequest
+): Promise<UserProfile> {
+  try {
+    const response = await fetch(API_ENDPOINTS.PROFILES, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+
+    const data = await response.json().catch(() => null)
+
+    if (!response.ok) {
+      const errorMessage =
+        (data &&
+          typeof data === 'object' &&
+          'error' in data &&
+          typeof (data as { error?: string }).error === 'string' &&
+          (data as { error?: string }).error) ||
+        ERROR_MESSAGES.CREATE_PROFILE
+
+      throw new Error(errorMessage)
+    }
+
+    return normalizeProfile(data as UserProfile)
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : ERROR_MESSAGES.CREATE_PROFILE
+    throw new Error(message)
+  }
+}
+

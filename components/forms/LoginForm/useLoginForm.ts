@@ -10,7 +10,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { loginFormSchema, type LoginFormData } from './loginFormSchema'
-import { API_ENDPOINTS } from '@/constants'
+import { ERROR_MESSAGES } from '@/constants'
+import { fetchProfileByUserId } from '@/services/api/profiles'
 
 export interface UseLoginFormOptions {
   /**
@@ -52,7 +53,7 @@ export function useLoginForm({ onSuccess }: UseLoginFormOptions = {}) {
           .single()
 
         if (profileError || !profile) {
-          setError('Invalid email or username')
+          setError(ERROR_MESSAGES.INVALID_CREDENTIALS ?? 'Invalid email or username')
           setIsLoading(false)
           return
         }
@@ -75,15 +76,14 @@ export function useLoginForm({ onSuccess }: UseLoginFormOptions = {}) {
       // Check if profile exists
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        const response = await fetch(API_ENDPOINTS.PROFILE_BY_USER_ID(user.id))
-        if (!response.ok || response.status === 404) {
+        const profile = await fetchProfileByUserId(user.id).catch(() => null)
+        if (!profile) {
           router.push('/profile?setup=true')
           router.refresh()
           return
         }
 
         // Check user preference and set cookie for middleware
-        const profile = await response.json()
         const keepMeLoggedIn = profile.keep_me_logged_in ?? true
 
         // Set preference cookie that middleware can read

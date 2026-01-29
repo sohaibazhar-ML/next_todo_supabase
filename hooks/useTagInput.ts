@@ -6,10 +6,11 @@
  * 
  * @example
  * ```tsx
- * const { tagInput, tags, handleAddTag, handleRemoveTag, handleTagKeyPress, setTagInput } = useTagInput({
- *   form,
- *   fieldName: 'tags'
- * })
+ * const { tagInput, tags, handleAddTag, handleRemoveTag, handleTagKeyPress, setTagInput } =
+ *   useTagInput({
+ *     form,
+ *     fieldName: 'tags',
+ *   })
  * 
  * <input
  *   value={tagInput}
@@ -20,19 +21,26 @@
  */
 
 import { useState, useCallback } from 'react'
-import type { UseFormReturn } from 'react-hook-form'
+import type {
+  FieldValues,
+  Path,
+  UseFormReturn,
+} from 'react-hook-form'
 
-export interface UseTagInputOptions {
-    /**
-     * React Hook Form instance
-     */
-    form: UseFormReturn<any>
+export interface UseTagInputOptions<
+  TFieldValues extends FieldValues,
+  TName extends Path<TFieldValues> = Path<TFieldValues>
+> {
+  /**
+   * React Hook Form instance
+   */
+  form: UseFormReturn<TFieldValues>
 
-    /**
-     * Name of the tags field in the form
-     * @default 'tags'
-     */
-    fieldName?: string
+  /**
+   * Name of the tags field in the form
+   * @default 'tags'
+   */
+  fieldName?: TName
 }
 
 export interface UseTagInputReturn {
@@ -70,45 +78,57 @@ export interface UseTagInputReturn {
 /**
  * Hook for managing tag input functionality
  */
-export function useTagInput(options: UseTagInputOptions): UseTagInputReturn {
-    const { form, fieldName = 'tags' } = options
-    const { watch, setValue } = form
+export function useTagInput<
+  TFieldValues extends FieldValues,
+  TName extends Path<TFieldValues> = Path<TFieldValues>
+>(options: UseTagInputOptions<TFieldValues, TName>): UseTagInputReturn {
+  const { form, fieldName } = options
+  const { watch, setValue } = form
 
-    const [tagInput, setTagInput] = useState('')
+  const [tagInput, setTagInput] = useState('')
 
-    // Watch tags to get current value
-    const tags: string[] = watch(fieldName) || []
+  const watchedFieldName = (fieldName ?? ('tags' as TName)) as TName
 
-    const handleAddTag = useCallback(() => {
-        const trimmedTag = tagInput.trim()
+  // Watch tags to get current value
+  const tags: string[] = (watch(watchedFieldName) as string[] | undefined) || []
 
-        if (trimmedTag && !tags.includes(trimmedTag)) {
-            setValue(fieldName, [...tags, trimmedTag], { shouldValidate: true })
-            setTagInput('')
-        }
-    }, [tagInput, tags, setValue, fieldName])
+  const handleAddTag = useCallback(() => {
+    const trimmedTag = tagInput.trim()
 
-    const handleRemoveTag = useCallback((tagToRemove: string) => {
-        setValue(
-            fieldName,
-            tags.filter((tag) => tag !== tagToRemove),
-            { shouldValidate: true }
-        )
-    }, [tags, setValue, fieldName])
-
-    const handleTagKeyPress = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            e.preventDefault()
-            handleAddTag()
-        }
-    }, [handleAddTag])
-
-    return {
-        tagInput,
-        setTagInput,
-        tags,
-        handleAddTag,
-        handleRemoveTag,
-        handleTagKeyPress,
+    if (trimmedTag && !tags.includes(trimmedTag)) {
+      setValue(watchedFieldName, [...tags, trimmedTag] as unknown as TFieldValues[TName], {
+        shouldValidate: true,
+      })
+      setTagInput('')
     }
+  }, [tagInput, tags, setValue, watchedFieldName])
+
+  const handleRemoveTag = useCallback(
+    (tagToRemove: string) => {
+      const nextTags = tags.filter((tag) => tag !== tagToRemove)
+      setValue(watchedFieldName, nextTags as unknown as TFieldValues[TName], {
+        shouldValidate: true,
+      })
+    },
+    [tags, setValue, watchedFieldName],
+  )
+
+  const handleTagKeyPress = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        handleAddTag()
+      }
+    },
+    [handleAddTag],
+  )
+
+  return {
+    tagInput,
+    setTagInput,
+    tags,
+    handleAddTag,
+    handleRemoveTag,
+    handleTagKeyPress,
+  }
 }

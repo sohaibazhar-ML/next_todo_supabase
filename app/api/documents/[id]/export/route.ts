@@ -42,10 +42,9 @@ type CheerioDomElement = cheerio.Element
 
 /**
  * Type for cheerio selection (jQuery-like wrapper)
- * Using a practical type - cheerio.load returns a function that returns Cheerio instances
+ * Using cheerio's Cheerio type alias without generics for compatibility.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type CheerioSelection = any
+type CheerioSelection = cheerio.Cheerio
 
 /**
  * Type for TextRun options (extends IRunOptions from docx)

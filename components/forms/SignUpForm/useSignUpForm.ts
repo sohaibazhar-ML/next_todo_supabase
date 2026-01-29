@@ -10,8 +10,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
 import { signUpFormSchema, type SignUpFormData } from './signUpFormSchema'
-import { API_ENDPOINTS, CONTENT_TYPES, ERROR_MESSAGES } from '@/constants'
-import { DEFAULT_VALUES } from '@/constants'
+import { ERROR_MESSAGES, DEFAULT_VALUES } from '@/constants'
+import { createProfile } from '@/services/api/profiles'
 
 export interface UseSignUpFormOptions {
   /**
@@ -77,41 +77,30 @@ export function useSignUpForm({ onSuccess }: UseSignUpFormOptions = {}) {
         throw new Error(ERROR_MESSAGES.CREATE_USER_FAILED)
       }
 
-      // Create profile
-      const profileResponse = await fetch(API_ENDPOINTS.PROFILES, {
-        method: 'POST',
-        headers: { 'Content-Type': CONTENT_TYPES.JSON },
-        body: JSON.stringify({
-          id: authData.user.id,
-          username: data.username,
-          first_name: data.firstName,
-          last_name: data.lastName,
-          email: data.email,
-          phone_number: data.phoneNumber,
-          current_address: data.currentAddress,
-          country_of_origin: data.countryOfOrigin,
-          new_address_switzerland: data.newAddressSwitzerland,
-          number_of_adults: data.numberOfAdults,
-          number_of_children: data.numberOfChildren,
-          pets_type: data.petsType || null,
-          marketing_consent: data.marketingConsent,
-          terms_accepted: data.termsAccepted,
-          data_privacy_accepted: data.dataPrivacyAccepted,
-          email_confirmed: false,
-          role: 'user',
-        }),
+      // Create profile via profiles service
+      const profile = await createProfile({
+        id: authData.user.id,
+        username: data.username,
+        first_name: data.firstName,
+        last_name: data.lastName,
+        email: data.email,
+        phone_number: data.phoneNumber,
+        current_address: data.currentAddress,
+        country_of_origin: data.countryOfOrigin,
+        new_address_switzerland: data.newAddressSwitzerland,
+        number_of_adults: data.numberOfAdults,
+        number_of_children: data.numberOfChildren,
+        pets_type: data.petsType || null,
+        marketing_consent: data.marketingConsent,
+        terms_accepted: data.termsAccepted,
+        data_privacy_accepted: data.dataPrivacyAccepted,
+        email_confirmed: false,
+        role: 'user',
       })
-
-      if (!profileResponse.ok) {
-        const errorData = await profileResponse.json().catch(() => ({
-          error: ERROR_MESSAGES.CREATE_PROFILE,
-        }))
-        throw new Error(errorData.error || ERROR_MESSAGES.CREATE_PROFILE)
-      }
 
       return {
         user: authData.user,
-        profile: await profileResponse.json(),
+        profile,
       }
     },
     onSuccess: () => {

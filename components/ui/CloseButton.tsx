@@ -12,6 +12,7 @@
 
 import { ButtonHTMLAttributes } from 'react'
 import { cn } from '@/lib/utils/cn'
+import IconClose from '@/components/ui/icons/IconClose'
 
 interface CloseButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   /**
@@ -51,20 +52,7 @@ export default function CloseButton({
       aria-label={label}
       {...props}
     >
-      <svg
-        className="h-5 w-5"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        aria-hidden="true"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M6 18L18 6M6 6l12 12"
-        />
-      </svg>
+      <IconClose className="h-5 w-5" aria-hidden="true" />
     </button>
   )
 }

@@ -20,7 +20,11 @@ import {
   type PasswordChangeFormData,
   passwordChangeSchema,
 } from './profileFormSchema'
-import { updateProfile, checkUsernameAvailability } from '@/services/api/profiles'
+import {
+  updateProfile,
+  checkUsernameAvailability,
+  createProfile,
+} from '@/services/api/profiles'
 import { QUERY_KEYS } from '@/constants/queryKeys'
 import { DEFAULT_VALUES, ERROR_MESSAGES } from '@/constants'
 import type { UserProfile } from '@/types'
@@ -95,43 +99,26 @@ export function useProfileForm({
           throw new Error(ERROR_MESSAGES.USERNAME_EXISTS)
         }
 
-        // Create profile via API
-        const response = await fetch('/api/profiles', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            id: userId,
-            username: createData.username,
-            first_name: createData.first_name,
-            last_name: createData.last_name,
-            email: createData.email,
-            phone_number: createData.phone_number,
-            current_address: createData.current_address,
-            country_of_origin: createData.country_of_origin,
-            new_address_switzerland: createData.new_address_switzerland,
-            number_of_adults: createData.number_of_adults,
-            number_of_children: createData.number_of_children,
-            pets_type: createData.pets_type || null,
-            marketing_consent: createData.marketing_consent,
-            terms_accepted: createData.terms_accepted,
-            data_privacy_accepted: createData.data_privacy_accepted,
-            email_confirmed: true,
-            email_confirmed_at: new Date().toISOString(),
-          }),
+        // Create profile via profiles service
+        return createProfile({
+          id: userId,
+          username: createData.username,
+          first_name: createData.first_name,
+          last_name: createData.last_name,
+          email: createData.email,
+          phone_number: createData.phone_number,
+          current_address: createData.current_address,
+          country_of_origin: createData.country_of_origin,
+          new_address_switzerland: createData.new_address_switzerland,
+          number_of_adults: createData.number_of_adults,
+          number_of_children: createData.number_of_children,
+          pets_type: createData.pets_type || null,
+          marketing_consent: createData.marketing_consent,
+          terms_accepted: createData.terms_accepted,
+          data_privacy_accepted: createData.data_privacy_accepted,
+          email_confirmed: true,
+          email_confirmed_at: new Date().toISOString(),
         })
-
-        if (!response.ok) {
-          const errorData = await response.json()
-          throw new Error(errorData.error || ERROR_MESSAGES.CREATE_PROFILE)
-        }
-
-        const createdProfile = await response.json()
-        // Normalize the response to match UserProfile type
-        return {
-          ...createdProfile,
-          created_at: createdProfile.created_at || new Date().toISOString(),
-          updated_at: createdProfile.updated_at || new Date().toISOString(),
-        }
       } else {
         // For updates, use the service
         return updateProfile(userId, {
