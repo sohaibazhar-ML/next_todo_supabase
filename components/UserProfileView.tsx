@@ -7,9 +7,10 @@ import { IconCheck, IconX } from '@/components/ui/icons'
 interface UserProfileViewProps {
   profile: UserProfile
   isOwnProfile: boolean
+  onEdit?: () => void
 }
 
-export default function UserProfileView({ profile, isOwnProfile }: UserProfileViewProps) {
+export default function UserProfileView({ profile, isOwnProfile, onEdit }: UserProfileViewProps) {
   const t = useTranslations('userProfileView')
   const locale = useLocale()
 
@@ -17,7 +18,17 @@ export default function UserProfileView({ profile, isOwnProfile }: UserProfileVi
     <div className="space-y-6">
       {/* Personal Information */}
       <div className="border-b pb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('personalInfo')}</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-900">{t('personalInfo')}</h3>
+          {onEdit && (
+            <button
+              onClick={onEdit}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              {t('edit') || 'Edit'} 
+            </button>
+          )}
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <p className="text-sm font-medium text-gray-500 mb-1">{t('username')}</p>

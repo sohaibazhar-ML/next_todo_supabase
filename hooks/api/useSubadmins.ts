@@ -13,6 +13,7 @@ import type {
 } from '@/services/api/subadmins'
 import * as subadminsApi from '@/services/api/subadmins'
 import { QUERY_KEYS } from '@/constants/queryKeys'
+import { ERROR_MESSAGES } from '@/constants'
 
 /**
  * Fetch all subadmins
@@ -32,7 +33,7 @@ export function useSubadmin(userId: string | null) {
   return useQuery({
     queryKey: QUERY_KEYS.admin.subadmins.detail(userId || ''),
     queryFn: () => {
-      if (!userId) throw new Error('User ID is required')
+      if (!userId) throw new Error(ERROR_MESSAGES.USER_ID_REQUIRED)
       return subadminsApi.fetchSubadminById(userId)
     },
     enabled: !!userId,

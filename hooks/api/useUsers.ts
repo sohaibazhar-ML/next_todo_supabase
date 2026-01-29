@@ -9,6 +9,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import type { UserProfile } from '@/types'
 import * as profilesApi from '@/services/api/profiles'
 import { QUERY_KEYS } from '@/constants/queryKeys'
+import { ERROR_MESSAGES } from '@/constants'
 
 /**
  * Fetch users with filters
@@ -33,7 +34,7 @@ export function useUser(userId: string | null) {
   return useQuery({
     queryKey: QUERY_KEYS.profiles.byUserId(userId || ''),
     queryFn: () => {
-      if (!userId) throw new Error('User ID is required')
+      if (!userId) throw new Error(ERROR_MESSAGES.USER_ID_REQUIRED)
       return profilesApi.fetchProfileByUserId(userId)
     },
     enabled: !!userId,
@@ -72,7 +73,7 @@ export function useCheckUsername(username: string | null) {
   return useQuery({
     queryKey: QUERY_KEYS.profiles.checkUsername(username || ''),
     queryFn: () => {
-      if (!username) throw new Error('Username is required')
+      if (!username) throw new Error(ERROR_MESSAGES.USERNAME_REQUIRED)
       return profilesApi.checkUsernameAvailability(username)
     },
     enabled: !!username && username.length > 0,

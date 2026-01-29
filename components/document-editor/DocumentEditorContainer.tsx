@@ -53,6 +53,11 @@ export default function DocumentEditorContainer({
 
   // Initialize PDF.js worker
   const { workerReady } = usePdfWorker()
+  
+  // Load versions (now handled by React Query in useVersionManager)
+  const { versions, loading: versionsLoading } = useVersionManager({
+    documentId: document.id,
+  })
 
   // TipTap editor for DOCX
   const editor = useEditor({
@@ -98,23 +103,11 @@ export default function DocumentEditorContainer({
     setScale: editorState.setScale,
     editor: editor,
     isSettingContentRef: editorState.isSettingContentRef,
-    versions: editorState.versions,
+    versions: versions || [],
     setAnnotations: editorState.setAnnotations,
     setLoading: editorState.setLoading,
     setError: editorState.setError,
   })
-
-  // Load versions
-  const { loadVersions } = useVersionManager({
-    documentId: document.id,
-    setVersions: editorState.setVersions,
-  })
-
-  // Load versions on mount and when document changes
-  useEffect(() => {
-    loadVersions()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [document.id])
 
   // Document actions (save, export, load version)
   const { handleSave, handleExport, loadVersion, saving, exporting } =
@@ -125,15 +118,13 @@ export default function DocumentEditorContainer({
       content: editorState.content,
       annotations: editorState.annotations,
       versionName: editorState.versionName,
-      versions: editorState.versions,
+      versions: versions || [],
       isSettingContentRef: editorState.isSettingContentRef,
       setContent: editorState.setContent,
       setAnnotations: editorState.setAnnotations,
       setError: editorState.setError,
       setLoading: editorState.setLoading,
-      loadVersions: async () => {
-        await loadVersions()
-      },
+      loadVersions: async () => {}, // No-op, React Query handles auto-refetching on mutation success
       setShowVersions: editorState.setShowVersions,
     })
 
@@ -159,24 +150,7 @@ export default function DocumentEditorContainer({
     setSearchQuery: editorState.setSearchQuery,
   })
 
-  // Initialize editor content only once when editor is ready
-  useEffect(() => {
-    if (
-      editor &&
-      editorState.documentType === DOCUMENT_TYPES.DOCX &&
-      editorState.content &&
-      !editorState.loading
-    ) {
-      const currentContent = editor.getHTML()
-      if (currentContent === '<p></p>' || currentContent === '') {
-        editorState.isSettingContentRef.current = true
-        editor.commands.setContent(editorState.content)
-        setTimeout(() => {
-          editorState.isSettingContentRef.current = false
-        }, DEFAULT_VALUES.TIMEOUTS.ZERO)
-      }
-    }
-  }, [editor, editorState.documentType, editorState.loading, editorState.content])
+
 
   // Loading state
   if (editorState.loading && !editorState.content) {
@@ -192,7 +166,7 @@ export default function DocumentEditorContainer({
       <DocumentHeader
         document={document}
         documentType={editorState.documentType}
-        versions={editorState.versions}
+        versions={versions || []}
         showVersions={editorState.showVersions}
         onToggleVersions={() => editorState.setShowVersions(!editorState.showVersions)}
         onExport={handleExport}
@@ -206,7 +180,7 @@ export default function DocumentEditorContainer({
 
       {editorState.showVersions && (
         <VersionManager
-          versions={editorState.versions}
+          versions={versions || []}
           onLoadVersion={loadVersion}
         />
       )}

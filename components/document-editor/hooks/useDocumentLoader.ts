@@ -14,11 +14,10 @@
  *   })
  */
 
-import { useEffect, useCallback } from 'react'
-import { CONTENT_TYPES, DEFAULT_VALUES, ERROR_MESSAGES, CONSOLE_MESSAGES, DOCUMENT_TYPES } from '@/constants'
-import { convertDocumentForEditor } from '@/services/api/documents'
+import { useEffect } from 'react'
+import { CONTENT_TYPES, DEFAULT_VALUES, CONSOLE_MESSAGES, DOCUMENT_TYPES } from '@/constants'
+import { useConvertDocumentForEditor } from '@/hooks/api/useDocuments'
 import type { DocumentType, TipTapEditor, UserVersion, PDFAnnotation } from '@/types/documentEditor'
-import { isErrorWithMessage } from '@/types/documentEditor'
 
 interface UseDocumentLoaderProps {
   /**
@@ -116,79 +115,67 @@ export function useDocumentLoader({
   setLoading,
   setError,
 }: UseDocumentLoaderProps) {
-  /**
-   * Load document content from API
-   */
-  const loadDocument = useCallback(async () => {
-    try {
-      setLoading(true)
-      setError(null)
+  // React Query for loading document
+  const { data, isLoading, error: loadError } = useConvertDocumentForEditor(documentId)
 
-      const data = await convertDocumentForEditor(documentId)
+  // Sync loading and error states
+  useEffect(() => {
+    setLoading(isLoading)
+    setError(loadError ? (loadError as Error).message : null)
+  }, [isLoading, loadError, setLoading, setError])
 
-      setDocumentType(data.type)
+  // Effect to handle loaded data
+  useEffect(() => {
+    if (!data) return
 
-      if (data.type === DOCUMENT_TYPES.DOCX) {
-        // Set content state and editor content only when loading document
-        const htmlContent = data.content || ''
-        if (editor) {
-          // Set flag to prevent onUpdate from updating state
-          isSettingContentRef.current = true
-          editor.commands.setContent(htmlContent)
-          // Reset flag after a brief delay to allow editor to update
-          setTimeout(() => {
-            isSettingContentRef.current = false
-            setContent(htmlContent)
-          }, DEFAULT_VALUES.CONTENT_TIMEOUT)
-        } else {
+    setDocumentType(data.type)
+
+    if (data.type === DOCUMENT_TYPES.DOCX) {
+      // Set content state and editor content only when loading document
+      const htmlContent = data.content || ''
+      if (editor) {
+        // Set flag to prevent onUpdate from updating state
+        isSettingContentRef.current = true
+        editor.commands.setContent(htmlContent)
+        // Reset flag after a brief delay to allow editor to update
+        setTimeout(() => {
+          isSettingContentRef.current = false
           setContent(htmlContent)
-        }
-      } else if (data.type === DOCUMENT_TYPES.PDF) {
-        // For PDF, set up viewer
-        setPdfUrl(data.pdfUrl || null)
-        setNumPages(data.pageCount || null)
-        setContent(data.content || '')
-        setPageNumber(DEFAULT_VALUES.PDF_PAGE_NUMBER)
-        setScale(DEFAULT_VALUES.PDF_SCALE)
-        // Load annotations from latest version if available
-        if (versions.length > 0 && versions[0].pdf_annotations) {
-          try {
-            const loadedAnnotations = Array.isArray(versions[0].pdf_annotations) 
-              ? versions[0].pdf_annotations 
-              : []
-            setAnnotations(loadedAnnotations)
-          } catch (err) {
-            console.error(CONSOLE_MESSAGES.ERROR_LOADING_ANNOTATIONS, err)
-          }
+        }, DEFAULT_VALUES.CONTENT_TIMEOUT)
+      } else {
+        setContent(htmlContent)
+      }
+    } else if (data.type === DOCUMENT_TYPES.PDF) {
+      // For PDF, set up viewer
+      setPdfUrl(data.pdfUrl || null)
+      setNumPages(data.pageCount || null)
+      setContent(data.content || '')
+      setPageNumber(DEFAULT_VALUES.PDF_PAGE_NUMBER)
+      setScale(DEFAULT_VALUES.PDF_SCALE)
+      // Load annotations from latest version if available
+      if (versions.length > 0 && versions[0].pdf_annotations) {
+        try {
+          const loadedAnnotations = Array.isArray(versions[0].pdf_annotations)
+            ? versions[0].pdf_annotations as unknown as PDFAnnotation[]
+            : []
+          setAnnotations(loadedAnnotations)
+        } catch (err) {
+          console.error(CONSOLE_MESSAGES.ERROR_LOADING_ANNOTATIONS, err)
         }
       }
-    } catch (err) {
-      const errorMessage = isErrorWithMessage(err)
-        ? err.message
-        : ERROR_MESSAGES.LOAD_DOCUMENT
-      setError(errorMessage)
-    } finally {
-      setLoading(false)
     }
   }, [
-    documentId,
+    data,
+    editor,
     setDocumentType,
     setContent,
     setPdfUrl,
     setNumPages,
     setPageNumber,
     setScale,
-    editor,
     isSettingContentRef,
-    versions,
     setAnnotations,
-    setLoading,
-    setError,
+    versions, // Keep versions in dependency for PDF annotations
   ])
-
-  // Load document when documentId changes
-  useEffect(() => {
-    loadDocument()
-  }, [loadDocument])
 }
 

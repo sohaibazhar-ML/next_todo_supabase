@@ -25,7 +25,7 @@ export const QUERY_KEYS = {
   documents: {
     all: DOCUMENTS_BASE,
     lists: () => [...DOCUMENTS_BASE, 'list'] as const,
-    list: (filters?: DocumentSearchFilters) => 
+    list: (filters?: DocumentSearchFilters) =>
       [...DOCUMENTS_BASE, 'list', filters] as const,
     details: () => [...DOCUMENTS_BASE, 'detail'] as const,
     detail: (id: string) => [...DOCUMENTS_BASE, 'detail', id] as const,
@@ -33,39 +33,40 @@ export const QUERY_KEYS = {
     filterOptions: () => [...DOCUMENTS_BASE, 'filterOptions'] as const,
     downloadUrl: (id: string) => [...DOCUMENTS_BASE, 'detail', id, 'downloadUrl'] as const,
     convert: (id: string) => [...DOCUMENTS_BASE, 'detail', id, 'convert'] as const,
+    userVersions: (id: string) => [...DOCUMENTS_BASE, 'detail', id, 'userVersions'] as const,
   },
-  
+
   // ============================================================================
   // Profiles
   // ============================================================================
   profiles: {
     all: PROFILES_BASE,
     lists: () => [...PROFILES_BASE, 'list'] as const,
-    list: (filters?: Record<string, unknown>) => 
+    list: (filters?: Record<string, unknown>) =>
       [...PROFILES_BASE, 'list', filters] as const,
     details: () => [...PROFILES_BASE, 'detail'] as const,
     detail: (id: string) => [...PROFILES_BASE, 'detail', id] as const,
     byUserId: (userId: string) => [...PROFILES_BASE, 'detail', 'user', userId] as const,
-    checkUsername: (username: string) => 
+    checkUsername: (username: string) =>
       [...PROFILES_BASE, 'checkUsername', username] as const,
   },
-  
+
   // ============================================================================
   // Users
   // ============================================================================
   users: {
     all: USERS_BASE,
     lists: () => [...USERS_BASE, 'list'] as const,
-    list: (filters?: Record<string, unknown>) => 
+    list: (filters?: Record<string, unknown>) =>
       [...USERS_BASE, 'list', filters] as const,
   },
-  
+
   // ============================================================================
   // Admin
   // ============================================================================
   admin: {
     all: ADMIN_BASE,
-    stats: (filters?: unknown) => 
+    stats: (filters?: unknown) =>
       [...ADMIN_BASE, 'stats', filters] as const,
     dashboardStats: () => [...ADMIN_BASE, 'dashboardStats'] as const,
     subadmins: {
@@ -74,14 +75,14 @@ export const QUERY_KEYS = {
       detail: (id: string) => [...ADMIN_BASE, 'subadmins', 'detail', id] as const,
     },
   },
-  
+
   // ============================================================================
   // Download Logs
   // ============================================================================
   downloadLogs: {
     all: DOWNLOAD_LOGS_BASE,
     lists: () => [...DOWNLOAD_LOGS_BASE, 'list'] as const,
-    list: (filters?: unknown) => 
+    list: (filters?: unknown) =>
       [...DOWNLOAD_LOGS_BASE, 'list', filters] as const,
   },
 } as const

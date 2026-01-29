@@ -22,7 +22,7 @@ import {
 } from './profileFormSchema'
 import { updateProfile, checkUsernameAvailability } from '@/services/api/profiles'
 import { QUERY_KEYS } from '@/constants/queryKeys'
-import { DEFAULT_VALUES } from '@/constants'
+import { DEFAULT_VALUES, ERROR_MESSAGES } from '@/constants'
 import type { UserProfile } from '@/types'
 
 export interface UseProfileFormOptions {
@@ -30,17 +30,17 @@ export interface UseProfileFormOptions {
    * User ID
    */
   userId: string
-  
+
   /**
    * Whether this is creating a new profile (true) or editing existing (false)
    */
   isCreating: boolean
-  
+
   /**
    * Callback when profile update/create succeeds
    */
   onSuccess?: () => void
-  
+
   /**
    * Initial form values (from existing profile)
    */
@@ -88,11 +88,11 @@ export function useProfileForm({
         // Note: Profile creation is typically handled server-side during signup
         // This mutation is for the profile completion flow
         const createData = data as CreateProfileFormData
-        
+
         // Check username availability
         const isAvailable = await checkUsernameAvailability(createData.username)
         if (!isAvailable) {
-          throw new Error('Username already exists')
+          throw new Error(ERROR_MESSAGES.USERNAME_EXISTS)
         }
 
         // Create profile via API
@@ -122,7 +122,7 @@ export function useProfileForm({
 
         if (!response.ok) {
           const errorData = await response.json()
-          throw new Error(errorData.error || 'Failed to create profile')
+          throw new Error(errorData.error || ERROR_MESSAGES.CREATE_PROFILE)
         }
 
         const createdProfile = await response.json()
@@ -156,7 +156,7 @@ export function useProfileForm({
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.profiles.byUserId(userId) })
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.users.lists() })
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.profiles.lists() })
-      
+
       // Call success callback
       onSuccess?.()
     },
@@ -178,7 +178,7 @@ export function useProfileForm({
       })
 
       if (error) {
-        throw new Error(error.message || 'Failed to update password')
+        throw new Error(error.message || ERROR_MESSAGES.UPDATE_PASSWORD)
       }
     },
     onSuccess: () => {
@@ -200,7 +200,7 @@ export function useProfileForm({
     isLoading: profileMutation.isPending,
     error: profileMutation.error,
     isSuccess: profileMutation.isSuccess,
-    
+
     // Password change
     passwordForm,
     onPasswordSubmit,

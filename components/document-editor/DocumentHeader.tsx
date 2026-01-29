@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { DOCUMENT_TYPES } from '@/constants'
 import { THEME } from '@/constants/theme'
+import { IconArrowLeft } from '@/components/ui/icons'
 import type { DocumentType, UserVersion } from '@/types/documentEditor'
 
 interface DocumentHeaderProps {
@@ -56,9 +57,7 @@ export default function DocumentHeader({
               onClick={onClose || (() => router.back())}
               className="text-gray-600 hover:text-gray-900"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
+              <IconArrowLeft className="w-6 h-6" />
             </button>
             <div>
               <h1 className="text-xl font-semibold text-gray-900">{document.title}</h1>

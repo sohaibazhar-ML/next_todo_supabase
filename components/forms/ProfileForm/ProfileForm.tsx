@@ -23,6 +23,7 @@ import { useProfileForm } from './useProfileForm'
 import ProfileFormFields from './ProfileFormFields'
 import PasswordChangeForm from './PasswordChangeForm'
 import { ErrorMessage, SuccessMessage, Button } from '@/components/ui'
+import UserProfileView from '@/components/UserProfileView'
 import type { UserProfile } from '@/types'
 
 /**
@@ -191,81 +192,11 @@ export default function ProfileForm({
           <SuccessMessage message={t('profileUpdated') || 'Profile updated successfully'} />
         )}
 
-        {/* Personal Information */}
-        <div className="border-b pb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">{t('personalInfo')}</h3>
-            <Button
-              variant="primary"
-              size="md"
-              onClick={handleEdit}
-            >
-              {t('edit')}
-            </Button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <p className="text-sm font-medium text-gray-500 mb-1">{t('username')}</p>
-              <p className="text-base text-gray-900">{initialProfile.username}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500 mb-1">{t('email')}</p>
-              <p className="text-base text-gray-900">{initialProfile.email}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500 mb-1">{t('firstName')}</p>
-              <p className="text-base text-gray-900">{initialProfile.first_name}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500 mb-1">{t('lastName')}</p>
-              <p className="text-base text-gray-900">{initialProfile.last_name}</p>
-            </div>
-            <div className="md:col-span-2">
-              <p className="text-sm font-medium text-gray-500 mb-1">{t('phoneNumber')}</p>
-              <p className="text-base text-gray-900">{initialProfile.phone_number}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Address Information */}
-        <div className="border-b pb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('addressInfo')}</h3>
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm font-medium text-gray-500 mb-1">{t('currentAddress')}</p>
-              <p className="text-base text-gray-900">{initialProfile.current_address}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500 mb-1">{t('countryOfOrigin')}</p>
-              <p className="text-base text-gray-900">{initialProfile.country_of_origin}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500 mb-1">{t('newAddressSwitzerland')}</p>
-              <p className="text-base text-gray-900">{initialProfile.new_address_switzerland}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Family Information */}
-        <div className="border-b pb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('familyInfo')}</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <p className="text-sm font-medium text-gray-500 mb-1">{t('numberOfAdults')}</p>
-              <p className="text-base text-gray-900">{initialProfile.number_of_adults}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500 mb-1">{t('numberOfChildren')}</p>
-              <p className="text-base text-gray-900">{initialProfile.number_of_children}</p>
-            </div>
-            {initialProfile.pets_type && (
-              <div className="md:col-span-2">
-                <p className="text-sm font-medium text-gray-500 mb-1">{t('petsType')}</p>
-                <p className="text-base text-gray-900">{initialProfile.pets_type}</p>
-              </div>
-            )}
-          </div>
-        </div>
+        <UserProfileView
+          profile={initialProfile}
+          isOwnProfile={true}
+          onEdit={handleEdit}
+        />
 
         {/* Password Change Section */}
         <div>

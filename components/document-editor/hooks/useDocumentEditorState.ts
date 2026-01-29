@@ -31,8 +31,7 @@ export interface UseDocumentEditorStateReturn {
   setDocumentType: (type: DocumentType | null) => void
 
   // Version state
-  versions: import('@/types/documentEditor').UserVersion[]
-  setVersions: (versions: import('@/types/documentEditor').UserVersion[]) => void
+
   versionName: string
   setVersionName: (name: string) => void
   showVersions: boolean
@@ -86,9 +85,7 @@ export function useDocumentEditorState(): UseDocumentEditorStateReturn {
   const [documentType, setDocumentType] = useState<DocumentType | null>(null)
 
   // Version state
-  const [versions, setVersions] = useState<
-    import('@/types/documentEditor').UserVersion[]
-  >([])
+
   const [versionName, setVersionName] = useState('')
   const [showVersions, setShowVersions] = useState(false)
 
@@ -129,8 +126,7 @@ export function useDocumentEditorState(): UseDocumentEditorStateReturn {
     setDocumentType,
 
     // Version state
-    versions,
-    setVersions,
+
     versionName,
     setVersionName,
     showVersions,

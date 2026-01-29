@@ -159,6 +159,11 @@ export const ERROR_MESSAGES = {
   INVALID_DOCUMENT_ID: 'Invalid document ID',
 
   /**
+   * Document ID required
+   */
+  DOCUMENT_ID_REQUIRED: 'Document ID is required',
+
+  /**
    * File not found in storage
    */
   FILE_NOT_FOUND_IN_STORAGE: 'File not found in storage',
@@ -597,6 +602,11 @@ export const ERROR_MESSAGES = {
    * Used in SignUpPage component
    */
   CREATE_USER_FAILED: 'Failed to create user account',
+
+  /**
+   * Failed to update password
+   */
+  UPDATE_PASSWORD: 'Failed to update password',
 
   /**
    * Subadmin permissions not found

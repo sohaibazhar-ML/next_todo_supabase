@@ -10,7 +10,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
 import { signUpFormSchema, type SignUpFormData } from './signUpFormSchema'
-import { API_ENDPOINTS, CONTENT_TYPES } from '@/constants'
+import { API_ENDPOINTS, CONTENT_TYPES, ERROR_MESSAGES } from '@/constants'
 import { DEFAULT_VALUES } from '@/constants'
 
 export interface UseSignUpFormOptions {
@@ -74,7 +74,7 @@ export function useSignUpForm({ onSuccess }: UseSignUpFormOptions = {}) {
       }
 
       if (!authData.user) {
-        throw new Error('Failed to create user account')
+        throw new Error(ERROR_MESSAGES.CREATE_USER_FAILED)
       }
 
       // Create profile
@@ -104,9 +104,9 @@ export function useSignUpForm({ onSuccess }: UseSignUpFormOptions = {}) {
 
       if (!profileResponse.ok) {
         const errorData = await profileResponse.json().catch(() => ({
-          error: 'Profile creation failed',
+          error: ERROR_MESSAGES.CREATE_PROFILE,
         }))
-        throw new Error(errorData.error || 'Profile creation failed')
+        throw new Error(errorData.error || ERROR_MESSAGES.CREATE_PROFILE)
       }
 
       return {
@@ -117,7 +117,7 @@ export function useSignUpForm({ onSuccess }: UseSignUpFormOptions = {}) {
     onSuccess: () => {
       // Reset form
       form.reset()
-      
+
       // Call success callback
       onSuccess?.()
     },

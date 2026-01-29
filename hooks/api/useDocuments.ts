@@ -14,6 +14,7 @@ import type {
 } from '@/types'
 import * as documentsApi from '@/services/api/documents'
 import { QUERY_KEYS } from '@/constants/queryKeys'
+import { ERROR_MESSAGES } from '@/constants'
 
 /**
  * Fetch documents with filters
@@ -33,7 +34,7 @@ export function useDocument(id: string | null) {
   return useQuery({
     queryKey: QUERY_KEYS.documents.detail(id || ''),
     queryFn: () => {
-      if (!id) throw new Error('Document ID is required')
+      if (!id) throw new Error(ERROR_MESSAGES.DOCUMENT_ID_REQUIRED)
       return documentsApi.fetchDocumentById(id)
     },
     enabled: !!id,
@@ -48,7 +49,7 @@ export function useDocumentVersions(id: string | null) {
   return useQuery({
     queryKey: QUERY_KEYS.documents.versions(id || ''),
     queryFn: () => {
-      if (!id) throw new Error('Document ID is required')
+      if (!id) throw new Error(ERROR_MESSAGES.DOCUMENT_ID_REQUIRED)
       return documentsApi.fetchDocumentVersions(id)
     },
     enabled: !!id,
@@ -126,7 +127,7 @@ export function useDocumentDownloadUrl(id: string | null) {
   return useQuery({
     queryKey: QUERY_KEYS.documents.downloadUrl(id || ''),
     queryFn: () => {
-      if (!id) throw new Error('Document ID is required')
+      if (!id) throw new Error(ERROR_MESSAGES.DOCUMENT_ID_REQUIRED)
       return documentsApi.getDocumentDownloadUrl(id)
     },
     enabled: !!id,
@@ -141,7 +142,7 @@ export function useConvertDocumentForEditor(id: string | null) {
   return useQuery({
     queryKey: QUERY_KEYS.documents.convert(id || ''),
     queryFn: () => {
-      if (!id) throw new Error('Document ID is required')
+      if (!id) throw new Error(ERROR_MESSAGES.DOCUMENT_ID_REQUIRED)
       return documentsApi.convertDocumentForEditor(id)
     },
     enabled: !!id,
@@ -149,3 +150,18 @@ export function useConvertDocumentForEditor(id: string | null) {
   })
 }
 
+
+/**
+ * Fetch user's edited versions of a document
+ */
+export function useUserDocumentVersions(id: string | null) {
+  return useQuery({
+    queryKey: QUERY_KEYS.documents.userVersions(id || ''),
+    queryFn: () => {
+      if (!id) throw new Error(ERROR_MESSAGES.DOCUMENT_ID_REQUIRED)
+      return documentsApi.getUserDocumentVersions(id)
+    },
+    enabled: !!id,
+    staleTime: 30 * 1000, // 30 seconds
+  })
+}

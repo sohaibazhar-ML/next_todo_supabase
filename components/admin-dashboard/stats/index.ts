@@ -10,4 +10,5 @@ export { default as StatsSummaryTab } from './StatsSummaryTab'
 export { default as StatsDownloadsTab } from './StatsDownloadsTab'
 export { default as StatsVersionsTab } from './StatsVersionsTab'
 export { default as StatsUsersTab } from './StatsUsersTab'
+export { default as StatsCard } from './StatsCard'
 
