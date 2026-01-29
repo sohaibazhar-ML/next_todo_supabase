@@ -10,7 +10,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { loginFormSchema, type LoginFormData } from './loginFormSchema'
-import { ERROR_MESSAGES } from '@/constants'
+import { ERROR_MESSAGES, ROUTES } from '@/constants'
 import { fetchProfileByUserId } from '@/services/api/profiles'
 
 export interface UseLoginFormOptions {
@@ -78,7 +78,7 @@ export function useLoginForm({ onSuccess }: UseLoginFormOptions = {}) {
       if (user) {
         const profile = await fetchProfileByUserId(user.id).catch(() => null)
         if (!profile) {
-          router.push('/profile?setup=true')
+          router.push(ROUTES.PROFILE_SETUP)
           router.refresh()
           return
         }
@@ -94,14 +94,14 @@ export function useLoginForm({ onSuccess }: UseLoginFormOptions = {}) {
       if (onSuccess) {
         onSuccess()
       } else {
-        router.push('/dashboard')
+        router.push(ROUTES.DASHBOARD_ROOT)
         router.refresh()
       }
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
-          : 'An unexpected error occurred during login'
+          : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
       )
     } finally {
       setIsLoading(false)

@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 import { LoginForm } from '@/components/forms/LoginForm'
 import { IconLock } from '@/components/ui/icons'
+import { ROUTES } from '@/constants'
 
 export default function LoginPage() {
   const t = useTranslations()
@@ -31,11 +32,17 @@ export default function LoginPage() {
         {/* Footer */}
         <p className="mt-8 text-center text-sm text-white/80 drop-shadow-md">
           {t('auth.bySigningIn')}{' '}
-          <a href="#" className="font-medium text-white hover:text-white/80 underline">
+          <a
+            href={ROUTES.TERMS}
+            className="font-medium text-white hover:text-white/80 underline"
+          >
             {t('common.termsOfService')}
           </a>{' '}
           {t('auth.and')}{' '}
-          <a href="#" className="font-medium text-white hover:text-white/80 underline">
+          <a
+            href={ROUTES.PRIVACY}
+            className="font-medium text-white hover:text-white/80 underline"
+          >
             {t('common.privacyPolicy')}
           </a>
         </p>

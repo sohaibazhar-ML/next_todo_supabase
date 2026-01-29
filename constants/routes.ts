@@ -74,6 +74,17 @@ export const ROUTES = {
    */
   PRIVACY: '/privacy',
 
+  /**
+   * Profile setup flow (after login when profile is missing)
+   * Note: locale is handled via middleware; this path is locale-agnostic.
+   */
+  PROFILE_SETUP: '/profile?setup=true',
+
+  /**
+   * Dashboard root (locale-agnostic, resolved by middleware)
+   */
+  DASHBOARD_ROOT: '/dashboard',
+
   // ============================================================================
   // Admin Routes
   // ============================================================================
