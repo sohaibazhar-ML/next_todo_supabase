@@ -376,6 +376,7 @@
   },
   "userProfileView": {
     "personalInfo": "Informazioni personali",
+    "edit": "Modifica",
     "username": "Nome utente",
     "email": "E-mail",
     "firstName": "Nome",
