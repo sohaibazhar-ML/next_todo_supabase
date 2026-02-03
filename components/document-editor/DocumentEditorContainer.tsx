@@ -36,6 +36,10 @@ import { useDocumentLoader } from './hooks/useDocumentLoader'
 import { useVersionManager } from './hooks/useVersionManager'
 import { useDocumentActions } from './hooks/useDocumentActions'
 import { usePdfHandlers } from './hooks/usePdfHandlers'
+import { createEditingSession, finishEditingSession } from '@/actions/google-docs'
+import { Button } from '../ui'
+import { useState } from 'react'
+import { toast } from 'sonner'
 
 interface DocumentEditorContainerProps {
   document: Document
@@ -151,6 +155,131 @@ export default function DocumentEditorContainer({
   })
 
 
+
+// ... imports
+
+// ... inside the component
+
+  // Google Docs Logic
+  const [googleLoading, setGoogleLoading] = useState(false)
+  const [activeVersionId, setActiveVersionId] = useState<string | null>(null)
+
+  const handleStartGoogleSession = async () => {
+    if (!document.google_drive_template_id) return
+    
+    setGoogleLoading(true)
+    try {
+      const { editUrl, versionId } = await createEditingSession(document.id, document.google_drive_template_id)
+      setActiveVersionId(versionId)
+      // Open in new tab
+      window.open(editUrl, '_blank')
+      toast.success('Document opened in new tab')
+    } catch (error) {
+      console.error(error)
+      toast.error('Failed to open document')
+    } finally {
+      setGoogleLoading(false)
+    }
+  }
+
+  const handleFinishGoogleSession = async () => {
+    if (!activeVersionId) return
+
+    setGoogleLoading(true)
+    try {
+      const result = await finishEditingSession(activeVersionId)
+      
+      // Automatic download if fileUrl is returned
+      if (result.success && result.fileUrl) {
+        // Create a temporary link and trigger download
+        const link = window.document.createElement('a')
+        link.href = result.fileUrl
+        link.download = `${document.title || 'Document'}.docx`
+        link.target = '_blank'
+        window.document.body.appendChild(link)
+        link.click()
+        window.document.body.removeChild(link)
+        
+        // Wait a bit for the download to start before redirecting
+        await new Promise(resolve => setTimeout(resolve, 1000))
+      }
+
+      toast.success('Document saved successfully!')
+      
+      // Redirect to downloads page
+      if (onClose) {
+        onClose()
+      } else {
+        window.location.href = '/downloads'
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error('Failed to save document')
+    } finally {
+      setGoogleLoading(false)
+    }
+  }
+
+  // Check if it's a Google Doc Template
+  // Note: We need to ensure 'document' prop has this field. 
+  // Assuming the `Document` type is updated to include `google_drive_template_id`.
+  const isGoogleDoc = !!document.google_drive_template_id
+
+  if (isGoogleDoc) {
+     return (
+        <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+           <div className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full text-center space-y-6">
+              <div className="h-16 w-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto">
+                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              
+              <div>
+                 <h2 className="text-2xl font-bold text-gray-900">Edit Document</h2>
+                 <p className="text-gray-500 mt-2">
+                    This document is managed via Google Docs. Click below to open it in a new tab.
+                 </p>
+              </div>
+
+              <div className="space-y-3">
+                 {!activeVersionId ? (
+                   <Button 
+                     onClick={handleStartGoogleSession} 
+                     disabled={googleLoading}
+                     className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                   >
+                     {googleLoading ? 'Preparing...' : 'Open in Google Docs'}
+                   </Button>
+                 ) : (
+                   <div className="space-y-4">
+                     <div className="p-4 bg-yellow-50 text-yellow-800 rounded-lg text-sm">
+                       Editing in progress... When you are done making changes in the other tab, come back here and click Finish.
+                     </div>
+                     <Button 
+                       onClick={handleFinishGoogleSession}
+                       disabled={googleLoading} 
+                       className="w-full bg-green-600 hover:bg-green-700 text-white"
+                     >
+                       {googleLoading ? 'Saving...' : 'Finish & Save DOCX'}
+                     </Button>
+                     <button 
+                       onClick={() => setActiveVersionId(null)}
+                       className="text-gray-400 text-sm hover:text-gray-600"
+                     >
+                       Cancel
+                     </button>
+                   </div>
+                 )}
+              </div>
+           </div>
+           
+           <button onClick={onClose} className="mt-8 text-gray-500 hover:text-gray-800">
+             Close Editor
+           </button>
+        </div>
+     )
+  }
 
   // Loading state
   if (editorState.loading && !editorState.content) {

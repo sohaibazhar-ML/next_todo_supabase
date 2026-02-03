@@ -15,6 +15,7 @@ import { NextResponse } from 'next/server'
 import { hasPermission } from '@/lib/utils/roles'
 import { isErrorWithMessage } from '@/types'
 import { CONSOLE_MESSAGES, ERROR_MESSAGES, STORAGE_BUCKETS, STORAGE_CONFIG } from '@/constants'
+import { uploadTemplateToDrive } from '@/actions/google-docs'
 
 function getFileType(fileName: string): string {
   const ext = fileName.split('.').pop()?.toLowerCase()
@@ -130,6 +131,31 @@ export async function POST(request: Request) {
       }
     }
 
+    // If it's a DOCX file, also upload to Google Drive for editing
+    let googleDriveTemplateId = null
+    const fileType = getFileType(file.name)
+
+    console.log(`[DEBUG] Uploading file: ${file.name}, MIME: ${file.type}, Detected Type: ${fileType}`)
+
+    if (fileType === 'document' && (file.name.endsWith('.docx') || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')) {
+      console.log(`[DEBUG] Triggering Google Drive upload for ${file.name}`)
+      try {
+        const arrayBuffer = await file.arrayBuffer()
+        const buffer = Buffer.from(arrayBuffer)
+        console.log(`[DEBUG] Calling uploadTemplateToDrive for ${file.name}...`)
+        googleDriveTemplateId = await uploadTemplateToDrive(buffer, file.name)
+        console.log(`[DEBUG] Google Drive conversion RESULT: ${googleDriveTemplateId}`)
+      } catch (error) {
+        console.error('[DEBUG] CRITICAL: Google Drive Conversion Failed:', error)
+        if (error instanceof Error) {
+          console.error('[DEBUG] Error Message:', error.message)
+          console.error('[DEBUG] Error Stack:', error.stack)
+        }
+      }
+    } else {
+      console.warn(`[DEBUG] Skipping Google Drive upload. Condition failed: ${fileType === 'document'} && (${file.name.endsWith('.docx')} || ${file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'})`)
+    }
+
     // Insert document record
     const document = await prisma.documents.create({
       data: {
@@ -140,8 +166,9 @@ export async function POST(request: Request) {
         file_name: file.name,
         file_path: filePath,
         file_size: BigInt(file.size),
-        file_type: getFileType(file.name),
+        file_type: fileType,
         mime_type: file.type,
+        google_drive_template_id: googleDriveTemplateId,
         version: versionNumber,
         parent_document_id: parentDocumentId,
         is_active: true,

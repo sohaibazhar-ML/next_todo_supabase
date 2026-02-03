@@ -18,7 +18,7 @@
  * ```
  */
 
-import { SelectHTMLAttributes, forwardRef } from 'react'
+import { SelectHTMLAttributes, forwardRef, useId } from 'react'
 import { cn } from '@/lib/utils/cn'
 
 export interface SelectOption {
@@ -68,7 +68,8 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
     },
     ref
   ) => {
-    const selectId = id || `select-${Math.random().toString(36).substr(2, 9)}`
+    const generatedId = useId()
+    const selectId = id || `select-${generatedId}`
     
     const baseStyles = 'block w-full px-3 py-2 border rounded-lg shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out text-gray-900'
     

@@ -28,7 +28,7 @@ export async function GET(request: Request) {
       select: { id: true }
     })
 
-    return NextResponse.json({ exists: !!existing })
+    return NextResponse.json({ available: !existing })
   } catch (error) {
     console.error(CONSOLE_MESSAGES.ERROR_CHECKING_USERNAME, error)
     const errorMessage = isErrorWithMessage(error)

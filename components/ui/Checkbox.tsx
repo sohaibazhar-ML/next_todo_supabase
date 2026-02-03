@@ -14,7 +14,7 @@
  * ```
  */
 
-import { InputHTMLAttributes, forwardRef } from 'react'
+import { InputHTMLAttributes, forwardRef, useId } from 'react'
 import { cn } from '@/lib/utils/cn'
 
 export interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
@@ -46,8 +46,8 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
     },
     ref
   ) => {
-    const checkboxId = id || `checkbox-${Math.random().toString(36).substr(2, 9)}`
-    
+    const generatedId = useId()
+    const checkboxId = id || `checkbox-${generatedId}`    
     const baseStyles = 'h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded transition duration-150 ease-in-out'
     
     return (

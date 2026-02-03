@@ -65,6 +65,15 @@
     "numberOfChildren": "Number of Children",
     "petsType": "Pets and Type",
     "petsPlaceholder": "e.g., 2 dogs, 1 cat",
+    "firstNamePlaceholder": "Enter your first name",
+    "lastNamePlaceholder": "Enter your last name",
+    "usernamePlaceholder": "Choose a username",
+    "emailPlaceholder": "Enter your email address",
+    "phoneNumberPlaceholder": "Enter your phone number",
+    "currentAddressPlaceholder": "Enter your current address",
+    "countryOfOriginPlaceholder": "Enter your country of origin",
+    "newAddressSwitzerlandPlaceholder": "Enter your new address in Switzerland",
+    "confirmPasswordPlaceholder": "Confirm your password",
     "passwordSection": "Password",
     "confirmPassword": "Confirm Password",
     "termsAccept": "I accept the",
@@ -290,7 +299,8 @@
     "hideVersions": "Hide Versions",
     "viewAllVersions": "View All Versions",
     "downloading": "Downloading...",
-    "download": "Download"
+    "download": "Download",
+    "edit": "Edit"
   },
   "documentUpload": {
     "invalidFileType": "Invalid file type. Please upload PDF, DOCX, XLSX, or ZIP files only.",
@@ -439,30 +449,6 @@
     "results": "results",
     "enterAnnotationText": "Enter annotation text:",
     "delete": "Delete"
-  },
-  "documentCard": {
-    "featured": "Featured",
-    "category": "Category",
-    "fileType": "File Type",
-    "version": "Version",
-    "availableVersions": "Available Versions",
-    "versions": "Versions",
-    "size": "Size",
-    "downloadsThisVersion": "Downloads (this version)",
-    "totalDownloads": "Total Downloads",
-    "selectVersion": "Select Version",
-    "versionsAvailable": "{count} versions available",
-    "versionDetails": "Version Details",
-    "current": "Current",
-    "downloads": "Downloads",
-    "noOtherVersions": "No other versions available",
-    "viewAllVersions": "View All Versions",
-    "hideVersions": "Hide Versions",
-    "loadingVersions": "Loading versions...",
-    "more": "+{count} more",
-    "downloading": "Downloading...",
-    "download": "Download",
-    "edit": "Edit"
   },
   "stats": {
     "title": "Statistics & Analytics",
@@ -645,4 +631,3 @@
     }
   }
 }
-

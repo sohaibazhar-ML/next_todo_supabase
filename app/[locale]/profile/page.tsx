@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ProfileForm } from '@/components/forms/ProfileForm'
+import ProfilePageClient from './ProfilePageClient'
 import UserList from '@/components/UserList'
 import { isAdmin } from '@/lib/utils/roles'
 import { getTranslations } from 'next-intl/server'
@@ -40,7 +41,7 @@ export default async function ProfilePage() {
               <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('profile.completeYourProfile')}</h1>
               <p className="text-gray-600">{t('profile.completeProfileDescription')}</p>
             </div>
-            <ProfileForm 
+            <ProfilePageClient 
               userId={user.id}
               initialProfile={null} 
               userInfo={{
@@ -83,7 +84,7 @@ export default async function ProfilePage() {
                   {t('profile.backToDashboard')}
                 </Link>
               </div>
-              <ProfileForm 
+              <ProfilePageClient 
                 userId={user.id}
                 initialProfile={{
                   ...profile,

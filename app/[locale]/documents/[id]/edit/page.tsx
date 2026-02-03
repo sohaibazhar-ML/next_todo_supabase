@@ -38,6 +38,7 @@ export default async function EditDocumentPage({ params }: PageProps) {
       is_featured: true,
       download_count: true,
       searchable_content: true,
+      google_drive_template_id: true,
       created_at: true,
       updated_at: true,
       created_by: true,

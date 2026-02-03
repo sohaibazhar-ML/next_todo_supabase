@@ -65,6 +65,15 @@
     "numberOfChildren": "Anzahl Kinder",
     "petsType": "Haustiere und Art",
     "petsPlaceholder": "z.B. 2 Hunde, 1 Katze",
+    "firstNamePlaceholder": "Geben Sie Ihren Vornamen ein",
+    "lastNamePlaceholder": "Geben Sie Ihren Nachnamen ein",
+    "usernamePlaceholder": "Wählen Sie einen Benutzernamen",
+    "emailPlaceholder": "Geben Sie Ihre E-Mail-Adresse ein",
+    "phoneNumberPlaceholder": "Geben Sie Ihre Telefonnummer ein",
+    "currentAddressPlaceholder": "Geben Sie Ihre aktuelle Adresse ein",
+    "countryOfOriginPlaceholder": "Geben Sie Ihr Herkunftsland ein",
+    "newAddressSwitzerlandPlaceholder": "Geben Sie Ihre neue Adresse in der Schweiz ein",
+    "confirmPasswordPlaceholder": "Bestätigen Sie Ihr Passwort",
     "passwordSection": "Passwort",
     "confirmPassword": "Passwort bestätigen",
     "termsAccept": "Ich akzeptiere die",
@@ -290,7 +299,8 @@
     "hideVersions": "Versionen ausblenden",
     "viewAllVersions": "Alle Versionen anzeigen",
     "downloading": "Wird heruntergeladen...",
-    "download": "Herunterladen"
+    "download": "Herunterladen",
+    "edit": "Bearbeiten"
   },
   "documentUpload": {
     "invalidFileType": "Ungültiger Dateityp. Bitte laden Sie nur PDF, DOCX, XLSX oder ZIP Dateien hoch.",
@@ -439,30 +449,6 @@
     "results": "Ergebnisse",
     "enterAnnotationText": "Anmerkungstext eingeben:",
     "delete": "Löschen"
-  },
-  "documentCard": {
-    "featured": "Empfohlen",
-    "category": "Kategorie",
-    "fileType": "Dateityp",
-    "version": "Version",
-    "availableVersions": "Verfügbare Versionen",
-    "versions": "Versionen",
-    "size": "Größe",
-    "downloadsThisVersion": "Downloads (diese Version)",
-    "totalDownloads": "Gesamt-Downloads",
-    "selectVersion": "Version auswählen",
-    "versionsAvailable": "{count} Versionen verfügbar",
-    "versionDetails": "Versionsdetails",
-    "current": "Aktuell",
-    "downloads": "Downloads",
-    "noOtherVersions": "Keine anderen Versionen verfügbar",
-    "viewAllVersions": "Alle Versionen anzeigen",
-    "hideVersions": "Versionen ausblenden",
-    "loadingVersions": "Versionen werden geladen...",
-    "more": "+{count} weitere",
-    "downloading": "Herunterladen...",
-    "download": "Herunterladen",
-    "edit": "Bearbeiten"
   },
   "stats": {
     "title": "Statistiken & Analysen",
@@ -645,4 +631,3 @@
     }
   }
 }
-

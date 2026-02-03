@@ -13,17 +13,23 @@ interface DocumentActionsProps {
   downloading: boolean
   loadingVersions: boolean
   showVersions: boolean
+  isGoogleDoc: boolean
+  allowGoogleDocs?: boolean
   onEdit: () => void
+  onGoogleEdit?: () => void
   onDownload: () => void
   onToggleVersions: () => void
 }
 
 export default function DocumentActions({
   canEdit,
+  isGoogleDoc,
+  allowGoogleDocs,
   downloading,
   loadingVersions,
   showVersions,
   onEdit,
+  onGoogleEdit,
   onDownload,
   onToggleVersions,
 }: DocumentActionsProps) {
@@ -48,10 +54,26 @@ export default function DocumentActions({
           type="button"
           variant="primary"
           onClick={onEdit}
-          className="w-full mb-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+          className={`w-full mb-3 bg-gradient-to-r ${
+            isGoogleDoc 
+              ? 'from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700' 
+              : 'from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700'
+          }`}
         >
           <IconEdit className="h-5 w-5" />
-          {t('edit')}
+          {isGoogleDoc ? 'Edit in Google Docs' : t('edit')}
+        </Button>
+      )}
+
+      {!isGoogleDoc && allowGoogleDocs && onGoogleEdit && (
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onGoogleEdit}
+          className="w-full mb-3 border-blue-600 text-blue-600 hover:bg-blue-50"
+        >
+          <IconEdit className="h-5 w-5 border-blue-600" />
+          {'Try Google Docs Editor'}
         </Button>
       )}
 

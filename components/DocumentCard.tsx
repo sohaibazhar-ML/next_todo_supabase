@@ -33,6 +33,8 @@ import DocumentMetadata from './document-card/DocumentMetadata'
 import DocumentVersionSelector from './document-card/DocumentVersionSelector'
 import DocumentActions from './document-card/DocumentActions'
 import { ErrorMessage } from '@/components/ui'
+import { convertDocumentAction } from '@/actions/google-docs'
+import { toast } from 'sonner'
 
 interface DocumentCardProps {
   document: Document
@@ -43,6 +45,7 @@ export default function DocumentCard({ document }: DocumentCardProps) {
   const router = useRouter()
   const [showVersions, setShowVersions] = useState(false)
   const [selectedVersion, setSelectedVersion] = useState<Document | null>(document)
+  const [converting, setConverting] = useState(false)
 
   // Use custom hook for download functionality
   const { downloading, error, downloadDocument: downloadDocumentFn } = useDocumentDownload()
@@ -65,15 +68,41 @@ export default function DocumentCard({ document }: DocumentCardProps) {
   }, [versions, showVersions, document])
 
   // Check if document can be edited (PDF or DOCX/DOC files)
-  // Database stores: 'pdf' for PDFs, 'document' for DOCX/DOC files
-  // TypeScript type uses: 'PDF' for PDFs, 'DOCX' for DOCX/DOC files
   const fileTypeLower = document.file_type?.toLowerCase() || ''
-  const canEdit = fileTypeLower === 'pdf' || fileTypeLower === 'document' || 
-                  document.file_type === 'PDF' || document.file_type === 'DOCX'
+  const fileNameLower = document.file_name?.toLowerCase() || ''
+  const isDocx = fileTypeLower === 'document' || 
+                 document.file_type === 'DOCX' || 
+                 fileNameLower.endsWith('.docx') || 
+                 fileNameLower.endsWith('.doc')
+  
+  const canEdit = fileTypeLower === 'pdf' || isDocx || document.file_type === 'PDF'
 
   const handleEdit = () => {
     const locale = window.location.pathname.split('/')[1]
     router.push(ROUTES.DOCUMENTS_EDIT(locale, document.id))
+  }
+
+  const handleGoogleEdit = async () => {
+    if (document.google_drive_template_id) {
+      handleEdit()
+      return
+    }
+
+    setConverting(true)
+    const toastId = toast.loading('Converting to Google Docs...')
+    
+    try {
+      const result = await convertDocumentAction(document.id)
+      if (result.success) {
+        toast.success('Conversion successful!', { id: toastId })
+        handleEdit()
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error('Failed to convert document', { id: toastId })
+    } finally {
+      setConverting(false)
+    }
   }
 
   const toggleVersions = () => {
@@ -125,10 +154,13 @@ export default function DocumentCard({ document }: DocumentCardProps) {
 
         <DocumentActions
           canEdit={canEdit}
-          downloading={downloading}
+          isGoogleDoc={!!document.google_drive_template_id}
+          allowGoogleDocs={isDocx}
+          downloading={downloading || converting}
           loadingVersions={loadingVersions}
           showVersions={showVersions}
           onEdit={handleEdit}
+          onGoogleEdit={handleGoogleEdit}
           onDownload={handleDownload}
           onToggleVersions={toggleVersions}
         />

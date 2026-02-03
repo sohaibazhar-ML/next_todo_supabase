@@ -205,14 +205,7 @@ export default function DocumentUploadFields({
           {t('file')} <span className="text-red-500">*</span>
         </label>
         <input
-          {...register('file', {
-            onChange: (e) => {
-              const file = e.target.files?.[0]
-              if (file) {
-                setValue('file', file, { shouldValidate: true })
-              }
-            },
-          })}
+          {...register('file')}
           id="file-upload"
           type="file"
           accept={Object.values(FILE_EXTENSIONS).join(',')}

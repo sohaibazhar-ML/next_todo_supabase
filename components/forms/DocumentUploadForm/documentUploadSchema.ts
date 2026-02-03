@@ -16,34 +16,43 @@ export const documentUploadSchema = z.object({
     .string()
     .min(1, 'Title is required')
     .max(200, 'Title must be less than 200 characters'),
-  
+
   description: z
     .string()
     .max(1000, 'Description must be less than 1000 characters')
     .optional()
     .or(z.literal('')),
-  
+
   category: z
     .string()
     .min(1, 'Category is required'),
-  
+
   tags: z
     .array(z.string().min(1))
     .default([])
     .optional(),
-  
+
   file: z
-    .instanceof(File, { message: 'File is required' })
+    .any()
+    .refine((val) => {
+      // Handle the case where react-hook-form might return a FileList
+      if (val instanceof FileList) return val.length > 0;
+      if (val instanceof File) return true;
+      return false;
+    }, 'File is required')
+    .transform((val) => {
+      // Always transform to a single File object
+      if (val instanceof FileList) return val[0];
+      return val as File;
+    })
+    .refine((file) => file && file.size > 0, 'File cannot be empty')
     .refine(
-      (file) => file.size > 0,
-      'File cannot be empty'
-    )
-    .refine(
-      (file) => file.size <= DEFAULT_VALUES.MAX_FILE_SIZE,
+      (file) => file && file.size <= DEFAULT_VALUES.MAX_FILE_SIZE,
       `File size must be less than ${DEFAULT_VALUES.MAX_FILE_SIZE / (1024 * 1024)}MB`
     )
     .refine(
       (file) => {
+        if (!file) return false;
         // Check MIME type - ALLOWED_FILE_TYPES is readonly array
         const allowedTypes = ALLOWED_FILE_TYPES as readonly string[]
         if (allowedTypes.includes(file.type)) {
@@ -55,18 +64,18 @@ export const documentUploadSchema = z.object({
       },
       ERROR_MESSAGES.INVALID_FILE_TYPE
     ),
-  
+
   is_featured: z
     .boolean()
     .default(false)
     .optional(),
-  
+
   searchable_content: z
     .string()
     .max(50000, 'Searchable content must be less than 50000 characters')
     .optional()
     .or(z.literal('')),
-  
+
   parent_document_id: z
     .string()
     .optional()

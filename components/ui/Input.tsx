@@ -16,7 +16,7 @@
  * ```
  */
 
-import { InputHTMLAttributes, forwardRef } from 'react'
+import { InputHTMLAttributes, forwardRef, useId } from 'react'
 import { cn } from '@/lib/utils/cn'
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -60,7 +60,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     },
     ref
   ) => {
-    const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`
+    const generatedId = useId()
+    const inputId = id || `input-${generatedId}`
+
     
     const baseStyles = 'block w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out text-gray-900 placeholder:text-gray-400'
     

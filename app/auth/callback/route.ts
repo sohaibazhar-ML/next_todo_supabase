@@ -16,18 +16,41 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient()
-    const { data, error } = await supabase.auth.exchangeCodeForSession(code)
 
-    if (error) {
-      console.error(CONSOLE_MESSAGES.ERROR_SESSION_EXCHANGE, error)
-      return NextResponse.redirect(`${origin}/${locale}/login?error=${encodeURIComponent(error.message)}`)
+    // Retry logic for exchangeCodeForSession to handle network blips
+    let data: { user: any; session: any } | null = null
+    let error: any = null
+    let retries = 3;
+    while (retries > 0) {
+      const result = await supabase.auth.exchangeCodeForSession(code)
+      data = result.data
+      error = result.error
+
+      if (!error) break;
+
+      // If it's a network error, retry
+      if (error.message?.includes('fetch failed') || error.message?.includes('timeout')) {
+        retries--;
+        if (retries > 0) {
+          console.warn(`Auth exchange failed, retrying... (${3 - retries}/3)`)
+          await new Promise(r => setTimeout(r, 1500)); // Wait before retry
+          continue;
+        }
+      }
+      break;
+    }
+
+    const finalData = data;
+    if (error || !finalData) {
+      console.error(CONSOLE_MESSAGES.ERROR_SESSION_EXCHANGE, error || 'No session data')
+      return NextResponse.redirect(`${origin}/${locale}/login?error=${encodeURIComponent(error?.message || 'Authentication failed')}`)
     }
 
     // If user just confirmed email (first opt-in) or OAuth signin
-    if (data.user && type !== 'recovery') {
+    if (finalData.user && type !== 'recovery') {
       // Check if profile exists using Prisma
       const profile = await prisma.profiles.findUnique({
-        where: { id: data.user.id },
+        where: { id: finalData.user.id },
         select: { email_confirmed: true, email_confirmed_at: true }
       })
 
@@ -42,14 +65,14 @@ export async function GET(request: Request) {
       if (!profile.email_confirmed) {
         // Update profile to mark first confirmation
         await prisma.profiles.update({
-          where: { id: data.user.id },
+          where: { id: finalData.user.id },
           data: { email_confirmed: true }
         })
 
         // Send second confirmation email
         const { error: emailError } = await supabase.auth.resend({
           type: 'signup',
-          email: data.user.email!,
+          email: finalData.user.email!,
           options: {
             emailRedirectTo: `${origin}/auth/callback?type=double-confirm`,
           }
@@ -62,7 +85,7 @@ export async function GET(request: Request) {
       // Second confirmation - mark as fully confirmed
       else if (profile.email_confirmed && !profile.email_confirmed_at) {
         await prisma.profiles.update({
-          where: { id: data.user.id },
+          where: { id: finalData.user.id },
           data: {
             email_confirmed: true,
             email_confirmed_at: new Date()
