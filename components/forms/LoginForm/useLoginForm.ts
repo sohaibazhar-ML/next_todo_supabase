@@ -45,20 +45,17 @@ export function useLoginForm({ onSuccess }: UseLoginFormOptions = {}) {
       let loginEmail = data.emailOrUsername
 
       if (!isEmail) {
-        // Fetch email from username
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('email')
-          .eq('username', data.emailOrUsername)
-          .single()
+        // Fetch email from username via server-side resolver (bypasses RLS)
+        const response = await fetch(`/api/auth/resolve-username?username=${encodeURIComponent(data.emailOrUsername)}`)
 
-        if (profileError || !profile) {
+        if (!response.ok) {
           setError(ERROR_MESSAGES.INVALID_CREDENTIALS ?? 'Invalid email or username')
           setIsLoading(false)
           return
         }
 
-        loginEmail = profile.email
+        const { email } = await response.json()
+        loginEmail = email
       }
 
       // Sign in with password
