@@ -3,8 +3,8 @@ import { createClient } from '@supabase/supabase-js'
 // Simple connectivity test for Supabase from Node.js
 // Run with: node scripts/test-supabase-connection.mjs
 
-const SUPABASE_URL = 'https://mlesabvweritzyjvswcg.supabase.co'
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sZXNhYnZ3ZXJpdHp5anZzd2NnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NDM0OTgsImV4cCI6MjA3OTExOTQ5OH0.jap6_CH_FJVdP82VORQrYgzPrba0bZ9OCYG7Cet60xY'
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
