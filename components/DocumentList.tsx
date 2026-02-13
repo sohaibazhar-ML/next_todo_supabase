@@ -18,112 +18,36 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import type { Document, DocumentSearchFilters, SerializedDocument } from '@/types/document'
-import { API_ENDPOINTS, ERROR_MESSAGES, CONSOLE_MESSAGES } from '@/constants'
-import { isErrorWithMessage } from '@/types'
+import type { DocumentSearchFilters } from '@/types/document'
+import { useDocuments, useDocumentFilterOptions } from '@/hooks/api/useDocuments'
+import { IconSpinner, IconFile } from '@/components/ui/icons'
+import { UI_TEXT } from '@/constants'
 import DocumentCard from './DocumentCard'
-import DocumentSearch from './DocumentSearch'
+import { DocumentSearch } from './DocumentSearch'
 
 export default function DocumentList() {
   const t = useTranslations('documentList')
-  const [documents, setDocuments] = useState<Document[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [filters, setFilters] = useState<DocumentSearchFilters>({})
-  const [categories, setCategories] = useState<string[]>([])
-  const [fileTypes, setFileTypes] = useState<string[]>([])
-  const [tags, setTags] = useState<string[]>([])
 
-  useEffect(() => {
-    fetchFilterOptions()
-    fetchDocuments()
-  }, [])
-
-  useEffect(() => {
-    fetchDocuments()
-  }, [filters])
-
-  /**
-   * Fetch filter options (categories, file types, tags) from API
-   */
-  const fetchFilterOptions = async () => {
-    try {
-      const response = await fetch(API_ENDPOINTS.DOCUMENT_FILTER_OPTIONS)
-      if (response.ok) {
-        const data = await response.json()
-        setCategories(data.categories || [])
-        setFileTypes(data.fileTypes || [])
-        setTags(data.tags || [])
-      }
-    } catch (err) {
-      console.error(CONSOLE_MESSAGES.ERROR_FETCHING_FILTER_OPTIONS, err)
-    }
-  }
-
-  const fetchDocuments = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-
-      const params = new URLSearchParams()
-      if (filters.category) params.append('category', filters.category)
-      if (filters.fileType) params.append('fileType', filters.fileType)
-      if (filters.featuredOnly) params.append('featuredOnly', 'true')
-      if (filters.searchQuery) params.append('searchQuery', filters.searchQuery)
-      if (filters.tags && filters.tags.length > 0) params.append('tags', filters.tags.join(','))
-
-      const response = await fetch(
-        `${API_ENDPOINTS.DOCUMENTS}?${params.toString()}`
-      )
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(
-          (typeof data === 'object' && data !== null && 'error' in data && typeof data.error === 'string')
-            ? data.error
-            : ERROR_MESSAGES.FETCH_DOCUMENTS
-        )
-      }
-
-      // Convert BigInt file_size to number and ensure proper typing
-      const documents: Document[] = Array.isArray(data)
-        ? data.map((doc: SerializedDocument | Document) => ({
-            ...doc,
-            file_size:
-              typeof doc.file_size === 'bigint'
-                ? Number(doc.file_size)
-                : typeof doc.file_size === 'number'
-                ? doc.file_size
-                : 0,
-          }))
-        : []
-
-      setDocuments(documents)
-    } catch (err) {
-      const errorMessage = isErrorWithMessage(err)
-        ? err.message
-        : ERROR_MESSAGES.FETCH_DOCUMENTS
-      setError(errorMessage)
-      console.error(CONSOLE_MESSAGES.ERROR_FETCHING_DOCUMENTS, err)
-    } finally {
-      setLoading(false)
-    }
-  }
+  // Use React Query hooks for data fetching
+  const { data: documents = [], isLoading, error } = useDocuments(filters)
+  const { data: filterOptions } = useDocumentFilterOptions()
+  
+  const categories = filterOptions?.categories || []
+  const fileTypes = filterOptions?.fileTypes || []
+  const tags = filterOptions?.tags || []
 
   const handleFilterChange = (newFilters: DocumentSearchFilters) => {
     setFilters(newFilters)
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="bg-white rounded-2xl shadow-xl p-12">
         <div className="flex justify-center items-center py-12">
-          <svg className="animate-spin h-12 w-12 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
+          <IconSpinner className="h-12 w-12 text-indigo-600" />
         </div>
       </div>
     )
@@ -133,7 +57,9 @@ export default function DocumentList() {
     return (
       <div className="bg-white rounded-2xl shadow-xl p-8">
         <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
-          <p className="text-sm text-red-700">{error}</p>
+          <p className="text-sm text-red-700">
+            {error instanceof Error ? error.message : UI_TEXT.MESSAGES.FETCH_DOCUMENTS_FAILED}
+          </p>
         </div>
       </div>
     )
@@ -161,9 +87,7 @@ export default function DocumentList() {
         <div className="bg-white rounded-2xl shadow-xl p-12">
           <div className="text-center py-12">
             <div className="mx-auto h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-              <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
+              <IconFile className="h-8 w-8 text-gray-400" />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">{t('noDocuments')}</h3>
             <p className="text-gray-600">

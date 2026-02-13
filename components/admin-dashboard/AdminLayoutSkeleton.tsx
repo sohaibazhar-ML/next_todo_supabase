@@ -1,10 +1,11 @@
 'use client'
 
 import { ADMIN_DASHBOARD } from '@/constants/adminDashboard'
+import { THEME } from '@/constants/theme'
 import AdminSidebar from './AdminSidebar'
 import AdminTopNav from './AdminTopNav'
 import { SidebarProvider, useSidebar } from './SidebarContext'
-import type { UserRole } from '@/types/user'
+import type { UserRole, UserInfo } from '@/types/user'
 
 interface AdminLayoutSkeletonProps {
   userRole: UserRole
@@ -12,17 +13,13 @@ interface AdminLayoutSkeletonProps {
     canUpload: boolean
     canViewStats: boolean
   }
-  userName?: string
-  userAvatar?: string
-  userEmail?: string
+  user?: UserInfo
 }
 
 function AdminLayoutSkeletonContent({
   userRole,
   permissions,
-  userName,
-  userAvatar,
-  userEmail,
+  user = {},
 }: AdminLayoutSkeletonProps) {
   const { isCollapsed } = useSidebar()
 
@@ -39,9 +36,7 @@ function AdminLayoutSkeletonContent({
       }`}>
           {/* Real Top Nav - not skeleton */}
           <AdminTopNav 
-            userName={userName} 
-            userAvatar={userAvatar}
-            userEmail={userEmail}
+            user={user}
             userRole={userRole}
           />
 
@@ -66,7 +61,7 @@ function AdminLayoutSkeletonContent({
                   <div className="absolute top-0 right-0 p-4">
                     <div className={`${ADMIN_DASHBOARD.SKELETON_DIMENSIONS.STATS_ICON} ${ADMIN_DASHBOARD.COLOR_GRAY_LIGHTER_BG} rounded animate-pulse`}></div>
                   </div>
-                  <div className="relative z-10">
+                  <div className={`relative ${THEME.Z_INDEX.DEFAULT}`}>
                     <div className={`${ADMIN_DASHBOARD.SKELETON_DIMENSIONS.STATS_TITLE} ${ADMIN_DASHBOARD.COLOR_GRAY_LIGHTER_BG} rounded animate-pulse mb-2`}></div>
                     <div className={`${ADMIN_DASHBOARD.SKELETON_DIMENSIONS.STATS_VALUE} ${ADMIN_DASHBOARD.COLOR_GRAY_LIGHTER_BG} rounded animate-pulse mb-1`}></div>
                     <div className={`${ADMIN_DASHBOARD.SKELETON_DIMENSIONS.STATS_SUBTITLE} ${ADMIN_DASHBOARD.COLOR_GRAY_LIGHTER_BG} rounded animate-pulse`}></div>

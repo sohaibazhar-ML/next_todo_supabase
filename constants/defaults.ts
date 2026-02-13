@@ -76,6 +76,24 @@ export const DEFAULT_VALUES = {
   REFRESH_DELAY: 1000,
 
   /**
+   * Cleanup delay in milliseconds
+   * Used for DOM cleanup operations (e.g., removing temporary download links)
+   */
+  CLEANUP_DELAY: 100,
+
+  /**
+   * Reload delay in milliseconds
+   * Used before page reload after download operations
+   */
+  RELOAD_DELAY: 1500,
+
+  /**
+   * Debounce delay in milliseconds for search inputs
+   * Used in AdminUserManagement, AdminDocumentList, DocumentSearch
+   */
+  DEBOUNCE_DELAY: 300,
+
+  /**
    * Default version number
    * Used when version is not specified
    */
@@ -230,6 +248,19 @@ export const DEFAULT_VALUES = {
    * Used in document search API
    */
   DEFAULT_PAGE_OFFSET: 0,
+  TIMEOUTS: {
+    DEBOUNCE: 500,
+    ANIMATION: 300,
+    REDIRECT: 2000, // Added for reset password
+    CLEANUP: 100,
+    RELOAD: 500,
+    CONTENT_UPDATE: 100, // For editor update
+    ZERO: 0,
+  },
+  PAGINATION: {
+    ITEMS_PER_PAGE: 10,
+    INITIAL_PAGE: 1,
+  }
 } as const
 
 /**

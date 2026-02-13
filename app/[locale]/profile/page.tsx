@@ -2,7 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import ProfileForm from '@/components/ProfileForm'
+import { ProfileForm } from '@/components/forms/ProfileForm'
+import ProfilePageClient from './ProfilePageClient'
 import UserList from '@/components/UserList'
 import { isAdmin } from '@/lib/utils/roles'
 import { getTranslations } from 'next-intl/server'
@@ -40,12 +41,14 @@ export default async function ProfilePage() {
               <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('profile.completeYourProfile')}</h1>
               <p className="text-gray-600">{t('profile.completeProfileDescription')}</p>
             </div>
-            <ProfileForm 
-              initialProfile={null} 
-              userEmail={userEmail}
-              userFirstName={firstName}
-              userLastName={lastName}
+            <ProfilePageClient 
               userId={user.id}
+              initialProfile={null} 
+              userInfo={{
+                email: userEmail,
+                firstName: firstName,
+                lastName: lastName,
+              }}
             />
           </div>
         </div>
@@ -81,13 +84,16 @@ export default async function ProfilePage() {
                   {t('profile.backToDashboard')}
                 </Link>
               </div>
-              <ProfileForm initialProfile={{
-                ...profile,
-                email_confirmed_at: profile.email_confirmed_at?.toISOString() || null,
-                created_at: profile.created_at.toISOString(),
-                updated_at: profile.updated_at.toISOString(),
-                role: profile.role as 'user' | 'admin',
-              }} />
+              <ProfilePageClient 
+                userId={user.id}
+                initialProfile={{
+                  ...profile,
+                  email_confirmed_at: profile.email_confirmed_at?.toISOString() || null,
+                  created_at: profile.created_at.toISOString(),
+                  updated_at: profile.updated_at.toISOString(),
+                  role: profile.role as 'user' | 'admin',
+                }} 
+              />
             </div>
           </div>
 

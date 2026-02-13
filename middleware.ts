@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { CONSOLE_MESSAGES } from '@/constants/console'
 import createMiddleware from 'next-intl/middleware'
 import { routing } from './i18n/routing'
 
@@ -38,9 +39,9 @@ export async function middleware(request: NextRequest) {
   // Extract locale from pathname
   const localeMatch = pathname.match(/^\/(de|en|fr|it)/)
   const locale = localeMatch ? localeMatch[1] : 'de'
-  
+
   // Get the path without locale prefix
-  const pathWithoutLocale = localeMatch 
+  const pathWithoutLocale = localeMatch
     ? pathname.replace(/^\/(de|en|fr|it)/, '') || '/'
     : pathname
 
@@ -54,7 +55,7 @@ export async function middleware(request: NextRequest) {
     '/'
   ]
 
-  const isPublicRoute = publicRoutes.some(route => 
+  const isPublicRoute = publicRoutes.some(route =>
     pathWithoutLocale === route || pathWithoutLocale.startsWith(route + '/')
   )
 
@@ -102,20 +103,20 @@ export async function middleware(request: NextRequest) {
   // Default to true (keep logged in) if cookie doesn't exist
   const keepMeLoggedInCookie = request.cookies.get('keep_me_logged_in')
   const keepMeLoggedIn = keepMeLoggedInCookie?.value !== 'false' // Defaults to true if cookie missing or value is 'true'
-  
+
   // If user doesn't want persistent sessions, modify auth cookies to be session-only
   if (!keepMeLoggedIn) {
     try {
       // Get all Supabase auth cookies from the response
       const authCookieNames = ['sb-access-token', 'sb-refresh-token']
-      
+
       // Create a new response based on the existing one
       const modifiedResponse = NextResponse.next({
         request: {
           headers: request.headers,
         },
       })
-      
+
       // Copy all existing cookies first
       supabaseResponse.cookies.getAll().forEach((cookie) => {
         modifiedResponse.cookies.set(cookie.name, cookie.value, {
@@ -123,7 +124,7 @@ export async function middleware(request: NextRequest) {
           // Preserve original options
         })
       })
-      
+
       // Modify each auth cookie to be session-only (no maxAge)
       authCookieNames.forEach(cookieName => {
         const cookie = modifiedResponse.cookies.get(cookieName)
@@ -137,7 +138,7 @@ export async function middleware(request: NextRequest) {
           })
         }
       })
-      
+
       // Also check for any cookies with 'sb-' prefix
       modifiedResponse.cookies.getAll().forEach((cookie) => {
         if (cookie.name.startsWith('sb-') || cookie.name.includes('supabase')) {
@@ -150,16 +151,16 @@ export async function middleware(request: NextRequest) {
           })
         }
       })
-      
+
       // Copy headers and status from original response
       supabaseResponse.headers.forEach((value, key) => {
         modifiedResponse.headers.set(key, value)
       })
-      
+
       return modifiedResponse
     } catch (err) {
       // If error modifying cookies, just return original response
-      console.error('Error modifying session cookies:', err)
+      console.error(CONSOLE_MESSAGES.ERROR_MODIFYING_SESSION_COOKIES, err)
     }
   }
 

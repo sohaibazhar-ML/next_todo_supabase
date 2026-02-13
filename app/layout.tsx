@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { QueryProvider } from '@/lib/providers/QueryProvider'
 
 export const metadata: Metadata = {
   title: "Document Portal",
@@ -14,7 +15,7 @@ export default function RootLayout({
   return (
     <html suppressHydrationWarning>
       <body suppressHydrationWarning>
-        {children}
+        <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
   );

@@ -13,7 +13,7 @@
 
 import { useTranslations } from 'next-intl'
 import { pdfjs } from 'react-pdf'
-import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES, THEME } from '@/constants'
 import { isTextItem } from '@/types/documentEditor'
 import type {
   PDFAnnotation,
@@ -72,7 +72,7 @@ interface UsePdfHandlersProps {
   /**
    * Callback to set content
    */
-  setContent: (content: string) => void
+  setContent: React.Dispatch<React.SetStateAction<string>>
 
   /**
    * Callback to set error
@@ -82,7 +82,7 @@ interface UsePdfHandlersProps {
   /**
    * Callback to set annotations
    */
-  setAnnotations: (annotations: PDFAnnotation[]) => void
+  setAnnotations: React.Dispatch<React.SetStateAction<PDFAnnotation[]>>
 
   /**
    * Callback to set active tool
@@ -97,7 +97,7 @@ interface UsePdfHandlersProps {
   /**
    * Callback to set page number
    */
-  setPageNumber: (page: number) => void
+  setPageNumber: React.Dispatch<React.SetStateAction<number>>
 
   /**
    * Callback to set search results
@@ -215,7 +215,7 @@ export function usePdfHandlers({
         y: Math.max(0, Math.min(1, y - 0.02)),
         width: 0.2,
         height: 0.04,
-        color: '#ffff00',
+        color: THEME.COLORS.ANNOTATION.HIGHLIGHT,
         createdAt: new Date().toISOString(),
       }
       setAnnotations((prev) => [...prev, newAnnotation])
@@ -231,7 +231,7 @@ export function usePdfHandlers({
           x: Math.max(0, Math.min(1, x)),
           y: Math.max(0, Math.min(1, y)),
           text: text,
-          color: activeTool === 'sticky' ? '#ffff00' : '#ffffff',
+          color: activeTool === 'sticky' ? THEME.COLORS.ANNOTATION.HIGHLIGHT : THEME.COLORS.ANNOTATION.WHITE,
           createdAt: new Date().toISOString(),
         }
         setAnnotations((prev) => [...prev, newAnnotation])

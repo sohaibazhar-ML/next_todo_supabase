@@ -30,7 +30,7 @@ export async function GET(
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
     }
 
     await requireAdmin(user.id)
@@ -45,12 +45,12 @@ export async function GET(
     })
 
     if (!profile) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+      return NextResponse.json({ error: ERROR_MESSAGES.USER_NOT_FOUND }, { status: 404 })
     }
 
     if (profile.role !== 'subadmin') {
       return NextResponse.json(
-        { error: 'User is not a subadmin' },
+        { error: ERROR_MESSAGES.USER_NOT_SUBADMIN },
         { status: 400 }
       )
     }
@@ -91,7 +91,7 @@ export async function PATCH(
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
     }
 
     await requireAdmin(user.id)
@@ -106,12 +106,12 @@ export async function PATCH(
     })
 
     if (!profile) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+      return NextResponse.json({ error: ERROR_MESSAGES.USER_NOT_FOUND }, { status: 404 })
     }
 
     if (profile.role !== 'subadmin') {
       return NextResponse.json(
-        { error: 'User is not a subadmin' },
+        { error: ERROR_MESSAGES.USER_NOT_SUBADMIN },
         { status: 400 }
       )
     }
@@ -136,9 +136,32 @@ export async function PATCH(
       data: updateData,
     })
 
+    // Fetch the updated profile to return full subadmin object
+    const updatedProfile = await prisma.profiles.findUnique({
+      where: { id: userId },
+      include: {
+        subadmin_permissions: true,
+      },
+    })
+
+    if (!updatedProfile) {
+      return NextResponse.json({ error: ERROR_MESSAGES.USER_NOT_FOUND }, { status: 404 })
+    }
+
     return NextResponse.json({
-      message: 'Subadmin permissions updated successfully',
-      permissions,
+      id: updatedProfile.id,
+      username: updatedProfile.username,
+      email: updatedProfile.email,
+      first_name: updatedProfile.first_name,
+      last_name: updatedProfile.last_name,
+      role: updatedProfile.role,
+      permissions: updatedProfile.subadmin_permissions || {
+        can_upload_documents: false,
+        can_view_stats: false,
+        is_active: false,
+      },
+      created_at: updatedProfile.created_at,
+      updated_at: updatedProfile.updated_at,
     })
   } catch (error) {
     console.error(CONSOLE_MESSAGES.ERROR_UPDATING_SUBADMIN, error)
@@ -175,7 +198,7 @@ export async function DELETE(
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
     }
 
     await requireAdmin(user.id)
@@ -188,12 +211,12 @@ export async function DELETE(
     })
 
     if (!profile) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+      return NextResponse.json({ error: ERROR_MESSAGES.USER_NOT_FOUND }, { status: 404 })
     }
 
     if (profile.role !== 'subadmin') {
       return NextResponse.json(
-        { error: 'User is not a subadmin' },
+        { error: ERROR_MESSAGES.USER_NOT_SUBADMIN },
         { status: 400 }
       )
     }

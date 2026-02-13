@@ -54,8 +54,10 @@ export default async function AdminSettingsPage() {
         canUpload,
         canViewStats,
       }}
-      userName={userName}
-      userEmail={userEmail}
+      user={{
+        name: userName,
+        email: userEmail,
+      }}
     >
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="mb-6">

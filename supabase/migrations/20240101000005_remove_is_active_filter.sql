@@ -4,7 +4,7 @@
 -- ============================================================================
 
 -- Drop and recreate the SELECT policy without is_active filter
-DROP POLICY IF EXISTS "Users can view active documents" ON documents;
+DROP POLICY IF EXISTS "Users can view documents" ON documents;
 
 -- Policy: All authenticated users can view all documents
 CREATE POLICY "Users can view documents"

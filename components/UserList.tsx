@@ -1,52 +1,22 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import type { UserProfile } from '@/types/user'
-import { API_ENDPOINTS, CONSOLE_MESSAGES } from '@/constants'
+import { useUsers } from '@/hooks/api/useUsers'
+import { IconSpinner } from '@/components/ui/icons'
+import { ERROR_MESSAGES, ROUTES } from '@/constants'
+import { IconChevronRight } from '@/components/ui/icons'
 
 export default function UserList() {
   const t = useTranslations('userList')
-  const [users, setUsers] = useState<UserProfile[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const supabase = createClient()
+  
+  // Use React Query hook for data fetching
+  const { data: users = [], isLoading, error } = useUsers({ role: 'user' })
 
-  useEffect(() => {
-    fetchUsers()
-  }, [])
-
-  const fetchUsers = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-
-      const response = await fetch(API_ENDPOINTS.PROFILES + '?role=user')
-      const data = await response.json()
-
-      if (!response.ok) {
-        setError(data.error || 'Failed to fetch users')
-        return
-      }
-
-      setUsers(Array.isArray(data) ? data : [])
-    } catch (err) {
-      setError('Failed to fetch users')
-      console.error(CONSOLE_MESSAGES.ERROR_FETCHING_USERS, err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center py-12">
-        <svg className="animate-spin h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
+        <IconSpinner className="h-8 w-8 text-indigo-600" />
       </div>
     )
   }
@@ -54,7 +24,9 @@ export default function UserList() {
   if (error) {
     return (
       <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
-        <p className="text-sm text-red-700">{error}</p>
+        <p className="text-sm text-red-700">
+          {error instanceof Error ? error.message : ERROR_MESSAGES.FETCH_USERS_GENERIC}
+        </p>
       </div>
     )
   }
@@ -78,7 +50,7 @@ export default function UserList() {
         {users.map((user) => (
           <Link
             key={user.id}
-            href={`/profile/${user.id}`}
+            href={ROUTES.PROFILE(user.id)}
             className="block bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100 hover:border-indigo-300 transition-all duration-200"
           >
             <div className="flex items-center gap-3">
@@ -90,9 +62,7 @@ export default function UserList() {
                 <p className="text-xs text-gray-500 truncate">@{user.username}</p>
                 <p className="text-xs text-gray-400 truncate mt-1">{user.email}</p>
               </div>
-              <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+              <IconChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
             </div>
           </Link>
         ))}

@@ -66,6 +66,31 @@ export const ERROR_MESSAGES = {
    */
   INVALID_RESPONSE: 'Server returned an invalid response. Please try again.',
 
+  /**
+   * Invalid response format
+   */
+  INVALID_RESPONSE_FORMAT: 'Invalid response format',
+
+  /**
+   * Unauthorized access
+   */
+  UNAUTHORIZED: 'Unauthorized',
+
+  /**
+   * Forbidden access
+   */
+  FORBIDDEN: 'Forbidden',
+
+  /**
+   * Missing required fields
+   */
+  MISSING_REQUIRED_FIELDS: 'Missing required fields',
+
+  /**
+   * Invalid format
+   */
+  INVALID_FORMAT: 'Invalid format',
+
   // ============================================================================
   // Document Error Messages
   // ============================================================================
@@ -87,6 +112,106 @@ export const ERROR_MESSAGES = {
    * Used in DocumentCard component
    */
   FETCH_VERSIONS_FAILED: 'Failed to fetch versions',
+
+  /**
+   * Document not found
+   */
+  DOCUMENT_NOT_FOUND: 'Document not found',
+
+  /**
+   * User not found
+   */
+  USER_NOT_FOUND: 'User not found',
+
+  /**
+   * Permission required: upload documents
+   */
+  PERMISSION_REQUIRED_UPLOAD_DOCUMENTS: 'Permission required: can_upload_documents',
+
+  /**
+   * Parent document not found
+   */
+  PARENT_DOCUMENT_NOT_FOUND: 'Parent document not found',
+
+  /**
+   * Version ID required
+   */
+  VERSION_ID_REQUIRED: 'Version ID is required. Please save your document first.',
+
+  /**
+   * Version not found
+   */
+  VERSION_NOT_FOUND: 'Version not found. Please save your document first.',
+
+  /**
+   * Invalid export format
+   */
+  INVALID_EXPORT_FORMAT: 'Invalid export format',
+
+  /**
+   * No editable content found
+   */
+  NO_EDITABLE_CONTENT: 'No editable content found for this version',
+
+  /**
+   * Invalid document ID
+   */
+  INVALID_DOCUMENT_ID: 'Invalid document ID',
+
+  /**
+   * Document ID required
+   */
+  DOCUMENT_ID_REQUIRED: 'Document ID is required',
+
+  /**
+   * File not found in storage
+   */
+  FILE_NOT_FOUND_IN_STORAGE: 'File not found in storage',
+
+  /**
+   * Legacy .doc format not supported
+   */
+  LEGACY_DOC_FORMAT_NOT_SUPPORTED: 'Legacy .doc format is not supported. Please convert the file to .docx format to edit it.',
+
+  /**
+   * Unsupported file type
+   */
+  UNSUPPORTED_FILE_TYPE: 'Unsupported file type for editing',
+
+  /**
+   * Username required
+   */
+  USERNAME_REQUIRED: 'Username is required',
+
+  /**
+   * Admin access required
+   */
+  ADMIN_ACCESS_REQUIRED: 'Admin access required',
+
+  /**
+   * Permission required: view stats
+   */
+  PERMISSION_REQUIRED_VIEW_STATS: 'Permission required: can_view_stats',
+
+  /**
+   * User ID required
+   */
+  USER_ID_REQUIRED: 'userId is required',
+
+  /**
+   * Cannot assign subadmin role to admin
+   */
+  CANNOT_ASSIGN_SUBADMIN_TO_ADMIN: 'Cannot assign subadmin role to an admin',
+
+  /**
+   * User is not a subadmin
+   */
+  USER_NOT_SUBADMIN: 'User is not a subadmin',
+
+  /**
+   * Failed to load version information
+   * Used in DocumentCard component
+   */
 
   /**
    * Failed to load version information
@@ -185,6 +310,76 @@ export const ERROR_MESSAGES = {
   DOWNLOAD_DOCUMENT: 'Failed to download document',
 
   /**
+   * No document selected for download
+   * Used in DocumentCard component
+   */
+  NO_DOCUMENT_SELECTED: 'No document selected. Please select a version and try again.',
+
+  /**
+   * Invalid document selected
+   * Used in DocumentCard component
+   */
+  INVALID_DOCUMENT_SELECTED: 'Invalid document selected. Please try again.',
+
+  /**
+   * Invalid document ID format
+   * Used in DocumentCard component
+   */
+  /**
+   * Invalid document ID format
+   * Used in DocumentCard component
+   */
+  INVALID_DOCUMENT_ID_FORMAT: 'Invalid document ID format',
+
+  /**
+   * User must be logged in to download
+   * Used in DocumentCard component
+   */
+  MUST_BE_LOGGED_IN: 'You must be logged in to download documents',
+
+  /**
+   * Failed to fetch file for download
+   * Used in DocumentCard component
+   */
+  FAILED_TO_FETCH_FILE: 'Failed to fetch file',
+
+  /**
+   * Download popup was blocked
+   * Used in DocumentCard component
+   */
+  DOWNLOAD_POPUP_BLOCKED: 'Download failed and popup was blocked.',
+
+  /**
+   * Failed to fetch documents (generic)
+   * Used in DocumentManagement component
+   */
+  FETCH_DOCUMENTS_GENERIC: 'Failed to fetch documents',
+
+  /**
+   * Failed to fetch users (generic)
+   * Used in UserList component
+   */
+  FETCH_USERS_GENERIC: 'Failed to fetch users',
+
+  /**
+   * Invalid file type message
+   * Used in document upload schema validation
+   */
+  INVALID_FILE_TYPE: 'Invalid file type. Please upload PDF, DOCX, XLSX, or ZIP files only.',
+
+  /**
+   * Failed to save subadmin
+   * Used in SubadminManagement component
+   */
+  SAVE_SUBADMIN: 'Failed to save subadmin',
+
+  /**
+   * Failed to remove subadmin
+   * Used in SubadminManagement component
+   */
+  REMOVE_SUBADMIN: 'Failed to remove subadmin',
+
+  /**
    * Failed to fetch filter options
    * Used in DocumentList component
    */
@@ -281,10 +476,42 @@ export const ERROR_MESSAGES = {
   USERNAME_EXISTS: 'Username already exists',
 
   /**
+   * Username or email already exists
+   * Used in profiles API route when unique constraint violation occurs
+   */
+  USERNAME_OR_EMAIL_EXISTS: 'Username or email already exists',
+
+  /**
    * Failed to fetch profile
    * Used in various profile-related components
    */
   FETCH_PROFILE: 'Failed to fetch profile',
+
+  /**
+   * Failed to fetch profiles (plural)
+   * Used in profiles API service and user management components
+   */
+  FETCH_PROFILES: 'Failed to fetch profiles',
+
+  /**
+   * Failed to check username availability
+   */
+  CHECK_USERNAME_FAILED: 'Failed to check username availability',
+
+  /**
+   * Profile not found
+   */
+  PROFILE_NOT_FOUND: 'Profile not found',
+
+  /**
+   * Profile already exists
+   */
+  PROFILE_ALREADY_EXISTS: 'Profile already exists',
+
+  /**
+   * Invalid user ID format
+   */
+  INVALID_USER_ID_FORMAT: 'Invalid user ID format',
 
   // ============================================================================
   // Subadmin Error Messages
@@ -297,22 +524,20 @@ export const ERROR_MESSAGES = {
   FETCH_SUBADMINS: 'Failed to fetch subadmins',
 
   /**
-   * Failed to save subadmin
-   * Used in SubadminManagement component
+   * Failed to fetch subadmin
    */
-  SAVE_SUBADMIN: 'Failed to save subadmin',
-
-  /**
-   * Failed to remove subadmin
-   * Used in SubadminManagement component
-   */
-  REMOVE_SUBADMIN: 'Failed to remove subadmin',
+  FETCH_SUBADMIN: 'Failed to fetch subadmin',
 
   /**
    * Failed to update subadmin
    * Used in SubadminManagement component
    */
   UPDATE_SUBADMIN: 'Failed to update subadmin',
+
+  /**
+   * Failed to create subadmin
+   */
+  CREATE_SUBADMIN: 'Failed to create subadmin',
 
   /**
    * Failed to fetch users
@@ -377,6 +602,11 @@ export const ERROR_MESSAGES = {
    * Used in SignUpPage component
    */
   CREATE_USER_FAILED: 'Failed to create user account',
+
+  /**
+   * Failed to update password
+   */
+  UPDATE_PASSWORD: 'Failed to update password',
 
   /**
    * Subadmin permissions not found

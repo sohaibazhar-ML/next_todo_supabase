@@ -7,6 +7,8 @@
 
 import { useTranslations } from 'next-intl'
 import type { PDFAnnotation } from '@/types/documentEditor'
+import { UI_TEXT } from '@/constants/text'
+import { THEME } from '@/constants/theme'
 
 interface PdfAnnotationOverlayProps {
   annotations: PDFAnnotation[]
@@ -60,7 +62,7 @@ export default function PdfAnnotationOverlay({
               <div
                 className="absolute opacity-30 rounded"
                 style={{
-                  backgroundColor: annotation.color || '#ffff00',
+                  backgroundColor: annotation.color || THEME.COLORS.ANNOTATION.HIGHLIGHT,
                   width: '100%',
                   height: '100%',
                 }}
@@ -70,7 +72,7 @@ export default function PdfAnnotationOverlay({
               <div
                 className="absolute p-2 rounded shadow-lg border-2 border-gray-400 min-w-[150px] max-w-[250px]"
                 style={{
-                  backgroundColor: annotation.color || '#ffffff',
+                  backgroundColor: annotation.color || THEME.COLORS.ANNOTATION.WHITE,
                   zIndex: selectedAnnotation === annotation.id ? 1000 : 100,
                 }}
               >
@@ -82,7 +84,7 @@ export default function PdfAnnotationOverlay({
                       onDeleteAnnotation(annotation.id)
                     }}
                     className="text-red-600 hover:text-red-800 text-xs font-bold"
-                    title={t('delete') || 'Delete'}
+                    title={t('delete') || UI_TEXT.BUTTONS.DELETE}
                   >
                     ×
                   </button>

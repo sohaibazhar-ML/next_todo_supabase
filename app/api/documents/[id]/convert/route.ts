@@ -15,7 +15,7 @@ import { NextResponse } from 'next/server'
 import mammoth from 'mammoth'
 import { PDFDocument } from 'pdf-lib'
 import { isErrorWithMessage } from '@/types'
-import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES, STORAGE_BUCKETS, STORAGE_CONFIG } from '@/constants'
 
 // GET - Convert document to editable format (HTML for DOCX, text for PDF)
 export async function GET(
@@ -27,7 +27,7 @@ export async function GET(
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
     }
 
     const { id } = await params
@@ -45,12 +45,12 @@ export async function GET(
     })
 
     if (!document) {
-      return NextResponse.json({ error: 'Document not found' }, { status: 404 })
+      return NextResponse.json({ error: ERROR_MESSAGES.DOCUMENT_NOT_FOUND }, { status: 404 })
     }
 
     // Get file from Supabase Storage
     const { data: fileData, error: fileError } = await supabase.storage
-      .from('documents')
+      .from(STORAGE_BUCKETS.DOCUMENTS)
       .download(document.file_path)
 
     if (fileError) {
@@ -64,7 +64,7 @@ export async function GET(
     if (!fileData) {
       console.error('No file data returned for path:', document.file_path)
       return NextResponse.json(
-        { error: 'File not found in storage' },
+        { error: ERROR_MESSAGES.FILE_NOT_FOUND_IN_STORAGE },
         { status: 404 }
       )
     }
@@ -76,20 +76,20 @@ export async function GET(
     const fileName = document.file_name.toLowerCase()
     const isDocx = fileName.endsWith('.docx')
     const isDoc = fileName.endsWith('.doc')
-    
+
     if (document.file_type === 'document' || document.mime_type?.includes('word') || isDocx || isDoc) {
       // Check if it's old .doc format (not supported by mammoth)
       if (isDoc && !isDocx) {
         return NextResponse.json(
-          { 
-            error: 'Legacy .doc format is not supported. Please convert the file to .docx format to edit it.',
+          {
+            error: ERROR_MESSAGES.LEGACY_DOC_FORMAT_NOT_SUPPORTED,
             type: 'doc',
             unsupported: true
           },
           { status: 400 }
         )
       }
-      
+
       // DOCX to HTML using mammoth with style preservation
       try {
         // Configure mammoth to preserve inline styles and formatting
@@ -105,14 +105,14 @@ export async function GET(
           "p[style-name='Quote'] => blockquote:fresh",
           "p[style-name='Intense Quote'] => blockquote:fresh",
         ]
-        
+
         const options = {
           styleMap,
           includeDefaultStyleMap: true,
           // Preserve all inline styles from the document
           preserveEmptyParagraphs: false,
         }
-        
+
         // Mammoth can accept buffer or arrayBuffer
         // Mammoth automatically preserves inline styles (color, font-size, font-family, etc.) in style attributes
         const result = await mammoth.convertToHtml({ buffer }, options)
@@ -170,8 +170,8 @@ export async function GET(
 
         // Get signed URL for PDF viewing
         const { data: urlData, error: urlError } = await supabase.storage
-          .from('documents')
-          .createSignedUrl(document.file_path, 3600) // 1 hour expiry
+          .from(STORAGE_BUCKETS.DOCUMENTS)
+          .createSignedUrl(document.file_path, STORAGE_CONFIG.SIGNED_URL_EXPIRY)
 
         if (urlError) {
           console.error('Error creating signed URL:', urlError)
@@ -204,7 +204,7 @@ export async function GET(
       }
     } else {
       return NextResponse.json(
-        { error: 'Unsupported file type for editing' },
+        { error: ERROR_MESSAGES.UNSUPPORTED_FILE_TYPE },
         { status: 400 }
       )
     }

@@ -6,6 +6,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
+import { ToolbarButton } from '@/components/ui'
 
 interface PdfToolbarProps {
   activeTool: 'select' | 'highlight' | 'text' | 'sticky' | null
@@ -26,58 +27,47 @@ export default function PdfToolbar({
     <div className="border-b border-gray-200 p-3 bg-indigo-50">
       <div className="flex items-center gap-2 flex-wrap">
         <span className="text-sm font-medium text-gray-700 mr-2">{t('annotationTools') || 'Tools:'}</span>
-        <button
+        <ToolbarButton
+          active={activeTool === 'select'}
+          activeColor="indigo"
           onClick={() => onToolChange(activeTool === 'select' ? null : 'select')}
-          className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
-            activeTool === 'select' 
-              ? 'bg-indigo-600 text-white' 
-              : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-          }`}
           title={t('selectTool') || 'Select'}
         >
           {t('select') || 'Select'}
-        </button>
-        <button
+        </ToolbarButton>
+        <ToolbarButton
+          active={activeTool === 'highlight'}
+          activeColor="yellow"
           onClick={() => onToolChange(activeTool === 'highlight' ? null : 'highlight')}
-          className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
-            activeTool === 'highlight' 
-              ? 'bg-yellow-500 text-white' 
-              : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-          }`}
           title={t('highlightTool') || 'Highlight'}
         >
           {t('highlight') || 'Highlight'}
-        </button>
-        <button
+        </ToolbarButton>
+        <ToolbarButton
+          active={activeTool === 'text'}
+          activeColor="blue"
           onClick={() => onToolChange(activeTool === 'text' ? null : 'text')}
-          className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
-            activeTool === 'text' 
-              ? 'bg-blue-500 text-white' 
-              : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-          }`}
           title={t('textAnnotation') || 'Text Annotation'}
         >
           {t('textNote') || 'Text'}
-        </button>
-        <button
+        </ToolbarButton>
+        <ToolbarButton
+          active={activeTool === 'sticky'}
+          activeColor="green"
           onClick={() => onToolChange(activeTool === 'sticky' ? null : 'sticky')}
-          className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
-            activeTool === 'sticky' 
-              ? 'bg-green-500 text-white' 
-              : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-          }`}
           title={t('stickyNote') || 'Sticky Note'}
         >
           {t('sticky') || 'Sticky'}
-        </button>
+        </ToolbarButton>
         {annotationsCount > 0 && (
-          <button
+          <ToolbarButton
+            activeColor="red"
             onClick={onClearAll}
-            className="px-3 py-1.5 text-sm font-medium text-red-600 bg-white border border-red-300 rounded-lg hover:bg-red-50"
             title={t('clearAnnotations') || 'Clear All Annotations'}
+            className="border-red-300 text-red-600 hover:bg-red-50"
           >
             {t('clear') || 'Clear'}
-          </button>
+          </ToolbarButton>
         )}
       </div>
     </div>

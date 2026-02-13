@@ -4,10 +4,11 @@
 -- ============================================================================
 
 -- Drop existing policies if they exist
-DROP POLICY IF EXISTS "Users can view active documents" ON documents;
+DROP POLICY IF EXISTS "Users can view documents" ON documents;
 DROP POLICY IF EXISTS "Admins can insert documents" ON documents;
 DROP POLICY IF EXISTS "Admins can update documents" ON documents;
 DROP POLICY IF EXISTS "Admins can delete documents" ON documents;
+
 
 -- Create helper function to check if user is admin (SECURITY DEFINER to avoid recursion)
 -- This function bypasses RLS to check admin status

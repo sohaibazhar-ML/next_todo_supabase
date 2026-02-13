@@ -20,7 +20,7 @@ export async function GET(request: Request) {
     const username = searchParams.get('username')
 
     if (!username) {
-      return NextResponse.json({ error: 'Username is required' }, { status: 400 })
+      return NextResponse.json({ error: ERROR_MESSAGES.USERNAME_REQUIRED }, { status: 400 })
     }
 
     const existing = await prisma.profiles.findUnique({
@@ -28,7 +28,7 @@ export async function GET(request: Request) {
       select: { id: true }
     })
 
-    return NextResponse.json({ exists: !!existing })
+    return NextResponse.json({ available: !existing })
   } catch (error) {
     console.error(CONSOLE_MESSAGES.ERROR_CHECKING_USERNAME, error)
     const errorMessage = isErrorWithMessage(error)

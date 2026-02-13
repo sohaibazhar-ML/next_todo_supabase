@@ -26,7 +26,7 @@ export async function GET(request: Request) {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
     }
 
     const { searchParams } = new URL(request.url)
@@ -44,7 +44,7 @@ export async function GET(request: Request) {
     if (category) where.category = category
     if (fileType) where.file_type = fileType
     if (featuredOnly) where.is_featured = true
-    
+
     // Date range filters
     if (fromDate || toDate) {
       where.created_at = {}
@@ -89,7 +89,7 @@ export async function GET(request: Request) {
         id: { in: documentIds },
         // Removed parent_document_id filter to include both root and version documents
       }
-      
+
       // Add date range filters if provided
       if (fromDate || toDate) {
         searchWhere.created_at = {}
@@ -155,7 +155,7 @@ export async function GET(request: Request) {
 
     // Build orderBy clause based on sort parameter
     let orderBy: { [key: string]: 'asc' | 'desc' } = { created_at: 'desc' }
-    
+
     if (sort === 'created_at_asc') {
       orderBy = { created_at: 'asc' }
     } else if (sort === 'created_at_desc') {
@@ -212,12 +212,12 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
     }
 
     const admin = await isAdmin(user.id)
     if (!admin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
+      return NextResponse.json({ error: ERROR_MESSAGES.ADMIN_ACCESS_REQUIRED }, { status: 403 })
     }
 
     const body = await request.json()

@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { isAdmin, isSubadmin } from '@/lib/utils/roles'
 import type { DashboardStatistics, Project } from '@/types/admin-dashboard'
+import { ERROR_MESSAGES } from '@/constants'
 
 export async function GET() {
   try {
@@ -10,14 +11,14 @@ export async function GET() {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
     }
 
     const admin = await isAdmin(user.id)
     const subadmin = await isSubadmin(user.id)
 
     if (!admin && !subadmin) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      return NextResponse.json({ error: ERROR_MESSAGES.FORBIDDEN }, { status: 403 })
     }
 
     // Get statistics
@@ -138,11 +139,11 @@ export async function GET() {
         priority,
         members: creator
           ? [
-              {
-                id: creator.id,
-                name: `${creator.first_name} ${creator.last_name}`,
-              },
-            ]
+            {
+              id: creator.id,
+              name: `${creator.first_name} ${creator.last_name}`,
+            },
+          ]
           : [],
         progress,
       }
@@ -155,7 +156,7 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching dashboard stats:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR },
       { status: 500 }
     )
   }

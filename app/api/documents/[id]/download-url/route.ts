@@ -13,7 +13,7 @@ import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { isErrorWithMessage } from '@/types'
-import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES, STORAGE_BUCKETS, STORAGE_CONFIG } from '@/constants'
 
 // GET - Get signed download URL for a document
 export async function GET(
@@ -25,7 +25,7 @@ export async function GET(
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
     }
 
     const { id } = await params
@@ -33,7 +33,7 @@ export async function GET(
     // Validate UUID format
     if (!id || typeof id !== 'string') {
       return NextResponse.json(
-        { error: 'Invalid document ID' },
+        { error: ERROR_MESSAGES.INVALID_DOCUMENT_ID },
         { status: 400 }
       )
     }
@@ -42,7 +42,7 @@ export async function GET(
     if (!uuidRegex.test(id)) {
       console.error('Invalid UUID format:', id)
       return NextResponse.json(
-        { error: 'Invalid document ID format' },
+        { error: ERROR_MESSAGES.INVALID_DOCUMENT_ID_FORMAT },
         { status: 400 }
       )
     }
@@ -54,13 +54,13 @@ export async function GET(
     })
 
     if (!document) {
-      return NextResponse.json({ error: 'Document not found' }, { status: 404 })
+      return NextResponse.json({ error: ERROR_MESSAGES.DOCUMENT_NOT_FOUND }, { status: 404 })
     }
 
-    // Get signed URL from Supabase Storage
+    // Get signed URL from Supabase Storage using centralized configuration
     const { data: urlData, error: urlError } = await supabase.storage
-      .from('documents')
-      .createSignedUrl(document.file_path, 3600) // 1 hour expiry
+      .from(STORAGE_BUCKETS.DOCUMENTS)
+      .createSignedUrl(document.file_path, STORAGE_CONFIG.SIGNED_URL_EXPIRY)
 
     if (urlError) {
       console.error('Error creating signed URL:', urlError)

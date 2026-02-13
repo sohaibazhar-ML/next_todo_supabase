@@ -29,6 +29,7 @@ export type {
   UserProfile,
   SignUpFormData,
   SubadminPermissions,
+  UserInfo,
 } from './user'
 
 // Re-export API types
@@ -47,6 +48,13 @@ export type {
 } from './api'
 
 export { isErrorWithMessage } from './api'
+
+// Re-export stats types
+export type {
+  StatsFiltersState,
+  StatsFilterOptions,
+  Statistics,
+} from './stats'
 
 // Re-export Prisma types
 export type {

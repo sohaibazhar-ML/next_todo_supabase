@@ -17,6 +17,7 @@ export interface Document {
   is_featured: boolean
   download_count: number
   searchable_content: string | null
+  google_drive_template_id: string | null
   created_at: string
   updated_at: string
   created_by: string | null
@@ -49,6 +50,9 @@ export interface DocumentSearchFilters {
   fileType?: DocumentFileType
   tags?: string[]
   featuredOnly?: boolean
+  fromDate?: string
+  toDate?: string
+  sort?: 'created_at_desc' | 'created_at_asc' | 'title_asc' | 'title_desc' | 'download_count_desc' | 'download_count_asc'
 }
 
 export interface DocumentWithCreator extends Document {
@@ -94,6 +98,8 @@ export interface UserVersionRaw {
   exported_mime_type: string | null
   original_file_type: string
   is_draft: boolean
+  google_drive_file_id: string | null
+  google_edit_link: string | null
   created_at: Date | string
   updated_at: Date | string
 }
@@ -122,6 +128,8 @@ export interface SerializedVersion {
   exported_mime_type: string | null
   original_file_type: string
   is_draft: boolean
+  google_drive_file_id: string | null
+  google_edit_link: string | null
   created_at: string
   updated_at: string
 }

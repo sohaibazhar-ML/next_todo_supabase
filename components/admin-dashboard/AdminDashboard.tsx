@@ -6,7 +6,7 @@ import AdminTopNav from './AdminTopNav'
 import AdminDashboardHeader from './AdminDashboardHeader'
 import StatisticsCards from './StatisticsCards'
 import type { DashboardStatistics, Project } from '@/types/admin-dashboard'
-import type { UserRole } from '@/types/user'
+import type { UserRole, UserInfo } from '@/types/user'
 
 interface AdminDashboardProps {
   statistics: DashboardStatistics
@@ -16,8 +16,7 @@ interface AdminDashboardProps {
     canUpload: boolean
     canViewStats: boolean
   }
-  userName?: string
-  userAvatar?: string
+  user: UserInfo
 }
 
 export default function AdminDashboard({
@@ -25,8 +24,7 @@ export default function AdminDashboard({
   projects,
   userRole,
   permissions,
-  userName,
-  userAvatar,
+  user,
 }: AdminDashboardProps) {
   const handleCreateProject = () => {
     // TODO: Implement create project functionality
@@ -37,7 +35,7 @@ export default function AdminDashboard({
     <div className="flex min-h-screen bg-gray-100">
       <AdminSidebar userRole={userRole} permissions={permissions} />
       <div className={`flex-1 ${ADMIN_DASHBOARD.CONTENT_MARGIN_EXPANDED}`}>
-        <AdminTopNav userName={userName} userAvatar={userAvatar} />
+        <AdminTopNav user={user} userRole={userRole} />
         <div className="bg-white rounded-lg shadow-md mt-8 mr-8 mb-8">
           <AdminDashboardHeader onCreateProject={handleCreateProject} />
           <StatisticsCards statistics={statistics} />

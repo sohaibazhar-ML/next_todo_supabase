@@ -30,7 +30,7 @@ export async function GET(
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
     }
 
     const { id } = await params
@@ -40,7 +40,7 @@ export async function GET(
     })
 
     if (!document) {
-      return NextResponse.json({ error: 'Document not found' }, { status: 404 })
+      return NextResponse.json({ error: ERROR_MESSAGES.DOCUMENT_NOT_FOUND }, { status: 404 })
     }
 
     return NextResponse.json({
@@ -67,12 +67,12 @@ export async function PUT(
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
     }
 
     const admin = await isAdmin(user.id)
     if (!admin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
+      return NextResponse.json({ error: ERROR_MESSAGES.ADMIN_ACCESS_REQUIRED }, { status: 403 })
     }
 
     const { id } = await params
@@ -85,7 +85,7 @@ export async function PUT(
     })
 
     if (!document) {
-      return NextResponse.json({ error: 'Document not found' }, { status: 404 })
+      return NextResponse.json({ error: ERROR_MESSAGES.DOCUMENT_NOT_FOUND }, { status: 404 })
     }
 
     // Determine root document ID (Google Docs behavior: all versions share metadata)
@@ -123,7 +123,7 @@ export async function PUT(
     })
 
     if (!updatedDocument) {
-      return NextResponse.json({ error: 'Document not found after update' }, { status: 404 })
+      return NextResponse.json({ error: ERROR_MESSAGES.DOCUMENT_NOT_FOUND }, { status: 404 })
     }
 
     return NextResponse.json({
@@ -150,12 +150,12 @@ export async function DELETE(
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
     }
 
     const admin = await isAdmin(user.id)
     if (!admin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
+      return NextResponse.json({ error: ERROR_MESSAGES.ADMIN_ACCESS_REQUIRED }, { status: 403 })
     }
 
     const { id } = await params
@@ -167,7 +167,7 @@ export async function DELETE(
     })
 
     if (!document) {
-      return NextResponse.json({ error: 'Document not found' }, { status: 404 })
+      return NextResponse.json({ error: ERROR_MESSAGES.DOCUMENT_NOT_FOUND }, { status: 404 })
     }
 
     // Delete from database (cascade will handle download_logs)
@@ -177,7 +177,7 @@ export async function DELETE(
 
     // Delete from storage (client will handle this separately if needed)
     // We return the file_path so client can delete it
-    return NextResponse.json({ 
+    return NextResponse.json({
       message: 'Document deleted successfully',
       file_path: document.file_path,
     })

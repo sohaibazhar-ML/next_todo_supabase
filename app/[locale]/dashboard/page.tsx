@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { isAdmin, isSubadmin, hasPermission } from '@/lib/utils/roles'
 import { getTranslations } from 'next-intl/server'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
+import { Button } from '@/components/ui'
 
 export default async function DashboardPage() {
   const t = await getTranslations()
@@ -61,9 +62,9 @@ export default async function DashboardPage() {
                 {t('common.profile')}
               </Link>
               <form action="/auth/signout" method="post">
-                <button type="submit" className="px-5 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
+                <Button type="submit" variant="danger" size="lg" className="shadow-md hover:shadow-lg">
                   {t('common.signOut')}
-                </button>
+                </Button>
               </form>
             </div>
           </div>

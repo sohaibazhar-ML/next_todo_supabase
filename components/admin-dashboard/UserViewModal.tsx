@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl'
 import type { UserProfile } from '@/types/user'
 import UserProfileView from '@/components/UserProfileView'
+import { THEME } from '@/constants/theme'
 
 interface UserViewModalProps {
   user: UserProfile | null
@@ -18,7 +19,7 @@ export default function UserViewModal({ user, isOpen, onClose }: UserViewModalPr
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+    <div className={`fixed inset-0 ${THEME.Z_INDEX.MODAL} flex items-center justify-center bg-black bg-opacity-50 p-4`}>
       <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-lg bg-white shadow-xl">
         <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
           <h2 className="text-xl font-semibold text-gray-900">

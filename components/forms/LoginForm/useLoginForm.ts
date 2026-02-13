@@ -1,0 +1,114 @@
+/**
+ * Login Form Hook
+ * 
+ * Custom hook for handling login form logic with React Hook Form and Zod validation.
+ */
+
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+import { loginFormSchema, type LoginFormData } from './loginFormSchema'
+import { ERROR_MESSAGES, ROUTES } from '@/constants'
+import { fetchProfileByUserId } from '@/services/api/profiles'
+
+export interface UseLoginFormOptions {
+  /**
+   * Callback when login succeeds
+   */
+  onSuccess?: () => void
+}
+
+export function useLoginForm({ onSuccess }: UseLoginFormOptions = {}) {
+  const router = useRouter()
+  const supabase = createClient()
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const form = useForm<LoginFormData>({
+    resolver: zodResolver(loginFormSchema),
+    defaultValues: {
+      emailOrUsername: '',
+      password: '',
+      rememberMe: false,
+    },
+  })
+
+  const onSubmit = async (data: LoginFormData) => {
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      // Check if input is email or username
+      const isEmail = data.emailOrUsername.includes('@')
+      let loginEmail = data.emailOrUsername
+
+      if (!isEmail) {
+        // Fetch email from username via server-side resolver (bypasses RLS)
+        const response = await fetch(`/api/auth/resolve-username?username=${encodeURIComponent(data.emailOrUsername)}`)
+
+        if (!response.ok) {
+          setError(ERROR_MESSAGES.INVALID_CREDENTIALS ?? 'Invalid email or username')
+          setIsLoading(false)
+          return
+        }
+
+        const { email } = await response.json()
+        loginEmail = email
+      }
+
+      // Sign in with password
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: loginEmail,
+        password: data.password,
+      })
+
+      if (signInError) {
+        setError(signInError.message)
+        setIsLoading(false)
+        return
+      }
+
+      // Check if profile exists
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const profile = await fetchProfileByUserId(user.id).catch(() => null)
+        if (!profile) {
+          router.push(ROUTES.PROFILE_SETUP)
+          router.refresh()
+          return
+        }
+
+        // Check user preference and set cookie for middleware
+        const keepMeLoggedIn = profile.keep_me_logged_in ?? true
+
+        // Set preference cookie that middleware can read
+        document.cookie = `keep_me_logged_in=${String(keepMeLoggedIn)}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`
+      }
+
+      // Call success callback or redirect
+      if (onSuccess) {
+        onSuccess()
+      } else {
+        router.push(ROUTES.DASHBOARD_ROOT)
+        router.refresh()
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+      )
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return {
+    form,
+    onSubmit: form.handleSubmit(onSubmit),
+    isLoading,
+    error,
+  }
+}

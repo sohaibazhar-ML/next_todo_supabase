@@ -14,8 +14,7 @@
  *   const { loadVersions } = useVersionManager({ documentId, setVersions })
  */
 
-import { useState, useEffect } from 'react'
-import { API_ENDPOINTS, CONSOLE_MESSAGES } from '@/constants'
+import { useUserDocumentVersions } from '@/hooks/api/useDocuments'
 import type { UserVersion } from '@/types/documentEditor'
 
 interface UseVersionManagerProps {
@@ -23,12 +22,6 @@ interface UseVersionManagerProps {
    * Document ID to load versions for
    */
   documentId: string
-
-  /**
-   * Optional callback to set versions externally
-   * If provided, hook won't manage versions state internally
-   */
-  setVersions?: (versions: UserVersion[]) => void
 }
 
 /**
@@ -60,56 +53,18 @@ interface UseVersionManagerReturn {
  */
 export function useVersionManager({
   documentId,
-  setVersions: externalSetVersions,
 }: UseVersionManagerProps): UseVersionManagerReturn {
-  // Internal state (only used if external setVersions not provided)
-  const [versions, setVersionsInternal] = useState<UserVersion[]>([])
-  const [loading, setLoading] = useState(false)
+  const { data: versionsData = [], isLoading, refetch } = useUserDocumentVersions(documentId)
 
-  // Use external or internal setVersions
-  const setVersions = externalSetVersions || setVersionsInternal
+  // Cast to UserVersion[] since we know the shape matches but types are strictly incompatible due to unknown vs specific type
+  const versions = versionsData as unknown as UserVersion[]
 
-  /**
-   * Load versions from API
-   * 
-   * @returns Array of loaded versions
-   */
-  const loadVersions = async (): Promise<UserVersion[]> => {
-    try {
-      if (!externalSetVersions) {
-        setLoading(true)
-      }
-
-      const response = await fetch(API_ENDPOINTS.DOCUMENT_EDIT(documentId))
-      if (response.ok) {
-        const data = await response.json()
-        setVersions(data)
-        return data
-      }
-      return []
-    } catch (err) {
-      console.error(CONSOLE_MESSAGES.ERROR_LOADING_VERSIONS, err)
-      return []
-    } finally {
-      if (!externalSetVersions) {
-        setLoading(false)
-      }
+  return {
+    versions,
+    loading: isLoading,
+    loadVersions: async () => {
+      const result = await refetch()
+      return (result.data as unknown as UserVersion[]) || []
     }
   }
-
-  // Auto-load on mount if using internal state
-  useEffect(() => {
-    if (!externalSetVersions) {
-      loadVersions()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [documentId])
-
-  // Return appropriate values based on usage mode
-  if (externalSetVersions) {
-    return { loadVersions }
-  }
-
-  return { versions, loading, loadVersions }
 }
-

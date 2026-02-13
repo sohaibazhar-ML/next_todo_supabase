@@ -29,7 +29,7 @@ export async function POST(
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
     }
 
     const { id } = await params
@@ -48,7 +48,7 @@ export async function POST(
     })
 
     if (!originalDoc) {
-      return NextResponse.json({ error: 'Document not found' }, { status: 404 })
+      return NextResponse.json({ error: ERROR_MESSAGES.DOCUMENT_NOT_FOUND }, { status: 404 })
     }
 
     // Get latest version number for this user and document
@@ -124,7 +124,7 @@ export async function GET(
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
     }
 
     const { id } = await params

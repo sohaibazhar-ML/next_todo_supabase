@@ -14,7 +14,8 @@ import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { hasPermission } from '@/lib/utils/roles'
 import { isErrorWithMessage } from '@/types'
-import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES, STORAGE_BUCKETS, STORAGE_CONFIG } from '@/constants'
+import { uploadTemplateToDrive } from '@/actions/google-docs'
 
 function getFileType(fileName: string): string {
   const ext = fileName.split('.').pop()?.toLowerCase()
@@ -31,12 +32,12 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
     }
 
     const canUpload = await hasPermission(user.id, 'can_upload_documents')
     if (!canUpload) {
-      return NextResponse.json({ error: 'Permission required: can_upload_documents' }, { status: 403 })
+      return NextResponse.json({ error: ERROR_MESSAGES.PERMISSION_REQUIRED_UPLOAD_DOCUMENTS }, { status: 403 })
     }
 
     const formData = await request.formData()
@@ -51,7 +52,7 @@ export async function POST(request: Request) {
 
     if (!file || !title || !category) {
       return NextResponse.json(
-        { error: 'Missing required fields: file, title, category' },
+        { error: ERROR_MESSAGES.MISSING_REQUIRED_FIELDS },
         { status: 400 }
       )
     }
@@ -59,7 +60,7 @@ export async function POST(request: Request) {
     // If uploading a new version, validate parent document exists and get version number
     let versionNumber = '1.0'
     let parentDocumentId: string | null = null
-    
+
     if (parent_document_id) {
       // Get parent document to determine next version
       const parentDoc = await prisma.documents.findUnique({
@@ -69,7 +70,7 @@ export async function POST(request: Request) {
 
       if (!parentDoc) {
         return NextResponse.json(
-          { error: 'Parent document not found' },
+          { error: ERROR_MESSAGES.PARENT_DOCUMENT_NOT_FOUND },
           { status: 404 }
         )
       }
@@ -92,7 +93,7 @@ export async function POST(request: Request) {
       const versionNumbers = existingVersions
         .map(v => parseFloat(v.version || '1.0'))
         .filter(v => !isNaN(v))
-      
+
       const maxVersion = versionNumbers.length > 0 ? Math.max(...versionNumbers) : 0
       versionNumber = (maxVersion + 0.1).toFixed(1) // Increment by 0.1
       parentDocumentId = rootId
@@ -103,13 +104,11 @@ export async function POST(request: Request) {
     const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`
     const filePath = `${user.id}/${fileName}`
 
-    // Upload file to Supabase Storage using server client
-    // Note: The storage policy uses is_user_admin_for_documents function
-    // which bypasses RLS, so this should work correctly
+    // Upload file to Supabase Storage using centralized bucket configuration
     const { error: uploadError } = await supabase.storage
-      .from('documents')
+      .from(STORAGE_BUCKETS.DOCUMENTS)
       .upload(filePath, file, {
-        cacheControl: '3600',
+        cacheControl: STORAGE_CONFIG.CACHE_CONTROL,
         upsert: false,
       })
 
@@ -132,6 +131,31 @@ export async function POST(request: Request) {
       }
     }
 
+    // If it's a DOCX file, also upload to Google Drive for editing
+    let googleDriveTemplateId = null
+    const fileType = getFileType(file.name)
+
+    console.log(`[DEBUG] Uploading file: ${file.name}, MIME: ${file.type}, Detected Type: ${fileType}`)
+
+    if (fileType === 'document' && (file.name.endsWith('.docx') || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')) {
+      console.log(`[DEBUG] Triggering Google Drive upload for ${file.name}`)
+      try {
+        const arrayBuffer = await file.arrayBuffer()
+        const buffer = Buffer.from(arrayBuffer)
+        console.log(`[DEBUG] Calling uploadTemplateToDrive for ${file.name}...`)
+        googleDriveTemplateId = await uploadTemplateToDrive(buffer, file.name)
+        console.log(`[DEBUG] Google Drive conversion RESULT: ${googleDriveTemplateId}`)
+      } catch (error) {
+        console.error('[DEBUG] CRITICAL: Google Drive Conversion Failed:', error)
+        if (error instanceof Error) {
+          console.error('[DEBUG] Error Message:', error.message)
+          console.error('[DEBUG] Error Stack:', error.stack)
+        }
+      }
+    } else {
+      console.warn(`[DEBUG] Skipping Google Drive upload. Condition failed: ${fileType === 'document'} && (${file.name.endsWith('.docx')} || ${file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'})`)
+    }
+
     // Insert document record
     const document = await prisma.documents.create({
       data: {
@@ -142,8 +166,9 @@ export async function POST(request: Request) {
         file_name: file.name,
         file_path: filePath,
         file_size: BigInt(file.size),
-        file_type: getFileType(file.name),
+        file_type: fileType,
         mime_type: file.type,
+        google_drive_template_id: googleDriveTemplateId,
         version: versionNumber,
         parent_document_id: parentDocumentId,
         is_active: true,

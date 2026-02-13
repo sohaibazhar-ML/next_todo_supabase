@@ -30,12 +30,12 @@ export async function GET(request: Request) {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
     }
 
     const canViewStats = await hasPermission(user.id, 'can_view_stats')
     if (!canViewStats) {
-      return NextResponse.json({ error: 'Permission required: can_view_stats' }, { status: 403 })
+      return NextResponse.json({ error: ERROR_MESSAGES.PERMISSION_REQUIRED_VIEW_STATS }, { status: 403 })
     }
 
     // Parse query parameters
