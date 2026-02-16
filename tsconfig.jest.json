@@ -1,0 +1,15 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "jsx": "react-jsx",
+        "module": "commonjs",
+        "target": "esnext",
+        "esModuleInterop": true
+    },
+    "include": [
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "jest.setup.ts",
+        "lib/__mocks__/**/*.ts"
+    ]
+}
