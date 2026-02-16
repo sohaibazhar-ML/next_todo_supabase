@@ -68,6 +68,53 @@ describe('Profiles API', () => {
             expect(error).toBe(ERROR_MESSAGES.PROFILE_NOT_FOUND)
         })
 
+        it('should return 403 if non-admin attempts to view another user\'s profile', async () => {
+            ; (createClient as jest.Mock).mockResolvedValue({
+                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'other-id' } } }) }
+            })
+                ; (isAdmin as jest.Mock).mockResolvedValue(false)
+
+            const request = createMockRequest(`http://localhost/api/profiles?userId=${mockUserId}`)
+            const response = await GET(request)
+            const { status, error } = await validateResponse<any>(response)
+
+            expect(status).toBe(403)
+            expect(error).toBe(ERROR_MESSAGES.FORBIDDEN)
+        })
+
+        it('should return 200 for successful specific profile fetch', async () => {
+            ; (createClient as jest.Mock).mockResolvedValue({
+                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: mockUser } }) }
+            })
+                ; (isAdmin as jest.Mock).mockResolvedValue(false)
+            prismaMock.profiles.findUnique.mockResolvedValue(mockProfile as any)
+
+            const request = createMockRequest(`http://localhost/api/profiles?userId=${mockUserId}`)
+            const response = await GET(request)
+            const { status, data } = await validateResponse<any>(response)
+
+            expect(status).toBe(200)
+            expect(data.id).toBe(mockUserId)
+        })
+
+        it('should return current user\'s profile for non-admin on generic GET', async () => {
+            ; (createClient as jest.Mock).mockResolvedValue({
+                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: mockUser } }) }
+            })
+                ; (isAdmin as jest.Mock).mockResolvedValue(false)
+            prismaMock.profiles.findUnique.mockResolvedValue(mockProfile as any)
+
+            const request = createMockRequest('http://localhost/api/profiles')
+            const response = await GET(request)
+            const { status, data } = await validateResponse<any>(response)
+
+            expect(status).toBe(200)
+            expect(data.id).toBe(mockUserId)
+            expect(prismaMock.profiles.findUnique).toHaveBeenCalledWith({
+                where: { id: mockUserId }
+            })
+        })
+
         it('should verify date range filtering with end-of-day precision for admin', async () => {
             const adminId = '550e8400-e29b-41d4-a716-446655440001'
                 ; (createClient as jest.Mock).mockResolvedValue({
@@ -112,6 +159,23 @@ describe('Profiles API', () => {
                         { first_name: { contains: 'alex', mode: 'insensitive' } },
                         { last_name: { contains: 'alex', mode: 'insensitive' } }
                     ])
+                })
+            }))
+        })
+
+        it('should filter by role for admin', async () => {
+            ; (createClient as jest.Mock).mockResolvedValue({
+                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'admin-id' } } }) }
+            })
+                ; (isAdmin as jest.Mock).mockResolvedValue(true)
+            prismaMock.profiles.findMany.mockResolvedValue([mockProfile] as any)
+
+            const request = createMockRequest('http://localhost/api/profiles?role=admin')
+            await GET(request)
+
+            expect(prismaMock.profiles.findMany).toHaveBeenCalledWith(expect.objectContaining({
+                where: expect.objectContaining({
+                    role: 'admin'
                 })
             }))
         })
@@ -185,6 +249,22 @@ describe('Profiles API', () => {
             expect(error).toBe(ERROR_MESSAGES.USERNAME_EXISTS)
         })
 
+        it('should log warning if authenticated user ID mismatches creation ID (stale session)', async () => {
+            ; (createClient as jest.Mock).mockResolvedValue({
+                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'different-id' } } }) }
+            })
+            prismaMock.profiles.findUnique.mockResolvedValue(null)
+            prismaMock.profiles.create.mockResolvedValue(mockProfile as any)
+
+            const request = createMockRequest('http://localhost/api/profiles', {
+                method: 'POST',
+                body: JSON.stringify({ id: mockUserId, username: 'testuser', email: 'user@example.com' })
+            })
+            await POST(request)
+
+            expect(console.warn).toHaveBeenCalled()
+        })
+
         it('should create profile successfully and serialize dates', async () => {
             ; (createClient as jest.Mock).mockResolvedValue({
                 auth: { getUser: jest.fn().mockResolvedValue({ data: { user: null } }) }
@@ -216,6 +296,23 @@ describe('Profiles API', () => {
 
             expect(status).toBe(500)
         })
+
+        it('should return 400 for prisma unique constraint violation (P2002)', async () => {
+            prismaMock.profiles.findUnique.mockResolvedValue(null)
+            const prismaError = new Error('Unique constraint failed')
+                ; (prismaError as any).code = 'P2002'
+            prismaMock.profiles.create.mockRejectedValue(prismaError)
+
+            const request = createMockRequest('http://localhost/api/profiles', {
+                method: 'POST',
+                body: JSON.stringify({ id: mockUserId, username: 'taken', email: 'taken@test.com' })
+            })
+            const response = await POST(request)
+            const { status, error } = await validateResponse<any>(response)
+
+            expect(status).toBe(400)
+            expect(error).toBe(ERROR_MESSAGES.USERNAME_OR_EMAIL_EXISTS)
+        })
     })
 
     describe('PUT Handler', () => {
@@ -230,6 +327,41 @@ describe('Profiles API', () => {
 
             expect(status).toBe(401)
             expect(error).toBe(ERROR_MESSAGES.UNAUTHORIZED)
+        })
+
+        it('should return 403 if user attempts to update another user\'s profile', async () => {
+            ; (createClient as jest.Mock).mockResolvedValue({
+                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'wrong-id' } } }) }
+            })
+                ; (isAdmin as jest.Mock).mockResolvedValue(false)
+
+            const request = createMockRequest('http://localhost/api/profiles', {
+                method: 'PUT',
+                body: JSON.stringify({ id: mockUserId, first_name: 'Hacker' })
+            })
+            const response = await PUT(request)
+            const { status, error } = await validateResponse<any>(response)
+
+            expect(status).toBe(403)
+            expect(error).toBe(ERROR_MESSAGES.FORBIDDEN)
+        })
+
+        it('should return 404 if profile to update is not found', async () => {
+            ; (createClient as jest.Mock).mockResolvedValue({
+                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: mockUser } }) }
+            })
+                ; (isAdmin as jest.Mock).mockResolvedValue(false)
+            prismaMock.profiles.findUnique.mockResolvedValue(null)
+
+            const request = createMockRequest('http://localhost/api/profiles', {
+                method: 'PUT',
+                body: JSON.stringify({ first_name: 'NoBody' })
+            })
+            const response = await PUT(request)
+            const { status, error } = await validateResponse<any>(response)
+
+            expect(status).toBe(404)
+            expect(error).toBe(ERROR_MESSAGES.PROFILE_NOT_FOUND)
         })
 
         it('should fallback to authenticated userId if body.id is missing', async () => {
