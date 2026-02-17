@@ -112,23 +112,30 @@ export async function GET(request: Request) {
         select: { id: true },
       })
       const foundUserIds = filteredUsers.map(u => u.id)
-      if (foundUserIds.length === 0 && !documentFilter.OR) {
-        // No users or documents match, return empty results early
-        return NextResponse.json({
-          summary: {
-            totalUsers: 0,
-            totalAdmins: 0,
-            totalDocuments: 0,
-          },
-          downloadsPerDocument: [],
-          versionDownloads: [],
-          userVersionsCount: [],
-          userDocumentDownloads: [],
-          filterOptions: {
-            categories: [],
-            tags: [],
-          },
+      if (foundUserIds.length === 0) {
+        // Build document search check
+        const matchingDocsCount = await prisma.documents.count({
+          where: documentFilter
         })
+
+        if (matchingDocsCount === 0) {
+          // No users or documents match, return empty results early
+          return NextResponse.json({
+            summary: {
+              totalUsers: 0,
+              totalAdmins: 0,
+              totalDocuments: 0,
+            },
+            downloadsPerDocument: [],
+            versionDownloads: [],
+            userVersionsCount: [],
+            userDocumentDownloads: [],
+            filterOptions: {
+              categories: [],
+              tags: [],
+            },
+          })
+        }
       }
       filteredUserIdsForQueries = foundUserIds
     }
@@ -289,7 +296,7 @@ export async function GET(request: Request) {
     // Get which user downloaded what documents
     const userDocumentDownloads = await prisma.download_logs.findMany({
       where: {
-        ...dateFilter,
+        ...(Object.keys(dateFilter).length > 0 ? { downloaded_at: dateFilter } : {}),
         documents: documentFilter,
         ...(filteredUserIdsForQueries ? { user_id: { in: filteredUserIdsForQueries } } : {}),
       },

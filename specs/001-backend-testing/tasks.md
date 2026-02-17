@@ -19,7 +19,7 @@
 - [x] Test Document listing and search (app/api/documents)
 - [x] Test Document upload and conversion handlers
 - [x] Test Authentication flows and callbacks
-- [ ] Test Admin dashboard statistics APIs
+- [x] Test Admin dashboard statistics APIs
 - [ ] Test User management APIs
 
 ## Service Layer & Logic (Phase 4)
