@@ -30,5 +30,5 @@ Establish a robust, unit-only backend testing infrastructure for the Next.js/Sup
 ## Success Criteria
 - [x] Phase 2: Core infrastructure verified with pilot tests.
 - [x] 100% coverage of all logical paths in `profiles/route.ts` (GET, POST, PUT).
-- [ ] Zero `any` types in test files or mocking utilities.
-- [ ] Successful "Sabotage Verification" (tests fail when logic is broken).
+- [x] Zero `any` types in test files or mocking utilities.
+- [x] Successful "Sabotage Verification" (tests fail when logic is broken).

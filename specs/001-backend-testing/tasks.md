@@ -28,6 +28,6 @@
 - [x] Test utility functions (formatting, normalization)
 
 ## Verification & Compliance (Phase 5)
-- [ ] Sabotage business logic to verify test failure
-- [ ] Establish "Zero Infrastructure" baseline CI check
-- [ ] Final compliance review against Constitution
+- [x] Sabotage business logic to verify test failure
+- [x] Establish "Zero Infrastructure" baseline CI check
+- [x] Final compliance review against Constitution

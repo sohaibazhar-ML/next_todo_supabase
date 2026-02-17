@@ -179,6 +179,12 @@ describe('Google Docs Actions', () => {
             original_document_id: 'doc-123'
         }
 
+        it('should throw if user is not authenticated', async () => {
+            mockSupabase.auth.getUser.mockResolvedValue({ data: { user: null } })
+            await expect(finishEditingSession(versionId))
+                .rejects.toThrow('Unauthorized')
+        })
+
         it('should throw if version not found or unauthorized', async () => {
             (prisma.user_document_versions.findUnique as jest.Mock).mockResolvedValue(null)
             await expect(finishEditingSession(versionId))
