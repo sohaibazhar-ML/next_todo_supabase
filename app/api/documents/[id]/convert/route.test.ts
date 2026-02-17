@@ -269,7 +269,19 @@ describe('Document Conversion API', () => {
         expect(error).toBe(ERROR_MESSAGES.UNSUPPORTED_FILE_TYPE)
     })
 
+    it('should return 500 if an unexpected error occurs (Error instance)', async () => {
+        prismaMock.documents.findUnique.mockRejectedValue(new Error('Major Collision'))
+
+        const request = createMockRequest(`http://localhost/api/documents/${docId}/convert`)
+        const response = await GET(request, { params: Promise.resolve({ id: docId }) })
+        const { status, error } = await validateResponse<any>(response)
+
+        expect(status).toBe(500)
+        expect(error).toBe('Major Collision')
+    })
+
     it('should return 500 if an unexpected error occurs (non-Error)', async () => {
+        jest.spyOn(console, 'error').mockImplementation(() => { })
         prismaMock.documents.findUnique.mockRejectedValue('Global explode')
 
         const request = createMockRequest(`http://localhost/api/documents/${docId}/convert`)
@@ -278,5 +290,6 @@ describe('Document Conversion API', () => {
 
         expect(status).toBe(500)
         expect(error).toBe(ERROR_MESSAGES.INTERNAL_SERVER_ERROR)
+        expect(console.error).toHaveBeenCalled()
     })
 })

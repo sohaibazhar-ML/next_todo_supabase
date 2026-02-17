@@ -316,14 +316,17 @@ describe('Document Upload API', () => {
                 expect(uploadTemplateToDrive).not.toHaveBeenCalled()
             })
 
-            it('should detect various file types correctly including no extension', async () => {
+            it('should detect various file types correctly including legacy and no extension', async () => {
                 const types = [
                     { name: 'test.doc', type: 'document' },
                     { name: 'test.xls', type: 'spreadsheet' },
+                    { name: 'test.docx', type: 'document' },
                     { name: 'test.xlsx', type: 'spreadsheet' },
+                    { name: 'test.pdf', type: 'pdf' },
                     { name: 'test.zip', type: 'archive' },
                     { name: 'test.unknown', type: 'other' },
-                    { name: 'noext', type: 'other' }
+                    { name: 'noext', type: 'other' },
+                    { name: 'trailing.', type: 'other' }
                 ]
 
                 for (const t of types) {

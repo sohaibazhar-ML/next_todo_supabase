@@ -17,8 +17,8 @@
     - [x] PUT: RBAC & Role Restrictions
     - [x] PUT: Successful updates
 - [x] Test Document listing and search (app/api/documents)
-- [ ] Test Document upload and conversion handlers
-- [ ] Test Authentication flows and callbacks
+- [x] Test Document upload and conversion handlers
+- [x] Test Authentication flows and callbacks
 - [ ] Test Admin dashboard statistics APIs
 - [ ] Test User management APIs
 
