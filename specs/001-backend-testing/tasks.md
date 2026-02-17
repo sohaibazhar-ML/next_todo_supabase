@@ -20,7 +20,7 @@
 - [x] Test Document upload and conversion handlers
 - [x] Test Authentication flows and callbacks
 - [x] Test Admin dashboard statistics APIs
-- [ ] Test User management APIs
+- [x] Test User management APIs
 
 ## Service Layer & Logic (Phase 4)
 - [ ] Test Google Docs action logic with mocked Drive API

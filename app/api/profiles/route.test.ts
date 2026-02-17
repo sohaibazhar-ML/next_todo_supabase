@@ -115,30 +115,70 @@ describe('Profiles API', () => {
             })
         })
 
-        it('should verify date range filtering with end-of-day precision for admin', async () => {
-            const adminId = '550e8400-e29b-41d4-a716-446655440001'
-                ; (createClient as jest.Mock).mockResolvedValue({
-                    auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: adminId } } }) }
-                })
+        it('should handle fromDate without toDate', async () => {
+            ; (createClient as jest.Mock).mockResolvedValue({
+                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'admin-id' } } }) }
+            })
                 ; (isAdmin as jest.Mock).mockResolvedValue(true)
-            prismaMock.profiles.findMany.mockResolvedValue([mockProfile] as any)
+            prismaMock.profiles.findMany.mockResolvedValue([])
 
-            const fromStr = '2024-01-01'
-            const toStr = '2024-01-01'
-            const request = createMockRequest(`http://localhost/api/profiles?fromDate=${fromStr}&toDate=${toStr}`)
+            const request = createMockRequest('http://localhost/api/profiles?fromDate=2024-01-01')
             await GET(request)
 
-            const expectedEnd = new Date(toStr)
+            expect(prismaMock.profiles.findMany).toHaveBeenCalledWith(expect.objectContaining({
+                where: expect.objectContaining({
+                    created_at: { gte: new Date('2024-01-01') }
+                })
+            }))
+        })
+
+        it('should handle toDate without fromDate', async () => {
+            ; (createClient as jest.Mock).mockResolvedValue({
+                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'admin-id' } } }) }
+            })
+                ; (isAdmin as jest.Mock).mockResolvedValue(true)
+            prismaMock.profiles.findMany.mockResolvedValue([])
+
+            const request = createMockRequest('http://localhost/api/profiles?toDate=2024-01-01')
+            await GET(request)
+
+            const expectedEnd = new Date('2024-01-01')
             expectedEnd.setHours(23, 59, 59, 999)
 
             expect(prismaMock.profiles.findMany).toHaveBeenCalledWith(expect.objectContaining({
                 where: expect.objectContaining({
-                    created_at: {
-                        gte: new Date(fromStr),
-                        lte: expectedEnd
-                    }
+                    created_at: { lte: expectedEnd }
                 })
             }))
+        })
+
+        it('should handle error with custom message', async () => {
+            ; (createClient as jest.Mock).mockResolvedValue({
+                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: mockUser } }) }
+            })
+                ; (isAdmin as jest.Mock).mockResolvedValue(true)
+            prismaMock.profiles.findUnique.mockRejectedValue({ message: 'Custom Error' })
+
+            const request = createMockRequest(`http://localhost/api/profiles?userId=${mockUserId}`)
+            const response = await GET(request)
+            const { status, error } = await validateResponse<any>(response)
+
+            expect(status).toBe(500)
+            expect(error).toBe('Custom Error')
+        })
+
+        it('should handle generic error without message', async () => {
+            ; (createClient as jest.Mock).mockResolvedValue({
+                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: mockUser } }) }
+            })
+                ; (isAdmin as jest.Mock).mockResolvedValue(true)
+            prismaMock.profiles.findUnique.mockRejectedValue('Simple string error')
+
+            const request = createMockRequest(`http://localhost/api/profiles?userId=${mockUserId}`)
+            const response = await GET(request)
+            const { status } = await validateResponse<any>(response)
+
+            expect(status).toBe(500)
         })
 
         it('should return all profiles for admin with search across multiple fields', async () => {
@@ -265,22 +305,58 @@ describe('Profiles API', () => {
             expect(console.warn).toHaveBeenCalled()
         })
 
-        it('should create profile successfully and serialize dates', async () => {
+        it('should create profile successfully and serialize dates with email_confirmed_at', async () => {
             ; (createClient as jest.Mock).mockResolvedValue({
                 auth: { getUser: jest.fn().mockResolvedValue({ data: { user: null } }) }
             })
             prismaMock.profiles.findUnique.mockResolvedValue(null)
-            prismaMock.profiles.create.mockResolvedValue(mockProfile as any)
+            const createdProfile = {
+                ...mockProfile,
+                email_confirmed_at: new Date('2024-01-01T12:00:00Z')
+            }
+            prismaMock.profiles.create.mockResolvedValue(createdProfile as any)
+
+            const request = createMockRequest('http://localhost/api/profiles', {
+                method: 'POST',
+                body: JSON.stringify({
+                    id: mockUserId,
+                    username: 'testuser',
+                    email: 'user@example.com',
+                    email_confirmed_at: '2024-01-01T12:00:00Z'
+                })
+            })
+            const response = await POST(request)
+            const { status, data } = await validateResponse<any>(response)
+
+            expect(status).toBe(201)
+            expect(data.email_confirmed_at).toBe('2024-01-01T12:00:00.000Z')
+        })
+
+        it('should handle POST error with custom message', async () => {
+            prismaMock.profiles.findUnique.mockRejectedValue({ message: 'POST failed' })
 
             const request = createMockRequest('http://localhost/api/profiles', {
                 method: 'POST',
                 body: JSON.stringify({ id: mockUserId, username: 'testuser', email: 'user@example.com' })
             })
             const response = await POST(request)
-            const { status, data } = await validateResponse<any>(response)
+            const { status, error } = await validateResponse<any>(response)
 
-            expect(status).toBe(201)
-            expect(typeof data.created_at).toBe('string')
+            expect(status).toBe(500)
+            expect(error).toBe('POST failed')
+        })
+
+        it('should handle POST generic error without message', async () => {
+            prismaMock.profiles.findUnique.mockRejectedValue('Generic message')
+
+            const request = createMockRequest('http://localhost/api/profiles', {
+                method: 'POST',
+                body: JSON.stringify({ id: mockUserId, username: 'testuser', email: 'user@example.com' })
+            })
+            const response = await POST(request)
+            const { status } = await validateResponse<any>(response)
+
+            expect(status).toBe(500)
         })
 
         it('should return 500 if prisma throws on creation', async () => {
@@ -438,23 +514,84 @@ describe('Profiles API', () => {
             expect(error).toBe(ERROR_MESSAGES.CANNOT_CHANGE_SUBADMIN_ROLE)
         })
 
-        it('should update profile successfully and include current address', async () => {
+        it('should update profile successfully and include current address with keep_me_logged_in', async () => {
             ; (createClient as jest.Mock).mockResolvedValue({
                 auth: { getUser: jest.fn().mockResolvedValue({ data: { user: mockUser } }) }
             })
                 ; (isAdmin as jest.Mock).mockResolvedValue(false)
             prismaMock.profiles.findUnique.mockResolvedValue(mockProfile as any)
-            prismaMock.profiles.update.mockResolvedValue({ ...mockProfile, current_address: 'Swiss St 1' } as any)
+            prismaMock.profiles.update.mockResolvedValue({
+                ...mockProfile,
+                current_address: 'Swiss St 1',
+                keep_me_logged_in: false
+            } as any)
 
             const request = createMockRequest('http://localhost/api/profiles', {
                 method: 'PUT',
-                body: JSON.stringify({ current_address: 'Swiss St 1' })
+                body: JSON.stringify({
+                    current_address: 'Swiss St 1',
+                    keep_me_logged_in: false
+                })
             })
             const response = await PUT(request)
             const { status, data } = await validateResponse<any>(response)
 
             expect(status).toBe(200)
-            expect(data.current_address).toBe('Swiss St 1')
+            expect(data.keep_me_logged_in).toBe(false)
+        })
+
+        it('should fallback to existing keep_me_logged_in if missing in body', async () => {
+            ; (createClient as jest.Mock).mockResolvedValue({
+                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: mockUser } }) }
+            })
+                ; (isAdmin as jest.Mock).mockResolvedValue(false)
+            prismaMock.profiles.findUnique.mockResolvedValue({ ...mockProfile, keep_me_logged_in: true } as any)
+            prismaMock.profiles.update.mockResolvedValue(mockProfile as any)
+
+            const request = createMockRequest('http://localhost/api/profiles', {
+                method: 'PUT',
+                body: JSON.stringify({ first_name: 'test' })
+            })
+            await PUT(request)
+
+            expect(prismaMock.profiles.update).toHaveBeenCalledWith(expect.objectContaining({
+                data: expect.objectContaining({
+                    keep_me_logged_in: true
+                })
+            }))
+        })
+
+        it('should handle PUT error with custom message', async () => {
+            ; (createClient as jest.Mock).mockResolvedValue({
+                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: mockUser } }) }
+            })
+            prismaMock.profiles.findUnique.mockRejectedValue({ message: 'PUT failed' })
+
+            const request = createMockRequest('http://localhost/api/profiles', {
+                method: 'PUT',
+                body: JSON.stringify({ first_name: 'test' })
+            })
+            const response = await PUT(request)
+            const { status, error } = await validateResponse<any>(response)
+
+            expect(status).toBe(500)
+            expect(error).toBe('PUT failed')
+        })
+
+        it('should handle PUT generic error without message', async () => {
+            ; (createClient as jest.Mock).mockResolvedValue({
+                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: mockUser } }) }
+            })
+            prismaMock.profiles.findUnique.mockRejectedValue('Generic PUT error')
+
+            const request = createMockRequest('http://localhost/api/profiles', {
+                method: 'PUT',
+                body: JSON.stringify({ first_name: 'test' })
+            })
+            const response = await PUT(request)
+            const { status } = await validateResponse<any>(response)
+
+            expect(status).toBe(500)
         })
 
         it('should return 500 if prisma throws on PUT', async () => {

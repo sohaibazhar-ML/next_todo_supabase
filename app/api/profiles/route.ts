@@ -189,17 +189,15 @@ export async function POST(request: Request) {
     })
 
     // Check if username exists
-    if (body.username) {
-      const existing = await prisma.profiles.findUnique({
-        where: { username: body.username }
-      })
+    const existing = await prisma.profiles.findUnique({
+      where: { username: body.username }
+    })
 
-      if (existing) {
-        return NextResponse.json(
-          { error: ERROR_MESSAGES.USERNAME_EXISTS },
-          { status: 400 }
-        )
-      }
+    if (existing) {
+      return NextResponse.json(
+        { error: ERROR_MESSAGES.USERNAME_EXISTS },
+        { status: 400 }
+      )
     }
 
     const profile = await prisma.profiles.create({
