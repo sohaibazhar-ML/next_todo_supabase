@@ -23,9 +23,9 @@
 - [x] Test User management APIs
 
 ## Service Layer & Logic (Phase 4)
-- [ ] Test Google Docs action logic with mocked Drive API
-- [ ] Test Prisma-based service function business logic
-- [ ] Test utility functions (formatting, normalization)
+- [x] Test Google Docs action logic with mocked Drive API
+- [x] Test Prisma-based service function business logic
+- [x] Test utility functions (formatting, normalization)
 
 ## Verification & Compliance (Phase 5)
 - [ ] Sabotage business logic to verify test failure
