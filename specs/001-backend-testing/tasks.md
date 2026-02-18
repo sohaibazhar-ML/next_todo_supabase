@@ -25,9 +25,17 @@
 ## Service Layer & Logic (Phase 4)
 - [x] Test Google Docs action logic with mocked Drive API
 - [x] Test Prisma-based service function business logic
-- [x] Test utility functions (formatting, normalization)
+- [x] Test utility functions (formatting, normalization) 
 
 ## Verification & Compliance (Phase 5)
 - [x] Sabotage business logic to verify test failure
 - [x] Establish "Zero Infrastructure" baseline CI check
 - [x] Final compliance review against Constitution
+
+## Remaining Route Coverage (Phase 6)
+- [x] Test `app/api/documents/filter-options`
+- [x] Test `app/api/documents/[id]/download-url`
+- [x] Test `app/api/documents/[id]/edit`
+- [x] Test `app/api/documents/[id]/export`
+- [x] Test `app/api/documents/[id]/versions`
+- [x] Test `app/api/download-logs`

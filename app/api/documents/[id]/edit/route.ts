@@ -85,7 +85,9 @@ export async function POST(
     // Serialize BigInt values to strings for JSON
     const serializedVersion = {
       ...editedVersion,
-      exported_file_size: editedVersion.exported_file_size ? editedVersion.exported_file_size.toString() : null,
+      exported_file_size: editedVersion.exported_file_size !== null && editedVersion.exported_file_size !== undefined
+        ? editedVersion.exported_file_size.toString()
+        : null,
       message: 'Document version saved successfully',
     }
 
@@ -108,7 +110,7 @@ export async function POST(
 function serializeVersions(versions: UserVersionRaw[]) {
   return versions.map((version) => ({
     ...version,
-    exported_file_size: version.exported_file_size
+    exported_file_size: (version.exported_file_size !== null && version.exported_file_size !== undefined)
       ? version.exported_file_size.toString()
       : null,
   }))
