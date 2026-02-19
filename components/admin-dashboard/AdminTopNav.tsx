@@ -25,7 +25,6 @@ export default function AdminTopNav({ user, userRole }: AdminTopNavProps) {
   const t = useTranslations()
   const locale = useLocale()
   const { toggleSidebar } = useSidebar()
-  const [searchQuery, setSearchQuery] = useState('')
   const [showDropdown, setShowDropdown] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -74,18 +73,7 @@ export default function AdminTopNav({ user, userRole }: AdminTopNavProps) {
           tooltip="Toggle sidebar"
           variant="ghost"
         />
-        {/* <div className="relative flex-1 max-w-md">
-          <input
-            type="text"
-            placeholder={t('common.search')}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-          />
-          <IconSearch
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
-          />
-        </div> */}
+
       </div>
       <div className="flex items-center gap-4">
         <div className="relative">

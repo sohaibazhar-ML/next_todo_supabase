@@ -394,6 +394,18 @@ export const CONSOLE_MESSAGES = {
    * Used in SubadminManagement component
    */
   ERROR_TOGGLING_SUBADMIN_STATUS: 'Error toggling subadmin active status:',
+
+  /**
+   * Error converting document to Google Docs
+   * Used in DocumentCard component
+   */
+  GOOGLE_DOCS_CONVERSION_ERROR: 'Error converting document to Google Docs:',
+
+  /**
+   * Error saving document in editor
+   * Used in DocumentEditorContainer component
+   */
+  ERROR_SAVING_DOCUMENT_EDITOR: 'Error saving document in editor:',
 } as const
 
 /**

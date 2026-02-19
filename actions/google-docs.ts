@@ -23,7 +23,7 @@ const drive = google.drive({ version: 'v3', auth })
 /**
  * Helper to call the Google Apps Script Bridge
  */
-async function callBridge(action: string, payload: any) {
+async function callBridge(action: string, payload: Record<string, unknown>) {
     const bridgeUrl = process.env.GOOGLE_BRIDGE_URL;
     const bridgeSecret = process.env.GOOGLE_BRIDGE_SECRET;
 

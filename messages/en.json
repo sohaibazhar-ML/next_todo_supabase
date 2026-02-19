@@ -186,7 +186,8 @@
     "en": "English",
     "fr": "French",
     "it": "Italian",
-    "selectLanguage": "Select Language"
+    "selectLanguage": "Select Language",
+    "changingLanguage": "Changing language..."
   },
   "profileForm": {
     "personalInfo": "Personal Information",
@@ -300,7 +301,10 @@
     "viewAllVersions": "View All Versions",
     "downloading": "Downloading...",
     "download": "Download",
-    "edit": "Edit"
+    "edit": "Edit",
+    "convertingToGoogleDocs": "Converting to Google Docs...",
+    "conversionSuccessful": "Conversion successful!",
+    "conversionFailed": "Failed to convert document"
   },
   "documentUpload": {
     "invalidFileType": "Invalid file type. Please upload PDF, DOCX, XLSX, or ZIP files only.",

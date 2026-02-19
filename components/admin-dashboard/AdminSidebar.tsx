@@ -79,7 +79,6 @@ export default function AdminSidebar({ userRole, permissions }: AdminSidebarProp
       label: t('dashboard.manageDocuments'),
       href: ADMIN_DASHBOARD.ROUTE_ADMIN_DOCUMENTS,
       icon: <IconUpload className={ADMIN_DASHBOARD.ICON_SIZE_MEDIUM} />,
-      children: permissions.canUpload ? undefined : undefined,
     },
     {
       id: 'stats',

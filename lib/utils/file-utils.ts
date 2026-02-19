@@ -19,7 +19,7 @@ export function formatFileSize(bytes: number | null | undefined): string {
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   return (
     Math.round((bytes / Math.pow(k, i)) * DEFAULT_VALUES.FILE_SIZE_ROUNDING) /
-      DEFAULT_VALUES.FILE_SIZE_ROUNDING +
+    DEFAULT_VALUES.FILE_SIZE_ROUNDING +
     ' ' +
     sizes[i]
   )
@@ -54,3 +54,23 @@ export function getFileIconColor(fileType: string): string {
   return colors[fileType] || 'text-gray-600'
 }
 
+/**
+ * Check if a document is a DOCX/DOC type
+ * Checks file_type field and file_name extension for robustness
+ */
+export function isDocxType(fileType?: string | null, fileName?: string | null): boolean {
+  const typeLower = fileType?.toLowerCase() || ''
+  const nameLower = fileName?.toLowerCase() || ''
+  return typeLower === 'document' ||
+    fileType === 'DOCX' ||
+    nameLower.endsWith('.docx') ||
+    nameLower.endsWith('.doc')
+}
+
+/**
+ * Check if a document can be edited (PDF or DOCX/DOC)
+ */
+export function isEditableDocument(fileType?: string | null, fileName?: string | null): boolean {
+  const typeLower = fileType?.toLowerCase() || ''
+  return typeLower === 'pdf' || fileType === 'PDF' || isDocxType(fileType, fileName)
+}

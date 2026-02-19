@@ -30,6 +30,8 @@ import PdfEditorView from './PdfEditorView'
 import ErrorMessage from '../ui/ErrorMessage'
 import LoadingSpinner from '../ui/LoadingSpinner'
 import { DOCUMENT_TYPES, DEFAULT_VALUES } from '@/constants'
+import { CONSOLE_MESSAGES } from '@/constants/console'
+import { IconGoogleDoc } from '@/components/ui/icons'
 import { useDocumentEditorState } from './hooks/useDocumentEditorState'
 import { usePdfWorker } from './hooks/usePdfWorker'
 import { useDocumentLoader } from './hooks/useDocumentLoader'
@@ -175,7 +177,7 @@ export default function DocumentEditorContainer({
       window.open(editUrl, '_blank')
       toast.success('Document opened in new tab')
     } catch (error) {
-      console.error(error)
+      console.error(CONSOLE_MESSAGES.GOOGLE_DOCS_CONVERSION_ERROR, error)
       toast.error('Failed to open document')
     } finally {
       setGoogleLoading(false)
@@ -213,7 +215,7 @@ export default function DocumentEditorContainer({
         window.location.href = '/downloads'
       }
     } catch (error) {
-      console.error(error)
+      console.error(CONSOLE_MESSAGES.ERROR_SAVING_DOCUMENT_EDITOR, error)
       toast.error('Failed to save document')
     } finally {
       setGoogleLoading(false)
@@ -230,9 +232,7 @@ export default function DocumentEditorContainer({
         <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
            <div className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full text-center space-y-6">
               <div className="h-16 w-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto">
-                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+                 <IconGoogleDoc size={32} />
               </div>
               
               <div>

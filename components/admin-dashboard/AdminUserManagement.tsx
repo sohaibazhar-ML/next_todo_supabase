@@ -38,7 +38,7 @@ export default function AdminUserManagement() {
     // React Query will automatically refetch when mutations invalidate the cache
   }
 
-  const visibleUsers = useMemo(() => users, [users])
+  const visibleUsers = users
 
   const csvHeaders: CsvHeader<UserProfile>[] = useMemo(
     () => [

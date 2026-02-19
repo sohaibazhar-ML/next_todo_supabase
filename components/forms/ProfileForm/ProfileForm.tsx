@@ -47,27 +47,9 @@ export interface ProfileFormProps {
   initialProfile: UserProfile | null
   
   /**
-   * User info for pre-filling during creation (grouped props)
+   * User info for pre-filling during creation
    */
   userInfo?: UserInfo
-  
-  /**
-   * @deprecated Use userInfo instead
-   * User email (for pre-filling during creation)
-   */
-  userEmail?: string
-  
-  /**
-   * @deprecated Use userInfo instead
-   * User first name (for pre-filling during creation)
-   */
-  userFirstName?: string
-  
-  /**
-   * @deprecated Use userInfo instead
-   * User last name (for pre-filling during creation)
-   */
-  userLastName?: string
   
   /**
    * Callback when profile update/create succeeds
@@ -84,9 +66,6 @@ export default function ProfileForm({
   userId,
   initialProfile,
   userInfo,
-  userEmail,
-  userFirstName,
-  userLastName,
   onSuccess,
   onCompleted,
 }: ProfileFormProps) {
@@ -96,12 +75,29 @@ export default function ProfileForm({
   const [isEditing, setIsEditing] = useState(isCreating)
   const [showPasswordChange, setShowPasswordChange] = useState(false)
 
-  // Use userInfo if provided, otherwise fall back to individual props (for backward compatibility)
   const effectiveUserInfo = userInfo || {
-    email: userEmail || '',
-    firstName: userFirstName || '',
-    lastName: userLastName || '',
+    email: '',
+    firstName: '',
+    lastName: '',
   }
+
+  // Shared helper to build the form reset values from a profile
+  const getProfileResetValues = (profile: UserProfile) => ({
+    first_name: profile.first_name,
+    last_name: profile.last_name,
+    email: profile.email,
+    phone_number: profile.phone_number,
+    current_address: profile.current_address,
+    country_of_origin: profile.country_of_origin,
+    new_address_switzerland: profile.new_address_switzerland,
+    number_of_adults: profile.number_of_adults,
+    number_of_children: profile.number_of_children,
+    pets_type: profile.pets_type,
+    marketing_consent: profile.marketing_consent,
+    terms_accepted: profile.terms_accepted,
+    data_privacy_accepted: profile.data_privacy_accepted,
+    username: profile.username,
+  })
 
   // Prepare default values
   const defaultValues = initialProfile || {
@@ -138,22 +134,7 @@ export default function ProfileForm({
   // Reset form when initialProfile changes
   useEffect(() => {
     if (initialProfile && !isCreating) {
-      form.reset({
-        first_name: initialProfile.first_name,
-        last_name: initialProfile.last_name,
-        email: initialProfile.email,
-        phone_number: initialProfile.phone_number,
-        current_address: initialProfile.current_address,
-        country_of_origin: initialProfile.country_of_origin,
-        new_address_switzerland: initialProfile.new_address_switzerland,
-        number_of_adults: initialProfile.number_of_adults,
-        number_of_children: initialProfile.number_of_children,
-        pets_type: initialProfile.pets_type,
-        marketing_consent: initialProfile.marketing_consent,
-        terms_accepted: initialProfile.terms_accepted,
-        data_privacy_accepted: initialProfile.data_privacy_accepted,
-        username: initialProfile.username,
-      })
+      form.reset(getProfileResetValues(initialProfile))
     }
   }, [initialProfile?.id, form, isCreating])
 
@@ -163,22 +144,7 @@ export default function ProfileForm({
 
   const handleCancel = () => {
     if (initialProfile) {
-      form.reset({
-        first_name: initialProfile.first_name,
-        last_name: initialProfile.last_name,
-        email: initialProfile.email,
-        phone_number: initialProfile.phone_number,
-        current_address: initialProfile.current_address,
-        country_of_origin: initialProfile.country_of_origin,
-        new_address_switzerland: initialProfile.new_address_switzerland,
-        number_of_adults: initialProfile.number_of_adults,
-        number_of_children: initialProfile.number_of_children,
-        pets_type: initialProfile.pets_type,
-        marketing_consent: initialProfile.marketing_consent,
-        terms_accepted: initialProfile.terms_accepted,
-        data_privacy_accepted: initialProfile.data_privacy_accepted,
-        username: initialProfile.username,
-      })
+      form.reset(getProfileResetValues(initialProfile))
     }
     setIsEditing(false)
   }

@@ -24,9 +24,11 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import type { Document } from '@/types/document'
 import { ROUTES } from '@/constants/routes'
+import { CONSOLE_MESSAGES } from '@/constants/console'
 import { useDocumentVersions } from '@/hooks/api/useDocuments'
 import { useDownloadLogs } from '@/hooks/api/useDownloadLogs'
 import { useDocumentDownload } from '@/hooks/useDocumentDownload'
+import { isDocxType, isEditableDocument } from '@/lib/utils/file-utils'
 import DocumentHeader from './document-card/DocumentHeader'
 import DocumentTags from './document-card/DocumentTags'
 import DocumentMetadata from './document-card/DocumentMetadata'
@@ -68,14 +70,8 @@ export default function DocumentCard({ document }: DocumentCardProps) {
   }, [versions, showVersions, document])
 
   // Check if document can be edited (PDF or DOCX/DOC files)
-  const fileTypeLower = document.file_type?.toLowerCase() || ''
-  const fileNameLower = document.file_name?.toLowerCase() || ''
-  const isDocx = fileTypeLower === 'document' || 
-                 document.file_type === 'DOCX' || 
-                 fileNameLower.endsWith('.docx') || 
-                 fileNameLower.endsWith('.doc')
-  
-  const canEdit = fileTypeLower === 'pdf' || isDocx || document.file_type === 'PDF'
+  const isDocx = isDocxType(document.file_type, document.file_name)
+  const canEdit = isEditableDocument(document.file_type, document.file_name)
 
   const handleEdit = () => {
     const locale = window.location.pathname.split('/')[1]
@@ -89,17 +85,17 @@ export default function DocumentCard({ document }: DocumentCardProps) {
     }
 
     setConverting(true)
-    const toastId = toast.loading('Converting to Google Docs...')
+    const toastId = toast.loading(t('convertingToGoogleDocs'))
     
     try {
       const result = await convertDocumentAction(document.id)
       if (result.success) {
-        toast.success('Conversion successful!', { id: toastId })
+        toast.success(t('conversionSuccessful'), { id: toastId })
         handleEdit()
       }
     } catch (err) {
-      console.error(err)
-      toast.error('Failed to convert document', { id: toastId })
+      console.error(CONSOLE_MESSAGES.GOOGLE_DOCS_CONVERSION_ERROR, err)
+      toast.error(t('conversionFailed'), { id: toastId })
     } finally {
       setConverting(false)
     }

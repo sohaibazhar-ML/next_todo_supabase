@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import AdminDocumentManagementPanel from './AdminDocumentManagementPanel'
 import DocumentUploadModal from './DocumentUploadModal'
+import { IconPlus } from '@/components/ui/icons'
 
 interface AdminDocumentManagementWithUploadProps {
   managementTitle: string
@@ -36,19 +37,7 @@ export default function AdminDocumentManagementWithUpload({
           onClick={() => setIsUploadModalOpen(true)}
           className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium flex items-center gap-2"
         >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
+          <IconPlus className="w-5 h-5" />
           {t('uploadDocument')}
         </button>
       </div>

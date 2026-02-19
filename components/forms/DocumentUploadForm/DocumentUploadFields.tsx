@@ -12,6 +12,7 @@ import type { DocumentUploadFormData } from './documentUploadSchema'
 import { Input, Textarea, Select, Checkbox, Button } from '@/components/ui'
 import { useDocumentFilterOptions } from '@/hooks/api/useDocuments'
 import { DEFAULT_VALUES, FILE_EXTENSIONS } from '@/constants'
+import { IconX } from '@/components/ui/icons'
 import { useTagInput } from '@/hooks/useTagInput'
 
 export interface DocumentUploadFieldsProps {
@@ -176,19 +177,7 @@ export default function DocumentUploadFields({
                   className="text-indigo-600 hover:text-indigo-800"
                   disabled={isLoading}
                 >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
+                  <IconX className="w-4 h-4" />
                 </button>
               </span>
             ))}

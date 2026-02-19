@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { CONSOLE_MESSAGES } from '@/constants/console'
+import type { User, Session, AuthError } from '@supabase/supabase-js'
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
@@ -18,8 +19,8 @@ export async function GET(request: Request) {
     const supabase = await createClient()
 
     // Retry logic for exchangeCodeForSession to handle network blips
-    let data: { user: any; session: any } | null = null
-    let error: any = null
+    let data: { user: User | null; session: Session | null } | null = null
+    let error: AuthError | null = null
     let retries = 3;
     while (retries > 0) {
       const result = await supabase.auth.exchangeCodeForSession(code)

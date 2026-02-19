@@ -186,7 +186,8 @@
     "en": "Englisch",
     "fr": "Französisch",
     "it": "Italienisch",
-    "selectLanguage": "Sprache auswählen"
+    "selectLanguage": "Sprache auswählen",
+    "changingLanguage": "Sprache wird geändert..."
   },
   "profileForm": {
     "personalInfo": "Persönliche Informationen",
@@ -300,7 +301,10 @@
     "viewAllVersions": "Alle Versionen anzeigen",
     "downloading": "Wird heruntergeladen...",
     "download": "Herunterladen",
-    "edit": "Bearbeiten"
+    "edit": "Bearbeiten",
+    "convertingToGoogleDocs": "Konvertierung zu Google Docs...",
+    "conversionSuccessful": "Konvertierung erfolgreich!",
+    "conversionFailed": "Dokument konnte nicht konvertiert werden"
   },
   "documentUpload": {
     "invalidFileType": "Ungültiger Dateityp. Bitte laden Sie nur PDF, DOCX, XLSX oder ZIP Dateien hoch.",

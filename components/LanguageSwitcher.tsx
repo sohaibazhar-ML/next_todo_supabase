@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useRouter, usePathname } from 'next/navigation'
 import { routing } from '@/i18n/routing'
-import { IconSpinner } from '@/components/ui/icons'
+import { IconSpinner, IconChevronDown } from '@/components/ui/icons'
 
 export default function LanguageSwitcher() {
   const t = useTranslations('language')
@@ -53,26 +53,14 @@ export default function LanguageSwitcher() {
           {isPending ? (
             <IconSpinner className="h-4 w-4 text-indigo-600" />
           ) : (
-            <svg
-              className="h-4 w-4 text-gray-500 transition-transform"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
+            <IconChevronDown className="h-4 w-4 text-gray-500 transition-transform" />
           )}
         </div>
       </div>
       {isPending && (
         <div className="mt-2 flex items-center gap-2 text-sm text-indigo-600">
           <IconSpinner className="h-3 w-3" />
-          <span>Changing language...</span>
+          <span>{t('changingLanguage')}</span>
         </div>
       )}
     </div>

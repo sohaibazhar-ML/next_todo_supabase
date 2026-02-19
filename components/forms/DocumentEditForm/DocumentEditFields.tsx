@@ -11,6 +11,7 @@ import type { UseFormReturn } from 'react-hook-form'
 import type { DocumentEditFormData } from './documentEditSchema'
 import { Input, Textarea, Select, Checkbox, Button } from '@/components/ui'
 import { useDocumentFilterOptions } from '@/hooks/api/useDocuments'
+import { IconX } from '@/components/ui/icons'
 
 export interface DocumentEditFieldsProps {
   /**
@@ -172,19 +173,7 @@ export default function DocumentEditFields({
                   className="text-indigo-600 hover:text-indigo-800"
                   disabled={isLoading}
                 >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
+                  <IconX className="w-4 h-4" />
                 </button>
               </span>
             ))}
