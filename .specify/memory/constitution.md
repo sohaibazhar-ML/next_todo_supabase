@@ -1,37 +1,61 @@
-# Next.js Todo Supabase Constitution
+# next_crud Constitution
 
 ## Core Principles
 
-### I. Exclusive Backend testing
-Backend behavior must be verified using automated tests written in Jest. Frontend and UI testing are explicitly out of scope for this architecture. All core logic must reside in or be accessible to backend handlers and services.
+### I. Spec-First Development
+All features begin with a specification. No code is written without a reviewed spec. AI generates code FROM specs — not from ad-hoc prompts. If ambiguity exists, mark `[NEEDS CLARIFICATION]` and stop.
 
-### II. Total Isolation & Mocking (NON-NEGOTIABLE)
-All external dependencies MUST be mocked. This includes databases, Prisma Client, Supabase, internal/external services, utilities, network calls, file system access, environment variables, time, randomness, and generated IDs. Tests must run in a "vacuum" without any dependency on the outside world.
+### II. TypeScript with Strict Typing
+TypeScript `strict: true` mode is mandatory. No `any` types. No `@ts-ignore` or `@ts-expect-error` without documented justification. All function parameters and return types must be explicit.
 
-### III. Strict Unit Focus
-No integration, database, or end-to-end tests are permitted. Specifications that cannot be verified without real infrastructure are considered invalid. Tests must be fast, deterministic, and isolated.
+### III. Layered Architecture
+Clear separation of concerns:
+- `app/` — Route handlers and pages (UI + API entry points)
+- `components/` — UI components (no business logic)
+- `services/` — Business logic (no DB imports, no UI imports)
+- `lib/` — Database access, utilities
+- `types/` — Shared types and validation schemas
+No circular dependencies. One-directional data flow. Shared types in a dedicated types directory.
 
-### IV. Authentic Behavior Verification
-Tests must be behavior-driven and authentic. They must fail when business logic, control flow, error handling, or public contracts change. Shallow replicas or always-green tests that do not exercise logic are unacceptable. Trivial assertions and snapshot tests are disallowed.
+### IV. Simplicity & YAGNI
+Start with the simplest solution that meets the spec. Do not add features, abstractions, or dependencies that are not required. Complexity must be justified in the implementation plan.
 
-### V. Prisma Mock Integrity
-Prisma Client mocks must always be used and must respect real method names, input arguments, and return data shapes. Mocks must act as faithful representations of the database layer to ensure contract safety without a real database connection.
+### V. Next.js Conventions
+React Server Components by default. `"use client"` only for interactive components. All data mutations through API route handlers. Use `next/image` for images, `next/link` for navigation.
 
-## Development Constraints
+### VI. Data Integrity
+All database operations use transactions when modifying multiple records. Unique constraints enforced at database level. Timestamps generated server-side. No partial writes — operations succeed completely or fail completely.
 
-- Internal implementation details (private methods, non-exported logic) must not be tested or mocked directly to avoid brittle tests.
-- API routes must be tested via direct handler invocation.
-- Assertions must validate both status codes and response contracts.
-- Code without meaningful, authentic tests is considered incomplete and will fail compliance checks.
+## Technology Stack
 
-## Execution Standards
+- **Language**: TypeScript
+- **Framework**: Next.js
+- **Database**: Prisma
+- **Styling**: Tailwind CSS (no other CSS solutions)
+- **Validation**: Zod for runtime type checking at API boundaries
+- **Testing**: Jest
 
-- Tests must be side-effect free and capable of running in parallel.
-- Spec Kit analysis will flag unverifiable behavior, missing tests, or non-authentic verification patterns.
-- Environment variables, time (timers), and randomness (Math.random, UUIDs) must be controlled via global or local mocks.
+## Quality Gates
+
+Before committing, ensure:
+1. `npx tsc --noEmit` passes (zero type errors)
+2. Linter passes with zero warnings or errors
+3. Formatter check passes (consistent formatting)
+4. Tests pass: `npx jest`
+
+## Security
+
+- All user input validated server-side
+- No PII in logs
+- Parameterized queries / ORM for all database access
+- No secrets in source code or client bundles
+- Environment variables for all configuration
 
 ## Governance
 
-This constitution defines non-negotiable constraints for all future development. It supersedes all other documentation. Amendments require documentation, unanimous agreement, and a major version update. All development must be validated against these principles by the Spec Kit.
+- Constitution supersedes all other guidance
+- Amendments require documented rationale and review
+- All PRs/reviews must verify compliance
+- Complexity must be justified against the simplicity principle
 
-**Version**: 1.0.0 | **Ratified**: 2026-02-13 | **Last Amended**: 2026-02-13
+**Version**: 1.0.0 | **Ratified**: 2026-02-19 | **Last Amended**: 2026-02-19

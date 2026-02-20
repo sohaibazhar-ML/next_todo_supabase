@@ -633,5 +633,77 @@
       "fetchFailed": "Failed to fetch users",
       "updateFailed": "Failed to update user"
     }
+  },
+  "landing": {
+    "nav": {
+      "howItWorks": "How it works",
+      "myDocuments": "My documents",
+      "contact": "Contact",
+      "login": "Login",
+      "register": "Register for free"
+    },
+    "logo": {
+      "tagline": "smart documents for your Swiss move"
+    },
+    "hero": {
+      "headline": "Over 90 templates for your move to Switzerland. Free to download now.",
+      "subheadline": "Organize your move to Switzerland digitally, easily and step by step.",
+      "cta": "Register for free",
+      "imageAlt": "Person on laptop by the water"
+    },
+    "infoBar": {
+      "expatsLine": "Built for expats moving to Switzerland",
+      "secureLine": "Secure Swiss hosting"
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "step1Title": "Register for free",
+      "step1Desc": "in less than 1 minute",
+      "step2Title": "Find the right templates",
+      "step2Desc": "download and fill in",
+      "step3Title": "Edit, print templates",
+      "step3Desc": "save or send"
+    },
+    "myDocuments": {
+      "title": "My documents",
+      "subtitle1": "Deregister, re-register, register.",
+      "subtitle2": "With myswissmove, your move to Switzerland becomes effortless.",
+      "checkItem1": "The ultimate document checklist",
+      "checkItem2": "Authorities, bank, insurance – everything sorted?",
+      "checkItem3": "These 15 documents you need for your fresh start in Switzerland",
+      "checkItem4": "Swiss move 2026: What you absolutely need to know legally",
+      "checkItem5": "Well prepared emigration: How to avoid costly mistakes",
+      "cta": "Register for free",
+      "imageAlt": "mySwissMove document dashboard"
+    },
+    "allDocuments": {
+      "title": "All important documents and templates in one place",
+      "description": "Thinking about emigrating, in the middle of preparations, or already immigrated? Then you've come to the right place at myswissmove. We've compiled all the information important for emigrating to Switzerland. And with our free moving planner, you get all important templates and checklists to download.",
+      "benefit1": "90 document templates as Word files for your move",
+      "benefit2": "Freely editable and saveable templates for your PC",
+      "benefit3": "One year of free storage and accessible online anytime",
+      "benefit4": "Checklists with all important to-dos for moving to Switzerland",
+      "imageAlt": "Couple moving with boxes"
+    },
+    "callback": {
+      "title": "Do you have questions or need help?",
+      "subtitle": "Then start your personal callback.",
+      "namePlaceholder": "First name, Last name",
+      "timePlaceholder": "Day, Time",
+      "phonePlaceholder": "My callback number",
+      "submit": "Confirm callback",
+      "sent": "Sent ✓"
+    },
+    "footer": {
+      "aboutUs": "About us",
+      "faq": "FAQ",
+      "impressum": "Legal notice",
+      "datenschutz": "Privacy policy",
+      "agb": "Terms & conditions",
+      "hotlineLabel": "Hotline:",
+      "hotlineNumber": "+49 78 123 4567",
+      "serviceInfo": "myswissmove is a service of Mehrwerk Schweiz AG",
+      "partnerLabel": "In cooperation with"
+    }
   }
 }

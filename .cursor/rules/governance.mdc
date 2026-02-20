@@ -1,0 +1,64 @@
+---
+description: Project governance rules for AI-assisted development
+globs: ["src/**/*.ts","src/**/*.tsx"]
+---
+
+# Governance Rules
+
+## Spec-First Development
+
+- Before writing any code, read the relevant feature spec in `.specify/specs/`
+- Never invent functionality not described in the spec
+- If requirements are ambiguous, mark `[NEEDS CLARIFICATION]` and ask — do not guess
+- Reference the spec user story ID (US-001, US-002, etc.) in code comments for traceability
+
+## Constitution Compliance
+
+Read and follow `.specify/memory/constitution.md` for all development decisions. Key rules:
+
+- TypeScript strict mode — no `any`, no `@ts-ignore`
+- React Server Components by default; `"use client"` only for interactive components
+- All data mutations through API route handlers in `app/api/`
+- Business logic in services layer, never in route handlers or UI components
+- Zod for runtime validation at API boundaries
+- Database access only through the data layer — never from UI components or route handlers directly
+
+## Layered Architecture
+
+```
+src/app/          → Route handlers and pages (UI + API entry points)
+src/components/   → React components (UI only, no business logic)
+src/services/     → Business logic (no DB imports, no UI imports)
+src/lib/          → Database access, utilities (no UI imports)
+src/types/        → Shared TypeScript types and validation schemas
+```
+
+Do NOT skip layers. Route handlers/controllers delegate to services. Services call data layer. Never reverse.
+
+## Code Quality Gates
+
+Before committing, ensure:
+1. `npx tsc --noEmit` passes (zero type errors)
+2. `npx eslint .` passes (zero warnings or errors)
+3. `npx prettier --check .` passes (consistent formatting)
+
+## API Response Convention
+
+All API routes MUST return:
+```typescript
+{ success: true, data: T }           // on success
+{ success: false, error: string }     // on failure
+{ success: false, error: string, details: ValidationError[] }  // on validation failure
+```
+
+## Security Rules
+
+- Never log PII (emails, names) to console
+- Always validate input server-side with Zod
+- Use parameterized queries (Prisma enforces this)
+- No secrets in client-side code
+
+## Constraints
+
+Global constraints in `.specify/specs/global/` are HARD GATES. Violating them blocks the PR.
+Feature constraints in `.specify/specs/[feature]/constraints.md` are also hard gates for that feature.

@@ -633,5 +633,77 @@
       "fetchFailed": "Benutzer konnten nicht abgerufen werden",
       "updateFailed": "Benutzer konnte nicht aktualisiert werden"
     }
+  },
+  "landing": {
+    "nav": {
+      "howItWorks": "So geht's",
+      "myDocuments": "My documents",
+      "contact": "Kontakt",
+      "login": "Login",
+      "register": "Kostenlos registrieren"
+    },
+    "logo": {
+      "tagline": "smart documents for your Swiss move"
+    },
+    "hero": {
+      "headline": "Über 90 Vorlagen rund um Ihren Umzug in die Schweiz. Jetzt Gratis zum Downloaden.",
+      "subheadline": "Organisieren Sie Ihren Umzug in die Schweiz digital, einfach und Schritt für Schritt.",
+      "cta": "Kostenlos registrieren",
+      "imageAlt": "Person am Laptop am Wasser"
+    },
+    "infoBar": {
+      "expatsLine": "Built for expats moving to Switzerland",
+      "secureLine": "Secure Swiss hosting"
+    },
+    "howItWorks": {
+      "title": "So geht´s",
+      "step1Title": "Kostenlos registrieren",
+      "step1Desc": "in weniger als 1 Minute",
+      "step2Title": "Passende Vorlagen",
+      "step2Desc": "downloaden und ausfüllen",
+      "step3Title": "Vorlagen ändern, drucken",
+      "step3Desc": "speichern oder versenden"
+    },
+    "myDocuments": {
+      "title": "My documents",
+      "subtitle1": "Abmelden, Ummelden, Anmelden.",
+      "subtitle2": "Mit myswissmove gelingt der Umzug in die Schweiz spielend.",
+      "checkItem1": "Die ultimative Dokumenten-Checkliste",
+      "checkItem2": "Behörden, Bank, Versicherung – alles geregelt?",
+      "checkItem3": "Diese 15 Dokumente brauchen Sie für Ihren Neustart in der Schweiz",
+      "checkItem4": "Schweiz-Umzug 2026: Was Sie rechtlich unbedingt beachten müssen",
+      "checkItem5": "Gut vorbereitet auswandern: So vermeiden Sie teure Fehler",
+      "cta": "Kostenlos registrieren",
+      "imageAlt": "mySwissMove Dokumenten-Dashboard"
+    },
+    "allDocuments": {
+      "title": "Alle wichtigen Dokumente und Vorlagen an einem Ort",
+      "description": "Sie spielen mit dem Gedanken auszuwandern, stecken mitten in den Vorbereitungen oder sind bereits eingewandert? Dann sind Sie bei myswissmove genau richtig. Alle Informationen, die für die Auswanderung in die Schweiz wichtig sind, haben wir für Sie zusammengestellt. Und mit unserem kostenlosen Umzugsplaner erhalten Sie alle wichtigen Vorlagen und Checklisten zum Download.",
+      "benefit1": "90 Dokumentvorlagen als Word-Datei rund um den Umzug",
+      "benefit2": "Frei editierbare und speicherbare Vorlagen für den PC",
+      "benefit3": "Ein Jahr lang kostenloser Speicher und jederzeit Online abrufbar",
+      "benefit4": "Checklisten mit allen wichtigen ToDo´s für den Umzug in die Schweiz",
+      "imageAlt": "Paar beim Umzug mit Kartons"
+    },
+    "callback": {
+      "title": "Sie haben Fragen oder benötigen Hilfe?",
+      "subtitle": "Dann starten Sie Ihren persönlichen Rückruf.",
+      "namePlaceholder": "Vorname, Name",
+      "timePlaceholder": "Tag, Uhrzeit",
+      "phonePlaceholder": "Meine Rückrufnummer",
+      "submit": "Rückruf bestätigen",
+      "sent": "Gesendet ✓"
+    },
+    "footer": {
+      "aboutUs": "Über uns",
+      "faq": "FAQ",
+      "impressum": "Impressum",
+      "datenschutz": "Datenschutz",
+      "agb": "AGB",
+      "hotlineLabel": "Hotline:",
+      "hotlineNumber": "+49 78 123 4567",
+      "serviceInfo": "myswissmove ist ein Service der Mehrwerk Schweiz AG",
+      "partnerLabel": "In Zusammenarbeit mit"
+    }
   }
 }
