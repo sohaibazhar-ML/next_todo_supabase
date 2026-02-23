@@ -633,5 +633,77 @@
       "fetchFailed": "Impossibile recuperare gli utenti",
       "updateFailed": "Impossibile aggiornare l'utente"
     }
+  },
+  "landing": {
+    "nav": {
+      "howItWorks": "Come funziona",
+      "myDocuments": "I miei documenti",
+      "contact": "Contatto",
+      "login": "Accesso",
+      "register": "Registrati gratuitamente"
+    },
+    "logo": {
+      "tagline": "documenti intelligenti per il tuo trasloco in Svizzera"
+    },
+    "hero": {
+      "headline": "Oltre 90 modelli per il tuo trasloco in Svizzera. Scaricali subito gratuitamente.",
+      "subheadline": "Organizza il tuo trasloco in Svizzera in modo digitale, semplice e passo dopo passo.",
+      "cta": "Registrati gratuitamente",
+      "imageAlt": "Persona che lavora al computer davanti al lago"
+    },
+    "infoBar": {
+      "expatsLine": "Creato per gli espatriati che si trasferiscono in Svizzera",
+      "secureLine": "Hosting svizzero sicuro"
+    },
+    "howItWorks": {
+      "title": "Come funziona",
+      "step1Title": "Registrati gratuitamente",
+      "step1Desc": "in meno di 1 minuto",
+      "step2Title": "Modelli adatti",
+      "step2Desc": "scarica e compila",
+      "step3Title": "Modifica, stampa",
+      "step3Desc": "salva o invia"
+    },
+    "myDocuments": {
+      "title": "I miei documenti",
+      "subtitle1": "Disdetta, cambio di residenza, iscrizione.",
+      "subtitle2": "Con myswissmove, il trasloco in Svizzera è facilissimo.",
+      "checkItem1": "La check-list definitiva per i documenti",
+      "checkItem2": "Autorità, banca, assicurazione – tutto pronto?",
+      "checkItem3": "I 15 documenti necessari per il tuo nuovo inizio in Svizzera",
+      "checkItem4": "Trasloco in Svizzera 2026: cosa devi assolutamente rispettare a livello legale",
+      "checkItem5": "Emigrare preparati: come evitare errori costosi",
+      "cta": "Registrati gratuitamente",
+      "imageAlt": "Dashboard dei documenti di mySwissMove"
+    },
+    "allDocuments": {
+      "title": "Tutti i documenti e i modelli importanti in un unico posto",
+      "description": "Stai pensando di emigrare, sei nel pieno dei preparativi o sei già arrivato? Allora sei nel posto giusto su myswissmove. Abbiamo raccolto per te tutte le informazioni importanti per il trasferimento in Svizzera. E con il nostro pianificatore di traslochi gratuito, riceverai tutti i modelli e le check-list importanti da scaricare.",
+      "benefit1": "90 modelli di documenti in formato Word per il trasloco",
+      "benefit2": "Modelli liberamente modificabili e salvabili sul PC",
+      "benefit3": "Archiviazione gratuita per un anno e accessibile online in qualsiasi momento",
+      "benefit4": "Check-list con tutte le cose importanti da fare per il trasloco in Svizzera",
+      "imageAlt": "Coppia durante il trasloco con scatoloni"
+    },
+    "callback": {
+      "title": "Hai domande o hai bisogno di aiuto?",
+      "subtitle": "Richiedi una chiamata personale.",
+      "namePlaceholder": "Nome, Cognome",
+      "timePlaceholder": "Giorno, Ora",
+      "phonePlaceholder": "Il mio numero per la chiamata",
+      "submit": "Conferma chiamata",
+      "sent": "Inviato ✓"
+    },
+    "footer": {
+      "aboutUs": "Chi siamo",
+      "faq": "FAQ",
+      "impressum": "Informazioni legali",
+      "datenschutz": "Protezione dei dati",
+      "agb": "CGV",
+      "hotlineLabel": "Hotline:",
+      "hotlineNumber": "+41 78 123 4567",
+      "serviceInfo": "myswissmove è un service della Mehrwerk Schweiz AG",
+      "partnerLabel": "In collaborazione con"
+    }
   }
 }

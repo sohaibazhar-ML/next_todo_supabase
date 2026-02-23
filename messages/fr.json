@@ -633,5 +633,77 @@
       "fetchFailed": "Échec de la récupération des utilisateurs",
       "updateFailed": "Échec de la mise à jour de l'utilisateur"
     }
+  },
+  "landing": {
+    "nav": {
+      "howItWorks": "Comment ça marche",
+      "myDocuments": "Mes documents",
+      "contact": "Contact",
+      "login": "Connexion",
+      "register": "S'inscrire gratuitement"
+    },
+    "logo": {
+      "tagline": "documents intelligents pour votre déménagement en Suisse"
+    },
+    "hero": {
+      "headline": "Plus de 90 modèles pour votre déménagement en Suisse. Téléchargement gratuit dès maintenant.",
+      "subheadline": "Organisez votre déménagement en Suisse de manière numérique, simple et étape par étape.",
+      "cta": "S'inscrire gratuitement",
+      "imageAlt": "Personne devant un ordinateur portable au bord de l'eau"
+    },
+    "infoBar": {
+      "expatsLine": "Conçu pour les expatriés s'installant en Suisse",
+      "secureLine": "Hébergement suisse sécurisé"
+    },
+    "howItWorks": {
+      "title": "Comment ça marche",
+      "step1Title": "S'inscrire gratuitement",
+      "step1Desc": "en moins d'une minute",
+      "step2Title": "Modèles adaptés",
+      "step2Desc": "télécharger et remplir",
+      "step3Title": "Modifier, imprimer",
+      "step3Desc": "sauvegarder ou envoyer"
+    },
+    "myDocuments": {
+      "title": "Mes documents",
+      "subtitle1": "Se désabonner, changer d'adresse, s'inscrire.",
+      "subtitle2": "Avec myswissmove, déménager en Suisse devient un jeu d'enfant.",
+      "checkItem1": "La liste de contrôle ultime pour les documents",
+      "checkItem2": "Autorités, banque, assurance – tout est réglé ?",
+      "checkItem3": "Ces 15 documents dont vous avez besoin pour votre nouveau départ en Suisse",
+      "checkItem4": "Déménagement en Suisse 2026 : ce que vous devez impérativement respecter sur le plan juridique",
+      "checkItem5": "S'expatrier bien préparé : comment éviter des erreurs coûteuses",
+      "cta": "S'inscrire gratuitement",
+      "imageAlt": "Tableau de bord des documents mySwissMove"
+    },
+    "allDocuments": {
+      "title": "Tous les documents et modèles importants en un seul endroit",
+      "description": "Vous envisagez de vous expatrier, vous êtes en plein préparatifs ou vous êtes déjà arrivé ? Alors vous êtes au bon endroit chez myswissmove. Nous avons rassemblé pour vous toutes les informations importantes pour s'installer en Suisse. Et avec notre planificateur de déménagement gratuit, vous recevez tous les modèles et listes de contrôle importants à télécharger.",
+      "benefit1": "90 modèles de documents au format Word pour le déménagement",
+      "benefit2": "Modèles librement modifiables et enregistrables sur ordinateur",
+      "benefit3": "Stockage gratuit pendant un an et accessible en ligne à tout moment",
+      "benefit4": "Listes de contrôle avec toutes les tâches importantes pour le déménagement en Suisse",
+      "imageAlt": "Couple lors d'un déménagement avec des cartons"
+    },
+    "callback": {
+      "title": "Vous avez des questions ou besoin d'aide ?",
+      "subtitle": "Alors lancez votre rappel personnel.",
+      "namePlaceholder": "Prénom, Nom",
+      "timePlaceholder": "Jour, Heure",
+      "phonePlaceholder": "Mon numéro de rappel",
+      "submit": "Confirmer le rappel",
+      "sent": "Envoyé ✓"
+    },
+    "footer": {
+      "aboutUs": "À propos de nous",
+      "faq": "FAQ",
+      "impressum": "Mentions légales",
+      "datenschutz": "Protection des données",
+      "agb": "CGV",
+      "hotlineLabel": "Hotline :",
+      "hotlineNumber": "+41 78 123 4567",
+      "serviceInfo": "myswissmove est un service de Mehrwerk Schweiz AG",
+      "partnerLabel": "En collaboration avec"
+    }
   }
 }
