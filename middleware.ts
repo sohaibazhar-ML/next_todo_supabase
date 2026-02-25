@@ -28,17 +28,55 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Apply intl middleware first to get locale-prefixed response
+  // Extract locale from pathname
+  const localeMatch = pathname.match(/^\/(de|en|fr|it)/)
+  const hasLocale = !!localeMatch
+
+  // Root path redirection based on IP country
+  if (pathname === '/') {
+    const localeCookie = request.cookies.get('NEXT_LOCALE')?.value
+
+    // Only auto-detect if no user preference is set
+    if (!localeCookie) {
+      // 1. Check IP Geolocation Headers
+      const country = (
+        request.headers.get('x-vercel-ip-country') || // Vercel
+        request.headers.get('cf-ipcountry') ||        // Cloudflare
+        'unknown'
+      ).toUpperCase()
+
+      // 2. Check Browser Language Header
+      const acceptLanguage = request.headers.get('accept-language') || ''
+
+      let detectedLocale = 'en' // Default
+
+      // Logic Mapping
+      if (country === 'FR' || acceptLanguage.toLowerCase().startsWith('fr')) {
+        detectedLocale = 'fr'
+      } else if (country === 'IT' || acceptLanguage.toLowerCase().startsWith('it')) {
+        detectedLocale = 'it'
+      } else if (['DE', 'AT', 'CH'].includes(country) || acceptLanguage.toLowerCase().startsWith('de')) {
+        detectedLocale = 'de'
+      }
+
+      // If detected locale is not English (the new default), redirect
+      if (detectedLocale !== 'en') {
+        const url = request.nextUrl.clone()
+        url.pathname = `/${detectedLocale}`
+        return NextResponse.redirect(url)
+      }
+    }
+  }
+
+  // Apply intl middleware
   const intlResponse = intlMiddleware(request)
 
-  // For intl redirects (e.g., / -> /de), return immediately
+  // For intl redirects (e.g., / -> /en), return immediately
   if (intlResponse.status === 307 || intlResponse.status === 308) {
     return intlResponse
   }
 
-  // Extract locale from pathname
-  const localeMatch = pathname.match(/^\/(de|en|fr|it)/)
-  const locale = localeMatch ? localeMatch[1] : 'de'
+  const locale = localeMatch ? localeMatch[1] : 'en'
 
   // Get the path without locale prefix
   const pathWithoutLocale = localeMatch
