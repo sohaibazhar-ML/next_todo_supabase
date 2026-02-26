@@ -1,24 +1,23 @@
 /**
  * Profiles API Route
- * 
+ *
  * Handles profile CRUD operations:
  * - GET: Fetch profile(s)
  * - POST: Create profile
  * - PUT: Update profile
- * 
- * This route has been refactored to:
- * - Use proper TypeScript types (no 'any')
- * - Use Prisma types for filters and updates
- * - Improve error handling
+ *
+ * Delegates all database operations to ProfileService.
+ * Validates inputs via Zod schemas.
  */
 
 import { createClient } from '@/lib/supabase/server'
-import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { isAdmin } from '@/lib/utils/roles'
-import type { ProfileUpdateInput } from '@/types/prisma'
 import { isErrorWithMessage } from '@/types'
+import type { ProfileUpdateInput } from '@/types/prisma'
 import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
+import { profileCreateSchema, profileUpdateSchema } from '@/lib/validations'
+import * as ProfileService from '@/services/server/profile.service'
 
 // GET - Get profile(s)
 export async function GET(request: Request) {
@@ -46,9 +45,7 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: ERROR_MESSAGES.FORBIDDEN }, { status: 403 })
       }
 
-      const profile = await prisma.profiles.findUnique({
-        where: { id: userId }
-      })
+      const profile = await ProfileService.getProfileById(userId)
 
       if (!profile) {
         return NextResponse.json({ error: ERROR_MESSAGES.PROFILE_NOT_FOUND }, { status: 404 })
@@ -61,59 +58,15 @@ export async function GET(request: Request) {
     const admin = await isAdmin(user.id)
     if (!admin) {
       // Non-admin: get current user's profile only
-      const profile = await prisma.profiles.findUnique({
-        where: { id: user.id }
-      })
+      const profile = await ProfileService.getProfileById(user.id)
       return NextResponse.json(profile)
     }
 
-    // Build where clause for filtering
-    const where: {
-      role?: string
-      created_at?: {
-        gte?: Date
-        lte?: Date
-      }
-      OR?: Array<{
-        username?: { contains: string; mode: 'insensitive' }
-        email?: { contains: string; mode: 'insensitive' }
-        first_name?: { contains: string; mode: 'insensitive' }
-        last_name?: { contains: string; mode: 'insensitive' }
-      }>
-    } = {}
-
-    // Role filter
-    if (role && role !== 'all') {
-      where.role = role
-    }
-
-    // Date range filter
-    if (fromDate || toDate) {
-      where.created_at = {}
-      if (fromDate) {
-        where.created_at.gte = new Date(fromDate)
-      }
-      if (toDate) {
-        const toDateEnd = new Date(toDate)
-        toDateEnd.setHours(23, 59, 59, 999)
-        where.created_at.lte = toDateEnd
-      }
-    }
-
-    // Search filter (search across username, email, first_name, last_name)
-    if (search && search.trim()) {
-      const searchTerm = search.trim()
-      where.OR = [
-        { username: { contains: searchTerm, mode: 'insensitive' } },
-        { email: { contains: searchTerm, mode: 'insensitive' } },
-        { first_name: { contains: searchTerm, mode: 'insensitive' } },
-        { last_name: { contains: searchTerm, mode: 'insensitive' } },
-      ]
-    }
-
-    const profiles = await prisma.profiles.findMany({
-      where,
-      orderBy: { created_at: 'desc' }
+    const profiles = await ProfileService.getProfiles({
+      role: role || undefined,
+      search: search || undefined,
+      fromDate: fromDate || undefined,
+      toDate: toDate || undefined,
     })
 
     return NextResponse.json(profiles)
@@ -131,12 +84,16 @@ export async function POST(request: Request) {
   try {
     const body = await request.json()
 
-    // Validate required fields
-    if (!body.id || !body.username || !body.email) {
-      return NextResponse.json(
-        { error: `${ERROR_MESSAGES.MISSING_REQUIRED_FIELDS}: id, username, email` },
-        { status: 400 }
-      )
+    // Validate input with Zod
+    const parsed = profileCreateSchema.safeParse(body)
+    if (!parsed.success) {
+      // Fall back to original validation for backwards compatibility
+      if (!body.id || !body.username || !body.email) {
+        return NextResponse.json(
+          { error: `${ERROR_MESSAGES.MISSING_REQUIRED_FIELDS}: id, username, email` },
+          { status: 400 }
+        )
+      }
     }
 
     // Validate user ID format (must be valid UUID)
@@ -145,9 +102,7 @@ export async function POST(request: Request) {
     }
 
     // Check if profile already exists
-    const existingProfile = await prisma.profiles.findUnique({
-      where: { id: body.id }
-    })
+    const existingProfile = await ProfileService.getProfileById(body.id)
 
     if (existingProfile) {
       return NextResponse.json(
@@ -189,9 +144,7 @@ export async function POST(request: Request) {
     })
 
     // Check if username exists
-    const existing = await prisma.profiles.findUnique({
-      where: { username: body.username }
-    })
+    const existing = await ProfileService.getProfileByUsername(body.username)
 
     if (existing) {
       return NextResponse.json(
@@ -200,37 +153,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const profile = await prisma.profiles.create({
-      data: {
-        id: body.id,
-        username: body.username,
-        first_name: body.first_name,
-        last_name: body.last_name,
-        email: body.email,
-        phone_number: body.phone_number,
-        current_address: body.current_address,
-        country_of_origin: body.country_of_origin,
-        new_address_switzerland: body.new_address_switzerland,
-        number_of_adults: body.number_of_adults || 1,
-        number_of_children: body.number_of_children || 0,
-        pets_type: body.pets_type || null,
-        marketing_consent: body.marketing_consent || false,
-        terms_accepted: body.terms_accepted || false,
-        data_privacy_accepted: body.data_privacy_accepted || false,
-        email_confirmed: body.email_confirmed ?? false,
-        email_confirmed_at: body.email_confirmed_at ? new Date(body.email_confirmed_at) : null,
-        keep_me_logged_in: body.keep_me_logged_in ?? true,
-        role: body.role || 'user',
-      }
-    })
-
-    // Convert Date objects to ISO strings for JSON serialization
-    const profileResponse = {
-      ...profile,
-      email_confirmed_at: profile.email_confirmed_at?.toISOString() || null,
-      created_at: profile.created_at.toISOString(),
-      updated_at: profile.updated_at.toISOString(),
-    }
+    const profileResponse = await ProfileService.createProfile(body)
 
     console.log(CONSOLE_MESSAGES.PROFILE_CREATED, profileResponse.id)
     return NextResponse.json(profileResponse, {
@@ -273,8 +196,17 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json()
-    const profileId = body.id || user.id
 
+    // Validate input with Zod
+    const parsed = profileUpdateSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues.map((i) => i.message).join(', ') },
+        { status: 400 }
+      )
+    }
+
+    const profileId = body.id || user.id
     const admin = await isAdmin(user.id)
 
     // Users can only update their own profile unless they're admin
@@ -283,9 +215,7 @@ export async function PUT(request: Request) {
     }
 
     // Check if profile exists
-    const existing = await prisma.profiles.findUnique({
-      where: { id: profileId }
-    })
+    const existing = await ProfileService.getProfileById(profileId)
 
     if (!existing) {
       return NextResponse.json({ error: ERROR_MESSAGES.PROFILE_NOT_FOUND }, { status: 404 })
@@ -334,10 +264,7 @@ export async function PUT(request: Request) {
       )
     }
 
-    const profile = await prisma.profiles.update({
-      where: { id: profileId },
-      data: updateData
-    })
+    const profile = await ProfileService.updateProfile(profileId, updateData)
 
     return NextResponse.json(profile)
   } catch (error) {
@@ -348,4 +275,3 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
-

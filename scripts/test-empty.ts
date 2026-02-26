@@ -29,11 +29,12 @@ async function main() {
         // Cleanup
         await drive.files.delete({ fileId: response.data.id! })
         console.log('Cleanup successful.')
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Creation FAILED:')
-        if (error.response) {
-            console.error('Status:', error.response.status)
-            console.error('Data:', JSON.stringify(error.response.data, null, 2))
+        const err = error as { response?: { status: number; data: unknown } }
+        if (err.response) {
+            console.error('Status:', err.response.status)
+            console.error('Data:', JSON.stringify(err.response.data, null, 2))
         } else {
             console.error(error)
         }

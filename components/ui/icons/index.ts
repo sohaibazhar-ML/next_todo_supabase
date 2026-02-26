@@ -48,5 +48,7 @@ export { default as IconUsersGroup } from './IconUsersGroup'
 export { default as IconPlus } from './IconPlus'
 export { default as IconInfo } from './IconInfo'
 export { default as IconGoogleDoc } from './IconGoogleDoc'
+export { default as IconSwissFlag } from './IconSwissFlag'
+export { default as IconRedCheckbox } from './IconRedCheckbox'
 
 export type { IconProps } from './IconDashboard'

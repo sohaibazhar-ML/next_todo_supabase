@@ -2,10 +2,12 @@
  * AllDocuments section — light gray background
  * Left: title, description paragraph, red checkbox checklist
  * Right: moving-image.png (couple with boxes)
+ * SVG checkbox extracted to components/ui/icons/IconRedCheckbox.tsx
  */
 
 import Image from 'next/image'
 import { useTranslations } from 'next-intl'
+import IconRedCheckbox from '@/components/ui/icons/IconRedCheckbox'
 
 const BENEFIT_KEYS = ['benefit1', 'benefit2', 'benefit3', 'benefit4'] as const
 
@@ -30,10 +32,7 @@ export default function AllDocuments() {
               {BENEFIT_KEYS.map((key) => (
                 <li key={key} className="flex items-start gap-2.5">
                   <span className="flex-shrink-0 mt-[1px]">
-                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                      <rect x="1" y="1" width="16" height="16" rx="2" stroke="#e62e2d" strokeWidth="1.5" fill="white" />
-                      <path d="M4.5 9L7.5 12L13.5 6" stroke="#e62e2d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                    <IconRedCheckbox size={18} />
                   </span>
                   <span className="text-[14px] md:text-[15px] text-[#555] leading-snug font-medium">
                     {t(key)}
