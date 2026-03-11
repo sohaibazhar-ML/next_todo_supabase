@@ -15,8 +15,13 @@
     "prisma:pull": "prisma db pull"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@hookform/resolvers": "^3.10.0",
+    "@mui/icons-material": "^7.3.9",
+    "@mui/material": "^7.3.9",
     "@prisma/client": "^6.19.0",
+    "@raphiniert/ra-data-postgrest": "^2.5.1",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.79.0",
     "@tanstack/react-query": "^5.90.19",
@@ -40,6 +45,7 @@
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^5.4.394",
     "react": "19.2.0",
+    "react-admin": "^5.14.3",
     "react-dom": "19.2.0",
     "react-hook-form": "^7.71.1",
     "react-pdf": "^10.2.0",

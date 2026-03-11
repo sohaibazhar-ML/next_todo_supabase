@@ -1,0 +1,86 @@
+import { AuthProvider } from "react-admin";
+import { createClient } from "@/lib/supabase/client";
+
+const supabase = createClient();
+
+export const authProvider: AuthProvider = {
+    // Called when the user attempts to log in
+    login: async ({ username, password }: { username: string; password: string }) => {
+        const { error } = await supabase.auth.signInWithPassword({
+            email: username,
+            password,
+        });
+        if (error) {
+            throw new Error(error.message);
+        }
+    },
+
+    // Called when the user clicks on the logout button
+    logout: async () => {
+        await supabase.auth.signOut();
+    },
+
+    // Called when the API returns an error
+    checkError: async (error: { status?: number; message?: string }) => {
+        if (error.status === 401) {
+            const { data } = await supabase.auth.getUser();
+            if (!data.user) {
+                throw new Error("Unauthorized");
+            }
+        }
+    },
+
+    // Called when the user navigates to a new location, to check for authentication
+    checkAuth: async () => {
+        const { data } = await supabase.auth.getUser();
+        if (!data.user) {
+            throw new Error("Not authenticated");
+        }
+    },
+
+    // Called when the user navigates to a new location, to check for permissions
+    getPermissions: async () => {
+        const { data } = await supabase.auth.getUser();
+        if (!data.user) return null;
+
+        try {
+            const response = await fetch(`/api/admin/profiles?id=${data.user.id}`);
+            if (response.ok) {
+                const profile = await response.json();
+                return profile?.role ?? "user";
+            }
+        } catch (e) {
+            console.warn("[AuthProvider] Failed to fetch permissions:", e);
+        }
+
+        return "user";
+    },
+
+    // Called to display the user's identity in the app bar
+    getIdentity: async () => {
+        const { data } = await supabase.auth.getUser();
+        if (!data.user) throw new Error("Not authenticated");
+
+        try {
+            const response = await fetch(`/api/admin/profiles?id=${data.user.id}`);
+            if (response.ok) {
+                const profile = await response.json();
+                if (profile) {
+                    return {
+                        id: data.user.id,
+                        fullName: `${profile.first_name} ${profile.last_name}`,
+                        avatar: undefined,
+                    };
+                }
+            }
+        } catch (e) {
+            console.warn("[AuthProvider] Failed to fetch identity:", e);
+        }
+
+        return {
+            id: data.user.id,
+            fullName: data.user.email ?? "User",
+            avatar: undefined,
+        };
+    },
+};
