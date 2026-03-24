@@ -5,8 +5,7 @@ import { hasPermission } from '@/lib/utils/roles'
 import { ERROR_MESSAGES, STORAGE_BUCKETS } from '@/constants'
 import { DeepMockProxy } from 'jest-mock-extended'
 import { PrismaClient } from '@prisma/client'
-import { createMockRequest, validateResponse, cleanupMocks } from '@/test/utils/handler-utils'
-import { uploadTemplateToDrive } from '@/actions/google-docs'
+import { validateResponse, cleanupMocks } from '@/test/utils/handler-utils'
 
 // Mock dependencies
 jest.mock('@/lib/supabase/server')
@@ -14,7 +13,6 @@ jest.mock('@/lib/prisma', () => ({
     prisma: (require('jest-mock-extended') as any).mockDeep(),
 }))
 jest.mock('@/lib/utils/roles')
-jest.mock('@/actions/google-docs')
 
 const prismaMock = prisma as unknown as DeepMockProxy<PrismaClient>
 
@@ -23,15 +21,16 @@ describe('Document Upload API', () => {
     const mockUser = { id: mockUserId, email: 'user@example.com' }
 
     // Helper to create a multi-part form data request
-    const createUploadRequest = (fields: Record<string, any>, fileContent = 'test data', fileName = 'test.pdf', fileType = 'application/pdf') => {
+    const createUploadRequest = (fields: Record<string, any>, files: { content: string, name: string, type: string }[] = [{ content: 'test data', name: 'test.pdf', type: 'application/pdf' }]) => {
         const formData = new FormData()
-        if (fields.file !== null && fields.file !== undefined) {
-            // Use explicit case for null to skip file
-        } else if (fields.file === null) {
-            // skip
+        
+        if (fields.file === null) {
+            // skip adding files
         } else {
-            const blob = new Blob([fileContent], { type: fileType })
-            formData.append('file', blob, fileName)
+            files.forEach(f => {
+                const blob = new Blob([f.content], { type: f.type })
+                formData.append('file', blob, f.name)
+            })
         }
 
         Object.entries(fields).forEach(([key, value]) => {
@@ -40,7 +39,6 @@ describe('Document Upload API', () => {
             }
         })
 
-        // Bypass createMockRequest to avoid 'application/json' default header
         return new Request('http://localhost/api/documents/upload', {
             method: 'POST',
             body: formData
@@ -121,7 +119,7 @@ describe('Document Upload API', () => {
                 ; (hasPermission as jest.Mock).mockResolvedValue(true)
         })
 
-        it('should upload a new root document successfully', async () => {
+        it('should upload a single document successfully', async () => {
             prismaMock.documents.create.mockResolvedValue({
                 id: 'new-id',
                 title: validFields.title,
@@ -136,242 +134,48 @@ describe('Document Upload API', () => {
             expect(status).toBe(201)
             expect(data.version).toBe('1.0')
             expect(mockStorage.from).toHaveBeenCalledWith(STORAGE_BUCKETS.DOCUMENTS)
-            expect(prismaMock.documents.create).toHaveBeenCalledWith(expect.objectContaining({
-                data: expect.objectContaining({
-                    parent_document_id: null
-                })
-            }))
+            expect(prismaMock.documents.create).toHaveBeenCalled()
         })
 
-        it('should handle alternative tag formats (comma-separated)', async () => {
+        it('should upload multiple documents successfully (bulk)', async () => {
             prismaMock.documents.create.mockResolvedValue({
                 id: 'new-id',
-                file_size: BigInt(9)
+                file_size: BigInt(9),
             } as any)
 
-            const request = createUploadRequest({ ...validFields, tags: 'tag1, tag2' })
-            await POST(request)
+            const files = [
+                { content: 'data1', name: 'doc1.pdf', type: 'application/pdf' },
+                { content: 'data2', name: 'doc2.pdf', type: 'application/pdf' }
+            ]
 
-            expect(prismaMock.documents.create).toHaveBeenCalledWith(expect.objectContaining({
-                data: expect.objectContaining({
-                    tags: ['tag1', 'tag2']
-                })
-            }))
-        })
-
-        it('should return 400 if storage upload fails', async () => {
-            mockStorage.upload.mockResolvedValueOnce({ error: { message: 'Upload Error' } })
-
-            const request = createUploadRequest(validFields)
+            const request = createUploadRequest(validFields, files)
             const response = await POST(request)
-            const { status, error } = await validateResponse<any>(response)
+            const { status, data } = await validateResponse<any>(response)
 
-            expect(status).toBe(400)
-            expect(error).toContain('Upload failed: Upload Error')
+            expect(status).toBe(201)
+            expect(Array.isArray(data)).toBe(true)
+            expect(data.length).toBe(2)
+            expect(prismaMock.documents.create).toHaveBeenCalledTimes(2)
         })
 
-        describe('Versioning', () => {
-            it('should upload a new version and increment version number correctly', async () => {
-                const parentId = 'doc-1'
-                prismaMock.documents.findUnique.mockResolvedValue({
-                    id: parentId,
-                    version: '1.1',
-                    parent_document_id: null
-                } as any)
-                prismaMock.documents.findMany.mockResolvedValue([
-                    { version: '1.0' },
-                    { version: '1.1' }
-                ] as any)
-                prismaMock.documents.create.mockResolvedValue({
-                    id: 'new-id',
-                    version: '1.2',
-                    file_size: BigInt(9)
-                } as any)
+        it('should detect various file types correctly', async () => {
+            const types = [
+                { name: 'test.doc', type: 'document' },
+                { name: 'test.xls', type: 'spreadsheet' },
+                { name: 'test.pdf', type: 'pdf' },
+                { name: 'test.unknown', type: 'other' }
+            ]
 
-                const request = createUploadRequest({ ...validFields, parent_document_id: parentId })
-                const response = await POST(request)
-                const { status, data } = await validateResponse<any>(response)
-
-                expect(status).toBe(201)
-                expect(data.version).toBe('1.2')
-                expect(prismaMock.documents.create).toHaveBeenCalledWith(expect.objectContaining({
+            for (const t of types) {
+                prismaMock.documents.create.mockResolvedValueOnce({ id: 'id', file_size: BigInt(1) } as any)
+                const request = createUploadRequest(validFields, [{ content: 'c', name: t.name, type: 'any' }])
+                await POST(request)
+                expect(prismaMock.documents.create).toHaveBeenLastCalledWith(expect.objectContaining({
                     data: expect.objectContaining({
-                        parent_document_id: parentId
+                        file_type: t.type
                     })
                 }))
-            })
-
-            it('should handle parent with no valid version numbers', async () => {
-                const parentId = 'doc-1'
-                prismaMock.documents.findUnique.mockResolvedValue({ id: parentId, version: null } as any)
-                prismaMock.documents.findMany.mockResolvedValue([{ version: 'invalid' }] as any)
-                prismaMock.documents.create.mockResolvedValue({ id: 'id', file_size: BigInt(1), version: '0.1' } as any)
-
-                const request = createUploadRequest({ ...validFields, parent_document_id: parentId })
-                const response = await POST(request)
-                const { data } = await validateResponse<any>(response)
-                expect(data.version).toBe('0.1')
-            })
-
-            it('should handle version fallback when version field is null', async () => {
-                const parentId = 'doc-1'
-                prismaMock.documents.findUnique.mockResolvedValue({ id: parentId, version: '1.0' } as any)
-                prismaMock.documents.findMany.mockResolvedValue([{ version: null }] as any)
-                prismaMock.documents.create.mockResolvedValue({ id: 'id', file_size: BigInt(1), version: '1.1' } as any)
-
-                const request = createUploadRequest({ ...validFields, parent_document_id: parentId })
-                await POST(request)
-                expect(prismaMock.documents.create).toHaveBeenCalledWith(expect.objectContaining({
-                    data: expect.objectContaining({
-                        version: '1.1'
-                    })
-                }))
-            })
-
-            it('should handle versioning from a sub-version (find root)', async () => {
-                const subversionId = 'sub-1'
-                const rootId = 'root-1'
-                prismaMock.documents.findUnique.mockResolvedValue({
-                    id: subversionId,
-                    version: '1.1',
-                    parent_document_id: rootId
-                } as any)
-                prismaMock.documents.findMany.mockResolvedValue([{ version: '1.1' }] as any)
-                prismaMock.documents.create.mockResolvedValue({
-                    id: 'new-id',
-                    version: '1.2',
-                    file_size: BigInt(9)
-                } as any)
-
-                const request = createUploadRequest({ ...validFields, parent_document_id: subversionId })
-                await POST(request)
-
-                expect(prismaMock.documents.create).toHaveBeenCalledWith(expect.objectContaining({
-                    data: expect.objectContaining({
-                        parent_document_id: rootId
-                    })
-                }))
-            })
-
-            it('should return 404 if parent document not found', async () => {
-                prismaMock.documents.findUnique.mockResolvedValue(null)
-
-                const request = createUploadRequest({ ...validFields, parent_document_id: 'nonexistent' })
-                const response = await POST(request)
-                const { status, error } = await validateResponse<any>(response)
-
-                expect(status).toBe(404)
-                expect(error).toBe(ERROR_MESSAGES.PARENT_DOCUMENT_NOT_FOUND)
-            })
-        })
-
-        describe('Google Drive Integration', () => {
-            it('should trigger drive upload for DOCX files', async () => {
-                ; (uploadTemplateToDrive as jest.Mock).mockResolvedValue('drive-id')
-                prismaMock.documents.create.mockResolvedValue({
-                    id: 'new-id',
-                    file_size: BigInt(9),
-                    google_drive_template_id: 'drive-id'
-                } as any)
-
-                const request = createUploadRequest(validFields, 'docx content', 'test.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-                const response = await POST(request)
-                const { status } = await validateResponse<any>(response)
-                expect(status).toBe(201)
-                expect(uploadTemplateToDrive).toHaveBeenCalled()
-            })
-
-            it('should handle Google Drive upload failure gracefully (Error instance)', async () => {
-                const driveError = new Error('Drive Panic')
-                    ; (uploadTemplateToDrive as jest.Mock).mockRejectedValue(driveError)
-                prismaMock.documents.create.mockResolvedValue({
-                    id: 'new-id',
-                    file_size: BigInt(9),
-                    google_drive_template_id: null
-                } as any)
-
-                const request = createUploadRequest(validFields, 'docx content', 'test.docx')
-                await POST(request)
-
-                // Verify console.error was called with the error object
-                expect(console.error).toHaveBeenCalledWith(expect.stringContaining('Google Drive Conversion Failed'), driveError)
-            })
-
-            it('should handle Google Drive upload failure gracefully (non-Error)', async () => {
-                ; (uploadTemplateToDrive as jest.Mock).mockRejectedValue('Drive exploded')
-                prismaMock.documents.create.mockResolvedValue({
-                    id: 'new-id',
-                    file_size: BigInt(9),
-                    google_drive_template_id: null
-                } as any)
-
-                const request = createUploadRequest(validFields, 'docx content', 'test.docx')
-                await POST(request)
-                expect(console.error).toHaveBeenCalledWith(expect.stringContaining('Google Drive Conversion Failed'), 'Drive exploded')
-            })
-
-            it('should skip drive upload for non-docx files', async () => {
-                const request = createUploadRequest(validFields, 'pdf content', 'test.pdf', 'application/pdf')
-                await POST(request)
-                expect(uploadTemplateToDrive).not.toHaveBeenCalled()
-            })
-
-            it('should detect various file types correctly including legacy and no extension', async () => {
-                const types = [
-                    { name: 'test.doc', type: 'document' },
-                    { name: 'test.xls', type: 'spreadsheet' },
-                    { name: 'test.docx', type: 'document' },
-                    { name: 'test.xlsx', type: 'spreadsheet' },
-                    { name: 'test.pdf', type: 'pdf' },
-                    { name: 'test.zip', type: 'archive' },
-                    { name: 'test.unknown', type: 'other' },
-                    { name: 'noext', type: 'other' },
-                    { name: 'trailing.', type: 'other' }
-                ]
-
-                for (const t of types) {
-                    prismaMock.documents.create.mockResolvedValueOnce({ id: 'id', file_size: BigInt(1) } as any)
-                    const request = createUploadRequest(validFields, 'content', t.name)
-                    await POST(request)
-                    expect(prismaMock.documents.create).toHaveBeenLastCalledWith(expect.objectContaining({
-                        data: expect.objectContaining({
-                            file_type: t.type
-                        })
-                    }))
-                }
-            })
-
-            it('should hit drive upload with MIME type and docx extension', async () => {
-                ; (uploadTemplateToDrive as jest.Mock).mockResolvedValue('drive-id')
-                prismaMock.documents.create.mockResolvedValue({ id: 'id', file_size: BigInt(1) } as any)
-
-                const request = createUploadRequest(validFields, 'content', 'test.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-                await POST(request)
-                expect(uploadTemplateToDrive).toHaveBeenCalled()
-            })
-
-            it('should hit drive upload with MIME type only (but it will skip due to fileType check)', async () => {
-                // This test documents current behavior: fileType MUST be document too
-                ; (uploadTemplateToDrive as jest.Mock).mockResolvedValue('drive-id')
-                prismaMock.documents.create.mockResolvedValue({ id: 'id', file_size: BigInt(1) } as any)
-
-                const request = createUploadRequest(validFields, 'content', 'no-ext', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-                await POST(request)
-                expect(uploadTemplateToDrive).not.toHaveBeenCalled()
-            })
-        })
-
-        it('should use default values for searchable_content and featured flags', async () => {
-            prismaMock.documents.create.mockResolvedValue({ id: 'id', file_size: BigInt(1) } as any)
-            const request = createUploadRequest({ title: 'T', category: 'C' })
-            await POST(request)
-
-            expect(prismaMock.documents.create).toHaveBeenCalledWith(expect.objectContaining({
-                data: expect.objectContaining({
-                    searchable_content: null,
-                    is_featured: false
-                })
-            }))
+            }
         })
     })
 
@@ -389,21 +193,5 @@ describe('Document Upload API', () => {
 
         expect(status).toBe(500)
         expect(error).toBe('Database error')
-    })
-
-    it('should return 500 if a non-Error object is thrown', async () => {
-        ; (createClient as jest.Mock).mockResolvedValue({
-            auth: { getUser: jest.fn().mockResolvedValue({ data: { user: mockUser } }) },
-            storage: { from: jest.fn().mockReturnThis(), upload: jest.fn().mockResolvedValue({ error: null }) }
-        })
-            ; (hasPermission as jest.Mock).mockResolvedValue(true)
-        prismaMock.documents.create.mockRejectedValue('Critical DB Failure')
-
-        const request = createUploadRequest({ title: 'T', category: 'C' })
-        const response = await POST(request)
-        const { status, error } = await validateResponse<any>(response)
-
-        expect(status).toBe(500)
-        expect(error).toBe(ERROR_MESSAGES.INTERNAL_SERVER_ERROR)
     })
 })

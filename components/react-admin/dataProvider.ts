@@ -134,13 +134,57 @@ export const dataProvider: DataProvider = {
      * Create a new record.
      * Used by React Admin's <Create> component.
      *
-     * Sends a POST request with the record data in the body.
+     * For 'documents', it uses FormData to support file uploads.
      * Returns: { data: Record } (the newly created record with its ID)
      */
     create: async (resource, params) => {
+        if (resource === 'documents' && params.data.file) {
+            const formData = new FormData();
+            
+            // Handle multiple files or a single file
+            const files = Array.isArray(params.data.file) ? params.data.file : [params.data.file];
+            
+            files.forEach((fileObj: any) => {
+                if (fileObj && fileObj.rawFile) {
+                    formData.append('file', fileObj.rawFile);
+                }
+            });
+
+            // Append other fields
+            for (const [key, value] of Object.entries(params.data)) {
+                if (key === 'file') continue;
+                
+                if (key === 'tags' && typeof value === 'string') {
+                    formData.append(key, JSON.stringify(value.split(',').map(t => t.trim()).filter(Boolean)));
+                } else if (Array.isArray(value)) {
+                    formData.append(key, JSON.stringify(value));
+                } else if (value !== undefined && value !== null) {
+                    formData.append(key, String(value));
+                }
+            }
+            
+            const response = await fetch('/api/documents/upload', {
+                method: 'POST',
+                body: formData,
+            });
+            const json = await response.json();
+            if (!response.ok) throw new Error(json.error || 'Upload failed');
+            
+            // For bulk uploads, React Admin expects a single object for navigation.
+            // We return the first one to avoid "missing id" errors.
+            const data = Array.isArray(json) ? json[0] : json;
+            return { data };
+        }
+
+        const data = { ...params.data };
+        // Parse tags if it's a string (from TextInput)
+        if (resource === 'documents' && typeof data.tags === 'string') {
+            data.tags = data.tags.split(',').map((t: string) => t.trim()).filter(Boolean);
+        }
+
         const { json } = await httpClient(`${apiUrl}/${resource}`, {
             method: 'POST',
-            body: JSON.stringify(params.data),
+            body: JSON.stringify(data),
         });
         return { data: json };
     },
@@ -153,9 +197,17 @@ export const dataProvider: DataProvider = {
      * Returns: { data: Record } (the updated record)
      */
     update: async (resource, params) => {
+        const data: any = { id: params.id, ...params.data };
+        
+        // Convert tags string to array if it's a string from TextInput
+        if (resource === 'documents' && typeof data.tags === 'string') {
+            data.tags = data.tags.split(',').map((t: string) => t.trim()).filter(Boolean);
+        }
+
+        // Use the base resource URL as [id] is handled in the body by the API
         const { json } = await httpClient(`${apiUrl}/${resource}`, {
             method: 'PUT',
-            body: JSON.stringify({ id: params.id, ...params.data }),
+            body: JSON.stringify(data),
         });
         return { data: json };
     },

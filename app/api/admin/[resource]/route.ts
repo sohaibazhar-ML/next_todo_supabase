@@ -13,7 +13,7 @@ import { prisma } from '@/lib/prisma';
 export const dynamic = 'force-dynamic';
 
 // Whitelist of resources that can be accessed via this API
-const ALLOWED_RESOURCES = ['profiles', 'documents', 'download_logs', 'subadmin_permissions', 'user_document_versions'] as const;
+const ALLOWED_RESOURCES = ['profiles', 'documents', 'download_logs', 'subadmin_permissions', 'user_document_versions', 'documents-list', 'stats', 'settings'] as const;
 type ResourceName = typeof ALLOWED_RESOURCES[number];
 
 function isAllowedResource(resource: string): resource is ResourceName {
@@ -25,9 +25,12 @@ function getPrismaModel(resource: ResourceName) {
     const models: Record<ResourceName, any> = {
         profiles: prisma.profiles,
         documents: prisma.documents,
+        'documents-list': prisma.documents,
         download_logs: prisma.download_logs,
         subadmin_permissions: prisma.subadmin_permissions,
         user_document_versions: prisma.user_document_versions,
+        stats: prisma.profiles, // Dummy mapping for custom view
+        settings: prisma.profiles, // Dummy mapping for custom view
     };
     return models[resource];
 }
@@ -105,20 +108,71 @@ export async function GET(
     const sortOrder = (searchParams.get('_sortOrder') || 'DESC').toLowerCase();
     const filterParam = searchParams.get('_filters');
 
-    // Build Prisma where clause from filters (string = case-insensitive search)
+    // Build Prisma where clause from filters
     let where: any = {};
     if (filterParam) {
         try {
             const filters = JSON.parse(filterParam);
-            for (const [key, value] of Object.entries(filters)) {
-                if (typeof value === 'string') {
-                    where[key] = { contains: value, mode: 'insensitive' };
+            const { q, fromDate, lte_created_at, gte_created_at, ...exactFilters } = filters;
+
+            // Global search (q)
+            if (q) {
+                if (resource === 'documents') {
+                    where.OR = [
+                        { title: { contains: q, mode: 'insensitive' } },
+                        { description: { contains: q, mode: 'insensitive' } },
+                        { file_name: { contains: q, mode: 'insensitive' } },
+                    ];
+                } else if (resource === 'profiles') {
+                    where.OR = [
+                        { first_name: { contains: q, mode: 'insensitive' } },
+                        { last_name: { contains: q, mode: 'insensitive' } },
+                        { email: { contains: q, mode: 'insensitive' } },
+                        { username: { contains: q, mode: 'insensitive' } },
+                    ];
                 } else {
-                    where[key] = value;
+                    // Fallback for other resources: try 'name' or 'title' if they exist in the schema
+                    where.OR = [
+                        { id: { contains: q, mode: 'insensitive' } }
+                    ];
+                }
+            }
+
+            // Date Range Filtering (standard RA uses gte/lte prefix, custom dashboard used fromDate/toDate)
+            const start = filters.fromDate || filters.gte_created_at;
+            const end = filters.toDate || filters.lte_created_at;
+
+            if (start || end) {
+                where.created_at = {};
+                if (start) where.created_at.gte = new Date(start);
+                if (end) where.created_at.lte = new Date(end);
+            }
+
+            // Other exact or string matches
+            for (const [key, value] of Object.entries(exactFilters)) {
+                if (key === 'role' && value === 'all') continue;
+                if (!value && value !== false && value !== 0) continue;
+
+                let filterKey = key;
+                // Resource-specific mapping
+                if (resource === 'documents' || resource === 'documents-list') {
+                    if (key === 'fileType') filterKey = 'file_type';
+                }
+
+                if (key === 'tags' && resource === 'documents') {
+                    // Handle tags array filtering
+                    const tagList = typeof value === 'string' ? value.split(',').map(t => t.trim()).filter(Boolean) : value;
+                    if (Array.isArray(tagList) && tagList.length > 0) {
+                        where.tags = { hasSome: tagList };
+                    }
+                } else if (typeof value === 'string' && value.length > 0) {
+                    where[filterKey] = { contains: value, mode: 'insensitive' };
+                } else if (value !== undefined && value !== '') {
+                    where[filterKey] = value;
                 }
             }
         } catch (e) {
-            // Ignore invalid filter JSON
+            console.error('[Admin API] Filter parse error:', e);
         }
     }
 
@@ -181,6 +235,11 @@ export async function PUT(
         return NextResponse.json({ error: auth.message }, { status: auth.status });
     }
 
+    // Role-based restriction: Only Admins can edit
+    if (!auth.isAdmin) {
+        return NextResponse.json({ error: 'Admin access required for updates' }, { status: 403 });
+    }
+
     const { resource } = await params;
     if (!isAllowedResource(resource)) {
         return NextResponse.json({ error: `Unknown resource: ${resource}` }, { status: 400 });
@@ -207,6 +266,11 @@ export async function DELETE(
     const auth = await authorize(request);
     if (!auth.authorized) {
         return NextResponse.json({ error: auth.message }, { status: auth.status });
+    }
+
+    // Role-based restriction: Only Admins can delete
+    if (!auth.isAdmin) {
+        return NextResponse.json({ error: 'Admin access required for deletion' }, { status: 403 });
     }
 
     const { resource } = await params;
