@@ -22,14 +22,29 @@ export async function GET(request: NextRequest) {
     }
 
     const searchParams = request.nextUrl.searchParams;
-    const month = parseInt(searchParams.get('month') || format(new Date(), 'M'));
-    const year = parseInt(searchParams.get('year') || format(new Date(), 'yyyy'));
+    const fromParam = searchParams.get('from');
+    const toParam = searchParams.get('to');
 
     try {
-        const start = startOfMonth(new Date(year, month - 1));
-        const end = endOfMonth(new Date(year, month - 1));
+        let start: Date;
+        let end: Date;
 
-        // Get all uploads in this month
+        if (fromParam && toParam) {
+            start = new Date(fromParam);
+            end = new Date(toParam);
+            // Ensure 'end' includes the entire day
+            end.setHours(23, 59, 59, 999);
+        } else {
+            // Default to current month if no dates provided
+            start = startOfMonth(new Date());
+            end = endOfMonth(new Date());
+        }
+
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+            return NextResponse.json({ error: 'Invalid date format' }, { status: 400 });
+        }
+
+        // Get all uploads in this interval
         const uploads = await prisma.documents.findMany({
             where: {
                 created_at: {
@@ -42,7 +57,7 @@ export async function GET(request: NextRequest) {
             },
         });
 
-        // Get all downloads in this month
+        // Get all downloads in this interval
         const downloads = await prisma.download_logs.findMany({
             where: {
                 downloaded_at: {
@@ -59,8 +74,8 @@ export async function GET(request: NextRequest) {
         const days = eachDayOfInterval({ start, end });
         const reportData = days.map(day => {
             const dayStr = format(day, 'yyyy-MM-dd');
-            const dailyUploads = uploads.filter(u => format(u.created_at!, 'yyyy-MM-dd') === dayStr).length;
-            const dailyDownloads = downloads.filter(d => format(d.downloaded_at!, 'yyyy-MM-dd') === dayStr).length;
+            const dailyUploads = uploads.filter(u => u.created_at && format(u.created_at, 'yyyy-MM-dd') === dayStr).length;
+            const dailyDownloads = downloads.filter(d => d.downloaded_at && format(d.downloaded_at, 'yyyy-MM-dd') === dayStr).length;
 
             return {
                 date: dayStr,
@@ -70,8 +85,8 @@ export async function GET(request: NextRequest) {
         });
 
         return NextResponse.json({
-            month,
-            year,
+            from: format(start, 'yyyy-MM-dd'),
+            to: format(end, 'yyyy-MM-dd'),
             totalUploads: uploads.length,
             totalDownloads: downloads.length,
             dailyData: reportData,

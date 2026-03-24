@@ -8,10 +8,7 @@ import {
     Typography, 
     Grid, 
     Button, 
-    FormControl, 
-    InputLabel, 
-    Select, 
-    MenuItem, 
+    TextField,
     Table, 
     TableBody, 
     TableCell, 
@@ -22,19 +19,23 @@ import {
     Divider
 } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
+import { format, startOfMonth } from 'date-fns';
 
 const ReportsPage = () => {
     const notify = useNotify();
     const { permissions } = usePermissions();
-    const [month, setMonth] = useState(new Date().getMonth() + 1);
-    const [year, setYear] = useState(new Date().getFullYear());
+    
+    // Default to start of current month and today
+    const [fromDate, setFromDate] = useState(format(startOfMonth(new Date()), 'yyyy-MM-dd'));
+    const [toDate, setToDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+    
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(false);
 
     const fetchReport = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`/api/admin/reports?month=${month}&year=${year}`);
+            const response = await fetch(`/api/admin/reports?from=${fromDate}&to=${toDate}`);
             if (!response.ok) throw new Error('Failed to fetch report');
             const result = await response.json();
             setData(result);
@@ -47,7 +48,7 @@ const ReportsPage = () => {
 
     useEffect(() => {
         fetchReport();
-    }, [month, year]);
+    }, [fromDate, toDate]);
 
     const exportToCSV = () => {
         if (!data || !data.dailyData) return;
@@ -64,53 +65,42 @@ const ReportsPage = () => {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.setAttribute('href', url);
-        link.setAttribute('download', `report_${year}_${month}.csv`);
+        link.setAttribute('download', `report_${fromDate}_to_${toDate}.csv`);
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     };
 
-    const months = [
-        { id: 1, name: 'January' }, { id: 2, name: 'February' }, { id: 3, name: 'March' },
-        { id: 4, name: 'April' }, { id: 5, name: 'May' }, { id: 6, name: 'June' },
-        { id: 7, name: 'July' }, { id: 8, name: 'August' }, { id: 9, name: 'September' },
-        { id: 10, name: 'October' }, { id: 11, name: 'November' }, { id: 12, name: 'December' },
-    ];
-
-    const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
-
     return (
         <Box p={3}>
-            <Title title="Monthly Reports" />
+            <Title title="Reports" />
             
             <Box mb={4} display="flex" justifyContent="space-between" alignItems="center">
                 <Typography variant="h4" fontWeight="bold">
-                    Monthly Interaction Reports
+                    Interaction Reports
                 </Typography>
                 
-                <Box display="flex" gap={2}>
-                    <FormControl variant="outlined" size="small" style={{ minWidth: 150 }}>
-                        <InputLabel>Month</InputLabel>
-                        <Select
-                            value={month}
-                            onChange={(e) => setMonth(e.target.value as number)}
-                            label="Month"
-                        >
-                            {months.map(m => <MenuItem key={m.id} value={m.id}>{m.name}</MenuItem>)}
-                        </Select>
-                    </FormControl>
+                <Box display="flex" gap={2} alignItems="center">
+                    <TextField
+                        label="From"
+                        type="date"
+                        variant="outlined"
+                        value={fromDate}
+                        onChange={(e) => setFromDate(e.target.value)}
+                        size="small"
+                        slotProps={{ inputLabel: { shrink: true } }}
+                    />
 
-                    <FormControl variant="outlined" size="small" style={{ minWidth: 120 }}>
-                        <InputLabel>Year</InputLabel>
-                        <Select
-                            value={year}
-                            onChange={(e) => setYear(e.target.value as number)}
-                            label="Year"
-                        >
-                            {years.map(y => <MenuItem key={y} value={y}>{y}</MenuItem>)}
-                        </Select>
-                    </FormControl>
+                    <TextField
+                        label="To"
+                        type="date"
+                        variant="outlined"
+                        value={toDate}
+                        onChange={(e) => setToDate(e.target.value)}
+                        size="small"
+                        slotProps={{ inputLabel: { shrink: true } }}
+                    />
 
                     <Button 
                         variant="contained" 
@@ -118,6 +108,12 @@ const ReportsPage = () => {
                         startIcon={<DownloadIcon />}
                         onClick={exportToCSV}
                         disabled={!data || loading}
+                        size="medium"
+                        sx={{ 
+                            whiteSpace: 'nowrap',
+                            minWidth: 'max-content',
+                            height: '40px', // Matches standardized MUI size="small" input height
+                        }}
                     >
                         Export CSV
                     </Button>
