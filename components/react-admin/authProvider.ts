@@ -22,10 +22,12 @@ export const authProvider: AuthProvider = {
 
     // Called when the API returns an error
     checkError: async (error: { status?: number; message?: string }) => {
-        if (error.status === 401) {
-            const { data } = await supabase.auth.getUser();
-            if (!data.user) {
-                throw new Error("Unauthorized");
+        if (error.status === 401 || error.status === 403) {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                // Return a rejected promise with message: false to suppress the error notification
+                // and trigger an automatic redirect to the login page.
+                return Promise.reject({ message: false });
             }
         }
     },
@@ -44,7 +46,8 @@ export const authProvider: AuthProvider = {
         if (!data.user) return null;
 
         try {
-            const response = await fetch(`/api/admin/profiles?id=${data.user.id}`);
+            // Use the unrestricted profile API to get one's own role
+            const response = await fetch(`/api/profiles?userId=${data.user.id}`);
             if (response.ok) {
                 const profile = await response.json();
                 return profile?.role ?? "user";
@@ -62,7 +65,8 @@ export const authProvider: AuthProvider = {
         if (!data.user) throw new Error("Not authenticated");
 
         try {
-            const response = await fetch(`/api/admin/profiles?id=${data.user.id}`);
+            // Use the unrestricted profile API to get one's own data
+            const response = await fetch(`/api/profiles?userId=${data.user.id}`);
             if (response.ok) {
                 const profile = await response.json();
                 if (profile) {

@@ -9,6 +9,7 @@ import { dataProvider } from "./dataProvider";
 import { authProvider } from "./authProvider";
 import { DocumentList, DocumentEdit, DocumentShow, DocumentCreate } from "./resources/Documents";
 import { UserList, UserEdit, UserShow } from "./resources/Users";
+import { DownloadLogList } from "./resources/DownloadLogs";
 import SettingsPage from "./Settings";
 import ReportsPage from "./resources/Reports";
 
@@ -47,7 +48,7 @@ const AdminApp = () => (
                 key="download_logs"
                 options={{ label: 'Download History' }}
                 icon={DownloadIcon}
-                list={ListGuesser}
+                list={DownloadLogList}
                 show={ShowGuesser}
             />,
 

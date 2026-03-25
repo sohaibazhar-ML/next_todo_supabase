@@ -52,7 +52,8 @@ export async function middleware(request: NextRequest) {
     '/forgot-password',
     '/reset-password',
     '/auth/callback',
-    '/'
+    '/',
+    '/admin'
   ]
 
   const isPublicRoute = publicRoutes.some(route =>

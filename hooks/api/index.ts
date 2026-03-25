@@ -18,12 +18,6 @@ export * from './useDocuments'
 // Re-export user/profile hooks
 export * from './useUsers'
 
-// Re-export statistics hooks
-export * from './useStats'
-
 // Re-export download log hooks
 export * from './useDownloadLogs'
-
-// Re-export subadmin hooks
-export * from './useSubadmins'
 

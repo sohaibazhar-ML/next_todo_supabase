@@ -13,7 +13,7 @@ import { prisma } from '@/lib/prisma';
 export const dynamic = 'force-dynamic';
 
 // Whitelist of resources that can be accessed via this API
-const ALLOWED_RESOURCES = ['profiles', 'documents', 'download_logs', 'subadmin_permissions', 'user_document_versions', 'documents-list', 'stats', 'settings'] as const;
+const ALLOWED_RESOURCES = ['profiles', 'users', 'documents', 'download_logs', 'subadmin_permissions', 'user_document_versions', 'documents-list', 'stats', 'settings'] as const;
 type ResourceName = typeof ALLOWED_RESOURCES[number];
 
 function isAllowedResource(resource: string): resource is ResourceName {
@@ -24,6 +24,7 @@ function isAllowedResource(resource: string): resource is ResourceName {
 function getPrismaModel(resource: ResourceName) {
     const models: Record<ResourceName, any> = {
         profiles: prisma.profiles,
+        users: prisma.profiles, // Alias for profiles
         documents: prisma.documents,
         'documents-list': prisma.documents,
         download_logs: prisma.download_logs,
@@ -44,14 +45,21 @@ async function authorize(request: NextRequest) {
         return { authorized: false as const, status: 401, message: 'Unauthorized' };
     }
 
-    const userIsAdmin = await isAdmin(user.id);
-    const userIsSubadmin = await isSubadmin(user.id);
+    // Single query to get user role
+    const profile = await prisma.profiles.findUnique({
+        where: { id: user.id },
+        select: { role: true }
+    });
+
+    const role = profile?.role || 'user';
+    const userIsAdmin = role === 'admin';
+    const userIsSubadmin = role === 'subadmin';
 
     if (!userIsAdmin && !userIsSubadmin) {
         return { authorized: false as const, status: 403, message: 'Forbidden' };
     }
 
-    return { authorized: true as const, user, isAdmin: userIsAdmin };
+    return { authorized: true as const, user, isAdmin: userIsAdmin, role };
 }
 
 // GET — handles getOne (?id=), getMany (?ids=), and getList (paginated)

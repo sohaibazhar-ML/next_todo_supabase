@@ -30,9 +30,23 @@ export interface LoginFormProps {
    * Callback when login succeeds
    */
   onSuccess?: () => void
+  /**
+   * Whether to show social login options
+   * @default true
+   */
+  showSocial?: boolean
+  /**
+   * Whether to show the registration footer
+   * @default true
+   */
+  showFooter?: boolean
 }
 
-export default function LoginForm({ onSuccess }: LoginFormProps) {
+export default function LoginForm({ 
+  onSuccess, 
+  showSocial = true, 
+  showFooter = true 
+}: LoginFormProps) {
   const t = useTranslations()
   const router = useRouter()
   
@@ -52,31 +66,35 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         )}
 
         {/* Social Login */}
-        <div className="space-y-3">
-          <Button
-            type="button"
-            variant="outline"
-            size="lg"
-            fullWidth
-            loading={socialLoading === 'google'}
-            disabled={isLoading || socialLoading !== null}
-            onClick={handleGoogleAuth}
-            icon={<IconGoogle className="h-5 w-5" />}
-            className="shadow-md hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98]"
-          >
-            {socialLoading === 'google' ? t('auth.signingInWithGoogle') : t('auth.continueWithGoogle')}
-          </Button>
-        </div>
+        {showSocial && (
+          <>
+            <div className="space-y-3">
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                fullWidth
+                loading={socialLoading === 'google'}
+                disabled={isLoading || socialLoading !== null}
+                onClick={handleGoogleAuth}
+                icon={<IconGoogle className="h-5 w-5" />}
+                className="shadow-md hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98]"
+              >
+                {socialLoading === 'google' ? t('auth.signingInWithGoogle') : t('auth.continueWithGoogle')}
+              </Button>
+            </div>
 
-        {/* Divider */}
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300"></div>
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">{t('auth.orContinueWithEmail')}</span>
-          </div>
-        </div>
+            {/* Divider */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">{t('auth.orContinueWithEmail')}</span>
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Form Fields */}
         <LoginFormFields />
@@ -97,26 +115,28 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         </div>
       </form>
 
-      {/* Divider */}
-      <div className="mt-6">
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300"></div>
+      {/* Footer */}
+      {showFooter && (
+        <div className="mt-6">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">{t('auth.newToPlatform')}</span>
+            </div>
           </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">{t('auth.newToPlatform')}</span>
-          </div>
-        </div>
 
-        <div className="mt-6 text-center">
-          <Link
-            href={ROUTES.SIGNUP}
-            className="w-full inline-flex justify-center items-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out"
-          >
-            {t('auth.createAccount')}
-          </Link>
+          <div className="mt-6 text-center">
+            <Link
+              href={ROUTES.SIGNUP}
+              className="w-full inline-flex justify-center items-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out"
+            >
+              {t('auth.createAccount')}
+            </Link>
+          </div>
         </div>
-      </div>
+      )}
     </FormProvider>
   )
 }

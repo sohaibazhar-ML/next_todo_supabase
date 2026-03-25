@@ -31,7 +31,7 @@ export default async function DashboardPage() {
   const subadmin = await isSubadmin(user.id)
   
   if (admin || subadmin) {
-    redirect('/admin/dashboard')
+    redirect('/admin')
   }
 
   const displayName = profile ? `${profile.first_name} ${profile.last_name}` : (user.email || 'User')
@@ -86,21 +86,6 @@ export default async function DashboardPage() {
               <Link href="/downloads" className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
                 {t('dashboard.downloadCenter')}
               </Link>
-              {canUpload && (
-                <Link href="/admin/documents" className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
-                  {t('dashboard.manageDocuments')}
-                </Link>
-              )}
-              {canViewStats && (
-                <Link href="/admin/stats" className="px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-lg hover:from-orange-700 hover:to-red-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
-                  {t('dashboard.statistics')}
-                </Link>
-              )}
-              {admin && (
-                <Link href="/admin/subadmins" className="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
-                  {t('dashboard.manageSubadmins')}
-                </Link>
-              )}
             </div>
           </div>
         </div>

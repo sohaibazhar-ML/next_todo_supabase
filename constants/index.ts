@@ -54,12 +54,6 @@ export {
   type DocumentType,
 } from './documentEditor'
 
-// Re-export admin dashboard specific constants
-export {
-  ADMIN_DASHBOARD,
-  type AdminDashboardKey,
-} from './adminDashboard'
-
 // Re-export query keys
 export { QUERY_KEYS } from './queryKeys'
 
