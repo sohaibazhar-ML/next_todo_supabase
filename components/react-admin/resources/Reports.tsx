@@ -7,8 +7,6 @@ import {
     CardContent, 
     Typography, 
     Grid, 
-    Button, 
-    TextField,
     Table, 
     TableBody, 
     TableCell, 
@@ -18,13 +16,21 @@ import {
     Paper,
     Divider
 } from '@mui/material';
-import DownloadIcon from '@mui/icons-material/Download';
 import { format, startOfMonth } from 'date-fns';
+import { CustomFilterToolbar, FilterDefinition } from '../common/CustomFilterToolbar';
+
+const filterDefinitions: FilterDefinition[] = [
+    { source: 'fromDate', label: 'From Date', type: 'date' },
+    { source: 'toDate', label: 'To Date', type: 'date' },
+];
 
 const ReportsPage = () => {
     const notify = useNotify();
     const { permissions } = usePermissions();
     
+    // Filter selection states
+    const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set(['fromDate', 'toDate']));
+
     // Default to start of current month and today
     const [fromDate, setFromDate] = useState(format(startOfMonth(new Date()), 'yyyy-MM-dd'));
     const [toDate, setToDate] = useState(format(new Date(), 'yyyy-MM-dd'));
@@ -35,7 +41,11 @@ const ReportsPage = () => {
     const fetchReport = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`/api/admin/reports?from=${fromDate}&to=${toDate}`);
+            const params = new URLSearchParams();
+            if (activeFilters.has('fromDate')) params.append('from', fromDate);
+            if (activeFilters.has('toDate')) params.append('to', toDate);
+            
+            const response = await fetch(`/api/admin/reports?${params.toString()}`);
             if (!response.ok) throw new Error('Failed to fetch report');
             const result = await response.json();
             setData(result);
@@ -48,7 +58,19 @@ const ReportsPage = () => {
 
     useEffect(() => {
         fetchReport();
-    }, [fromDate, toDate]);
+    }, [fromDate, toDate, activeFilters]);
+
+    const handleFilterChange = (name: string, value: any) => {
+        if (name === 'fromDate') setFromDate(value);
+        if (name === 'toDate') setToDate(value);
+    };
+
+    const handleToggleFilter = (name: string, active: boolean) => {
+        const newFilters = new Set(activeFilters);
+        if (active) newFilters.add(name);
+        else newFilters.delete(name);
+        setActiveFilters(newFilters);
+    };
 
     const exportToCSV = () => {
         if (!data || !data.dailyData) return;
@@ -76,49 +98,20 @@ const ReportsPage = () => {
         <Box p={3}>
             <Title title="Reports" />
             
-            <Box mb={4} display="flex" justifyContent="space-between" alignItems="center">
+            <Box mb={2}>
                 <Typography variant="h4" fontWeight="bold">
                     Interaction Reports
                 </Typography>
-                
-                <Box display="flex" gap={2} alignItems="center">
-                    <TextField
-                        label="From"
-                        type="date"
-                        variant="outlined"
-                        value={fromDate}
-                        onChange={(e) => setFromDate(e.target.value)}
-                        size="small"
-                        slotProps={{ inputLabel: { shrink: true } }}
-                    />
-
-                    <TextField
-                        label="To"
-                        type="date"
-                        variant="outlined"
-                        value={toDate}
-                        onChange={(e) => setToDate(e.target.value)}
-                        size="small"
-                        slotProps={{ inputLabel: { shrink: true } }}
-                    />
-
-                    <Button 
-                        variant="contained" 
-                        color="primary" 
-                        startIcon={<DownloadIcon />}
-                        onClick={exportToCSV}
-                        disabled={!data || loading}
-                        size="medium"
-                        sx={{ 
-                            whiteSpace: 'nowrap',
-                            minWidth: 'max-content',
-                            height: '40px', // Matches standardized MUI size="small" input height
-                        }}
-                    >
-                        Export CSV
-                    </Button>
-                </Box>
             </Box>
+
+            <CustomFilterToolbar 
+                filters={filterDefinitions}
+                activeValues={{ fromDate, toDate }}
+                activeFilters={activeFilters}
+                onFilterChange={handleFilterChange}
+                onToggleFilter={handleToggleFilter}
+                onExport={exportToCSV}
+            />
 
             {loading ? (
                 <Box display="flex" justifyContent="center" py={8}><CircularProgress /></Box>

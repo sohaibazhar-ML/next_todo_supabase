@@ -36,30 +36,38 @@ function getPrismaModel(resource: ResourceName) {
     return models[resource];
 }
 
+const isUuid = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+
 // Shared auth check — verifies session + admin/subadmin role
 async function authorize(request: NextRequest) {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    if (!user) {
+    if (authError || !user) {
+        console.error('[Admin API] Auth error:', authError?.message || 'No user session');
         return { authorized: false as const, status: 401, message: 'Unauthorized' };
     }
 
-    // Single query to get user role
-    const profile = await prisma.profiles.findUnique({
-        where: { id: user.id },
-        select: { role: true }
-    });
+    try {
+        // Single query to get user role
+        const profile = await prisma.profiles.findUnique({
+            where: { id: user.id },
+            select: { role: true }
+        });
 
-    const role = profile?.role || 'user';
-    const userIsAdmin = role === 'admin';
-    const userIsSubadmin = role === 'subadmin';
+        const role = profile?.role || 'user';
+        const userIsAdmin = role === 'admin';
+        const userIsSubadmin = role === 'subadmin';
 
-    if (!userIsAdmin && !userIsSubadmin) {
-        return { authorized: false as const, status: 403, message: 'Forbidden' };
+        if (!userIsAdmin && !userIsSubadmin) {
+            return { authorized: false as const, status: 403, message: 'Forbidden' };
+        }
+
+        return { authorized: true as const, user, isAdmin: userIsAdmin, role };
+    } catch (dbError: any) {
+        console.error('[Admin API] Database error during auth:', dbError?.message || dbError);
+        return { authorized: false as const, status: 503, message: 'Database temporarily unavailable' };
     }
-
-    return { authorized: true as const, user, isAdmin: userIsAdmin, role };
 }
 
 // GET — handles getOne (?id=), getMany (?ids=), and getList (paginated)
@@ -86,6 +94,9 @@ export async function GET(
     // Single record by ID
     if (id) {
         try {
+            if (!isUuid(id)) {
+                return NextResponse.json({ error: 'Invalid ID format' }, { status: 400 });
+            }
             const record = await model.findUnique({ where: { id } });
             if (!record) {
                 return NextResponse.json({ error: 'Not found' }, { status: 404 });
@@ -100,7 +111,9 @@ export async function GET(
     // Multiple records by IDs
     if (ids) {
         try {
-            const idList = JSON.parse(ids);
+            const idList = JSON.parse(ids).filter(isUuid);
+            if (idList.length === 0) return NextResponse.json([]);
+            
             const records = await model.findMany({ where: { id: { in: idList } } });
             return NextResponse.json(records.map(serializeRecord));
         } catch (error) {
@@ -125,24 +138,33 @@ export async function GET(
 
             // Global search (q)
             if (q) {
-                if (resource === 'documents') {
+                if (resource === 'documents' || resource === 'documents-list') {
                     where.OR = [
                         { title: { contains: q, mode: 'insensitive' } },
                         { description: { contains: q, mode: 'insensitive' } },
                         { file_name: { contains: q, mode: 'insensitive' } },
                     ];
-                } else if (resource === 'profiles') {
+                } else if (resource === 'profiles' || resource === 'users') {
                     where.OR = [
                         { first_name: { contains: q, mode: 'insensitive' } },
                         { last_name: { contains: q, mode: 'insensitive' } },
                         { email: { contains: q, mode: 'insensitive' } },
                         { username: { contains: q, mode: 'insensitive' } },
+                        { role: { contains: q, mode: 'insensitive' } },
+                    ];
+                } else if (resource === 'download_logs') {
+                    // NOTE: ip_address is PostgreSQL 'Inet' type — Prisma does NOT support
+                    // 'contains' on Inet. Only search string fields here.
+                    where.OR = [
+                        { user_agent: { contains: q, mode: 'insensitive' } },
+                        { context: { contains: q, mode: 'insensitive' } },
                     ];
                 } else {
-                    // Fallback for other resources: try 'name' or 'title' if they exist in the schema
-                    where.OR = [
-                        { id: { contains: q, mode: 'insensitive' } }
-                    ];
+                    // Fallback for other resources: only use 'equals' on 'id' if q is a UUID
+                    // This prevents 500 errors when q is a name/string
+                    if (isUuid(q)) {
+                        where.id = q;
+                    }
                 }
             }
 
@@ -174,7 +196,16 @@ export async function GET(
                         where.tags = { hasSome: tagList };
                     }
                 } else if (typeof value === 'string' && value.length > 0) {
-                    where[filterKey] = { contains: value, mode: 'insensitive' };
+                    // Defensive check: Avoid 'contains' on UUID fields
+                    const isUuidField = ['id', 'user_id', 'document_id', 'parent_document_id', 'original_document_id'].includes(filterKey);
+                    if (isUuidField) {
+                        // Only add the filter if it's a valid UUID to avoid Prisma errors
+                        if (isUuid(value)) {
+                            where[filterKey] = value;
+                        }
+                    } else {
+                        where[filterKey] = { contains: value, mode: 'insensitive' };
+                    }
                 } else if (value !== undefined && value !== '') {
                     where[filterKey] = value;
                 }
