@@ -3,40 +3,38 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
-  schemas  = ["public"]
+  schemas   = ["public"]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model documents {
-  id                 String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  title              String
-  description        String?
-  category           String
-  tags               String[]
-  file_name          String
-  file_path          String
-  file_size          BigInt
-  file_type          String
-  mime_type          String
-  version            String?         @default("1.0")
-  parent_document_id String?         @db.Uuid
-  is_active          Boolean?        @default(true)
-  is_featured        Boolean?        @default(false)
-  download_count     Int?            @default(0)
-  searchable_content String?
+  id                       String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title                    String
+  description              String?
+  category                 String
+  tags                     String[]
+  file_name                String
+  file_path                String
+  file_size                BigInt
+  file_type                String
+  mime_type                String
+  version                  String?                  @default("1.0")
+  parent_document_id       String?                  @db.Uuid
+  is_active                Boolean?                 @default(true)
+  is_featured              Boolean?                 @default(false)
+  download_count           Int?                     @default(0)
+  searchable_content       String?
+  created_at               DateTime?                @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime?                @default(now()) @db.Timestamptz(6)
+  created_by               String?                  @db.Uuid
   google_drive_template_id String?
-  created_at         DateTime?       @default(now()) @db.Timestamptz(6)
-  updated_at         DateTime?       @default(now()) @db.Timestamptz(6)
-  created_by         String?         @db.Uuid
-  // Note: created_by references auth.users.id, but we don't include auth schema in Prisma
-  // Use Supabase client for auth operations
-  documents          documents?      @relation("documentsTodocuments", fields: [parent_document_id], references: [id], onUpdate: NoAction)
-  other_documents    documents[]     @relation("documentsTodocuments")
-  download_logs      download_logs[]
-  user_document_versions user_document_versions[]
+  documents                documents?               @relation("documentsTodocuments", fields: [parent_document_id], references: [id], onUpdate: NoAction)
+  other_documents          documents[]              @relation("documentsTodocuments")
+  download_logs            download_logs[]
+  user_document_versions   user_document_versions[]
 
   @@index([category], map: "idx_documents_category")
   @@index([category, created_at(sort: Desc)], map: "idx_documents_category_created")
@@ -62,8 +60,6 @@ model download_logs {
   context       String?
   metadata      Json?
   documents     documents @relation(fields: [document_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  // Note: user_id references auth.users.id, but we don't include auth schema in Prisma
-  // Use Supabase client for auth operations
 
   @@index([document_id, downloaded_at(sort: Desc)], map: "idx_download_logs_document_id")
   @@index([document_id, user_id], map: "idx_download_logs_document_user")
@@ -74,31 +70,28 @@ model download_logs {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model profiles {
-  id                      String    @id @db.Uuid
-  username                String    @unique
+  id                      String                @id @db.Uuid
+  username                String                @unique
   first_name              String
   last_name               String
   current_address         String
   country_of_origin       String
   email                   String
   phone_number            String
-  number_of_adults        Int       @default(1)
-  number_of_children      Int       @default(0)
+  number_of_adults        Int                   @default(1)
+  number_of_children      Int                   @default(0)
   pets_type               String?
   new_address_switzerland String
-  marketing_consent       Boolean   @default(false)
-  terms_accepted          Boolean   @default(false)
-  data_privacy_accepted   Boolean   @default(false)
-  email_confirmed         Boolean   @default(false)
-  email_confirmed_at      DateTime? @db.Timestamptz(6)
-  keep_me_logged_in       Boolean   @default(true)
-  role                    String    @default("user")
-  created_at              DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at              DateTime  @default(now()) @db.Timestamptz(6)
-  // Note: id references auth.users.id, but we don't include auth schema in Prisma
-  // Use Supabase client for auth operations
-
-  subadmin_permissions subadmin_permissions?
+  marketing_consent       Boolean               @default(false)
+  terms_accepted          Boolean               @default(false)
+  data_privacy_accepted   Boolean               @default(false)
+  email_confirmed         Boolean               @default(false)
+  email_confirmed_at      DateTime?             @db.Timestamptz(6)
+  role                    String                @default("user")
+  created_at              DateTime              @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime              @default(now()) @db.Timestamptz(6)
+  keep_me_logged_in       Boolean               @default(true)
+  subadmin_permissions    subadmin_permissions?
 
   @@index([email], map: "idx_profiles_email")
   @@index([role], map: "idx_profiles_role")
@@ -114,32 +107,19 @@ model user_document_versions {
   user_id              String    @db.Uuid
   version_number       Int       @default(1)
   version_name         String?
-  
-  // For DOCX: Store edited HTML content
-  html_content         String?   @db.Text
-  
-  // For PDF: Store extracted text and annotations
-  pdf_text_content     String?   @db.Text
-  pdf_annotations      Json?     // Array of annotations: [{ page: number, type: string, x: number, y: number, text: string }]
-  
-  // Exported file path (if user exports edited version)
+  html_content         String?
+  pdf_text_content     String?
+  pdf_annotations      Json?
   exported_file_path   String?
   exported_file_size   BigInt?
   exported_mime_type   String?
-  
-  // Original file reference
-  original_file_type   String    // "pdf" or "document" (for docx)
-  
-  // Metadata
+  original_file_type   String
   is_draft             Boolean   @default(true)
   created_at           DateTime  @default(now()) @db.Timestamptz(6)
   updated_at           DateTime  @default(now()) @db.Timestamptz(6)
-  
+  google_drive_file_id String?
+  google_edit_link     String?
   documents            documents @relation(fields: [original_document_id], references: [id], onDelete: Cascade)
-
-  // Google Docs Integration
-  google_drive_file_id   String?
-  google_edit_link       String?
 
   @@unique([original_document_id, user_id, version_number])
   @@index([user_id])
@@ -150,14 +130,14 @@ model user_document_versions {
 
 /// Subadmin permissions for granular access control
 model subadmin_permissions {
-  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id              String    @unique @db.Uuid
-  can_upload_documents Boolean   @default(false)
-  can_view_stats       Boolean   @default(false)
-  is_active            Boolean   @default(true)
-  created_at           DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at           DateTime  @default(now()) @db.Timestamptz(6)
-  profiles             profiles  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id              String   @unique @db.Uuid
+  can_upload_documents Boolean  @default(false)
+  can_view_stats       Boolean  @default(false)
+  is_active            Boolean  @default(true)
+  created_at           DateTime @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime @default(now()) @db.Timestamptz(6)
+  profiles             profiles @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id])
   @@index([is_active])

@@ -47,10 +47,6 @@ export async function middleware(request: NextRequest) {
 
   // Define public routes (without locale prefix)
   const publicRoutes = [
-    '/login',
-    '/signup',
-    '/forgot-password',
-    '/reset-password',
     '/auth/callback',
     '/',
     '/admin'
@@ -95,7 +91,7 @@ export async function middleware(request: NextRequest) {
   // If authentication fails (expired/invalid token), redirect to login
   if (error || !user) {
     const url = request.nextUrl.clone()
-    url.pathname = `/${locale}/login`
+    url.pathname = `/${locale}/admin`
     return NextResponse.redirect(url)
   }
 
