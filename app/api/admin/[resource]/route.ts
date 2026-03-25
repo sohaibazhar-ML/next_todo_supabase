@@ -38,6 +38,23 @@ function getPrismaModel(resource: ResourceName) {
 
 const isUuid = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
 
+// Helper: fetch user role from DB with one automatic retry (handles cold-start)
+async function fetchUserRole(userId: string) {
+    try {
+        return await prisma.profiles.findUnique({
+            where: { id: userId },
+            select: { role: true }
+        });
+    } catch (firstError: any) {
+        console.warn('[Admin API] DB cold-start — retrying in 1s:', firstError?.message);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return await prisma.profiles.findUnique({
+            where: { id: userId },
+            select: { role: true }
+        });
+    }
+}
+
 // Shared auth check — verifies session + admin/subadmin role
 async function authorize(request: NextRequest) {
     const supabase = await createClient();
@@ -49,11 +66,7 @@ async function authorize(request: NextRequest) {
     }
 
     try {
-        // Single query to get user role
-        const profile = await prisma.profiles.findUnique({
-            where: { id: user.id },
-            select: { role: true }
-        });
+        const profile = await fetchUserRole(user.id);
 
         const role = profile?.role || 'user';
         const userIsAdmin = role === 'admin';
@@ -65,7 +78,7 @@ async function authorize(request: NextRequest) {
 
         return { authorized: true as const, user, isAdmin: userIsAdmin, role };
     } catch (dbError: any) {
-        console.error('[Admin API] Database error during auth:', dbError?.message || dbError);
+        console.error('[Admin API] Database error during auth (after retry):', dbError?.message || dbError);
         return { authorized: false as const, status: 503, message: 'Database temporarily unavailable' };
     }
 }
