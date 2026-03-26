@@ -50,12 +50,6 @@ export interface SignUpFormData {
   dataPrivacyAccepted: boolean
 }
 
-export interface SubadminPermissions {
-  can_upload_documents: boolean
-  can_view_stats: boolean
-  is_active: boolean
-}
-
 /**
  * User information for display purposes
  * Used in admin layouts and navigation components

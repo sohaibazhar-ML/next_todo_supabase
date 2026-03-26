@@ -60,6 +60,7 @@ model download_logs {
   context       String?
   metadata      Json?
   documents     documents @relation(fields: [document_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  profiles      profiles  @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([document_id, downloaded_at(sort: Desc)], map: "idx_download_logs_document_id")
   @@index([document_id, user_id], map: "idx_download_logs_document_user")
@@ -91,7 +92,7 @@ model profiles {
   created_at              DateTime              @default(now()) @db.Timestamptz(6)
   updated_at              DateTime              @default(now()) @db.Timestamptz(6)
   keep_me_logged_in       Boolean               @default(true)
-  subadmin_permissions    subadmin_permissions?
+  download_logs           download_logs[]
 
   @@index([email], map: "idx_profiles_email")
   @@index([role], map: "idx_profiles_role")
@@ -125,21 +126,5 @@ model user_document_versions {
   @@index([user_id])
   @@index([original_document_id, user_id])
   @@index([user_id, created_at(sort: Desc)])
-  @@schema("public")
-}
-
-/// Subadmin permissions for granular access control
-model subadmin_permissions {
-  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id              String   @unique @db.Uuid
-  can_upload_documents Boolean  @default(false)
-  can_view_stats       Boolean  @default(false)
-  is_active            Boolean  @default(true)
-  created_at           DateTime @default(now()) @db.Timestamptz(6)
-  updated_at           DateTime @default(now()) @db.Timestamptz(6)
-  profiles             profiles @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  @@index([user_id])
-  @@index([is_active])
   @@schema("public")
 }

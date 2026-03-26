@@ -10,10 +10,8 @@ import { authProvider } from "./authProvider";
 import { DocumentList, DocumentEdit, DocumentShow, DocumentCreate } from "./resources/Documents";
 import { UserList, UserEdit, UserShow } from "./resources/Users";
 import { DownloadLogList } from "./resources/DownloadLogs";
-import { SubadminPermissionList, SubadminPermissionEdit, SubadminPermissionCreate } from "./resources/SubadminPermissions";
 import SettingsPage from "./Settings";
 import ReportsPage from "./resources/Reports";
-import ShieldIcon from "@mui/icons-material/Shield";
 
 const AdminApp = () => (
     <Admin 
@@ -39,8 +37,8 @@ const AdminApp = () => (
                 options={{ label: 'Manage Documents' }}
                 icon={UploadIcon}
                 list={DocumentList}
-                create={DocumentCreate}
-                edit={DocumentEdit}
+                create={permissions === 'admin' ? DocumentCreate : undefined}
+                edit={permissions === 'admin' ? DocumentEdit : undefined}
                 show={DocumentShow}
             />,
 
@@ -71,15 +69,6 @@ const AdminApp = () => (
                     options={{ label: 'Settings' }}
                     icon={SettingsIcon}
                     list={SettingsPage}
-                />,
-                <Resource
-                    name="subadmin_permissions"
-                    key="subadmin_permissions"
-                    options={{ label: 'Subadmin Access' }}
-                    icon={ShieldIcon}
-                    list={SubadminPermissionList}
-                    edit={SubadminPermissionEdit}
-                    create={SubadminPermissionCreate}
                 />
             ] : null,
         ]}

@@ -14,6 +14,7 @@ import {
     Show,
     SimpleShowLayout,
     SearchInput,
+    usePermissions,
 } from "react-admin";
 
 const UserFilter = (props: any) => (
@@ -34,18 +35,21 @@ const UserFilter = (props: any) => (
     </Filter>
 );
 
-export const UserList = () => (
-    <List filters={<UserFilter />}>
-        <Datagrid rowClick="show">
-            <TextField source="username" />
-            <TextField source="first_name" />
-            <TextField source="last_name" />
-            <EmailField source="email" />
-            <TextField source="role" />
-            <DateField source="created_at" label="Joined" />
-        </Datagrid>
-    </List>
-);
+export const UserList = () => {
+    const { permissions } = usePermissions();
+    return (
+        <List filters={<UserFilter />}>
+            <Datagrid rowClick="show" bulkActionButtons={permissions === 'admin'}>
+                <TextField source="username" />
+                <TextField source="first_name" />
+                <TextField source="last_name" />
+                <EmailField source="email" />
+                <TextField source="role" />
+                <DateField source="created_at" label="Joined" />
+            </Datagrid>
+        </List>
+    );
+};
 
 export const UserEdit = () => (
     <Edit>

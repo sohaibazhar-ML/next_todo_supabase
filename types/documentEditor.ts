@@ -4,10 +4,18 @@
  */
 
 import { Editor } from '@tiptap/react'
-import { PDFAnnotation } from '../components/document-editor/hooks/usePdfAnnotations'
 
-// Re-export PDFAnnotation for convenience
-export type { PDFAnnotation }
+export interface PDFAnnotation {
+  id: string
+  type: string
+  page: number
+  x: number
+  y: number
+  content?: string
+  color?: string
+  author?: string
+  created_at?: string
+}
 
 // User Version Interface
 export interface UserVersion {

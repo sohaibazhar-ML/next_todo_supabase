@@ -19,6 +19,7 @@ import {
     BooleanInput,
     FunctionField,
     SearchInput,
+    usePermissions,
 } from "react-admin";
 
 export const DocumentCreate = () => (
@@ -62,7 +63,7 @@ export const DocumentCreate = () => (
 
 const DocumentFilter = (props: any) => (
     <Filter {...props}>
-        <SearchInput source="q" alwaysOn />
+        <SearchInput placeholder="Search Title, Category, Type..." source="q" alwaysOn />
         <SelectInput
             label="Category"
             source="category"
@@ -92,19 +93,22 @@ const DocumentFilter = (props: any) => (
     </Filter>
 );
 
-export const DocumentList = () => (
-    <List filters={<DocumentFilter />}>
-        <Datagrid rowClick="show">
-            <TextField source="title" />
-            <TextField source="category" />
-            <TextField source="file_type" label="Type" />
-            <NumberField source="file_size" label="Size (Bytes)" />
-            <NumberField source="download_count" label="Downloads" />
-            <DateField source="created_at" label="Created" showTime />
-            <TextField source="is_active" label="Status" />
-        </Datagrid>
-    </List>
-);
+export const DocumentList = () => {
+    const { permissions } = usePermissions();
+    return (
+        <List filters={<DocumentFilter />}>
+            <Datagrid rowClick="show" bulkActionButtons={permissions === 'admin'}>
+                <TextField source="title" />
+                <TextField source="category" />
+                <TextField source="file_type" label="Type" />
+                <NumberField source="file_size" label="Size (Bytes)" />
+                <NumberField source="download_count" label="Downloads" />
+                <DateField source="created_at" label="Created" showTime />
+                <TextField source="is_active" label="Status" />
+            </Datagrid>
+        </List>
+    );
+};
 
 export const DocumentEdit = () => (
     <Edit>

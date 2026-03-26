@@ -97,28 +97,6 @@ export type UserVersionCreateInput = Prisma.user_document_versionsCreateInput
 export type UserVersionUpdateInput = Prisma.user_document_versionsUpdateInput
 
 // ============================================================================
-// Subadmin Permissions Filter Types
-// ============================================================================
-
-/**
- * Prisma where input for subadmin_permissions table
- * Used in subadmin permission queries to replace 'any' types
- */
-export type SubadminPermissionWhereInput = Prisma.subadmin_permissionsWhereInput
-
-/**
- * Prisma where input for subadmin permission creation
- * Used when creating new subadmin permissions
- */
-export type SubadminPermissionCreateInput = Prisma.subadmin_permissionsCreateInput
-
-/**
- * Prisma where input for subadmin permission updates
- * Used when updating existing subadmin permissions
- */
-export type SubadminPermissionUpdateInput = Prisma.subadmin_permissionsUpdateInput
-
-// ============================================================================
 // Date Filter Helper Types
 // ============================================================================
 

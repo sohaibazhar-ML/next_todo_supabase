@@ -22,6 +22,4 @@ export * from './stats'
 // Re-export download log services
 export * from './downloadLogs'
 
-// Re-export subadmin services
-export * from './subadmins'
 

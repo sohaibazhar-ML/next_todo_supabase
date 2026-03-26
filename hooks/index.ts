@@ -15,7 +15,6 @@ export { useDocumentDownload } from './useDocumentDownload'
 export { useModal } from './useModal'
 export { usePagination } from './usePagination'
 export { useSort } from './useSort'
-export { useSubadminActions } from './useSubadminActions'
 
 // Phase 1 Refactoring: New utility hooks
 export { useTableState } from './useTableState'
@@ -33,7 +32,6 @@ export { useTagInput } from './useTagInput'
 export type { UseModalReturn } from './useModal'
 export type { UsePaginationProps, UsePaginationReturn } from './usePagination'
 export type { SortDirection, UseSortProps, UseSortReturn } from './useSort'
-export type { SubadminActionType } from './useSubadminActions'
 
 // Phase 1 Refactoring: New utility hook types
 export type { TableState, TableStateConfig, SortConfig, PaginationConfig } from './useTableState'

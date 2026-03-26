@@ -3,16 +3,12 @@
  * 
  * Handles document upload operations:
  * - POST: Upload new document or version
- * 
- * This route has been refactored to:
- * - Use proper TypeScript types (no 'any')
- * - Improve error handling
  */
 
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
-import { hasPermission } from '@/lib/utils/roles'
+import { isAdmin } from '@/lib/utils/roles'
 import { isErrorWithMessage } from '@/types'
 import { CONSOLE_MESSAGES, ERROR_MESSAGES, STORAGE_BUCKETS, STORAGE_CONFIG } from '@/constants'
 
@@ -34,8 +30,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
     }
 
-    const canUpload = await hasPermission(user.id, 'can_upload_documents')
-    if (!canUpload) {
+    // Role-based restriction: Only Admins can upload
+    const userIsAdmin = await isAdmin(user.id)
+    if (!userIsAdmin) {
       return NextResponse.json({ error: ERROR_MESSAGES.PERMISSION_REQUIRED_UPLOAD_DOCUMENTS }, { status: 403 })
     }
 
@@ -71,9 +68,8 @@ export async function POST(request: Request) {
     let parentDocumentId: string | null = null
 
     if (parent_document_id) {
-        // ... (Versioning logic remains largely the same, but we'll assume versioning is single-file for now or applies to the first)
-        // For simplicity in bulk, if parent_document_id is provided, we only allow ONE file or version all of them.
-        // Usually versioning is a single-file operation.
+        // Versioning logic could be added here if needed
+        parentDocumentId = parent_document_id
     }
 
     const createdDocuments = []
@@ -94,12 +90,10 @@ export async function POST(request: Request) {
 
         if (uploadError) {
           console.error(`Storage upload error for ${file.name}:`, uploadError)
-          continue; // Skip this file if upload fails, or handle error
+          continue;
         }
 
         const fileType = getFileType(file.name)
-        
-        // Determine title: Use provided title if only one file, otherwise use filename
         const docTitle = files.length === 1 && title ? title : file.name;
 
         // Insert document record
@@ -141,4 +135,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
-

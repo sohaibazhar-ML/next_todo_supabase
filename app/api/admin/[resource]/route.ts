@@ -13,7 +13,7 @@ import { prisma } from '@/lib/prisma';
 export const dynamic = 'force-dynamic';
 
 // Whitelist of resources that can be accessed via this API
-const ALLOWED_RESOURCES = ['profiles', 'users', 'documents', 'download_logs', 'subadmin_permissions', 'user_document_versions', 'documents-list', 'stats', 'settings'] as const;
+const ALLOWED_RESOURCES = ['profiles', 'users', 'documents', 'download_logs', 'user_document_versions', 'documents-list', 'stats', 'settings'] as const;
 type ResourceName = typeof ALLOWED_RESOURCES[number];
 
 function isAllowedResource(resource: string): resource is ResourceName {
@@ -28,7 +28,6 @@ function getPrismaModel(resource: ResourceName) {
         documents: prisma.documents,
         'documents-list': prisma.documents,
         download_logs: prisma.download_logs,
-        subadmin_permissions: prisma.subadmin_permissions,
         user_document_versions: prisma.user_document_versions,
         stats: prisma.profiles, // Dummy mapping for custom view
         settings: prisma.profiles, // Dummy mapping for custom view
@@ -156,6 +155,8 @@ export async function GET(
                         { title: { contains: q, mode: 'insensitive' } },
                         { description: { contains: q, mode: 'insensitive' } },
                         { file_name: { contains: q, mode: 'insensitive' } },
+                        { category: { contains: q, mode: 'insensitive' } },
+                        { file_type: { contains: q, mode: 'insensitive' } },
                     ];
                 } else if (resource === 'profiles' || resource === 'users') {
                     where.OR = [
@@ -166,12 +167,24 @@ export async function GET(
                         { role: { contains: q, mode: 'insensitive' } },
                     ];
                 } else if (resource === 'download_logs') {
-                    // NOTE: ip_address is PostgreSQL 'Inet' type — Prisma does NOT support
-                    // 'contains' on Inet. Only search string fields here.
+                    // Raw search for download logs across multiple fields
                     where.OR = [
                         { user_agent: { contains: q, mode: 'insensitive' } },
                         { context: { contains: q, mode: 'insensitive' } },
+                        // Search in related documents
+                        { documents: { title: { contains: q, mode: 'insensitive' } } },
+                        // Search in related profiles
+                        { profiles: { username: { contains: q, mode: 'insensitive' } } },
+                        { profiles: { email: { contains: q, mode: 'insensitive' } } },
+                        { profiles: { first_name: { contains: q, mode: 'insensitive' } } },
+                        { profiles: { last_name: { contains: q, mode: 'insensitive' } } },
                     ];
+                    
+                    // Handle IP address - Prisma doesn't support 'contains' on Inet type
+                    // but we can try exact match if q looks like an IP
+                    if (/^[0-9.:]+$/.test(q)) {
+                        where.OR.push({ ip_address: { equals: q } });
+                    }
                 } else {
                     // Fallback for other resources: only use 'equals' on 'id' if q is a UUID
                     // This prevents 500 errors when q is a name/string
@@ -258,6 +271,11 @@ export async function POST(
     const auth = await authorize(request);
     if (!auth.authorized) {
         return NextResponse.json({ error: auth.message }, { status: auth.status });
+    }
+
+    // Role-based restriction: Only Admins can create
+    if (!auth.isAdmin) {
+        return NextResponse.json({ error: 'Admin access required for creation' }, { status: 403 });
     }
 
     const { resource } = await params;

@@ -93,13 +93,6 @@ const SettingsPage = () => {
                         >
                             Manage Users & Roles
                         </Button>
-                        <Button 
-                            variant="outlined" 
-                            color="primary" 
-                            href="#/subadmin_permissions"
-                        >
-                            Manage Subadmin Access
-                        </Button>
                     </Box>
                 </Paper>
             )}

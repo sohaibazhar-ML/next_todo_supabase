@@ -28,7 +28,6 @@ export type {
   UserRole,
   UserProfile,
   SignUpFormData,
-  SubadminPermissions,
   UserInfo,
 } from './user'
 
@@ -69,9 +68,6 @@ export type {
   UserVersionWhereInput,
   UserVersionCreateInput,
   UserVersionUpdateInput,
-  SubadminPermissionWhereInput,
-  SubadminPermissionCreateInput,
-  SubadminPermissionUpdateInput,
   DateFilter,
   GenericFilter,
   PrismaSelect,

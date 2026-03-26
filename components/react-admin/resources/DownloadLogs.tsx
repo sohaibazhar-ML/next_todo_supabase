@@ -12,7 +12,7 @@ import {
 
 const DownloadLogFilter = (props: any) => (
     <Filter {...props}>
-        <SearchInput placeholder="Search IP/User Agent" source="q" alwaysOn />
+        <SearchInput placeholder="Search Document, User, IP or Agent" source="q" alwaysOn />
         <DateInput label="From Date" source="fromDate" />
         <DateInput label="To Date" source="toDate" />
     </Filter>
