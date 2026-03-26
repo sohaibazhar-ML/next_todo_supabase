@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { adminStatsService } from '@/features/admin/stats/services/adminStatsService';
+import { adminStatsService } from '@/services/admin-stats-service';
 import { QUERY_KEYS } from '@/constants/queryKeys';
 
 export const useAdminStats = () => {

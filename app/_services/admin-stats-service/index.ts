@@ -1,6 +1,6 @@
 import { api } from '@/services/apiClient';
 import { API_ROUTES } from '@/constants/routes';
-import { StatisticsData } from '../types';
+import { StatisticsData } from '@/features/admin/stats/types';
 
 export const adminStatsService = {
     getStats: (): Promise<StatisticsData> => {

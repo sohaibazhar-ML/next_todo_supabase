@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { profileService } from '@/features/website/profile/services/profileService';
+import { profileService } from '@/services/profile-service';
 import { QUERY_KEYS } from '@/constants/queryKeys';
 import { UserProfile } from '@/types';
 

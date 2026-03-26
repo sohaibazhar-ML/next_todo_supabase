@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { authService } from '@/features/website/auth/services/authService';
+import { authService } from '@/services/auth-service';
 import { SignUpFormData } from '@/types';
 
 export interface LoginCredentials {
