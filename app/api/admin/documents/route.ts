@@ -219,3 +219,84 @@ export async function POST(request: Request) {
   }
 }
 
+// PUT - Update document (admin only)
+export async function PUT(request: Request) {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
+    }
+
+    const admin = await isAdmin(user.id)
+    if (!admin) {
+      return NextResponse.json({ error: ERROR_MESSAGES.ADMIN_ACCESS_REQUIRED }, { status: 403 })
+    }
+
+    const body = await request.json()
+    const { id, ...data } = body
+
+    if (!id) {
+      return NextResponse.json({ error: 'ID is required' }, { status: 400 })
+    }
+
+    // Convert file_size back to BigInt if present
+    const updateData: any = { ...data }
+    if (updateData.file_size !== undefined) {
+      updateData.file_size = BigInt(updateData.file_size)
+    }
+
+    const document = await prisma.documents.update({
+      where: { id },
+      data: updateData
+    })
+
+    return NextResponse.json({
+      ...document,
+      file_size: Number(document.file_size),
+    })
+  } catch (error: unknown) {
+    console.error('[Admin Documents API] update error:', error)
+    const errorMessage = isErrorWithMessage(error)
+      ? error.message
+      : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
+  }
+}
+
+// DELETE - Delete document (admin only)
+export async function DELETE(request: Request) {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
+    }
+
+    const admin = await isAdmin(user.id)
+    if (!admin) {
+      return NextResponse.json({ error: ERROR_MESSAGES.ADMIN_ACCESS_REQUIRED }, { status: 403 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return NextResponse.json({ error: 'ID is required' }, { status: 400 })
+    }
+
+    await prisma.documents.delete({
+      where: { id }
+    })
+
+    return NextResponse.json({ id })
+  } catch (error: unknown) {
+    console.error('[Admin Documents API] delete error:', error)
+    const errorMessage = isErrorWithMessage(error)
+      ? error.message
+      : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
+  }
+}

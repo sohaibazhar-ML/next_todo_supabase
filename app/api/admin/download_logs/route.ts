@@ -144,3 +144,39 @@ export async function POST(request: Request) {
   }
 }
 
+// DELETE - Delete download log (admin only)
+export async function DELETE(request: Request) {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
+    }
+
+    const admin = await isAdmin(user.id)
+    if (!admin) {
+      return NextResponse.json({ error: ERROR_MESSAGES.ADMIN_ACCESS_REQUIRED }, { status: 403 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return NextResponse.json({ error: 'ID is required' }, { status: 400 })
+    }
+
+    await prisma.download_logs.delete({
+      where: { id }
+    })
+
+    return NextResponse.json({ id })
+  } catch (error: unknown) {
+    console.error('[Admin DownloadLogs API] delete error:', error)
+    const errorMessage = isErrorWithMessage(error)
+      ? error.message
+      : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
+  }
+}
+
