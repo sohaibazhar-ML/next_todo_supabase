@@ -40,8 +40,8 @@
       "@/types/*": ["./app/_types/shared/*"],
       "@/constants": ["./app/_constants/shared/index"],
       "@/constants/*": ["./app/_constants/shared/*"],
-      "@/utils": ["./app/_utils/shared/index"],
-      "@/utils/*": ["./app/_utils/shared/*"],
+      "@/utils": ["./app/_utils/index"],
+      "@/utils/*": ["./app/_utils/*"],
       "@/icons": ["./app/_components/shared/atoms/AdaptiveIcon/index"],
       "@/icons/*": ["./app/_components/shared/atoms/AdaptiveIcon/*"]
     }

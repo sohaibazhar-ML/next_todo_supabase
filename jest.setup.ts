@@ -1,4 +1,4 @@
-import { prismaMock } from './lib/__mocks__/prisma'
+import { prismaMock } from './app/_lib/__mocks__/prisma'
 
 // Global mocks for environment
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://mock.supabase.co'

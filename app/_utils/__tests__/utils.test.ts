@@ -1,6 +1,6 @@
-import { formatDate, formatDateTime, formatRelativeTime } from './date-utils'
-import { formatFileSize, getFileType, getFileIconColor } from './file-utils'
-import { serializeDocument, serializeDocuments, serializeProfile, serializeProfiles, serializeVersion, serializeVersions } from './serialization'
+import { formatDate, formatDateTime, formatRelativeTime } from '../date-utils'
+import { formatFileSize, getFileType, getFileIconColor } from '../file-utils'
+import { serializeDocument, serializeDocuments, serializeProfile, serializeProfiles, serializeVersion, serializeVersions } from '../serialization'
 
 describe('Date Utils', () => {
     const testDate = new Date('2024-01-01T12:00:00Z')
