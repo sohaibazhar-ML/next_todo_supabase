@@ -1,10 +1,10 @@
 "use client";
 import React from 'react';
 import { useProfileForm } from '@/website/hooks';
-import { AdaptiveIcon } from '@/shared/atoms/AdaptiveIcon';
+import { AdaptiveIcon } from '@/website/atoms/AdaptiveIcon';
 import { User } from 'lucide-react';
 
-import { UserProfile } from '@/types';
+import { UserProfile } from '@/website/types';
 
 interface ProfileFormProps {
     userId: string;

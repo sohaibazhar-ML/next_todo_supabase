@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { reportService } from '@/services/report-service';
+import { reportService } from '@/services/admin/report-service';
 import { QUERY_KEYS } from '@/constants/queryKeys';
 
 export const useReports = (from?: string, to?: string) => {

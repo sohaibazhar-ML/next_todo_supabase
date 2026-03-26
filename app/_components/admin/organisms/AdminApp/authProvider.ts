@@ -1,6 +1,6 @@
 import { AuthProvider } from "react-admin";
 import { createClient } from "@/lib/supabase/client";
-import { api } from "@/services/apiClient";
+import { api } from "@/services/admin/apiClient";
 import { UserProfile } from "@/types";
 
 const supabase = createClient();
@@ -48,7 +48,7 @@ export const authProvider: AuthProvider = {
         if (!data.user) return null;
 
         try {
-            const profile = await api.get<UserProfile>(`/api/profiles?userId=${data.user.id}`);
+            const profile = await api.get<UserProfile>(`/api/website/profiles?userId=${data.user.id}`);
             return profile?.role ?? "user";
         } catch (e) {
             console.warn("[AuthProvider] Failed to fetch permissions:", e);
@@ -63,7 +63,7 @@ export const authProvider: AuthProvider = {
         if (!data.user) throw new Error("Not authenticated");
 
         try {
-            const profile = await api.get<UserProfile>(`/api/profiles?userId=${data.user.id}`);
+            const profile = await api.get<UserProfile>(`/api/website/profiles?userId=${data.user.id}`);
             if (profile) {
                 return {
                     id: data.user.id,

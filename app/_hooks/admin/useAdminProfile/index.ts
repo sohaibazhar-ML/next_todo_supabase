@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { adminSettingsService } from '@/services/admin-settings-service';
+import { adminSettingsService } from '@/services/admin/admin-settings-service';
 import { QUERY_KEYS } from '@/constants/queryKeys';
 import { createClient } from '@/lib/supabase/client';
 

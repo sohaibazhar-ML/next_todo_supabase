@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { userService } from '@/services/user-service';
+import { userService } from '@/services/admin/user-service';
 import { QUERY_KEYS } from '@/constants/queryKeys';
-import { UserProfile } from '@/types';
+import { UserProfile } from '@/admin/types';
 
 export const useUsers = (params?: Record<string, unknown>) => {
     return useQuery({

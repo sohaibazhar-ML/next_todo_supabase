@@ -19,15 +19,15 @@ import {
   type EditProfileFormData,
   type PasswordChangeFormData,
   passwordChangeSchema,
-} from '@/types';
+} from '@/website/types';
 import {
   updateProfile,
   checkUsernameAvailability,
   createProfile,
-} from '@/services/profiles'
-import { QUERY_KEYS } from '@/constants/queryKeys'
-import { DEFAULT_VALUES, ERROR_MESSAGES, CONSOLE_MESSAGES } from '@/constants'
-import type { UserProfile } from '@/types/user'
+} from '@/services/website/profiles'
+import { QUERY_KEYS } from '@/website/constants/queryKeys'
+import { DEFAULT_VALUES, ERROR_MESSAGES, CONSOLE_MESSAGES } from '@/website/constants'
+import type { UserProfile } from '@/website/types/user'
 
 export interface UseProfileFormOptions {
   /**

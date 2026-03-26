@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { Link } from '@/i18n/routing';
-import { AdaptiveIcon } from '@/shared/atoms/AdaptiveIcon';
+import { AdaptiveIcon } from '@/website/atoms/AdaptiveIcon';
 import { Menu, X, Rocket, User } from 'lucide-react';
 
 /**

@@ -163,7 +163,7 @@ export const dataProvider: DataProvider = {
                 }
             }
             
-            const response = await fetch('/api/documents/upload', {
+            const response = await fetch('/api/admin/documents/upload', {
                 method: 'POST',
                 body: formData,
             });

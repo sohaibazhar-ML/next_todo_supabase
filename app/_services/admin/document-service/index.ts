@@ -1,0 +1,20 @@
+import { api } from '@/services/admin/apiClient';
+import { API_ROUTES } from '@/constants/routes';
+import { SerializedDocument } from '@/admin/types';
+
+export const documentService = {
+    getAll: (params?: Record<string, unknown>) => 
+        api.get<{ data: SerializedDocument[], total: number }>(API_ROUTES.ADMIN('documents'), params),
+    
+    getById: (id: string) => 
+        api.get<SerializedDocument>(`${API_ROUTES.ADMIN('documents')}?id=${id}`),
+    
+    create: (data: FormData) => 
+        api.post<SerializedDocument>(API_ROUTES.ADMIN('documents'), data),
+    
+    update: (id: string, data: Partial<SerializedDocument>) => 
+        api.put<SerializedDocument>(API_ROUTES.ADMIN('documents'), { id, ...data }),
+    
+    delete: (id: string) => 
+        api.delete<void>(`${API_ROUTES.ADMIN('documents')}?id=${id}`),
+};
