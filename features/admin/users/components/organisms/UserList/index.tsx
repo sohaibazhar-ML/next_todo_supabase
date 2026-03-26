@@ -7,7 +7,7 @@ import {
     DateField,
     usePermissions,
 } from "react-admin";
-import { UserFilter } from "@/features/admin/users/components/UserFilter";
+import { UserFilter } from "@/features/admin/users/components/molecules/UserFilter";
 
 export const UserList = () => {
     const { permissions } = usePermissions();

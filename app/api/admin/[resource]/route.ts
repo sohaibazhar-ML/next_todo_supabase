@@ -106,15 +106,29 @@ export async function GET(
             const thirtyDaysAgo = new Date();
             thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-            // Fetch counts in parallel for performance
-            const [totalUsers, totalDocuments, totalDownloads, recentDownloads] = await Promise.all([
-                prisma.profiles.count(),
-                prisma.documents.count(),
-                prisma.download_logs.count(),
-                prisma.download_logs.count({
-                    where: { downloaded_at: { gte: thirtyDaysAgo } }
-                })
-            ]);
+            // Fetch counts sequentially to avoid connection pool exhaustion (P1001)
+            // On some Supabase tiers, parallel heavy counts can trigger pooler timeouts
+            const totalUsers = await prisma.profiles.count().catch(err => {
+                console.error('[Admin API] Error counting profiles:', err);
+                return 0;
+            });
+            
+            const totalDocuments = await prisma.documents.count().catch(err => {
+                console.error('[Admin API] Error counting documents:', err);
+                return 0;
+            });
+            
+            const totalDownloads = await prisma.download_logs.count().catch(err => {
+                console.error('[Admin API] Error counting total downloads:', err);
+                return 0;
+            });
+            
+            const recentDownloads = await prisma.download_logs.count({
+                where: { downloaded_at: { gte: thirtyDaysAgo } }
+            }).catch(err => {
+                console.error('[Admin API] Error counting recent downloads:', err);
+                return 0;
+            });
 
             return NextResponse.json({
                 totalUsers,
@@ -123,7 +137,7 @@ export async function GET(
                 recentDownloads
             });
         } catch (error) {
-            console.error('[Admin API] stats error:', error);
+            console.error('[Admin API] Global stats error:', error);
             return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
         }
     }

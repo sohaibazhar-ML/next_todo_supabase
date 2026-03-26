@@ -1,1 +1,1 @@
-export * from './DownloadLogList';
+export * from './organisms/DownloadLogList';

@@ -1,9 +1,9 @@
 import { Title } from 'react-admin';
 import { Box, Typography, CircularProgress, Alert, Paper } from '@mui/material';
-import MuiStatisticsCards from '@/components/admin/MuiStatisticsCards';
-import { useAdminStats } from '../hooks/useAdminStats';
+import MuiStatisticsCards from '@/organisms/StatisticsDashboard';
+import { useAdminStats } from '../../../hooks/useAdminStats';
 
-const StatisticsPage = () => {
+export const StatisticsPage = () => {
     const { data: stats, isLoading, error } = useAdminStats();
 
     if (isLoading) {
@@ -47,4 +47,4 @@ const StatisticsPage = () => {
     );
 };
 
-export default StatisticsPage;
+

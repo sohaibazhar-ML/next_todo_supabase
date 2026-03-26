@@ -17,9 +17,9 @@ import {
     Button
 } from '@mui/material';
 import { format, startOfMonth } from 'date-fns';
-import { CustomFilterToolbar, FilterDefinition } from '@/components/admin/common/CustomFilterToolbar';
-import { useReports } from '../hooks/useReports';
-import { DailyReportData } from '../types';
+import { CustomFilterToolbar, FilterDefinition } from '@/molecules/FilterToolbar';
+import { useReports } from '../../../hooks/useReports';
+import { DailyReportData } from '../../../types';
 
 const filterDefinitions: FilterDefinition[] = [
     { source: 'fromDate', label: 'From Date', type: 'date' },
@@ -64,7 +64,7 @@ export const ReportsPage = () => {
         
         const csvContent = [
             headers.join(','),
-            ...rows.map((row) => row.join(','))
+            ...rows.map((row: (string | number)[]) => row.join(','))
         ].join('\n');
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });

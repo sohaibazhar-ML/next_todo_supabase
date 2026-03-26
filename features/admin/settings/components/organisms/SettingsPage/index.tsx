@@ -1,9 +1,9 @@
 import { Title } from 'react-admin';
 import { Box, Typography, CircularProgress, Alert, Paper, Divider, Button } from '@mui/material';
-import { useAdminProfile } from '../hooks/useAdminProfile';
+import { useAdminProfile } from '../../../hooks/useAdminProfile';
 import { UserProfile } from '@/shared/types';
 
-const SettingsPage = () => {
+export const SettingsPage = () => {
     const { data: profile, isLoading, error } = useAdminProfile();
 
     if (isLoading) {
@@ -89,4 +89,4 @@ const SettingsPage = () => {
     );
 };
 
-export default SettingsPage;
+

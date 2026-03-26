@@ -1,6 +1,6 @@
 import React from "react";
 import { List, Datagrid, TextField, DateField, NumberField, usePermissions } from "react-admin";
-import { DocumentFilter } from "@/features/admin/documents/components/DocumentFilter";
+import { DocumentFilter } from "@/features/admin/documents/components/molecules/DocumentFilter";
 
 export const DocumentList = () => {
     const { permissions } = usePermissions();

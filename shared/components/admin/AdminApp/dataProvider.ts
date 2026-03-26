@@ -144,7 +144,7 @@ export const dataProvider: DataProvider = {
             // Handle multiple files or a single file
             const files = Array.isArray(params.data.file) ? params.data.file : [params.data.file];
             
-            files.forEach((fileObj: { rawFile: File }) => {
+            files.forEach((fileObj: { rawFile?: File }) => {
                 if (fileObj && fileObj.rawFile) {
                     formData.append('file', fileObj.rawFile);
                 }
@@ -174,7 +174,7 @@ export const dataProvider: DataProvider = {
             return { data };
         }
 
-        const data = { ...params.data };
+        const data = { ...params.data } as Record<string, unknown>;
         if (resource === 'documents' && typeof data.tags === 'string') {
             data.tags = (data.tags as string).split(',').map((t: string) => t.trim()).filter(Boolean);
         }
@@ -187,10 +187,10 @@ export const dataProvider: DataProvider = {
     },
 
     update: async (resource, params) => {
-        const data = { id: params.id, ...params.data };
+        const data = { id: params.id, ...params.data } as Record<string, unknown>;
         
-        if (resource === 'documents' && typeof (data as any).tags === 'string') {
-            (data as any).tags = (data as any).tags.split(',').map((t: string) => t.trim()).filter(Boolean);
+        if (resource === 'documents' && typeof data.tags === 'string') {
+            data.tags = (data.tags as string).split(',').map((t: string) => t.trim()).filter(Boolean);
         }
 
         const { json } = await httpClient(`${apiUrl}/${resource}`, {

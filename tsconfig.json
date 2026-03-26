@@ -24,8 +24,10 @@
       "@/shared/*": ["./shared/*"],
       "@/features/*": ["./features/*"],
       "@/components/website/*": ["./components/website/*"],
-      "@/components/admin/*": ["./shared/components/admin/*"],
-      "@/shared/components/*": ["./shared/components/*"],
+      "@/admin-components/*": ["./shared/components/admin/*"],
+      "@/atoms/*": ["./shared/components/ui/atoms/*"],
+      "@/molecules/*": ["./shared/components/ui/molecules/*"],
+      "@/organisms/*": ["./shared/components/ui/organisms/*"],
       "@/components/ui/*": ["./shared/components/ui/*"],
       "@/hooks": ["./shared/hooks/index"],
       "@/hooks/*": ["./shared/hooks/*"],
@@ -37,8 +39,8 @@
       "@/constants/*": ["./shared/constants/*"],
       "@/utils": ["./shared/utils/index"],
       "@/utils/*": ["./shared/utils/*"],
-      "@/icons": ["./shared/components/ui/icons/index"],
-      "@/icons/*": ["./shared/components/ui/icons/*"]
+      "@/icons": ["./shared/components/ui/atoms/Icon/index"],
+      "@/icons/*": ["./shared/components/ui/atoms/Icon/*"]
     }
   },
   "include": [
