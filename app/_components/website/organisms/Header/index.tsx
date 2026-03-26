@@ -103,5 +103,3 @@ export const Header = () => {
         </nav>
     );
 };
-
-// export default Header; (Removed for named export consistency)

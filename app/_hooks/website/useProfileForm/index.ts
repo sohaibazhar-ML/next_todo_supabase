@@ -20,14 +20,13 @@ import {
   type PasswordChangeFormData,
   passwordChangeSchema,
 } from '@/website/types';
-import {
-  updateProfile,
-  checkUsernameAvailability,
-  createProfile,
-} from '@/services/website/profiles'
-import { QUERY_KEYS } from '@/website/constants/queryKeys'
-import { DEFAULT_VALUES, ERROR_MESSAGES, CONSOLE_MESSAGES } from '@/website/constants'
-import type { UserProfile } from '@/website/types/user'
+import { 
+    completeProfileSetup 
+} from '@/services/website/profiles';
+import { authService } from '@/services/website/auth-service';
+import { QUERY_KEYS } from '@/website/constants/queryKeys';
+import { DEFAULT_VALUES } from '@/website/constants';
+import type { UserProfile } from '@/website/types/user';
 
 export interface UseProfileFormOptions {
   /**
@@ -86,58 +85,8 @@ export function useProfileForm({
 
   // Profile create/update mutation
   const profileMutation = useMutation({
-    mutationFn: async (data: CreateProfileFormData | EditProfileFormData) => {
-      if (isCreating) {
-        // For creation, we need to create via API
-        // Note: Profile creation is typically handled server-side during signup
-        // This mutation is for the profile completion flow
-        const createData = data as CreateProfileFormData
-
-        // Check username availability
-        const isAvailable = await checkUsernameAvailability(createData.username)
-        if (!isAvailable) {
-          throw new Error(ERROR_MESSAGES.USERNAME_EXISTS)
-        }
-
-        // Create profile via profiles service
-        return createProfile({
-          id: userId,
-          username: createData.username,
-          first_name: createData.first_name,
-          last_name: createData.last_name,
-          email: createData.email,
-          phone_number: createData.phone_number,
-          current_address: createData.current_address,
-          country_of_origin: createData.country_of_origin,
-          new_address_switzerland: createData.new_address_switzerland,
-          number_of_adults: createData.number_of_adults,
-          number_of_children: createData.number_of_children,
-          pets_type: createData.pets_type || null,
-          marketing_consent: createData.marketing_consent,
-          terms_accepted: createData.terms_accepted,
-          data_privacy_accepted: createData.data_privacy_accepted,
-          email_confirmed: true,
-          email_confirmed_at: new Date().toISOString(),
-        })
-      } else {
-        // For updates, use the service
-        return updateProfile(userId, {
-          first_name: data.first_name,
-          last_name: data.last_name,
-          email: data.email,
-          phone_number: data.phone_number,
-          current_address: data.current_address,
-          country_of_origin: data.country_of_origin,
-          new_address_switzerland: data.new_address_switzerland,
-          number_of_adults: data.number_of_adults,
-          number_of_children: data.number_of_children,
-          pets_type: data.pets_type || null,
-          marketing_consent: data.marketing_consent,
-          terms_accepted: data.terms_accepted,
-          data_privacy_accepted: data.data_privacy_accepted,
-        })
-      }
-    },
+    mutationFn: (data: CreateProfileFormData | EditProfileFormData) => 
+        completeProfileSetup(userId, data as CreateProfileFormData, isCreating),
     onSuccess: () => {
       // Invalidate user and profile queries
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.profiles.byUserId(userId) })
@@ -159,15 +108,8 @@ export function useProfileForm({
   })
 
   const passwordMutation = useMutation({
-    mutationFn: async (data: PasswordChangeFormData) => {
-      const { error } = await supabase.auth.updateUser({
-        password: data.newPassword,
-      })
-
-      if (error) {
-        throw new Error(error.message || CONSOLE_MESSAGES.UPDATE_PASSWORD)
-      }
-    },
+    mutationFn: (data: PasswordChangeFormData) => 
+        authService.updatePassword(supabase, data.newPassword),
     onSuccess: () => {
       passwordForm.reset()
     },

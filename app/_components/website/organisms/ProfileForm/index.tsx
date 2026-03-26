@@ -23,10 +23,9 @@ interface ProfileFormProps {
  */
 export const ProfileForm = ({ userId, isCreating = false, defaultValues }: ProfileFormProps) => {
     const { 
-        form, 
+        form,
         onSubmit, 
         isLoading,
-        passwordForm,
         onPasswordSubmit,
         isPasswordLoading
     } = useProfileForm({ userId, isCreating, defaultValues });
@@ -51,8 +50,9 @@ export const ProfileForm = ({ userId, isCreating = false, defaultValues }: Profi
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* First Name */}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">First Name</label>
+                        <label htmlFor="first_name" className="text-sm font-medium text-gray-700">First Name</label>
                         <input 
+                            id="first_name"
                             {...register('first_name')}
                             className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 transition-all outline-none"
                         />
@@ -61,8 +61,9 @@ export const ProfileForm = ({ userId, isCreating = false, defaultValues }: Profi
 
                     {/* Last Name */}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Last Name</label>
+                        <label htmlFor="last_name" className="text-sm font-medium text-gray-700">Last Name</label>
                         <input 
+                            id="last_name"
                             {...register('last_name')}
                             className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 transition-all outline-none"
                         />
@@ -70,7 +71,76 @@ export const ProfileForm = ({ userId, isCreating = false, defaultValues }: Profi
                     </div>
                 </div>
 
-                {/* More fields here... (Omitted for brevity, but would be fully implemented) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Phone Number */}
+                    <div className="space-y-2">
+                        <label htmlFor="phone_number" className="text-sm font-medium text-gray-700">Phone Number</label>
+                        <input 
+                            id="phone_number"
+                            {...register('phone_number')}
+                            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 transition-all outline-none"
+                            placeholder="+41 XX XXX XX XX"
+                        />
+                        {errors.phone_number && <p className="text-sm text-red-500">{errors.phone_number.message}</p>}
+                    </div>
+
+                    {/* Username (only if creating) */}
+                    {isCreating && (
+                        <div className="space-y-2">
+                            <label htmlFor="username" className="text-sm font-medium text-gray-700">Username</label>
+                            <input 
+                                id="username"
+                                {...register('username' as never)}
+                                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 transition-all outline-none"
+                            />
+                            {errors && 'username' in errors && (errors as any).username && (
+                                <p className="text-sm text-red-500">{(errors as any).username.message}</p>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Current Address */}
+                    <div className="space-y-2">
+                        <label htmlFor="current_address" className="text-sm font-medium text-gray-700">Current Address</label>
+                        <input 
+                            id="current_address"
+                            {...register('current_address')}
+                            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 transition-all outline-none"
+                        />
+                    </div>
+
+                    {/* Country of Origin */}
+                    <div className="space-y-2">
+                        <label htmlFor="country_of_origin" className="text-sm font-medium text-gray-700">Country of Origin</label>
+                        <input 
+                            id="country_of_origin"
+                            {...register('country_of_origin')}
+                            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 transition-all outline-none"
+                        />
+                    </div>
+                </div>
+
+                {/* Consent Checkboxes */}
+                <div className="space-y-4 pt-4">
+                    <div className="flex items-center gap-3">
+                        <input type="checkbox" id="marketing_consent" {...register('marketing_consent')} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                        <label htmlFor="marketing_consent" className="text-sm text-gray-600">I agree to receive marketing updates.</label>
+                    </div>
+                    {isCreating && (
+                        <>
+                            <div className="flex items-center gap-3">
+                                <input type="checkbox" id="terms_accepted" {...register('terms_accepted' as never)} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                                <label htmlFor="terms_accepted" className="text-sm text-gray-600">I accept the Terms of Service.</label>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <input type="checkbox" id="data_privacy_accepted" {...register('data_privacy_accepted' as never)} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                                <label htmlFor="data_privacy_accepted" className="text-sm text-gray-600">I accept the Data Privacy Policy.</label>
+                            </div>
+                        </>
+                    )}
+                </div>
 
                 <div className="pt-4">
                     <button 

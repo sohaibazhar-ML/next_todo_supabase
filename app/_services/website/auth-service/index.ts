@@ -1,5 +1,4 @@
 import { api } from '@/services/website/apiClient';
-import { API_ROUTES } from '@/website/constants/routes';
 import { UserProfile, SignUpFormData } from '@/website/types';
 
 import { LoginCredentials } from '@/admin/hooks/useAuth';
@@ -16,4 +15,10 @@ export const authService = {
     
     resetPassword: (email: string) => 
         api.post('/api/website/auth/reset-password', { email }),
+
+    updatePassword: async (supabase: { auth: { updateUser: (data: { password?: string }) => Promise<{ error: { message: string } | null }> } }, password: string) => {
+        const { error } = await supabase.auth.updateUser({ password });
+        if (error) throw new Error(error.message);
+        return { success: true };
+    }
 };

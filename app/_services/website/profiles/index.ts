@@ -33,3 +33,26 @@ export const checkUsernameAvailability = async (username: string): Promise<boole
  */
 export const createProfile = (data: Partial<UserProfile> & { id: string, username: string }) => 
     api.post<UserProfile>(API_ROUTES.PROFILES, data);
+
+/**
+ * Coordinated profile setup/update
+ * Handles username availability check and profile persistence
+ */
+export const completeProfileSetup = async (userId: string, data: Partial<UserProfile> & { username: string }, isCreating: boolean) => {
+    if (isCreating) {
+        // Check username availability first (Business Logic)
+        const isAvailable = await checkUsernameAvailability(data.username);
+        if (!isAvailable) {
+            throw new Error('Username is already taken');
+        }
+
+        return createProfile({
+            ...data,
+            id: userId,
+            email_confirmed: true,
+            email_confirmed_at: new Date().toISOString()
+        });
+    }
+
+    return updateProfile(userId, data);
+};

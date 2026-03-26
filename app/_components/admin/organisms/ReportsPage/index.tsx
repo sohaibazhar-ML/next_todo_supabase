@@ -5,7 +5,6 @@ import {
     Card, 
     CardContent, 
     Typography, 
-    Grid, 
     Table, 
     TableBody, 
     TableCell, 
@@ -13,12 +12,12 @@ import {
     TableRow,
     CircularProgress,
     Paper,
-    Divider,
-    Button
+    Divider
 } from '@mui/material';
 import { format, startOfMonth } from 'date-fns';
 import { CustomFilterToolbar, FilterDefinition } from '@/admin/molecules';
 import { useReports } from '@/admin/hooks';
+import { useCsvExport } from '@/website/hooks';
 import { DailyReportData } from '@/types';
 
 const filterDefinitions: FilterDefinition[] = [
@@ -28,6 +27,7 @@ const filterDefinitions: FilterDefinition[] = [
 
 export const ReportsPage = () => {
     const notify = useNotify();
+    const { exportToCsv } = useCsvExport();
     
     const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set(['fromDate', 'toDate']));
     const [fromDate, setFromDate] = useState(format(startOfMonth(new Date()), 'yyyy-MM-dd'));
@@ -56,26 +56,9 @@ export const ReportsPage = () => {
         setActiveFilters(newFilters);
     };
 
-    const exportToCSV = () => {
+    const handleExport = () => {
         if (!data || !data.dailyData) return;
-
-        const headers = ['Date', 'Uploads', 'Downloads'];
-        const rows = data.dailyData.map((d: DailyReportData) => [d.date, d.uploads, d.downloads]);
-        
-        const csvContent = [
-            headers.join(','),
-            ...rows.map((row: (string | number)[]) => row.join(','))
-        ].join('\n');
-
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.setAttribute('href', url);
-        link.setAttribute('download', `report_${fromDate}_to_${toDate}.csv`);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        exportToCsv(data.dailyData as unknown as Record<string, unknown>[], `report_${fromDate}_to_${toDate}.csv`);
     };
 
     return (
@@ -94,7 +77,7 @@ export const ReportsPage = () => {
                 activeFilters={activeFilters}
                 onFilterChange={handleFilterChange}
                 onToggleFilter={handleToggleFilter}
-                onExport={exportToCSV}
+                onExport={handleExport}
             />
 
             {isLoading ? (

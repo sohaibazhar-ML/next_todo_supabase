@@ -1,5 +1,4 @@
 "use client";
-"use client";
 import React from 'react';
 import { Link } from '@/i18n/routing';
 import { AdaptiveIcon } from '@/website/atoms/AdaptiveIcon';
@@ -69,4 +68,3 @@ export const Hero = () => {
     );
 };
 
-// export default Hero;
