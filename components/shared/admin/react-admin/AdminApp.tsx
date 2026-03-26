@@ -11,12 +11,14 @@ import { DocumentList, DocumentEdit, DocumentShow, DocumentCreate } from "@/feat
 import { UserList, UserEdit, UserShow } from "@/features/admin/users/components";
 import { DownloadLogList } from "@/features/admin/downloads/components";
 import { SettingsPage } from "@/features/admin/settings/components";
-import { ReportsPage } from "@/features/admin/reports/components/ReportsPage";
+import { ReportsPage } from "@/features/admin/reports/components";
+import { StatisticsPage } from "@/features/admin/stats/components";
 
 const AdminApp = () => (
     <Admin 
         dataProvider={dataProvider} 
         authProvider={authProvider}
+        dashboard={StatisticsPage}
     >
         {permissions => [
             // Profiles: Full access for admin, show-only for subadmin

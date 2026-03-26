@@ -3,7 +3,7 @@ import { API_ROUTES } from '@/shared/constants/routes';
 import { UserProfile } from '@/shared/types';
 
 export const userService = {
-    getAll: (params?: Record<string, any>) => 
+    getAll: (params?: Record<string, unknown>) => 
         api.get<{ data: UserProfile[], total: number }>(API_ROUTES.ADMIN('users'), params),
     
     getById: (id: string) => 

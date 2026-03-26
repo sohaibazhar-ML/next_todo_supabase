@@ -1,31 +1,12 @@
-import React, { useEffect, useState } from 'react';
 import { Title } from 'react-admin';
 import { Box, Typography, CircularProgress, Alert, Paper } from '@mui/material';
-import MuiStatisticsCards from './MuiStatisticsCards';
+import MuiStatisticsCards from '@/components/shared/admin/react-admin/MuiStatisticsCards';
+import { useAdminStats } from '../hooks/useAdminStats';
 
 const StatisticsPage = () => {
-    const [stats, setStats] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const { data: stats, isLoading, error } = useAdminStats();
 
-    useEffect(() => {
-        const fetchStats = async () => {
-            try {
-                const response = await fetch('/api/admin/stats');
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || 'Failed to fetch statistics');
-                setStats(data);
-            } catch (err: any) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchStats();
-    }, []);
-
-    if (loading) {
+    if (isLoading) {
         return (
             <Box display="flex" justifyContent="center" alignItems="center" py={8}>
                 <CircularProgress />
@@ -34,7 +15,8 @@ const StatisticsPage = () => {
     }
 
     if (error) {
-        return <Box p={2}><Alert severity="error">Error: {error}</Alert></Box>;
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        return <Box p={2}><Alert severity="error">Error: {errorMessage}</Alert></Box>;
     }
 
     return (
@@ -57,7 +39,7 @@ const StatisticsPage = () => {
                         Performance Overview
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                        The metrics above represent the current snapshot of projects, tasks, and team productivity.
+                        The metrics above represent real-time administrative activity, including user registrations, document management, and download history.
                     </Typography>
                 </Paper>
             </Box>

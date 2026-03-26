@@ -144,7 +144,7 @@ export const dataProvider: DataProvider = {
             // Handle multiple files or a single file
             const files = Array.isArray(params.data.file) ? params.data.file : [params.data.file];
             
-            files.forEach((fileObj: any) => {
+            files.forEach((fileObj: { rawFile: File }) => {
                 if (fileObj && fileObj.rawFile) {
                     formData.append('file', fileObj.rawFile);
                 }
@@ -170,16 +170,13 @@ export const dataProvider: DataProvider = {
             const json = await response.json();
             if (!response.ok) throw new Error(json.error || 'Upload failed');
             
-            // For bulk uploads, React Admin expects a single object for navigation.
-            // We return the first one to avoid "missing id" errors.
             const data = Array.isArray(json) ? json[0] : json;
             return { data };
         }
 
         const data = { ...params.data };
-        // Parse tags if it's a string (from TextInput)
         if (resource === 'documents' && typeof data.tags === 'string') {
-            data.tags = data.tags.split(',').map((t: string) => t.trim()).filter(Boolean);
+            data.tags = (data.tags as string).split(',').map((t: string) => t.trim()).filter(Boolean);
         }
 
         const { json } = await httpClient(`${apiUrl}/${resource}`, {
@@ -189,22 +186,13 @@ export const dataProvider: DataProvider = {
         return { data: json };
     },
 
-    /**
-     * Update an existing record by ID.
-     * Used by React Admin's <Edit> component on save.
-     *
-     * Sends a PUT request with { id, ...updatedFields } in the body.
-     * Returns: { data: Record } (the updated record)
-     */
     update: async (resource, params) => {
-        const data: any = { id: params.id, ...params.data };
+        const data = { id: params.id, ...params.data };
         
-        // Convert tags string to array if it's a string from TextInput
-        if (resource === 'documents' && typeof data.tags === 'string') {
-            data.tags = data.tags.split(',').map((t: string) => t.trim()).filter(Boolean);
+        if (resource === 'documents' && typeof (data as any).tags === 'string') {
+            (data as any).tags = (data as any).tags.split(',').map((t: string) => t.trim()).filter(Boolean);
         }
 
-        // Use the base resource URL as [id] is handled in the body by the API
         const { json } = await httpClient(`${apiUrl}/${resource}`, {
             method: 'PUT',
             body: JSON.stringify(data),

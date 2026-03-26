@@ -1,7 +1,7 @@
 import React from "react";
-import { List, Datagrid, TextField, DateField, SearchInput, Filter } from "react-admin";
+import { List, Datagrid, TextField, DateField, SearchInput, Filter, FilterProps } from "react-admin";
 
-const DownloadLogFilter = (props: any) => (
+const DownloadLogFilter = (props: Omit<FilterProps, 'children'>) => (
     <Filter {...props}>
         <SearchInput placeholder="Search Document, User, IP..." source="q" alwaysOn />
     </Filter>

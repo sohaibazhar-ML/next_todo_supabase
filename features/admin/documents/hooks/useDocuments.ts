@@ -3,7 +3,7 @@ import { documentService } from '../services/documentService';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { SerializedDocument } from '@/shared/types';
 
-export const useDocuments = (params?: Record<string, any>) => {
+export const useDocuments = (params?: Record<string, unknown>) => {
     return useQuery({
         queryKey: [QUERY_KEYS.ADMIN.DOCUMENTS, params],
         queryFn: () => documentService.getAll(params),

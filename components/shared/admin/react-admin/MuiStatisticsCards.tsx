@@ -1,50 +1,44 @@
 "use client";
 import React from 'react';
 import { Card, CardContent, Typography, Grid, Box } from '@mui/material';
-import BriefcaseIcon from '@mui/icons-material/BusinessCenter';
-import ClipboardIcon from '@mui/icons-material/Assignment';
-import GroupIcon from '@mui/icons-material/Group';
-import BarChartIcon from '@mui/icons-material/BarChart';
-
-interface Statistics {
-    projects: { total: number; completed: number };
-    activeTasks: { total: number; completed: number };
-    teams: { total: number; completed: number };
-    productivity: { percentage: number; completed: number };
-}
+import { StatisticsData } from '@/features/admin/stats/types';
+import PeopleIcon from '@mui/icons-material/People';
+import DescriptionIcon from '@mui/icons-material/Description';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import HistoryIcon from '@mui/icons-material/History';
 
 interface MuiStatisticsCardsProps {
-    statistics: Statistics;
+    statistics: StatisticsData;
 }
 
 const MuiStatisticsCards = ({ statistics }: MuiStatisticsCardsProps) => {
     const cards = [
         {
-            title: 'Projects',
-            value: statistics.projects.total,
-            subtitle: `${statistics.projects.completed} Completed`,
-            icon: <BriefcaseIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
+            title: 'Total Users',
+            value: statistics.totalUsers,
+            subtitle: 'Registered Profiles',
+            icon: <PeopleIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
             color: 'primary.light',
         },
         {
-            title: 'Active Tasks',
-            value: statistics.activeTasks.total,
-            subtitle: `${statistics.activeTasks.completed} Completed`,
-            icon: <ClipboardIcon sx={{ fontSize: 40, color: 'secondary.main' }} />,
+            title: 'Total Documents',
+            value: statistics.totalDocuments,
+            subtitle: 'Uploads & Versions',
+            icon: <DescriptionIcon sx={{ fontSize: 40, color: 'secondary.main' }} />,
             color: 'secondary.light',
         },
         {
-            title: 'Teams',
-            value: statistics.teams.total,
-            subtitle: `${statistics.teams.completed} Completed`,
-            icon: <GroupIcon sx={{ fontSize: 40, color: 'success.main' }} />,
+            title: 'Total Downloads',
+            value: statistics.totalDownloads,
+            subtitle: 'Lifetime Activity',
+            icon: <FileDownloadIcon sx={{ fontSize: 40, color: 'success.main' }} />,
             color: 'success.light',
         },
         {
-            title: 'Productivity',
-            value: `${statistics.productivity.percentage}%`,
-            subtitle: `${statistics.productivity.completed}% Completed`,
-            icon: <BarChartIcon sx={{ fontSize: 40, color: 'warning.main' }} />,
+            title: 'Recent Activity',
+            value: statistics.recentDownloads,
+            subtitle: 'Downloads (Last 30 Days)',
+            icon: <HistoryIcon sx={{ fontSize: 40, color: 'warning.main' }} />,
             color: 'warning.light',
         },
     ];

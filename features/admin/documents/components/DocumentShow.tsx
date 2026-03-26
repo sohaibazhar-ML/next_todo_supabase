@@ -1,5 +1,5 @@
-import React from "react";
 import { Show, SimpleShowLayout, TextField, NumberField, DateField, FunctionField } from "react-admin";
+import { Document } from "@/shared/types";
 
 export const DocumentShow = () => (
     <Show>
@@ -9,7 +9,7 @@ export const DocumentShow = () => (
             <TextField source="category" />
             <FunctionField 
                 label="Tags"
-                render={(record: any) => Array.isArray(record.tags) ? record.tags.join(', ') : record.tags} 
+                render={(record: Document) => Array.isArray(record.tags) ? record.tags.join(', ') : record.tags} 
             />
             <TextField source="file_name" />
             <NumberField source="file_size" />

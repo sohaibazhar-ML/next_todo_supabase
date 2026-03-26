@@ -1,0 +1,9 @@
+import { api } from '@/shared/services/apiClient';
+import { API_ROUTES } from '@/shared/constants/routes';
+import { StatisticsData } from '../types';
+
+export const adminStatsService = {
+    getStats: (): Promise<StatisticsData> => {
+        return api.get<StatisticsData>(API_ROUTES.ADMIN('stats'));
+    }
+};

@@ -3,7 +3,7 @@ import { API_ROUTES } from '@/shared/constants/routes';
 import { SerializedDocument } from '@/shared/types';
 
 export const documentService = {
-    getAll: (params?: Record<string, any>) => 
+    getAll: (params?: Record<string, unknown>) => 
         api.get<{ data: SerializedDocument[], total: number }>(API_ROUTES.ADMIN('documents'), params),
     
     getById: (id: string) => 

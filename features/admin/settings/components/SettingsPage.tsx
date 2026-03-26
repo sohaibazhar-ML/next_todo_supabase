@@ -1,38 +1,12 @@
-import React, { useEffect, useState } from 'react';
 import { Title } from 'react-admin';
 import { Box, Typography, CircularProgress, Alert, Paper, Divider, Button } from '@mui/material';
-import { createClient } from '@/lib/supabase/client';
+import { useAdminProfile } from '../hooks/useAdminProfile';
+import { UserProfile } from '@/shared/types';
 
 const SettingsPage = () => {
-    const [profile, setProfile] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const { data: profile, isLoading, error } = useAdminProfile();
 
-    useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                const supabase = createClient();
-                const { data: { user } } = await supabase.auth.getUser();
-                if (!user) throw new Error('Not authenticated');
-
-                const response = await fetch(`/api/profiles?userId=${user.id}`);
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || 'Failed to fetch profile');
-                
-                // If data is an array (Standard API might return list), get first item
-                const userProfile = Array.isArray(data) ? data[0] : data;
-                setProfile(userProfile);
-            } catch (err: any) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchProfile();
-    }, []);
-
-    if (loading) {
+    if (isLoading) {
         return (
             <Box display="flex" justifyContent="center" alignItems="center" py={8}>
                 <CircularProgress />
@@ -41,7 +15,8 @@ const SettingsPage = () => {
     }
 
     if (error) {
-        return <Box p={2}><Alert severity="error">Error: {error}</Alert></Box>;
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        return <Box p={2}><Alert severity="error">Error: {errorMessage}</Alert></Box>;
     }
 
     return (

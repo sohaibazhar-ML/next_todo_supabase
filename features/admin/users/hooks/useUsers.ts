@@ -3,7 +3,7 @@ import { userService } from '../services/userService';
 import { QUERY_KEYS } from '@/shared/constants/queryKeys';
 import { UserProfile } from '@/shared/types';
 
-export const useUsers = (params?: Record<string, any>) => {
+export const useUsers = (params?: Record<string, unknown>) => {
     return useQuery({
         queryKey: [QUERY_KEYS.ADMIN.USERS, params],
         queryFn: () => userService.getAll(params),

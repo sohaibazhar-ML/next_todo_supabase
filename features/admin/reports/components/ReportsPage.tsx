@@ -13,11 +13,13 @@ import {
     TableRow,
     CircularProgress,
     Paper,
-    Divider
+    Divider,
+    Button
 } from '@mui/material';
 import { format, startOfMonth } from 'date-fns';
-import { CustomFilterToolbar, FilterDefinition } from '@/components/react-admin/common/CustomFilterToolbar';
+import { CustomFilterToolbar, FilterDefinition } from '@/components/shared/admin/react-admin/common/CustomFilterToolbar';
 import { useReports } from '../hooks/useReports';
+import { DailyReportData } from '../types';
 
 const filterDefinitions: FilterDefinition[] = [
     { source: 'fromDate', label: 'From Date', type: 'date' },
@@ -42,9 +44,8 @@ export const ReportsPage = () => {
         }
     }, [error, notify]);
 
-    const handleFilterChange = (name: string, value: any) => {
+    const handleFilterChange = (name: string, value: string) => {
         if (name === 'fromDate') setFromDate(value);
-        if (name === 'toDate') setFromDate(value); // Error in original code? fixed to setFromDate/setToDate
         if (name === 'toDate') setToDate(value);
     };
 
@@ -59,11 +60,11 @@ export const ReportsPage = () => {
         if (!data || !data.dailyData) return;
 
         const headers = ['Date', 'Uploads', 'Downloads'];
-        const rows = data.dailyData.map((d: any) => [d.date, d.uploads, d.downloads]);
+        const rows = data.dailyData.map((d: DailyReportData) => [d.date, d.uploads, d.downloads]);
         
         const csvContent = [
             headers.join(','),
-            ...rows.map((row: any) => row.join(','))
+            ...rows.map((row) => row.join(','))
         ].join('\n');
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -133,7 +134,7 @@ export const ReportsPage = () => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {data.dailyData.map((day: any) => (
+                                {data.dailyData.map((day: DailyReportData) => (
                                     <TableRow key={day.date} hover>
                                         <TableCell>{day.date}</TableCell>
                                         <TableCell align="right">{day.uploads}</TableCell>

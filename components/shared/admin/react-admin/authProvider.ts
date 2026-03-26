@@ -1,5 +1,7 @@
 import { AuthProvider } from "react-admin";
 import { createClient } from "@/lib/supabase/client";
+import { api } from "@/shared/services/apiClient";
+import { UserProfile } from "@/shared/types";
 
 const supabase = createClient();
 
@@ -46,12 +48,8 @@ export const authProvider: AuthProvider = {
         if (!data.user) return null;
 
         try {
-            // Use the unrestricted profile API to get one's own role
-            const response = await fetch(`/api/profiles?userId=${data.user.id}`);
-            if (response.ok) {
-                const profile = await response.json();
-                return profile?.role ?? "user";
-            }
+            const profile = await api.get<UserProfile>(`/api/profiles?userId=${data.user.id}`);
+            return profile?.role ?? "user";
         } catch (e) {
             console.warn("[AuthProvider] Failed to fetch permissions:", e);
         }
@@ -65,17 +63,13 @@ export const authProvider: AuthProvider = {
         if (!data.user) throw new Error("Not authenticated");
 
         try {
-            // Use the unrestricted profile API to get one's own data
-            const response = await fetch(`/api/profiles?userId=${data.user.id}`);
-            if (response.ok) {
-                const profile = await response.json();
-                if (profile) {
-                    return {
-                        id: data.user.id,
-                        fullName: `${profile.first_name} ${profile.last_name}`,
-                        avatar: undefined,
-                    };
-                }
+            const profile = await api.get<UserProfile>(`/api/profiles?userId=${data.user.id}`);
+            if (profile) {
+                return {
+                    id: data.user.id,
+                    fullName: `${profile.first_name} ${profile.last_name}`,
+                    avatar: undefined,
+                };
             }
         } catch (e) {
             console.warn("[AuthProvider] Failed to fetch identity:", e);

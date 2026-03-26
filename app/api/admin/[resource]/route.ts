@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { isAdmin, isSubadmin } from '@/shared/utils/roles';
 import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,7 +23,7 @@ function isAllowedResource(resource: string): resource is ResourceName {
 
 // Maps resource name → Prisma model delegate
 function getPrismaModel(resource: ResourceName) {
-    const models: Record<ResourceName, any> = {
+    const models: Record<ResourceName, Prisma.profilesDelegate<any> | Prisma.documentsDelegate<any> | Prisma.download_logsDelegate<any> | Prisma.user_document_versionsDelegate<any>> = {
         profiles: prisma.profiles,
         users: prisma.profiles, // Alias for profiles
         documents: prisma.documents,
@@ -32,7 +33,7 @@ function getPrismaModel(resource: ResourceName) {
         stats: prisma.profiles, // Dummy mapping for custom view
         settings: prisma.profiles, // Dummy mapping for custom view
     };
-    return models[resource];
+    return models[resource] as any; // Cast to any here is acceptable as it's the bridge to generic Prisma calls
 }
 
 const isUuid = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
@@ -44,8 +45,9 @@ async function fetchUserRole(userId: string) {
             where: { id: userId },
             select: { role: true }
         });
-    } catch (firstError: any) {
-        console.warn('[Admin API] DB cold-start — retrying in 1s:', firstError?.message);
+    } catch (firstError: unknown) {
+        const message = firstError instanceof Error ? firstError.message : 'Unknown error';
+        console.warn('[Admin API] DB cold-start — retrying in 1s:', message);
         await new Promise(resolve => setTimeout(resolve, 1000));
         return await prisma.profiles.findUnique({
             where: { id: userId },
@@ -76,8 +78,9 @@ async function authorize(request: NextRequest) {
         }
 
         return { authorized: true as const, user, isAdmin: userIsAdmin, role };
-    } catch (dbError: any) {
-        console.error('[Admin API] Database error during auth (after retry):', dbError?.message || dbError);
+    } catch (dbError: unknown) {
+        const message = dbError instanceof Error ? dbError.message : String(dbError);
+        console.error('[Admin API] Database error during auth (after retry):', message);
         return { authorized: false as const, status: 503, message: 'Database temporarily unavailable' };
     }
 }
@@ -95,6 +98,34 @@ export async function GET(
     const { resource } = await params;
     if (!isAllowedResource(resource)) {
         return NextResponse.json({ error: `Unknown resource: ${resource}` }, { status: 400 });
+    }
+
+    // Special Case: Statistics Dashboard
+    if (resource === 'stats') {
+        try {
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+            // Fetch counts in parallel for performance
+            const [totalUsers, totalDocuments, totalDownloads, recentDownloads] = await Promise.all([
+                prisma.profiles.count(),
+                prisma.documents.count(),
+                prisma.download_logs.count(),
+                prisma.download_logs.count({
+                    where: { downloaded_at: { gte: thirtyDaysAgo } }
+                })
+            ]);
+
+            return NextResponse.json({
+                totalUsers,
+                totalDocuments,
+                totalDownloads,
+                recentDownloads
+            });
+        } catch (error) {
+            console.error('[Admin API] stats error:', error);
+            return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+        }
     }
 
     const model = getPrismaModel(resource);
@@ -138,11 +169,11 @@ export async function GET(
             const idList = JSON.parse(ids).filter(isUuid);
             if (idList.length === 0) return NextResponse.json([]);
             
-            const records = await model.findMany({ 
+            const records = await (model as any).findMany({ 
                 where: { id: { in: idList } },
                 include
             });
-            return NextResponse.json(records.map((r: any) => serializeRecord(r, resource)));
+            return NextResponse.json(records.map((r: unknown) => serializeRecord(r, resource)));
         } catch (error) {
             console.error('[Admin API] getMany error:', error);
             return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -157,7 +188,7 @@ export async function GET(
     const filterParam = searchParams.get('_filters');
 
     // Build Prisma where clause from filters
-    let where: any = {};
+    let where: Record<string, unknown> = {};
     if (filterParam) {
         try {
             const filters = JSON.parse(filterParam);
@@ -183,7 +214,7 @@ export async function GET(
                     ];
                 } else if (resource === 'download_logs') {
                     // Raw search for download logs across multiple fields
-                    where.OR = [
+                    (where as any).OR = [
                         { user_agent: { contains: q, mode: 'insensitive' } },
                         { context: { contains: q, mode: 'insensitive' } },
                         // Search in related documents
@@ -198,13 +229,13 @@ export async function GET(
                     // Handle IP address - Prisma doesn't support 'contains' on Inet type
                     // but we can try exact match if q looks like an IP
                     if (/^[0-9.:]+$/.test(q)) {
-                        where.OR.push({ ip_address: { equals: q } });
+                        (where as any).OR.push({ ip_address: { equals: q } });
                     }
                 } else {
                     // Fallback for other resources: only use 'equals' on 'id' if q is a UUID
                     // This prevents 500 errors when q is a name/string
                     if (isUuid(q)) {
-                        where.id = q;
+                        (where as any).id = q;
                     }
                 }
             }
@@ -214,9 +245,9 @@ export async function GET(
             const end = filters.toDate || filters.lte_created_at;
 
             if (start || end) {
-                where.created_at = {};
-                if (start) where.created_at.gte = new Date(start);
-                if (end) where.created_at.lte = new Date(end);
+                (where as any).created_at = {};
+                if (start) (where as any).created_at.gte = new Date(start);
+                if (end) (where as any).created_at.lte = new Date(end);
             }
 
             // Other exact or string matches
@@ -242,13 +273,13 @@ export async function GET(
                     if (isUuidField) {
                         // Only add the filter if it's a valid UUID to avoid Prisma errors
                         if (isUuid(value)) {
-                            where[filterKey] = value;
+                            (where as any)[filterKey] = value;
                         }
                     } else {
-                        where[filterKey] = { contains: value, mode: 'insensitive' };
+                        (where as any)[filterKey] = { contains: value, mode: 'insensitive' };
                     }
                 } else if (value !== undefined && value !== '') {
-                    where[filterKey] = value;
+                    (where as any)[filterKey] = value;
                 }
             }
         } catch (e) {
@@ -270,7 +301,7 @@ export async function GET(
         ]);
 
         return NextResponse.json({
-            data: records.map((r: any) => serializeRecord(r, resource)),
+            data: records.map((r: unknown) => serializeRecord(r, resource)),
             total,
         });
     } catch (error) {
@@ -383,10 +414,13 @@ export async function DELETE(
 
 // Converts BigInt → number and Date → ISO string for JSON serialization
 // Optionally flattens relations for specific resources
-function serializeRecord(record: any, resource?: string): any {
-    if (record === null || record === undefined) return record;
-    const serialized: any = {};
-    for (const [key, value] of Object.entries(record)) {
+function serializeRecord(record: unknown, resource?: string): any {
+    if (!record || typeof record !== 'object') return record;
+    
+    const rec = record as Record<string, unknown>;
+    const serialized: Record<string, unknown> = {};
+    
+    for (const [key, value] of Object.entries(rec)) {
         if (typeof value === 'bigint') {
             serialized[key] = Number(value);
         } else if (value instanceof Date) {
@@ -401,12 +435,15 @@ function serializeRecord(record: any, resource?: string): any {
 
     // Specialized flattening for download_logs: move document title and user info to top-level
     if (resource === 'download_logs') {
-        if (record.documents) {
-            serialized.document_title = record.documents.title;
+        const docs = rec.documents as Record<string, unknown> | undefined;
+        const profs = rec.profiles as Record<string, unknown> | undefined;
+        
+        if (docs && typeof docs.title === 'string') {
+            serialized.document_title = docs.title;
         }
-        if (record.profiles) {
-            serialized.username = record.profiles.username;
-            serialized.email = record.profiles.email;
+        if (profs) {
+            if (typeof profs.username === 'string') serialized.username = profs.username;
+            if (typeof profs.email === 'string') serialized.email = profs.email;
         }
     }
 

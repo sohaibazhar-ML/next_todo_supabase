@@ -5,6 +5,7 @@ export const QUERY_KEYS = {
         DOWNLOAD_LOGS: 'admin_download_logs',
         REPORTS: 'admin_reports',
         STATS: 'admin_stats',
+        SETTINGS: 'admin_settings',
     },
     WEBSITE: {
         USER_PROFILE: 'user_profile',

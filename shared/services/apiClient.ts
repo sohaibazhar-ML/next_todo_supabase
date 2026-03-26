@@ -5,7 +5,7 @@
  */
 
 interface RequestOptions extends RequestInit {
-    params?: Record<string, string | number | boolean>;
+    params?: Record<string, unknown>;
 }
 
 export async function apiClient<T>(url: string, options: RequestOptions = {}): Promise<T> {
@@ -14,9 +14,11 @@ export async function apiClient<T>(url: string, options: RequestOptions = {}): P
     let fullUrl = url;
     if (params) {
         const query = new URLSearchParams(
-            Object.entries(params).map(([key, value]) => [key, String(value)])
+            Object.entries(params)
+                .filter(([_, value]) => value !== undefined && value !== null)
+                .map(([key, value]) => [key, String(value)])
         ).toString();
-        fullUrl = `${url}?${query}`;
+        fullUrl = query ? `${url}?${query}` : url;
     }
 
     const response = await fetch(fullUrl, {
@@ -37,8 +39,8 @@ export async function apiClient<T>(url: string, options: RequestOptions = {}): P
 }
 
 export const api = {
-    get: <T>(url: string, params?: Record<string, any>) => apiClient<T>(url, { method: 'GET', params }),
-    post: <T>(url: string, body?: any) => apiClient<T>(url, { method: 'POST', body: JSON.stringify(body) }),
-    put: <T>(url: string, body?: any) => apiClient<T>(url, { method: 'PUT', body: JSON.stringify(body) }),
+    get: <T>(url: string, params?: Record<string, unknown>) => apiClient<T>(url, { method: 'GET', params }),
+    post: <T>(url: string, body?: unknown) => apiClient<T>(url, { method: 'POST', body: JSON.stringify(body) }),
+    put: <T>(url: string, body?: unknown) => apiClient<T>(url, { method: 'PUT', body: JSON.stringify(body) }),
     delete: <T>(url: string) => apiClient<T>(url, { method: 'DELETE' }),
 };

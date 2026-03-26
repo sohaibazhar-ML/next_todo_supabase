@@ -1,7 +1,6 @@
-import React from "react";
-import { Filter, SearchInput, SelectInput, DateInput } from "react-admin";
+import { Filter, SearchInput, SelectInput, DateInput, FilterProps } from "react-admin";
 
-export const UserFilter = (props: any) => (
+export const UserFilter = (props: Omit<FilterProps, 'children'>) => (
     <Filter {...props}>
         <SearchInput source="q" alwaysOn />
         <SelectInput

@@ -1,7 +1,6 @@
-import React from "react";
-import { Filter, SearchInput, SelectInput, TextInput, DateInput } from "react-admin";
+import { Filter, SearchInput, SelectInput, TextInput, DateInput, FilterProps } from "react-admin";
 
-export const DocumentFilter = (props: any) => (
+export const DocumentFilter = (props: Omit<FilterProps, 'children'>) => (
     <Filter {...props}>
         <SearchInput placeholder="Search Title, Category, Type..." source="q" alwaysOn />
         <SelectInput
