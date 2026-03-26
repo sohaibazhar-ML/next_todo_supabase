@@ -62,7 +62,10 @@ export async function GET(request: Request) {
       }
     })
 
-    return NextResponse.json(logs)
+    return NextResponse.json({
+      data: logs,
+      total: logs.length
+    })
   } catch (error: unknown) {
     console.error(CONSOLE_MESSAGES.ERROR_FETCHING_DOWNLOAD_LOGS, error)
     const errorMessage = isErrorWithMessage(error)

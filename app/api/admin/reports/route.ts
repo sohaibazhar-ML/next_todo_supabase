@@ -85,6 +85,8 @@ export async function GET(request: NextRequest) {
         });
 
         return NextResponse.json({
+            data: reportData,
+            total: reportData.length,
             from: format(start, 'yyyy-MM-dd'),
             to: format(end, 'yyyy-MM-dd'),
             totalUploads: uploads.length,

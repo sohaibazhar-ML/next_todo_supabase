@@ -30,14 +30,17 @@ export async function GET(request: Request) {
     }
 
     const { searchParams } = new URL(request.url)
+    const page = parseInt(searchParams.get('_page') || '1')
+    const perPage = parseInt(searchParams.get('_perPage') || '10')
     const category = searchParams.get('category')
     const fileType = searchParams.get('fileType')
     const featuredOnly = searchParams.get('featuredOnly') === 'true'
-    const searchQuery = searchParams.get('searchQuery')
+    const searchQuery = searchParams.get('searchQuery') || searchParams.get('q')
     const tags = searchParams.get('tags')?.split(',').filter(Boolean)
-    const fromDate = searchParams.get('fromDate')
-    const toDate = searchParams.get('toDate')
-    const sort = searchParams.get('sort') || 'created_at_desc'
+    const fromDate = searchParams.get('fromDate') || searchParams.get('gte_created_at')
+    const toDate = searchParams.get('toDate') || searchParams.get('lte_created_at')
+    const sortField = searchParams.get('_sortField') || 'created_at'
+    const sortOrder = (searchParams.get('_sortOrder') || 'DESC').toLowerCase()
 
     // Build where clause with proper typing
     const where: Prisma.documentsWhereInput = {}
@@ -52,7 +55,6 @@ export async function GET(request: Request) {
         where.created_at.gte = new Date(fromDate)
       }
       if (toDate) {
-        // Add one day to include the entire toDate
         const toDateEnd = new Date(toDate)
         toDateEnd.setHours(23, 59, 59, 999)
         where.created_at.lte = toDateEnd
@@ -61,8 +63,6 @@ export async function GET(request: Request) {
 
     // If search query exists, use RPC function
     if (searchQuery && searchQuery.trim()) {
-      // Use Prisma raw query to call the search_documents function
-      // Type the results as array of objects with id and rank
       interface SearchResult {
         id: string
         rank?: number
@@ -73,129 +73,69 @@ export async function GET(request: Request) {
         searchQuery,
         category || null,
         fileType || null,
-        100,
+        100, // Search limit
         0
       )
 
       if (!results || results.length === 0) {
-        return NextResponse.json([])
+        return NextResponse.json({ data: [], total: 0 })
       }
 
-      // Get IDs from search results
       const documentIds = results.map((doc) => doc.id)
-
-      // Build where clause for fetching full documents
       const searchWhere: Prisma.documentsWhereInput = {
         id: { in: documentIds },
-        // Removed parent_document_id filter to include both root and version documents
+        ...where
       }
 
-      // Add date range filters if provided
-      if (fromDate || toDate) {
-        searchWhere.created_at = {}
-        if (fromDate) {
-          searchWhere.created_at.gte = new Date(fromDate)
-        }
-        if (toDate) {
-          const toDateEnd = new Date(toDate)
-          toDateEnd.setHours(23, 59, 59, 999)
-          searchWhere.created_at.lte = toDateEnd
-        }
-      }
+      const [fullDocuments, total] = await Promise.all([
+        prisma.documents.findMany({
+          where: searchWhere,
+          skip: (page - 1) * perPage,
+          take: perPage,
+          orderBy: { [sortField]: sortOrder as 'asc' | 'desc' }
+        }),
+        prisma.documents.count({ where: searchWhere })
+      ])
 
-      // Fetch full document data for search results (both root documents and versions)
-      // This allows search to show original files and version files separately
-      const fullDocuments = await prisma.documents.findMany({
-        where: searchWhere,
-      })
+      const searchResultsMap = new Map(results.map((r) => [r.id, r] as [string, SearchResult]))
 
-      // Create a map of search results by ID for ranking
-      const searchResultsMap = new Map(
-        results.map((r) => [r.id, r] as [string, SearchResult])
-      )
-
-      // Merge search results with full document data, preserving search ranking
-      const documents = fullDocuments
-        .map((doc) => {
-          const searchResult = searchResultsMap.get(doc.id)
-          return {
-            ...doc,
-            // Preserve search rank if available
-            _rank: searchResult?.rank || 0,
-          }
-        })
-        .sort((a, b) => {
-          const rankA = (a as { _rank?: number })._rank || 0
-          const rankB = (b as { _rank?: number })._rank || 0
-          return rankB - rankA
-        }) // Sort by search rank
-
-      // Filter by tags if provided
-      let filteredDocuments = documents
-      if (tags && tags.length > 0) {
-        filteredDocuments = documents.filter((doc) => {
-          if (!doc.tags || !Array.isArray(doc.tags)) return false
-          return tags.some((selectedTag) => doc.tags.includes(selectedTag))
-        })
-      }
-
-      // Convert BigInt file_size to Number and remove _rank
-      const serializedDocuments = filteredDocuments.map((doc) => {
-        const { _rank, ...docWithoutRank } = doc as typeof doc & {
-          _rank?: number
-        }
+      const serializedDocuments = fullDocuments.map((doc) => {
+        const searchResult = searchResultsMap.get(doc.id)
         return {
-          ...docWithoutRank,
+          ...doc,
           file_size: typeof doc.file_size === 'bigint' ? Number(doc.file_size) : doc.file_size,
+          _rank: searchResult?.rank || 0,
         }
       })
 
-      return NextResponse.json(serializedDocuments)
+      return NextResponse.json({ data: serializedDocuments, total })
     }
 
-    // Build orderBy clause based on sort parameter
-    let orderBy: { [key: string]: 'asc' | 'desc' } = { created_at: 'desc' }
-
-    if (sort === 'created_at_asc') {
-      orderBy = { created_at: 'asc' }
-    } else if (sort === 'created_at_desc') {
-      orderBy = { created_at: 'desc' }
-    } else if (sort === 'title_asc') {
-      orderBy = { title: 'asc' }
-    } else if (sort === 'title_desc') {
-      orderBy = { title: 'desc' }
-    } else if (sort === 'download_count_asc') {
-      orderBy = { download_count: 'asc' }
-    } else if (sort === 'download_count_desc') {
-      orderBy = { download_count: 'desc' }
-    }
-
-    // Regular query - only show root documents (not versions)
-    // Versions have parent_document_id set, so we filter those out
-    const documents = await prisma.documents.findMany({
-      where: {
-        ...where,
-        parent_document_id: null, // Only root documents
-      },
-      orderBy
-    })
-
-    // Filter by tags client-side if provided
-    let filteredDocuments = documents
-    if (tags && tags.length > 0) {
-      filteredDocuments = documents.filter((doc) => {
-        if (!doc.tags || !Array.isArray(doc.tags)) return false
-        return tags.some(selectedTag => doc.tags.includes(selectedTag))
+    // Regular query
+    const [documents, total] = await Promise.all([
+      prisma.documents.findMany({
+        where: {
+          ...where,
+          parent_document_id: null,
+        },
+        skip: (page - 1) * perPage,
+        take: perPage,
+        orderBy: { [sortField]: sortOrder as 'asc' | 'desc' }
+      }),
+      prisma.documents.count({
+        where: {
+          ...where,
+          parent_document_id: null,
+        }
       })
-    }
+    ])
 
-    // Convert BigInt file_size to Number for JSON serialization
-    const serializedDocuments = filteredDocuments.map((doc) => ({
+    const serializedDocuments = documents.map((doc) => ({
       ...doc,
       file_size: typeof doc.file_size === 'bigint' ? Number(doc.file_size) : doc.file_size,
     }))
 
-    return NextResponse.json(serializedDocuments)
+    return NextResponse.json({ data: serializedDocuments, total })
   } catch (error: unknown) {
     console.error(CONSOLE_MESSAGES.ERROR_FETCHING_DOCUMENTS, error)
     const errorMessage = isErrorWithMessage(error)
