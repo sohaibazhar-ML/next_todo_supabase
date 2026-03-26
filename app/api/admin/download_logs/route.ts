@@ -30,6 +30,32 @@ export async function GET(request: Request) {
     }
 
     const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    // Single record by ID (getOne)
+    if (id) {
+        try {
+            const log = await prisma.download_logs.findUnique({
+                where: { id },
+                include: {
+                    documents: {
+                        select: { title: true }
+                    },
+                    profiles: {
+                        select: { username: true, email: true }
+                    }
+                }
+            })
+            if (!log) {
+                return NextResponse.json({ error: 'Not found' }, { status: 404 })
+            }
+            return NextResponse.json(log)
+        } catch (error) {
+            console.error('[Admin DownloadLogs API] getOne error:', error)
+            return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+        }
+    }
+
     const documentId = searchParams.get('documentId')
     const userId = searchParams.get('userId')
 

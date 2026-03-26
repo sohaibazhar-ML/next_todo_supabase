@@ -22,6 +22,13 @@ export async function GET(request: NextRequest) {
     }
 
     const searchParams = request.nextUrl.searchParams;
+    const id = searchParams.get('id');
+
+    // Single record by ID (getOne) - for reports, ID is the date
+    if (id) {
+        return NextResponse.json({ id, info: "Report for specific ID is not implemented, use getList with filters" });
+    }
+
     const fromParam = searchParams.get('from');
     const toParam = searchParams.get('to');
 

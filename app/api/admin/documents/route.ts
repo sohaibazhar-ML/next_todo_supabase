@@ -30,6 +30,27 @@ export async function GET(request: Request) {
     }
 
     const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    // Single record by ID (getOne)
+    if (id) {
+        try {
+            const document = await prisma.documents.findUnique({
+                where: { id }
+            })
+            if (!document) {
+                return NextResponse.json({ error: 'Not found' }, { status: 404 })
+            }
+            return NextResponse.json({
+                ...document,
+                file_size: typeof document.file_size === 'bigint' ? Number(document.file_size) : document.file_size,
+            })
+        } catch (error) {
+            console.error('[Admin Documents API] getOne error:', error)
+            return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+        }
+    }
+
     const page = parseInt(searchParams.get('_page') || '1')
     const perPage = parseInt(searchParams.get('_perPage') || '10')
     const category = searchParams.get('category')
