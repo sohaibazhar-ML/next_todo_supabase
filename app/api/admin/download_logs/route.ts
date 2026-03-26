@@ -91,8 +91,20 @@ export async function GET(request: Request) {
         }
     }
 
-    const documentId = searchParams.get('documentId')
-    const userId = searchParams.get('userId')
+    // Parse filter from JSON if present
+    const filterStr = searchParams.get('filter')
+    let filterObj: any = {}
+    if (filterStr) {
+        try {
+            filterObj = JSON.parse(filterStr)
+        } catch (e) {
+            console.error('[Admin DownloadLogs API] Filter parse error:', e)
+        }
+    }
+
+    const documentId = filterObj.documentId || searchParams.get('documentId')
+    const userId = filterObj.userId || searchParams.get('userId')
+    const searchQuery = filterObj.q || filterObj.searchQuery || searchParams.get('q')
 
     const admin = await isAdmin(user.id)
 

@@ -71,17 +71,30 @@ export async function GET(request: Request) {
         }
     }
 
-    const page = parseInt(searchParams.get('_page') || '1')
-    const perPage = parseInt(searchParams.get('_perPage') || '10')
-    const category = searchParams.get('category')
-    const fileType = searchParams.get('fileType')
-    const featuredOnly = searchParams.get('featuredOnly') === 'true'
-    const searchQuery = searchParams.get('searchQuery') || searchParams.get('q')
-    const tags = searchParams.get('tags')?.split(',').filter(Boolean)
-    const fromDate = searchParams.get('fromDate') || searchParams.get('gte_created_at')
-    const toDate = searchParams.get('toDate') || searchParams.get('lte_created_at')
-    const sortField = searchParams.get('_sortField') || 'created_at'
-    const sortOrder = (searchParams.get('_sortOrder') || 'DESC').toLowerCase()
+    const page = parseInt(searchParams.get('_page') || searchParams.get('page') || '1')
+    const perPage = parseInt(searchParams.get('_perPage') || searchParams.get('perPage') || '10')
+
+    // Parse filter from JSON if present (React Admin style)
+    const filterStr = searchParams.get('filter')
+    let filterObj: any = {}
+    if (filterStr) {
+        try {
+            filterObj = JSON.parse(filterStr)
+        } catch (e) {
+            console.error('[Admin Documents API] Filter parse error:', e)
+        }
+    }
+
+    const category = filterObj.category || searchParams.get('category')
+    const fileType = filterObj.fileType || searchParams.get('fileType')
+    const featuredOnly = filterObj.is_featured === true || searchParams.get('featuredOnly') === 'true'
+    const searchQuery = filterObj.q || filterObj.searchQuery || searchParams.get('searchQuery') || searchParams.get('q')
+    const tags = (filterObj.tags || searchParams.get('tags'))?.split(',').filter(Boolean)
+    const fromDate = filterObj.fromDate || filterObj.gte_created_at || searchParams.get('fromDate') || searchParams.get('gte_created_at')
+    const toDate = filterObj.toDate || filterObj.lte_created_at || searchParams.get('toDate') || searchParams.get('lte_created_at')
+    
+    const sortField = searchParams.get('_sortField') || searchParams.get('sort') || 'created_at'
+    const sortOrder = (searchParams.get('_sortOrder') || searchParams.get('order') || 'DESC').toLowerCase()
 
     // Build where clause with proper typing
     const where: Prisma.documentsWhereInput = {}
