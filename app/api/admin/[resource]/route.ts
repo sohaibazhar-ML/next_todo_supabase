@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { isAdmin, isSubadmin } from '@/lib/utils/roles';
+import { isAdmin, isSubadmin } from '@/shared/utils/roles';
 import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
@@ -103,13 +103,25 @@ export async function GET(
     const id = searchParams.get('id');
     const ids = searchParams.get('ids');
 
+    // Define includes for specific resources to fetch related data
+    const includes: Record<string, any> = {
+        download_logs: {
+            documents: { select: { title: true } },
+            profiles: { select: { username: true, email: true } }
+        }
+    };
+    const include = includes[resource];
+
     // Single record by ID
     if (id) {
         try {
             if (!isUuid(id)) {
                 return NextResponse.json({ error: 'Invalid ID format' }, { status: 400 });
             }
-            const record = await model.findUnique({ where: { id } });
+            const record = await model.findUnique({ 
+                where: { id },
+                include
+            });
             if (!record) {
                 return NextResponse.json({ error: 'Not found' }, { status: 404 });
             }
@@ -126,8 +138,11 @@ export async function GET(
             const idList = JSON.parse(ids).filter(isUuid);
             if (idList.length === 0) return NextResponse.json([]);
             
-            const records = await model.findMany({ where: { id: { in: idList } } });
-            return NextResponse.json(records.map(serializeRecord));
+            const records = await model.findMany({ 
+                where: { id: { in: idList } },
+                include
+            });
+            return NextResponse.json(records.map((r: any) => serializeRecord(r, resource)));
         } catch (error) {
             console.error('[Admin API] getMany error:', error);
             return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -246,6 +261,7 @@ export async function GET(
         const [records, total] = await Promise.all([
             model.findMany({
                 where,
+                include,
                 skip: (page - 1) * perPage,
                 take: perPage,
                 orderBy: { [sortField]: sortOrder === 'asc' ? 'asc' : 'desc' },
@@ -254,7 +270,7 @@ export async function GET(
         ]);
 
         return NextResponse.json({
-            data: records.map(serializeRecord),
+            data: records.map((r: any) => serializeRecord(r, resource)),
             total,
         });
     } catch (error) {
@@ -366,7 +382,8 @@ export async function DELETE(
 }
 
 // Converts BigInt → number and Date → ISO string for JSON serialization
-function serializeRecord(record: any): any {
+// Optionally flattens relations for specific resources
+function serializeRecord(record: any, resource?: string): any {
     if (record === null || record === undefined) return record;
     const serialized: any = {};
     for (const [key, value] of Object.entries(record)) {
@@ -374,9 +391,24 @@ function serializeRecord(record: any): any {
             serialized[key] = Number(value);
         } else if (value instanceof Date) {
             serialized[key] = value.toISOString();
+        } else if (value && typeof value === 'object' && !Array.isArray(value)) {
+            // Recursively serialize nested objects (handles BigInt/Date in relations)
+            serialized[key] = serializeRecord(value);
         } else {
             serialized[key] = value;
         }
     }
+
+    // Specialized flattening for download_logs: move document title and user info to top-level
+    if (resource === 'download_logs') {
+        if (record.documents) {
+            serialized.document_title = record.documents.title;
+        }
+        if (record.profiles) {
+            serialized.username = record.profiles.username;
+            serialized.email = record.profiles.email;
+        }
+    }
+
     return serialized;
 }

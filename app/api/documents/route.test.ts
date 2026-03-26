@@ -1,8 +1,8 @@
 import { GET, POST } from './route'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
-import { isAdmin } from '@/lib/utils/roles'
-import { ERROR_MESSAGES } from '@/constants'
+import { isAdmin } from '@/shared/utils/roles'
+import { ERROR_MESSAGES } from '@/shared/constants'
 import { DeepMockProxy } from 'jest-mock-extended'
 import { PrismaClient } from '@prisma/client'
 import { createMockRequest, validateResponse, cleanupMocks } from '@/test/utils/handler-utils'
@@ -12,7 +12,7 @@ jest.mock('@/lib/supabase/server')
 jest.mock('@/lib/prisma', () => ({
     prisma: (require('jest-mock-extended') as any).mockDeep(),
 }))
-jest.mock('@/lib/utils/roles')
+jest.mock('@/shared/utils/roles')
 
 const prismaMock = prisma as unknown as DeepMockProxy<PrismaClient>
 

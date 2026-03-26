@@ -12,8 +12,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
-import { isErrorWithMessage } from '@/types'
-import { CONSOLE_MESSAGES, ERROR_MESSAGES, STORAGE_BUCKETS, STORAGE_CONFIG } from '@/constants'
+import { isErrorWithMessage } from '@/shared/utils'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES, STORAGE_BUCKETS, STORAGE_CONFIG } from '@/shared/constants'
 
 // GET - Get signed download URL for a document
 export async function GET(
@@ -78,7 +78,7 @@ export async function GET(
     }
 
     return NextResponse.json({ signedUrl: urlData.signedUrl })
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(CONSOLE_MESSAGES.ERROR_GENERATING_DOWNLOAD_URL, error)
     const errorMessage = isErrorWithMessage(error)
       ? error.message

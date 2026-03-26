@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { DeepMockProxy } from 'jest-mock-extended'
 import { PrismaClient } from '@prisma/client'
 import { createMockRequest, validateResponse, cleanupMocks } from '@/test/utils/handler-utils'
+import { ERROR_MESSAGES } from '@/shared/constants'
 
 // Mock dependencies
 jest.mock('@/lib/prisma', () => ({
@@ -23,7 +24,7 @@ describe('Resolve Username API', () => {
         const { status, error } = await validateResponse<any>(response)
 
         expect(status).toBe(400)
-        expect(error).toBe('Username is required')
+        expect(error).toBe(ERROR_MESSAGES.USERNAME_REQUIRED)
     })
 
     it('should return 404 if profile is not found', async () => {
@@ -34,7 +35,7 @@ describe('Resolve Username API', () => {
         const { status, error } = await validateResponse<any>(response)
 
         expect(status).toBe(404)
-        expect(error).toBe('Profile not found')
+        expect(error).toBe(ERROR_MESSAGES.PROFILE_NOT_FOUND)
         expect(prismaMock.profiles.findUnique).toHaveBeenCalledWith({
             where: { username: 'nonexistent' },
             select: { email: true }
@@ -63,7 +64,7 @@ describe('Resolve Username API', () => {
         const { status, error } = await validateResponse<any>(response)
 
         expect(status).toBe(500)
-        expect(error).toBe('Internal server error')
+        expect(error).toBe(ERROR_MESSAGES.INTERNAL_SERVER_ERROR)
         expect(console.error).toHaveBeenCalled()
     })
 })

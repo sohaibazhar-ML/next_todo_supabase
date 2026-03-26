@@ -1,7 +1,8 @@
 import { GET, POST } from './route'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
-import { createMockRequest, validateResponse } from '@/test/utils/handler-utils'
+import { createMockRequest, validateResponse, cleanupMocks } from '@/test/utils/handler-utils'
+import { ERROR_MESSAGES } from '@/shared/constants'
 
 // Mock dependencies
 jest.mock('@/lib/supabase/server', () => ({
@@ -44,7 +45,7 @@ describe('Download Logs API', () => {
             const response = await GET(createMockRequest('http://localhost:3000/api/download-logs'))
             const { status, error } = await validateResponse(response)
             expect(status).toBe(401)
-            expect(error).toBe('Unauthorized')
+            expect(error).toBe(ERROR_MESSAGES.UNAUTHORIZED)
         })
 
         it('should return all logs for admin', async () => {
@@ -151,7 +152,7 @@ describe('Download Logs API', () => {
             const response = await GET(createMockRequest('http://localhost:3000/api/download-logs'))
             const { status, error } = await validateResponse(response)
             expect(status).toBe(500)
-            expect(error).toBe('Internal server error')
+            expect(error).toBe(ERROR_MESSAGES.INTERNAL_SERVER_ERROR)
         })
     })
 
@@ -180,7 +181,7 @@ describe('Download Logs API', () => {
             }))
             const { status, error } = await validateResponse(response)
             expect(status).toBe(403)
-            expect(error).toBe('Forbidden')
+            expect(error).toBe(ERROR_MESSAGES.FORBIDDEN)
         })
 
         it('should create log successfully with all fields', async () => {

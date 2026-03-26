@@ -15,10 +15,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
-import { isAdmin } from '@/lib/utils/roles'
-import type { ProfileUpdateInput } from '@/types/prisma'
-import { isErrorWithMessage } from '@/types'
-import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
+import { isAdmin } from '@/shared/utils/roles'
+import type { Prisma } from '@prisma/client'
+import { isErrorWithMessage } from '@/shared/utils'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/shared/constants'
 
 // GET - Get profile(s)
 export async function GET(request: Request) {
@@ -117,7 +117,7 @@ export async function GET(request: Request) {
     })
 
     return NextResponse.json(profiles)
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(CONSOLE_MESSAGES.ERROR_FETCHING_PROFILE, error)
     const errorMessage = isErrorWithMessage(error)
       ? error.message
@@ -239,7 +239,7 @@ export async function POST(request: Request) {
         'Content-Type': 'application/json',
       },
     })
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(CONSOLE_MESSAGES.ERROR_CREATING_PROFILE, error)
 
     // Handle unique constraint violations (Prisma error)
@@ -292,7 +292,7 @@ export async function PUT(request: Request) {
     }
 
     // Prepare update data (exclude fields that shouldn't be updated)
-    const updateData: ProfileUpdateInput = {
+    const updateData: Prisma.profilesUpdateInput = {
       first_name: body.first_name,
       last_name: body.last_name,
       phone_number: body.phone_number,
@@ -340,7 +340,7 @@ export async function PUT(request: Request) {
     })
 
     return NextResponse.json(profile)
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(CONSOLE_MESSAGES.ERROR_UPDATING_PROFILE, error)
     const errorMessage = isErrorWithMessage(error)
       ? error.message

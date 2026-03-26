@@ -7,11 +7,11 @@ import DownloadIcon from "@mui/icons-material/Download";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { dataProvider } from "./dataProvider";
 import { authProvider } from "./authProvider";
-import { DocumentList, DocumentEdit, DocumentShow, DocumentCreate } from "./resources/Documents";
-import { UserList, UserEdit, UserShow } from "./resources/Users";
-import { DownloadLogList } from "./resources/DownloadLogs";
-import SettingsPage from "./Settings";
-import ReportsPage from "./resources/Reports";
+import { DocumentList, DocumentEdit, DocumentShow, DocumentCreate } from "@/features/admin/documents/components";
+import { UserList, UserEdit, UserShow } from "@/features/admin/users/components";
+import { DownloadLogList } from "@/features/admin/downloads/components";
+import { SettingsPage } from "@/features/admin/settings/components";
+import { ReportsPage } from "@/features/admin/reports/components/ReportsPage";
 
 const AdminApp = () => (
     <Admin 

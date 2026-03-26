@@ -1,13 +1,16 @@
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 
+import { isErrorWithMessage } from '@/shared/utils'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/shared/constants'
+
 export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url)
         const username = searchParams.get('username')
 
         if (!username) {
-            return NextResponse.json({ error: 'Username is required' }, { status: 400 })
+            return NextResponse.json({ error: ERROR_MESSAGES.USERNAME_REQUIRED }, { status: 400 })
         }
 
         // Prisma bypasses RLS, so this lookup is safe for unauthenticated users
@@ -17,12 +20,15 @@ export async function GET(request: Request) {
         })
 
         if (!profile) {
-            return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
+            return NextResponse.json({ error: ERROR_MESSAGES.PROFILE_NOT_FOUND }, { status: 404 })
         }
 
         return NextResponse.json({ email: profile.email })
-    } catch (error) {
-        console.error('Error resolving username:', error)
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    } catch (error: unknown) {
+        console.error(CONSOLE_MESSAGES.ERROR_RESOLVING_USERNAME, error)
+        const errorMessage = isErrorWithMessage(error)
+            ? error.message
+            : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+        return NextResponse.json({ error: errorMessage }, { status: 500 })
     }
 }

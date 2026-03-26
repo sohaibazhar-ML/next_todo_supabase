@@ -27,8 +27,8 @@ import {
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import * as cheerio from 'cheerio'
 import type { Element, Text, AnyNode } from 'domhandler'
-import { isErrorWithMessage } from '@/types'
-import { CONSOLE_MESSAGES, ERROR_MESSAGES, STORAGE_BUCKETS, STORAGE_CONFIG } from '@/constants'
+import { isErrorWithMessage } from '@/shared/utils'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES, STORAGE_BUCKETS, STORAGE_CONFIG } from '@/shared/constants'
 
 /**
  * Type for cheerio element (can be Element or Text node from domhandler)
@@ -548,7 +548,7 @@ export async function POST(
           const fileNameBase = baseFileName.replace(/\.[^/.]+$/, '')
           exportFileName = `${fileNameBase}_edited_v${editedVersion.version_number}.docx`
           mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-        } catch (htmlError) {
+        } catch (htmlError: unknown) {
           console.error(CONSOLE_MESSAGES.HTML_TO_DOCX_CONVERSION_ERROR, htmlError)
           const errorMessage = isErrorWithMessage(htmlError)
             ? htmlError.message
@@ -642,7 +642,7 @@ export async function POST(
           const fileNameBase = baseFileName.replace(/\.[^/.]+$/, '')
           exportFileName = `${fileNameBase}_edited_v${editedVersion.version_number}.pdf`
           mimeType = 'application/pdf'
-        } catch (pdfError) {
+        } catch (pdfError: unknown) {
           console.error(CONSOLE_MESSAGES.PDF_CREATION_ERROR, pdfError)
           const errorMessage = isErrorWithMessage(pdfError)
             ? pdfError.message
@@ -689,7 +689,7 @@ export async function POST(
           { status: 500 }
         )
       }
-    } catch (uploadErr) {
+    } catch (uploadErr: unknown) {
       console.error(CONSOLE_MESSAGES.STORAGE_UPLOAD_ERROR, uploadErr)
       const errorMessage = isErrorWithMessage(uploadErr)
         ? uploadErr.message
@@ -727,7 +727,7 @@ export async function POST(
       fileName: exportFileName,
       filePath,
     })
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(CONSOLE_MESSAGES.ERROR_EXPORTING_DOCUMENT, error)
     const errorMessage = isErrorWithMessage(error)
       ? error.message

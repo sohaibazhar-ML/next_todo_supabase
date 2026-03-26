@@ -1,7 +1,7 @@
 import { GET } from './route'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
-import { ERROR_MESSAGES, STORAGE_BUCKETS } from '@/constants'
+import { ERROR_MESSAGES, STORAGE_BUCKETS } from '@/shared/constants'
 import { DeepMockProxy } from 'jest-mock-extended'
 import { PrismaClient } from '@prisma/client'
 import { createMockRequest, validateResponse, cleanupMocks } from '@/test/utils/handler-utils'

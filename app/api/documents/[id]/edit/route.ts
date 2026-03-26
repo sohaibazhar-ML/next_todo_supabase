@@ -15,9 +15,8 @@ import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { Document, Packer, Paragraph, TextRun } from 'docx'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
-import type { UserVersionRaw } from '@/types/document'
-import { isErrorWithMessage } from '@/types'
-import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
+import { isErrorWithMessage } from '@/shared/utils'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/shared/constants'
 
 // POST - Save edited document version
 export async function POST(
@@ -92,7 +91,7 @@ export async function POST(
     }
 
     return NextResponse.json(serializedVersion, { status: 201 })
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(CONSOLE_MESSAGES.ERROR_SAVING_EDITED_DOCUMENT, error)
     const errorMessage = isErrorWithMessage(error)
       ? error.message
@@ -107,7 +106,7 @@ export async function POST(
  * @param versions - Array of user document versions with BigInt values
  * @returns Array with BigInt values converted to strings
  */
-function serializeVersions(versions: UserVersionRaw[]) {
+function serializeVersions(versions: any[]) {
   return versions.map((version) => ({
     ...version,
     exported_file_size: (version.exported_file_size !== null && version.exported_file_size !== undefined)
@@ -145,7 +144,7 @@ export async function GET(
     const serializedVersions = serializeVersions(versions)
 
     return NextResponse.json(serializedVersions)
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(CONSOLE_MESSAGES.ERROR_FETCHING_VERSIONS, error)
     const errorMessage = isErrorWithMessage(error)
       ? error.message

@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { CONSOLE_MESSAGES } from '@/constants/console'
+import { CONSOLE_MESSAGES } from '@/constants'
 import type { User, Session, AuthError } from '@supabase/supabase-js'
 
 export async function GET(request: Request) {

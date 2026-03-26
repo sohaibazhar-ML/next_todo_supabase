@@ -8,9 +8,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
-import { isAdmin } from '@/lib/utils/roles'
-import { isErrorWithMessage } from '@/types'
-import { CONSOLE_MESSAGES, ERROR_MESSAGES, STORAGE_BUCKETS, STORAGE_CONFIG } from '@/constants'
+import { isAdmin } from '@/shared/utils/roles'
+import { isErrorWithMessage } from '@/shared/utils/error-utils'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES, STORAGE_BUCKETS, STORAGE_CONFIG } from '@/shared/constants'
 
 function getFileType(fileName: string): string {
   const ext = fileName.split('.').pop()?.toLowerCase()
@@ -127,7 +127,7 @@ export async function POST(request: Request) {
       files.length === 1 ? createdDocuments[0] : createdDocuments,
       { status: 201 }
     )
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(CONSOLE_MESSAGES.UPLOAD_ERROR, error)
     const errorMessage = isErrorWithMessage(error)
       ? error.message

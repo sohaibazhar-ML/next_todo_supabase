@@ -14,10 +14,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
-import { isAdmin } from '@/lib/utils/roles'
-import type { DownloadLogWhereInput } from '@/types/prisma'
-import { isErrorWithMessage } from '@/types'
-import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
+import { isAdmin } from '@/shared/utils/roles'
+import type { Prisma } from '@prisma/client'
+import { isErrorWithMessage } from '@/shared/utils'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/shared/constants'
 
 // GET - Get download logs
 export async function GET(request: Request) {
@@ -36,9 +36,13 @@ export async function GET(request: Request) {
     const admin = await isAdmin(user.id)
 
     // Build where clause with proper typing
-    const where: DownloadLogWhereInput = {}
-    if (documentId) where.document_id = documentId
-    if (userId) where.user_id = userId
+    const where: Prisma.download_logsWhereInput = {}
+    if (documentId) {
+      where.document_id = documentId
+    }
+    if (userId) {
+      where.user_id = userId
+    }
     // Users can only see their own logs unless admin
     if (!admin) {
       where.user_id = user.id
@@ -59,7 +63,7 @@ export async function GET(request: Request) {
     })
 
     return NextResponse.json(logs)
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(CONSOLE_MESSAGES.ERROR_FETCHING_DOWNLOAD_LOGS, error)
     const errorMessage = isErrorWithMessage(error)
       ? error.message
@@ -102,7 +106,7 @@ export async function POST(request: Request) {
     })
 
     return NextResponse.json(log, { status: 201 })
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(CONSOLE_MESSAGES.ERROR_CREATING_DOWNLOAD_LOG, error)
     const errorMessage = isErrorWithMessage(error)
       ? error.message

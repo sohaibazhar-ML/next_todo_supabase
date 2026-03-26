@@ -14,8 +14,8 @@ import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import mammoth from 'mammoth'
 import { PDFDocument } from 'pdf-lib'
-import { isErrorWithMessage } from '@/types'
-import { CONSOLE_MESSAGES, ERROR_MESSAGES, STORAGE_BUCKETS, STORAGE_CONFIG } from '@/constants'
+import { isErrorWithMessage } from '@/shared/utils'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES, STORAGE_BUCKETS, STORAGE_CONFIG } from '@/shared/constants'
 
 // GET - Convert document to editable format (HTML for DOCX, text for PDF)
 export async function GET(
@@ -121,7 +121,7 @@ export async function GET(
           content: result.value,
           messages: result.messages,
         })
-      } catch (error) {
+      } catch (error: unknown) {
         console.error(CONSOLE_MESSAGES.MAMMOTH_CONVERSION_ERROR, error)
         // Try with arrayBuffer as fallback
         try {
@@ -148,7 +148,7 @@ export async function GET(
             content: result.value,
             messages: result.messages,
           })
-        } catch (fallbackError) {
+        } catch (fallbackError: unknown) {
           console.error(CONSOLE_MESSAGES.MAMMOTH_FALLBACK_ERROR, fallbackError)
           const errorMessage = isErrorWithMessage(fallbackError)
             ? fallbackError.message
@@ -192,7 +192,7 @@ export async function GET(
           pdfUrl: urlData?.signedUrl || null,
           note: 'PDF text extraction is available in the viewer. You can extract text from pages and add annotations.',
         })
-      } catch (error) {
+      } catch (error: unknown) {
         console.error(CONSOLE_MESSAGES.PDF_PROCESSING_ERROR, error)
         const errorMessage = isErrorWithMessage(error)
           ? error.message
@@ -208,7 +208,7 @@ export async function GET(
         { status: 400 }
       )
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(CONSOLE_MESSAGES.ERROR_CONVERTING_DOCUMENT, error)
     const errorMessage = isErrorWithMessage(error)
       ? error.message

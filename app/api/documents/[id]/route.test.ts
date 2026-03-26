@@ -1,7 +1,8 @@
 import { GET, PUT, DELETE } from './route'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
-import { isAdmin } from '@/lib/utils/roles'
+import { isAdmin } from '@/shared/utils/roles'
+import { ERROR_MESSAGES } from '@/shared/constants'
 import { createMockRequest, validateResponse, cleanupMocks } from '@/test/utils/handler-utils'
 
 // Mock dependencies
@@ -19,7 +20,7 @@ jest.mock('@/lib/prisma', () => ({
     }
 }))
 
-jest.mock('@/lib/utils/roles', () => ({
+jest.mock('@/shared/utils/roles', () => ({
     isAdmin: jest.fn()
 }))
 
@@ -53,7 +54,7 @@ describe('Document by ID API', () => {
             const response = await GET(createMockRequest('http://local'), params)
             const { status, error } = await validateResponse(response)
             expect(status).toBe(401)
-            expect(error).toBe('Unauthorized')
+            expect(error).toBe(ERROR_MESSAGES.UNAUTHORIZED)
         })
 
         it('should return 404 if document not found', async () => {
@@ -62,7 +63,7 @@ describe('Document by ID API', () => {
             const response = await GET(createMockRequest('http://local'), params)
             const { status, error } = await validateResponse(response)
             expect(status).toBe(404)
-            expect(error).toBe('Document not found')
+            expect(error).toBe(ERROR_MESSAGES.DOCUMENT_NOT_FOUND)
         })
 
         it('should return document with file_size converted from BigInt to Number', async () => {

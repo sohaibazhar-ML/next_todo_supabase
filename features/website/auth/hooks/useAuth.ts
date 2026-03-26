@@ -1,0 +1,25 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { authService } from '../services/authService';
+import { SignUpFormData } from '@/shared/types';
+
+export const useLoginMutation = () => {
+    return useMutation({
+        mutationFn: (credentials: any) => authService.login(credentials),
+    });
+};
+
+export const useSignupMutation = () => {
+    return useMutation({
+        mutationFn: (data: SignUpFormData) => authService.signup(data),
+    });
+};
+
+export const useSignoutMutation = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: () => authService.signout(),
+        onSuccess: () => {
+            queryClient.clear();
+        },
+    });
+};

@@ -12,8 +12,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
-import { isErrorWithMessage } from '@/types'
-import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
+import { isErrorWithMessage } from '@/shared/utils'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/shared/constants'
 
 // GET - Get all versions of a document (including the document itself and its versions)
 export async function GET(
@@ -94,7 +94,7 @@ export async function GET(
     }))
 
     return NextResponse.json(serializedVersions)
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(CONSOLE_MESSAGES.ERROR_FETCHING_VERSIONS, error)
     const errorMessage = isErrorWithMessage(error)
       ? error.message

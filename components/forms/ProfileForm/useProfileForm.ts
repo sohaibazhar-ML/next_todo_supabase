@@ -24,10 +24,10 @@ import {
   updateProfile,
   checkUsernameAvailability,
   createProfile,
-} from '@/services/api/profiles'
-import { QUERY_KEYS } from '@/constants/queryKeys'
-import { DEFAULT_VALUES, ERROR_MESSAGES } from '@/constants'
-import type { UserProfile } from '@/types'
+} from '@/shared/services/api/profiles'
+import { QUERY_KEYS } from '@/shared/constants/queryKeys'
+import { DEFAULT_VALUES, ERROR_MESSAGES, CONSOLE_MESSAGES } from '@/shared/constants'
+import type { UserProfile } from '@/shared/types/user'
 
 export interface UseProfileFormOptions {
   /**
@@ -165,7 +165,7 @@ export function useProfileForm({
       })
 
       if (error) {
-        throw new Error(error.message || ERROR_MESSAGES.UPDATE_PASSWORD)
+        throw new Error(error.message || CONSOLE_MESSAGES.UPDATE_PASSWORD)
       }
     },
     onSuccess: () => {

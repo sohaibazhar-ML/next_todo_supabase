@@ -15,10 +15,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
-import { isAdmin } from '@/lib/utils/roles'
-import type { DocumentUpdateInput } from '@/types/prisma'
-import { isErrorWithMessage } from '@/types'
-import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
+import { isAdmin } from '@/shared/utils/roles'
+import type { Prisma } from '@prisma/client'
+import { isErrorWithMessage } from '@/shared/utils'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/shared/constants'
 
 // GET - Get single document
 export async function GET(
@@ -47,7 +47,7 @@ export async function GET(
       ...document,
       file_size: Number(document.file_size),
     })
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(CONSOLE_MESSAGES.ERROR_FETCHING_DOCUMENT, error)
     const errorMessage = isErrorWithMessage(error)
       ? error.message
@@ -93,7 +93,7 @@ export async function PUT(
     const rootId = document.parent_document_id || document.id
 
     // Prepare update data (only metadata fields, not file-specific fields)
-    const updateData: DocumentUpdateInput = {
+    const updateData: Prisma.documentsUpdateInput = {
       updated_at: new Date(),
     }
     if (body.title !== undefined) updateData.title = body.title
@@ -131,7 +131,7 @@ export async function PUT(
       file_size: Number(updatedDocument.file_size),
       versionsUpdated: updateResult.count,
     })
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(CONSOLE_MESSAGES.ERROR_UPDATING_DOCUMENT, error)
     const errorMessage = isErrorWithMessage(error)
       ? error.message
@@ -181,7 +181,7 @@ export async function DELETE(
       message: 'Document deleted successfully',
       file_path: document.file_path,
     })
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(CONSOLE_MESSAGES.ERROR_DELETING_DOCUMENT, error)
     const errorMessage = isErrorWithMessage(error)
       ? error.message

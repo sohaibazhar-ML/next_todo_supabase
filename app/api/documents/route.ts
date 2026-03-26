@@ -14,10 +14,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
-import { isAdmin } from '@/lib/utils/roles'
-import type { DocumentWhereInput } from '@/types/prisma'
-import { isErrorWithMessage } from '@/types'
-import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
+import { isAdmin } from '@/shared/utils/roles'
+import type { Prisma } from '@prisma/client'
+import { isErrorWithMessage } from '@/shared/utils'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/shared/constants'
 
 // GET - Get documents with optional filters
 export async function GET(request: Request) {
@@ -40,7 +40,7 @@ export async function GET(request: Request) {
     const sort = searchParams.get('sort') || 'created_at_desc'
 
     // Build where clause with proper typing
-    const where: DocumentWhereInput = {}
+    const where: Prisma.documentsWhereInput = {}
     if (category) where.category = category
     if (fileType) where.file_type = fileType
     if (featuredOnly) where.is_featured = true
@@ -85,7 +85,7 @@ export async function GET(request: Request) {
       const documentIds = results.map((doc) => doc.id)
 
       // Build where clause for fetching full documents
-      const searchWhere: DocumentWhereInput = {
+      const searchWhere: Prisma.documentsWhereInput = {
         id: { in: documentIds },
         // Removed parent_document_id filter to include both root and version documents
       }
@@ -196,7 +196,7 @@ export async function GET(request: Request) {
     }))
 
     return NextResponse.json(serializedDocuments)
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(CONSOLE_MESSAGES.ERROR_FETCHING_DOCUMENTS, error)
     const errorMessage = isErrorWithMessage(error)
       ? error.message
@@ -249,7 +249,7 @@ export async function POST(request: Request) {
       },
       { status: 201 }
     )
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(CONSOLE_MESSAGES.ERROR_CREATING_DOCUMENT, error)
     const errorMessage = isErrorWithMessage(error)
       ? error.message

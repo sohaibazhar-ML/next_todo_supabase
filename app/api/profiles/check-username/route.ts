@@ -11,8 +11,8 @@
 
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
-import { isErrorWithMessage } from '@/types'
-import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
+import { isErrorWithMessage } from '@/shared/utils'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/shared/constants'
 
 export async function GET(request: Request) {
   try {
@@ -29,7 +29,7 @@ export async function GET(request: Request) {
     })
 
     return NextResponse.json({ available: !existing })
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(CONSOLE_MESSAGES.ERROR_CHECKING_USERNAME, error)
     const errorMessage = isErrorWithMessage(error)
       ? error.message
