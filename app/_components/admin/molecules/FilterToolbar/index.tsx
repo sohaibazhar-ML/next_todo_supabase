@@ -20,15 +20,28 @@ export interface FilterDefinition {
     type: string;
 }
 
+/**
+ * Filter Values Type
+ * 
+ * Strict typing for active filter values to avoid unsfae 'unknown' casting.
+ */
+export type FilterValues = Record<string, string | number | boolean | undefined>;
+
 interface CustomFilterToolbarProps {
     filters: FilterDefinition[];
-    activeValues: Record<string, unknown>;
+    activeValues: FilterValues;
     onFilterChange: (name: string, value: string) => void;
     onToggleFilter: (name: string, active: boolean) => void;
     activeFilters: Set<string>;
     onExport?: () => void;
 }
 
+/**
+ * CustomFilterToolbar Molecule
+ * 
+ * Shared administrative toolbar for filtering and exporting data.
+ * Harden with strict typing and declarative handlers.
+ */
 export const CustomFilterToolbar = ({ 
     filters, 
     activeValues, 
@@ -57,7 +70,7 @@ export const CustomFilterToolbar = ({
                                 label={filter.label}
                                 type={filter.type}
                                 variant="filled"
-                                value={(activeValues[filter.source] as string) || ''}
+                                value={String(activeValues[filter.source] ?? '')}
                                 onChange={(e) => onFilterChange(filter.source, e.target.value)}
                                 size="small"
                                 slotProps={{ inputLabel: { shrink: true } }}

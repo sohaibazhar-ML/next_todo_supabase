@@ -1,5 +1,6 @@
 import React from "react";
 import { Edit, SimpleForm, TextInput, SelectInput } from "react-admin";
+import { ADMIN_ROLES } from "@/admin/constants";
 
 export const UserEdit = () => (
     <Edit>
@@ -9,11 +10,7 @@ export const UserEdit = () => (
             <TextInput source="email" />
             <SelectInput
                 source="role"
-                choices={[
-                    { id: 'user', name: 'User' },
-                    { id: 'subadmin', name: 'Subadmin' },
-                    { id: 'admin', name: 'Admin' },
-                ]}
+                choices={[...ADMIN_ROLES]}
             />
         </SimpleForm>
     </Edit>

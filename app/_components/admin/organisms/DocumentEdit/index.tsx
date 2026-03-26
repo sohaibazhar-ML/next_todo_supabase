@@ -1,5 +1,6 @@
 import React from "react";
 import { Edit, SimpleForm, TextInput, SelectInput, BooleanInput } from "react-admin";
+import { DOCUMENT_CATEGORIES } from "@/admin/constants";
 
 export const DocumentEdit = () => (
     <Edit>
@@ -8,13 +9,7 @@ export const DocumentEdit = () => (
             <TextInput source="description" multiline fullWidth />
             <SelectInput
                 source="category"
-                choices={[
-                    { id: 'Personal', name: 'Personal' },
-                    { id: 'Legal', name: 'Legal' },
-                    { id: 'Financial', name: 'Financial' },
-                    { id: 'Medical', name: 'Medical' },
-                    { id: 'Other', name: 'Other' },
-                ]}
+                choices={[...DOCUMENT_CATEGORIES]}
                 required
             />
             <TextInput 

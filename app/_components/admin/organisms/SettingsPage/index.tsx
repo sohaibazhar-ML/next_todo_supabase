@@ -1,7 +1,6 @@
-import { Title } from 'react-admin';
+import { Title, Link } from 'react-admin';
 import { Box, Typography, CircularProgress, Alert, Paper, Divider, Button } from '@mui/material';
 import { useAdminProfile } from '@/admin/hooks';
-import { UserProfile } from '@/types';
 
 export const SettingsPage = () => {
     const { data: profile, isLoading, error } = useAdminProfile();
@@ -78,7 +77,8 @@ export const SettingsPage = () => {
                         <Button 
                             variant="outlined" 
                             color="primary" 
-                            href="#/profiles"
+                            component={Link}
+                            to="/profiles"
                         >
                             Manage Users & Roles
                         </Button>
@@ -88,5 +88,3 @@ export const SettingsPage = () => {
         </Box>
     );
 };
-
-

@@ -11,41 +11,45 @@ interface MuiStatisticsCardsProps {
     statistics: StatisticsData;
 }
 
-export const StatisticsDashboard = ({ statistics }: MuiStatisticsCardsProps) => {
-    const cards = [
-        {
-            title: 'Total Users',
-            value: statistics.totalUsers,
-            subtitle: 'Registered Profiles',
-            icon: <PeopleIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-            color: 'primary.light',
-        },
-        {
-            title: 'Total Documents',
-            value: statistics.totalDocuments,
-            subtitle: 'Uploads & Versions',
-            icon: <DescriptionIcon sx={{ fontSize: 40, color: 'secondary.main' }} />,
-            color: 'secondary.light',
-        },
-        {
-            title: 'Total Downloads',
-            value: statistics.totalDownloads,
-            subtitle: 'Lifetime Activity',
-            icon: <FileDownloadIcon sx={{ fontSize: 40, color: 'success.main' }} />,
-            color: 'success.light',
-        },
-        {
-            title: 'Recent Activity',
-            value: statistics.recentDownloads,
-            subtitle: 'Downloads (Last 30 Days)',
-            icon: <HistoryIcon sx={{ fontSize: 40, color: 'warning.main' }} />,
-            color: 'warning.light',
-        },
-    ];
+const DASHBOARD_CARDS = [
+    {
+        title: 'Total Users',
+        source: 'totalUsers',
+        subtitle: 'Registered Profiles',
+        icon: PeopleIcon,
+        color: 'primary.light',
+        iconColor: 'primary.main',
+    },
+    {
+        title: 'Total Documents',
+        source: 'totalDocuments',
+        subtitle: 'Uploads & Versions',
+        icon: DescriptionIcon,
+        color: 'secondary.light',
+        iconColor: 'secondary.main',
+    },
+    {
+        title: 'Total Downloads',
+        source: 'totalDownloads',
+        subtitle: 'Lifetime Activity',
+        icon: FileDownloadIcon,
+        color: 'success.light',
+        iconColor: 'success.main',
+    },
+    {
+        title: 'Recent Activity',
+        source: 'recentDownloads',
+        subtitle: 'Downloads (Last 30 Days)',
+        icon: HistoryIcon,
+        color: 'warning.light',
+        iconColor: 'warning.main',
+    },
+] as const;
 
+export const StatisticsDashboard = ({ statistics }: MuiStatisticsCardsProps) => {
     return (
         <Grid container spacing={3}>
-            {cards.map((card) => (
+            {DASHBOARD_CARDS.map((card) => (
                 <Grid size={{ xs: 12, sm: 6, md: 3 }} key={card.title}>
                     <Card sx={{ height: '100%', position: 'relative', overflow: 'hidden' }}>
                         <CardContent>
@@ -55,7 +59,7 @@ export const StatisticsDashboard = ({ statistics }: MuiStatisticsCardsProps) => 
                                         {card.title}
                                     </Typography>
                                     <Typography variant="h4" component="div" fontWeight="bold">
-                                        {card.value}
+                                        {statistics[card.source as keyof StatisticsData]}
                                     </Typography>
                                     <Typography color="textSecondary" variant="body2" sx={{ mt: 1 }}>
                                         {card.subtitle}
@@ -72,7 +76,7 @@ export const StatisticsDashboard = ({ statistics }: MuiStatisticsCardsProps) => 
                                         opacity: 0.8
                                     }}
                                 >
-                                    {card.icon}
+                                    <card.icon sx={{ fontSize: 40, color: card.iconColor }} />
                                 </Box>
                             </Box>
                         </CardContent>

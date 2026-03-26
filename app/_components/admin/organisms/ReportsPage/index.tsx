@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Title, useNotify } from 'react-admin';
+import React from 'react';
+import { Title } from 'react-admin';
 import { 
     Box, 
     Card, 
@@ -14,10 +14,8 @@ import {
     Paper,
     Divider
 } from '@mui/material';
-import { format, startOfMonth } from 'date-fns';
 import { CustomFilterToolbar, FilterDefinition } from '@/admin/molecules';
-import { useReports } from '@/admin/hooks';
-import { useCsvExport } from '@/website/hooks';
+import { useReportsDashboard } from '@/admin/hooks';
 import { DailyReportData } from '@/types';
 
 const filterDefinitions: FilterDefinition[] = [
@@ -25,41 +23,21 @@ const filterDefinitions: FilterDefinition[] = [
     { source: 'toDate', label: 'To Date', type: 'date' },
 ];
 
+/**
+ * ReportsPage Organism
+ * 
+ * Clean, declarative component for administrative reporting.
+ * Logic and state are entirely encapsulated in the useReportsDashboard hook.
+ */
 export const ReportsPage = () => {
-    const notify = useNotify();
-    const { exportToCsv } = useCsvExport();
-    
-    const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set(['fromDate', 'toDate']));
-    const [fromDate, setFromDate] = useState(format(startOfMonth(new Date()), 'yyyy-MM-dd'));
-    const [toDate, setToDate] = useState(format(new Date(), 'yyyy-MM-dd'));
-    
-    const { data, isLoading, error } = useReports(
-        activeFilters.has('fromDate') ? fromDate : undefined,
-        activeFilters.has('toDate') ? toDate : undefined
-    );
-
-    useEffect(() => {
-        if (error) {
-            notify('Error fetching report', { type: 'error' });
-        }
-    }, [error, notify]);
-
-    const handleFilterChange = (name: string, value: string) => {
-        if (name === 'fromDate') setFromDate(value);
-        if (name === 'toDate') setToDate(value);
-    };
-
-    const handleToggleFilter = (name: string, active: boolean) => {
-        const newFilters = new Set(activeFilters);
-        if (active) newFilters.add(name);
-        else newFilters.delete(name);
-        setActiveFilters(newFilters);
-    };
-
-    const handleExport = () => {
-        if (!data || !data.dailyData) return;
-        exportToCsv(data.dailyData as unknown as Record<string, unknown>[], `report_${fromDate}_to_${toDate}.csv`);
-    };
+    const { 
+        data, 
+        isLoading, 
+        filterState,
+        handleFilterChange,
+        handleToggleFilter,
+        handleExport 
+    } = useReportsDashboard();
 
     return (
         <Box p={3}>
@@ -73,8 +51,11 @@ export const ReportsPage = () => {
 
             <CustomFilterToolbar 
                 filters={filterDefinitions}
-                activeValues={{ fromDate, toDate }}
-                activeFilters={activeFilters}
+                activeValues={{ 
+                    fromDate: filterState.fromDate, 
+                    toDate: filterState.toDate 
+                }}
+                activeFilters={filterState.activeFilters}
                 onFilterChange={handleFilterChange}
                 onToggleFilter={handleToggleFilter}
                 onExport={handleExport}

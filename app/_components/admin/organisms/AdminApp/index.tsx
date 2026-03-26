@@ -1,5 +1,5 @@
 "use client";
-import { Admin, Resource, ListGuesser, ShowGuesser } from "react-admin";
+import { Admin, Resource, ShowGuesser } from "react-admin";
 import PeopleIcon from "@mui/icons-material/People";
 import DescriptionIcon from "@mui/icons-material/Description";
 import UploadIcon from "@mui/icons-material/Upload";

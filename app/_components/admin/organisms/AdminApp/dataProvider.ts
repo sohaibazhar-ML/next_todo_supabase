@@ -57,7 +57,7 @@ export const dataProvider: DataProvider = {
         };
 
         // Attach filters if any are provided (e.g., search, category filter)
-        if (params.filter && Object.keys(params.filter as Object).length > 0) {
+        if (params.filter && Object.keys(params.filter as object).length > 0) {
             query._filters = JSON.stringify(params.filter);
         }
 
