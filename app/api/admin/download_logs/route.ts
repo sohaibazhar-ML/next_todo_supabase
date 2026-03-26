@@ -49,9 +49,44 @@ export async function GET(request: Request) {
             if (!log) {
                 return NextResponse.json({ error: 'Not found' }, { status: 404 })
             }
-            return NextResponse.json(log)
+            return NextResponse.json({
+                ...log,
+                document_title: log.documents?.title,
+                username: log.profiles?.username,
+                email: log.profiles?.email,
+            })
         } catch (error) {
             console.error('[Admin DownloadLogs API] getOne error:', error)
+            return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+        }
+    }
+
+    const ids = searchParams.get('ids')
+
+    // List of records by IDs (getMany)
+    if (ids) {
+        try {
+            const idList = JSON.parse(ids)
+            const logs = await prisma.download_logs.findMany({
+                where: { id: { in: idList } },
+                include: {
+                    documents: {
+                      select: { title: true }
+                    },
+                    profiles: {
+                      select: { username: true, email: true }
+                    }
+                }
+            })
+            const serialized = logs.map((log: any) => ({
+                ...log,
+                document_title: log.documents?.title,
+                username: log.profiles?.username,
+                email: log.profiles?.email,
+            }))
+            return NextResponse.json(serialized)
+        } catch (error) {
+            console.error('[Admin DownloadLogs API] getMany error:', error)
             return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
         }
     }
@@ -84,12 +119,25 @@ export async function GET(request: Request) {
             title: true,
             file_name: true
           }
+        },
+        profiles: {
+          select: {
+            username: true,
+            email: true
+          }
         }
       }
     })
 
+    const serializedLogs = logs.map((log: any) => ({
+      ...log,
+      document_title: log.documents?.title,
+      username: log.profiles?.username,
+      email: log.profiles?.email,
+    }))
+
     return NextResponse.json({
-      data: logs,
+      data: serializedLogs,
       total: logs.length
     })
   } catch (error: unknown) {

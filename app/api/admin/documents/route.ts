@@ -51,6 +51,26 @@ export async function GET(request: Request) {
         }
     }
 
+    const ids = searchParams.get('ids')
+
+    // List of records by IDs (getMany)
+    if (ids) {
+        try {
+            const idList = JSON.parse(ids)
+            const documents = await prisma.documents.findMany({
+                where: { id: { in: idList } }
+            })
+            const serialized = documents.map((doc: any) => ({
+                ...doc,
+                file_size: typeof doc.file_size === 'bigint' ? Number(doc.file_size) : doc.file_size,
+            }))
+            return NextResponse.json(serialized)
+        } catch (error) {
+            console.error('[Admin Documents API] getMany error:', error)
+            return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+        }
+    }
+
     const page = parseInt(searchParams.get('_page') || '1')
     const perPage = parseInt(searchParams.get('_perPage') || '10')
     const category = searchParams.get('category')
