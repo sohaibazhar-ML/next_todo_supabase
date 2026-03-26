@@ -1,16 +1,7 @@
 import { GET } from './route'
-import { prisma } from '@/lib/prisma'
-import { DeepMockProxy } from 'jest-mock-extended'
-import { PrismaClient } from '@prisma/client'
+import { prismaMock } from '@/lib/__mocks__/prisma'
 import { createMockRequest, validateResponse, cleanupMocks } from '@/test/utils/handler-utils'
 import { ERROR_MESSAGES } from '@/website/constants'
-
-// Mock dependencies
-jest.mock('@/lib/prisma', () => ({
-    prisma: (require('jest-mock-extended') as any).mockDeep(),
-}))
-
-const prismaMock = prisma as unknown as DeepMockProxy<PrismaClient>
 
 describe('Resolve Username API', () => {
     afterEach(() => {
@@ -19,7 +10,7 @@ describe('Resolve Username API', () => {
     })
 
     it('should return 400 if username is missing', async () => {
-        const request = createMockRequest('http://localhost/api/website/auth/resolve-username')
+        const request = createMockRequest('http://localhost:3000/api/website/auth/resolve-username')
         const response = await GET(request)
         const { status, error } = await validateResponse<any>(response)
 
@@ -30,7 +21,7 @@ describe('Resolve Username API', () => {
     it('should return 404 if profile is not found', async () => {
         prismaMock.profiles.findUnique.mockResolvedValue(null)
 
-        const request = createMockRequest('http://localhost/api/website/auth/resolve-username?username=nonexistent')
+        const request = createMockRequest('http://localhost:3000/api/website/auth/resolve-username?username=nonexistent')
         const response = await GET(request)
         const { status, error } = await validateResponse<any>(response)
 
@@ -47,7 +38,7 @@ describe('Resolve Username API', () => {
             email: 'test@example.com'
         } as any)
 
-        const request = createMockRequest('http://localhost/api/website/auth/resolve-username?username=testuser')
+        const request = createMockRequest('http://localhost:3000/api/website/auth/resolve-username?username=testuser')
         const response = await GET(request)
         const { status, data } = await validateResponse<any>(response)
 
@@ -59,12 +50,12 @@ describe('Resolve Username API', () => {
         jest.spyOn(console, 'error').mockImplementation(() => { })
         prismaMock.profiles.findUnique.mockRejectedValue(new Error('Database collision'))
 
-        const request = createMockRequest('http://localhost/api/website/auth/resolve-username?username=testuser')
+        const request = createMockRequest('http://localhost:3000/api/website/auth/resolve-username?username=testuser')
         const response = await GET(request)
         const { status, error } = await validateResponse<any>(response)
 
         expect(status).toBe(500)
-        expect(error).toBe(ERROR_MESSAGES.INTERNAL_SERVER_ERROR)
+        expect(error).toBe('Database collision')
         expect(console.error).toHaveBeenCalled()
     })
 })

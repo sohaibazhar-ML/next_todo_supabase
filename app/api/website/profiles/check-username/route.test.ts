@@ -1,15 +1,7 @@
 import { GET } from './route'
-import { prisma } from '@/lib/prisma'
-import { createMockRequest, validateResponse } from '@/test/utils/handler-utils'
-
-// Mock dependencies
-jest.mock('@/lib/prisma', () => ({
-    prisma: {
-        profiles: {
-            findUnique: jest.fn()
-        }
-    }
-}))
+import { prismaMock } from '@/lib/__mocks__/prisma'
+import { createMockRequest, validateResponse, cleanupMocks } from '@/test/utils/handler-utils'
+import { ERROR_MESSAGES } from '@/website/constants'
 
 describe('Check Username API', () => {
     beforeEach(() => {
@@ -17,29 +9,34 @@ describe('Check Username API', () => {
         jest.spyOn(console, 'error').mockImplementation(() => { })
     })
 
+    afterEach(() => {
+        cleanupMocks()
+        jest.restoreAllMocks()
+    })
+
     it('should return 400 if username is missing', async () => {
         const response = await GET(createMockRequest('http://localhost:3000/api/website/profiles/check-username'))
         const { status, error } = await validateResponse(response)
         expect(status).toBe(400)
-        expect(error).toBe('Username is required')
+        expect(error).toBe(ERROR_MESSAGES.USERNAME_REQUIRED)
     })
 
     it('should return available: true if username is not taken', async () => {
-        ; (prisma.profiles.findUnique as jest.Mock).mockResolvedValue(null)
+        prismaMock.profiles.findUnique.mockResolvedValue(null)
 
         const response = await GET(createMockRequest('http://localhost:3000/api/website/profiles/check-username?username=newuser'))
         const { status, data } = await validateResponse(response)
 
         expect(status).toBe(200)
         expect(data).toEqual({ available: true })
-        expect(prisma.profiles.findUnique).toHaveBeenCalledWith({
+        expect(prismaMock.profiles.findUnique).toHaveBeenCalledWith({
             where: { username: 'newuser' },
             select: { id: true }
         })
     })
 
     it('should return available: false if username is taken', async () => {
-        ; (prisma.profiles.findUnique as jest.Mock).mockResolvedValue({ id: 'user-123' })
+        prismaMock.profiles.findUnique.mockResolvedValue({ id: 'user-123' } as any)
 
         const response = await GET(createMockRequest('http://localhost:3000/api/website/profiles/check-username?username=existinguser'))
         const { status, data } = await validateResponse(response)
@@ -49,7 +46,7 @@ describe('Check Username API', () => {
     })
 
     it('should handle database errors', async () => {
-        ; (prisma.profiles.findUnique as jest.Mock).mockRejectedValue(new Error('DB Error'))
+        prismaMock.profiles.findUnique.mockRejectedValue(new Error('DB Error'))
 
         const response = await GET(createMockRequest('http://localhost:3000/api/website/profiles/check-username?username=testuser'))
         const { status, error } = await validateResponse(response)

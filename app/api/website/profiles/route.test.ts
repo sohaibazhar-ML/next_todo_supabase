@@ -1,20 +1,13 @@
 import { GET, POST, PUT } from './route'
-import { createClient } from '@/lib/supabase/server'
-import { prisma } from '@/lib/prisma'
+import { prismaMock } from '@/lib/__mocks__/prisma'
 import { isAdmin } from '@/website/utils/roles'
 import { ERROR_MESSAGES } from '@/website/constants'
-import { DeepMockProxy } from 'jest-mock-extended'
-import { PrismaClient } from '@prisma/client'
 import { createMockRequest, validateResponse, cleanupMocks } from '@/test/utils/handler-utils'
+import { createSupabaseMock, setupSupabaseMock } from '@/test/utils/supabase-mock'
 
 // Mock dependencies
 jest.mock('@/lib/supabase/server')
-jest.mock('@/lib/prisma', () => ({
-    prisma: (require('jest-mock-extended') as any).mockDeep(),
-}))
 jest.mock('@/website/utils/roles')
-
-const prismaMock = prisma as unknown as DeepMockProxy<PrismaClient>
 
 describe('Profiles API', () => {
     const mockUserId = '550e8400-e29b-41d4-a716-446655440000'
@@ -29,6 +22,7 @@ describe('Profiles API', () => {
     }
 
     beforeEach(() => {
+        jest.clearAllMocks()
         jest.spyOn(console, 'log').mockImplementation(() => { })
         jest.spyOn(console, 'error').mockImplementation(() => { })
         jest.spyOn(console, 'warn').mockImplementation(() => { })
@@ -41,9 +35,7 @@ describe('Profiles API', () => {
 
     describe('GET Handler', () => {
         it('should return 401 if user is not authenticated', async () => {
-            ; (createClient as jest.Mock).mockResolvedValue({
-                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: null } }) }
-            })
+            setupSupabaseMock(createSupabaseMock({ user: null }))
 
             const request = createMockRequest('http://localhost/api/website/profiles')
             const response = await GET(request)
@@ -54,10 +46,8 @@ describe('Profiles API', () => {
         })
 
         it('should return 404 if specific userId is provided but profile not found', async () => {
-            ; (createClient as jest.Mock).mockResolvedValue({
-                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: mockUser } }) }
-            })
-                ; (isAdmin as jest.Mock).mockResolvedValue(true)
+            setupSupabaseMock(createSupabaseMock({ user: mockUser }))
+            ;(isAdmin as jest.Mock).mockResolvedValue(true)
             prismaMock.profiles.findUnique.mockResolvedValue(null)
 
             const request = createMockRequest(`http://localhost/api/website/profiles?userId=${mockUserId}`)
@@ -69,10 +59,8 @@ describe('Profiles API', () => {
         })
 
         it('should return 403 if non-admin attempts to view another user\'s profile', async () => {
-            ; (createClient as jest.Mock).mockResolvedValue({
-                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'other-id' } } }) }
-            })
-                ; (isAdmin as jest.Mock).mockResolvedValue(false)
+            setupSupabaseMock(createSupabaseMock({ user: { id: 'other-id', email: 'other@example.com' } }))
+            ;(isAdmin as jest.Mock).mockResolvedValue(false)
 
             const request = createMockRequest(`http://localhost/api/website/profiles?userId=${mockUserId}`)
             const response = await GET(request)
@@ -83,10 +71,8 @@ describe('Profiles API', () => {
         })
 
         it('should return 200 for successful specific profile fetch', async () => {
-            ; (createClient as jest.Mock).mockResolvedValue({
-                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: mockUser } }) }
-            })
-                ; (isAdmin as jest.Mock).mockResolvedValue(false)
+            setupSupabaseMock(createSupabaseMock({ user: mockUser }))
+            ;(isAdmin as jest.Mock).mockResolvedValue(false)
             prismaMock.profiles.findUnique.mockResolvedValue(mockProfile as any)
 
             const request = createMockRequest(`http://localhost/api/website/profiles?userId=${mockUserId}`)
@@ -98,10 +84,8 @@ describe('Profiles API', () => {
         })
 
         it('should return current user\'s profile for non-admin on generic GET', async () => {
-            ; (createClient as jest.Mock).mockResolvedValue({
-                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: mockUser } }) }
-            })
-                ; (isAdmin as jest.Mock).mockResolvedValue(false)
+            setupSupabaseMock(createSupabaseMock({ user: mockUser }))
+            ;(isAdmin as jest.Mock).mockResolvedValue(false)
             prismaMock.profiles.findUnique.mockResolvedValue(mockProfile as any)
 
             const request = createMockRequest('http://localhost/api/website/profiles')
@@ -116,10 +100,8 @@ describe('Profiles API', () => {
         })
 
         it('should handle fromDate without toDate', async () => {
-            ; (createClient as jest.Mock).mockResolvedValue({
-                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'admin-id' } } }) }
-            })
-                ; (isAdmin as jest.Mock).mockResolvedValue(true)
+            setupSupabaseMock(createSupabaseMock({ user: { id: 'admin-id', email: 'admin@example.com' } }))
+            ;(isAdmin as jest.Mock).mockResolvedValue(true)
             prismaMock.profiles.findMany.mockResolvedValue([])
 
             const request = createMockRequest('http://localhost/api/website/profiles?fromDate=2024-01-01')
@@ -133,10 +115,8 @@ describe('Profiles API', () => {
         })
 
         it('should handle toDate without fromDate', async () => {
-            ; (createClient as jest.Mock).mockResolvedValue({
-                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'admin-id' } } }) }
-            })
-                ; (isAdmin as jest.Mock).mockResolvedValue(true)
+            setupSupabaseMock(createSupabaseMock({ user: { id: 'admin-id', email: 'admin@example.com' } }))
+            ;(isAdmin as jest.Mock).mockResolvedValue(true)
             prismaMock.profiles.findMany.mockResolvedValue([])
 
             const request = createMockRequest('http://localhost/api/website/profiles?toDate=2024-01-01')
@@ -153,10 +133,8 @@ describe('Profiles API', () => {
         })
 
         it('should handle error with custom message', async () => {
-            ; (createClient as jest.Mock).mockResolvedValue({
-                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: mockUser } }) }
-            })
-                ; (isAdmin as jest.Mock).mockResolvedValue(true)
+            setupSupabaseMock(createSupabaseMock({ user: mockUser }))
+            ;(isAdmin as jest.Mock).mockResolvedValue(true)
             prismaMock.profiles.findUnique.mockRejectedValue({ message: 'Custom Error' })
 
             const request = createMockRequest(`http://localhost/api/website/profiles?userId=${mockUserId}`)
@@ -168,10 +146,8 @@ describe('Profiles API', () => {
         })
 
         it('should handle generic error without message', async () => {
-            ; (createClient as jest.Mock).mockResolvedValue({
-                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: mockUser } }) }
-            })
-                ; (isAdmin as jest.Mock).mockResolvedValue(true)
+            setupSupabaseMock(createSupabaseMock({ user: mockUser }))
+            ;(isAdmin as jest.Mock).mockResolvedValue(true)
             prismaMock.profiles.findUnique.mockRejectedValue('Simple string error')
 
             const request = createMockRequest(`http://localhost/api/website/profiles?userId=${mockUserId}`)
@@ -182,10 +158,8 @@ describe('Profiles API', () => {
         })
 
         it('should return all profiles for admin with search across multiple fields', async () => {
-            ; (createClient as jest.Mock).mockResolvedValue({
-                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'admin-id' } } }) }
-            })
-                ; (isAdmin as jest.Mock).mockResolvedValue(true)
+            setupSupabaseMock(createSupabaseMock({ user: { id: 'admin-id', email: 'admin@example.com' } }))
+            ;(isAdmin as jest.Mock).mockResolvedValue(true)
             prismaMock.profiles.findMany.mockResolvedValue([mockProfile] as any)
 
             const request = createMockRequest('http://localhost/api/website/profiles?search=alex')
@@ -204,10 +178,8 @@ describe('Profiles API', () => {
         })
 
         it('should filter by role for admin', async () => {
-            ; (createClient as jest.Mock).mockResolvedValue({
-                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'admin-id' } } }) }
-            })
-                ; (isAdmin as jest.Mock).mockResolvedValue(true)
+            setupSupabaseMock(createSupabaseMock({ user: { id: 'admin-id', email: 'admin@example.com' } }))
+            ;(isAdmin as jest.Mock).mockResolvedValue(true)
             prismaMock.profiles.findMany.mockResolvedValue([mockProfile] as any)
 
             const request = createMockRequest('http://localhost/api/website/profiles?role=admin')
@@ -221,9 +193,7 @@ describe('Profiles API', () => {
         })
 
         it('should return 500 if prisma throws on GET', async () => {
-            ; (createClient as jest.Mock).mockResolvedValue({
-                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: mockUser } }) }
-            })
+            setupSupabaseMock(createSupabaseMock({ user: mockUser }))
             prismaMock.profiles.findUnique.mockRejectedValue(new Error('DB Error'))
 
             const request = createMockRequest(`http://localhost/api/website/profiles?userId=${mockUserId}`)
@@ -290,9 +260,7 @@ describe('Profiles API', () => {
         })
 
         it('should log warning if authenticated user ID mismatches creation ID (stale session)', async () => {
-            ; (createClient as jest.Mock).mockResolvedValue({
-                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'different-id' } } }) }
-            })
+            setupSupabaseMock(createSupabaseMock({ user: { id: 'different-id', email: 'different@example.com' } }))
             prismaMock.profiles.findUnique.mockResolvedValue(null)
             prismaMock.profiles.create.mockResolvedValue(mockProfile as any)
 
@@ -306,9 +274,7 @@ describe('Profiles API', () => {
         })
 
         it('should create profile successfully and serialize dates with email_confirmed_at', async () => {
-            ; (createClient as jest.Mock).mockResolvedValue({
-                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: null } }) }
-            })
+            setupSupabaseMock(createSupabaseMock({ user: null }))
             prismaMock.profiles.findUnique.mockResolvedValue(null)
             const createdProfile = {
                 ...mockProfile,
@@ -376,7 +342,7 @@ describe('Profiles API', () => {
         it('should return 400 for prisma unique constraint violation (P2002)', async () => {
             prismaMock.profiles.findUnique.mockResolvedValue(null)
             const prismaError = new Error('Unique constraint failed')
-                ; (prismaError as any).code = 'P2002'
+            ;(prismaError as any).code = 'P2002'
             prismaMock.profiles.create.mockRejectedValue(prismaError)
 
             const request = createMockRequest('http://localhost/api/website/profiles', {
@@ -393,9 +359,7 @@ describe('Profiles API', () => {
 
     describe('PUT Handler', () => {
         it('should return 401 if user is not authenticated', async () => {
-            ; (createClient as jest.Mock).mockResolvedValue({
-                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: null } }) }
-            })
+            setupSupabaseMock(createSupabaseMock({ user: null }))
 
             const request = createMockRequest('http://localhost/api/website/profiles', { method: 'PUT' })
             const response = await PUT(request)
@@ -406,10 +370,8 @@ describe('Profiles API', () => {
         })
 
         it('should return 403 if user attempts to update another user\'s profile', async () => {
-            ; (createClient as jest.Mock).mockResolvedValue({
-                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'wrong-id' } } }) }
-            })
-                ; (isAdmin as jest.Mock).mockResolvedValue(false)
+            setupSupabaseMock(createSupabaseMock({ user: { id: 'wrong-id', email: 'wrong@example.com' } }))
+            ;(isAdmin as jest.Mock).mockResolvedValue(false)
 
             const request = createMockRequest('http://localhost/api/website/profiles', {
                 method: 'PUT',
@@ -423,10 +385,8 @@ describe('Profiles API', () => {
         })
 
         it('should return 404 if profile to update is not found', async () => {
-            ; (createClient as jest.Mock).mockResolvedValue({
-                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: mockUser } }) }
-            })
-                ; (isAdmin as jest.Mock).mockResolvedValue(false)
+            setupSupabaseMock(createSupabaseMock({ user: mockUser }))
+            ;(isAdmin as jest.Mock).mockResolvedValue(false)
             prismaMock.profiles.findUnique.mockResolvedValue(null)
 
             const request = createMockRequest('http://localhost/api/website/profiles', {
@@ -441,10 +401,8 @@ describe('Profiles API', () => {
         })
 
         it('should fallback to authenticated userId if body.id is missing', async () => {
-            ; (createClient as jest.Mock).mockResolvedValue({
-                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: mockUser } }) }
-            })
-                ; (isAdmin as jest.Mock).mockResolvedValue(false)
+            setupSupabaseMock(createSupabaseMock({ user: mockUser }))
+            ;(isAdmin as jest.Mock).mockResolvedValue(false)
             prismaMock.profiles.findUnique.mockResolvedValue(mockProfile as any)
             prismaMock.profiles.update.mockResolvedValue(mockProfile as any)
 
@@ -460,10 +418,8 @@ describe('Profiles API', () => {
         })
 
         it('should return 403 if non-admin attempts to change roles', async () => {
-            ; (createClient as jest.Mock).mockResolvedValue({
-                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: mockUser } }) }
-            })
-                ; (isAdmin as jest.Mock).mockResolvedValue(false)
+            setupSupabaseMock(createSupabaseMock({ user: mockUser }))
+            ;(isAdmin as jest.Mock).mockResolvedValue(false)
             prismaMock.profiles.findUnique.mockResolvedValue(mockProfile as any)
 
             const request = createMockRequest('http://localhost/api/website/profiles', {
@@ -478,10 +434,8 @@ describe('Profiles API', () => {
         })
 
         it('should allow subadmin role identity check (no change should succeed)', async () => {
-            ; (createClient as jest.Mock).mockResolvedValue({
-                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'admin-id' } } }) }
-            })
-                ; (isAdmin as jest.Mock).mockResolvedValue(true)
+            setupSupabaseMock(createSupabaseMock({ user: { id: 'admin-id', email: 'admin@example.com' } }))
+            ;(isAdmin as jest.Mock).mockResolvedValue(true)
             const subadminProfile = { ...mockProfile, role: 'subadmin' }
             prismaMock.profiles.findUnique.mockResolvedValue(subadminProfile as any)
             prismaMock.profiles.update.mockResolvedValue(subadminProfile as any)
@@ -497,10 +451,8 @@ describe('Profiles API', () => {
         })
 
         it('should return 400 when admin tries changing to/from subadmin incorrectly', async () => {
-            ; (createClient as jest.Mock).mockResolvedValue({
-                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'admin-id' } } }) }
-            })
-                ; (isAdmin as jest.Mock).mockResolvedValue(true)
+            setupSupabaseMock(createSupabaseMock({ user: { id: 'admin-id', email: 'admin@example.com' } }))
+            ;(isAdmin as jest.Mock).mockResolvedValue(true)
             prismaMock.profiles.findUnique.mockResolvedValue(mockProfile as any) // current: user
 
             const request = createMockRequest('http://localhost/api/website/profiles', {
@@ -515,10 +467,8 @@ describe('Profiles API', () => {
         })
 
         it('should update profile successfully and include current address with keep_me_logged_in', async () => {
-            ; (createClient as jest.Mock).mockResolvedValue({
-                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: mockUser } }) }
-            })
-                ; (isAdmin as jest.Mock).mockResolvedValue(false)
+            setupSupabaseMock(createSupabaseMock({ user: mockUser }))
+            ;(isAdmin as jest.Mock).mockResolvedValue(false)
             prismaMock.profiles.findUnique.mockResolvedValue(mockProfile as any)
             prismaMock.profiles.update.mockResolvedValue({
                 ...mockProfile,
@@ -541,10 +491,8 @@ describe('Profiles API', () => {
         })
 
         it('should fallback to existing keep_me_logged_in if missing in body', async () => {
-            ; (createClient as jest.Mock).mockResolvedValue({
-                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: mockUser } }) }
-            })
-                ; (isAdmin as jest.Mock).mockResolvedValue(false)
+            setupSupabaseMock(createSupabaseMock({ user: mockUser }))
+            ;(isAdmin as jest.Mock).mockResolvedValue(false)
             prismaMock.profiles.findUnique.mockResolvedValue({ ...mockProfile, keep_me_logged_in: true } as any)
             prismaMock.profiles.update.mockResolvedValue(mockProfile as any)
 
@@ -562,9 +510,7 @@ describe('Profiles API', () => {
         })
 
         it('should handle PUT error with custom message', async () => {
-            ; (createClient as jest.Mock).mockResolvedValue({
-                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: mockUser } }) }
-            })
+            setupSupabaseMock(createSupabaseMock({ user: mockUser }))
             prismaMock.profiles.findUnique.mockRejectedValue({ message: 'PUT failed' })
 
             const request = createMockRequest('http://localhost/api/website/profiles', {
@@ -579,9 +525,7 @@ describe('Profiles API', () => {
         })
 
         it('should handle PUT generic error without message', async () => {
-            ; (createClient as jest.Mock).mockResolvedValue({
-                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: mockUser } }) }
-            })
+            setupSupabaseMock(createSupabaseMock({ user: mockUser }))
             prismaMock.profiles.findUnique.mockRejectedValue('Generic PUT error')
 
             const request = createMockRequest('http://localhost/api/website/profiles', {
@@ -595,9 +539,7 @@ describe('Profiles API', () => {
         })
 
         it('should return 500 if prisma throws on PUT', async () => {
-            ; (createClient as jest.Mock).mockResolvedValue({
-                auth: { getUser: jest.fn().mockResolvedValue({ data: { user: mockUser } }) }
-            })
+            setupSupabaseMock(createSupabaseMock({ user: mockUser }))
             prismaMock.profiles.findUnique.mockRejectedValue(new Error('Update Fail'))
 
             const request = createMockRequest('http://localhost/api/website/profiles', { method: 'PUT', body: '{}' })

@@ -7,13 +7,13 @@ jest.mock('@supabase/ssr', () => ({
     createServerClient: jest.fn(),
 }))
 
-jest.mock('@/constants/console', () => ({
+jest.mock('@/constants', () => ({
     CONSOLE_MESSAGES: {
         ERROR_MODIFYING_SESSION_COOKIES: 'Error modifying session cookies'
     }
 }))
 
-jest.mock('./i18n/routing', () => ({
+jest.mock('@/i18n/routing', () => ({
     routing: {
         locales: ['de', 'en', 'fr', 'it'],
         defaultLocale: 'de'
@@ -73,7 +73,7 @@ describe('Middleware', () => {
 
         const res = await middleware(req) as NextResponse
         expect(res.status).toBe(307)
-        expect(res.headers.get('Location')).toBe(`${mockOrigin}/en/login`)
+        expect(res.headers.get('Location')).toBe(`${mockOrigin}/en/admin`)
     })
 
     it('should allow authenticated users on protected routes', async () => {

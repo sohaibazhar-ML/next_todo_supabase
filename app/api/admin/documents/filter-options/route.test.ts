@@ -1,31 +1,21 @@
 import { GET } from './route'
-import { createClient } from '@/lib/supabase/server'
-import { prisma } from '@/lib/prisma'
+import { prismaMock } from '@/lib/__mocks__/prisma'
 import { createMockRequest, validateResponse } from '@/test/utils/handler-utils'
+import { createSupabaseMock, setupSupabaseMock } from '@/test/utils/supabase-mock'
+import { ERROR_MESSAGES } from '@/constants'
 
 // Mock dependencies
-jest.mock('@/lib/supabase/server', () => ({
-    createClient: jest.fn()
-}))
-
-jest.mock('@/lib/prisma', () => ({
-    prisma: {
-        $queryRaw: jest.fn()
-    }
-}))
+jest.mock('@/lib/supabase/server')
 
 describe('Documents Filter Options API', () => {
     const mockUser = { id: 'user-123', email: 'test@example.com' }
-    const mockSupabase = {
-        auth: {
-            getUser: jest.fn()
-        }
-    }
+    let mockSupabase: any
 
     beforeEach(() => {
         jest.clearAllMocks()
         jest.spyOn(console, 'error').mockImplementation(() => { })
-            ; (createClient as jest.Mock).mockResolvedValue(mockSupabase)
+        mockSupabase = createSupabaseMock({ user: mockUser })
+        setupSupabaseMock(mockSupabase)
     })
 
     afterEach(() => {
@@ -33,28 +23,23 @@ describe('Documents Filter Options API', () => {
     })
 
     it('should return 401 if not authenticated', async () => {
-        mockSupabase.auth.getUser.mockResolvedValue({ data: { user: null } })
+        mockSupabase.auth.getUser.mockResolvedValue({ data: { user: null }, error: null })
         const response = await GET(createMockRequest('http://localhost:3000/api/admin/documents/filter-options'))
 
         const { status, error } = await validateResponse(response)
         expect(status).toBe(401)
-        expect(error).toBe('Unauthorized')
+        expect(error).toBe(ERROR_MESSAGES.UNAUTHORIZED)
     })
 
     it('should return filter options successfully', async () => {
-        mockSupabase.auth.getUser.mockResolvedValue({ data: { user: mockUser } })
-
-            // Mock the Promise.all calls to $queryRaw
-            // 1. Categories
-            // 2. File Types
-            // 3. Tags
-            ; (prisma.$queryRaw as jest.Mock)
-                .mockResolvedValueOnce([{ category: 'Financial' }, { category: 'Legal' }])
-                .mockResolvedValueOnce([{ file_type: 'pdf' }, { file_type: 'docx' }])
-                .mockResolvedValueOnce([{ tag: 'important' }, { tag: 'urgent' }])
+        // Mock the Promise.all calls to $queryRaw
+        prismaMock.$queryRaw
+            .mockResolvedValueOnce([{ category: 'Financial' }, { category: 'Legal' }])
+            .mockResolvedValueOnce([{ file_type: 'pdf' }, { file_type: 'docx' }])
+            .mockResolvedValueOnce([{ tag: 'important' }, { tag: 'urgent' }])
 
         const response = await GET(createMockRequest('http://localhost:3000/api/admin/documents/filter-options'))
-        const { status, data } = await validateResponse(response)
+        const { status, data } = await validateResponse<any>(response)
 
         expect(status).toBe(200)
         expect(data).toEqual({
@@ -65,8 +50,7 @@ describe('Documents Filter Options API', () => {
     })
 
     it('should handle database errors', async () => {
-        mockSupabase.auth.getUser.mockResolvedValue({ data: { user: mockUser } })
-            ; (prisma.$queryRaw as jest.Mock).mockRejectedValue(new Error('DB Failed'))
+        prismaMock.$queryRaw.mockRejectedValue(new Error('DB Failed'))
 
         const response = await GET(createMockRequest('http://localhost:3000/api/admin/documents/filter-options'))
         const { status, error } = await validateResponse(response)

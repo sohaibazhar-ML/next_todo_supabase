@@ -12,7 +12,10 @@
     "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
     "prisma:push": "prisma db push",
-    "prisma:pull": "prisma db pull"
+    "prisma:pull": "prisma db pull",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

@@ -1,31 +1,20 @@
 import { GET } from './route'
-import { createClient } from '@/lib/supabase/server'
-import { prisma } from '@/lib/prisma'
+import { prismaMock } from '@/lib/__mocks__/prisma'
 import { cookies } from 'next/headers'
-import { NextResponse } from 'next/server'
-import { DeepMockProxy } from 'jest-mock-extended'
-import { PrismaClient } from '@prisma/client'
 import { cleanupMocks } from '@/test/utils/handler-utils'
+import { createSupabaseMock, setupSupabaseMock } from '@/test/utils/supabase-mock'
 
 // Mock dependencies
 jest.mock('@/lib/supabase/server')
-jest.mock('@/lib/prisma', () => ({
-    prisma: (require('jest-mock-extended') as any).mockDeep(),
-}))
 jest.mock('next/headers', () => ({
     cookies: jest.fn(),
 }))
-
-const prismaMock = prisma as unknown as DeepMockProxy<PrismaClient>
 
 describe('Auth Callback API', () => {
     const mockOrigin = 'http://localhost'
     const mockUserId = 'user-123'
     const mockUser = { id: mockUserId, email: 'test@example.com' }
-
-    const mockExchangeCodeForSession = jest.fn()
-    const mockResend = jest.fn()
-    const mockGetCookie = jest.fn()
+    let mockSupabase: any
 
     beforeEach(() => {
         jest.useFakeTimers()
@@ -33,17 +22,12 @@ describe('Auth Callback API', () => {
         jest.spyOn(console, 'error').mockImplementation(() => { })
         jest.spyOn(console, 'warn').mockImplementation(() => { })
 
-            ; (createClient as jest.Mock).mockResolvedValue({
-                auth: {
-                    exchangeCodeForSession: mockExchangeCodeForSession,
-                    resend: mockResend
-                }
-            })
-            ; (cookies as jest.Mock).mockResolvedValue({
-                get: mockGetCookie
-            })
-
-        mockGetCookie.mockReturnValue({ value: 'de' })
+        mockSupabase = createSupabaseMock()
+        setupSupabaseMock(mockSupabase)
+        
+        ;(cookies as jest.Mock).mockReturnValue({
+            get: jest.fn().mockReturnValue({ value: 'de' })
+        })
     })
 
     afterEach(() => {
@@ -53,7 +37,8 @@ describe('Auth Callback API', () => {
     })
 
     it('should redirect with specific locale from cookie', async () => {
-        mockGetCookie.mockReturnValue({ value: 'en' })
+        const mockCookies = cookies()
+        ;(mockCookies.get as jest.Mock).mockReturnValue({ value: 'en' })
         const request = new Request(`${mockOrigin}/auth/callback`)
         const response = await GET(request)
 
@@ -61,7 +46,8 @@ describe('Auth Callback API', () => {
     })
 
     it('should use default locale if NEXT_LOCALE cookie is missing', async () => {
-        mockGetCookie.mockReturnValue(undefined)
+        const mockCookies = cookies()
+        ;(mockCookies.get as jest.Mock).mockReturnValue(undefined)
         const request = new Request(`${mockOrigin}/auth/callback`)
         const response = await GET(request)
 
@@ -69,7 +55,7 @@ describe('Auth Callback API', () => {
     })
 
     it('should redirect back to login if session data is missing after exchange', async () => {
-        mockExchangeCodeForSession.mockResolvedValue({ data: null, error: null })
+        mockSupabase.auth.exchangeCodeForSession.mockResolvedValue({ data: null, error: null })
         const request = new Request(`${mockOrigin}/auth/callback?code=some-code`)
         const response = await GET(request)
 
@@ -93,7 +79,7 @@ describe('Auth Callback API', () => {
     })
 
     it('should skip profile logic and redirect to reset-password if both code and type=recovery are present', async () => {
-        mockExchangeCodeForSession.mockResolvedValue({ data: { user: mockUser, session: {} }, error: null })
+        mockSupabase.auth.exchangeCodeForSession.mockResolvedValue({ data: { user: mockUser, session: {} }, error: null })
         const request = new Request(`${mockOrigin}/auth/callback?code=123&type=recovery`)
         const response = await GET(request)
 
@@ -106,7 +92,7 @@ describe('Auth Callback API', () => {
         const request = new Request(`${mockOrigin}/auth/callback?code=${code}`)
 
         it('should redirect to login on immediate exchange failure', async () => {
-            mockExchangeCodeForSession.mockResolvedValue({ data: null, error: { message: 'Invalid code' } })
+            mockSupabase.auth.exchangeCodeForSession.mockResolvedValue({ data: null, error: { message: 'Invalid code' } })
 
             const response = await GET(request)
 
@@ -115,7 +101,7 @@ describe('Auth Callback API', () => {
         })
 
         it('should retry on network errors and succeed eventually', async () => {
-            mockExchangeCodeForSession
+            mockSupabase.auth.exchangeCodeForSession
                 .mockResolvedValueOnce({ data: null, error: { message: 'fetch failed' } })
                 .mockResolvedValueOnce({ data: { user: mockUser, session: {} }, error: null })
 
@@ -128,13 +114,13 @@ describe('Auth Callback API', () => {
 
             const response = await promise
 
-            expect(mockExchangeCodeForSession).toHaveBeenCalledTimes(2)
+            expect(mockSupabase.auth.exchangeCodeForSession).toHaveBeenCalledTimes(2)
             expect(response.status).toBe(307)
             expect(response.headers.get('Location')).toBe(`${mockOrigin}/de/dashboard`)
         })
 
         it('should fail after 3 retries on persistent network errors', async () => {
-            mockExchangeCodeForSession.mockResolvedValue({ data: null, error: { message: 'fetch failed' } })
+            mockSupabase.auth.exchangeCodeForSession.mockResolvedValue({ data: null, error: { message: 'fetch failed' } })
 
             const promise = GET(request)
 
@@ -144,7 +130,7 @@ describe('Auth Callback API', () => {
 
             const response = await promise
 
-            expect(mockExchangeCodeForSession).toHaveBeenCalledTimes(3)
+            expect(mockSupabase.auth.exchangeCodeForSession).toHaveBeenCalledTimes(3)
             expect(response.status).toBe(307)
             expect(response.headers.get('Location')).toContain('/login?error=fetch%20failed')
         })
@@ -155,7 +141,7 @@ describe('Auth Callback API', () => {
         const request = new Request(`${mockOrigin}/auth/callback?code=${code}`)
 
         beforeEach(() => {
-            mockExchangeCodeForSession.mockResolvedValue({ data: { user: mockUser, session: {} }, error: null })
+            mockSupabase.auth.exchangeCodeForSession.mockResolvedValue({ data: { user: mockUser, session: {} }, error: null })
         })
 
         it('should redirect to profile setup if no profile exists (OAuth signup)', async () => {
@@ -169,7 +155,7 @@ describe('Auth Callback API', () => {
 
         it('should handle first confirmation for manual signup', async () => {
             prismaMock.profiles.findUnique.mockResolvedValue({ email_confirmed: false } as any)
-            mockResend.mockResolvedValue({ error: null })
+            mockSupabase.auth.resend.mockResolvedValue({ error: null })
 
             const response = await GET(request)
 
@@ -177,7 +163,7 @@ describe('Auth Callback API', () => {
                 where: { id: mockUserId },
                 data: { email_confirmed: true }
             }))
-            expect(mockResend).toHaveBeenCalledWith(expect.objectContaining({
+            expect(mockSupabase.auth.resend).toHaveBeenCalledWith(expect.objectContaining({
                 type: 'signup',
                 email: mockUser.email
             }))
@@ -203,7 +189,7 @@ describe('Auth Callback API', () => {
 
         it('should handle email resend failure gracefully', async () => {
             prismaMock.profiles.findUnique.mockResolvedValue({ email_confirmed: false } as any)
-            mockResend.mockResolvedValue({ error: { message: 'Resend failed' } })
+            mockSupabase.auth.resend.mockResolvedValue({ error: { message: 'Resend failed' } })
 
             const response = await GET(request)
 
