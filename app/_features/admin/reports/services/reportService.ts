@@ -1,0 +1,13 @@
+import { api } from '@/services/apiClient';
+import { API_ROUTES } from '@/constants/routes';
+import { ReportStats } from '@/features/admin/reports/types';
+
+export const reportService = {
+    getStats: (from?: string, to?: string) => {
+        const params: Record<string, string> = {};
+        if (from) params.from = from;
+        if (to) params.to = to;
+        
+        return api.get<ReportStats>(API_ROUTES.ADMIN('reports'), params);
+    },
+};

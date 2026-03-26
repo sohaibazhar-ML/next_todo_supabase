@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { CONSOLE_MESSAGES } from '@/constants'
 import createMiddleware from 'next-intl/middleware'
-import { routing } from './i18n/routing'
+import { routing } from '@/i18n/routing'
 
 // Create the next-intl middleware
 const intlMiddleware = createMiddleware(routing)
