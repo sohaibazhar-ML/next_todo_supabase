@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
-import { usePagination } from '@/hooks/usePagination';
-import { useSort } from '@/hooks/useSort';
+import { usePagination } from '../usePagination';
+import { useSort } from '../useSort';
 
 export function useTableState(initialField = 'id', initialOrder: 'ASC' | 'DESC' = 'DESC') {
     const pagination = usePagination();

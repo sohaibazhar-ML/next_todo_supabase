@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import { format, startOfMonth } from 'date-fns';
 import { CustomFilterToolbar, FilterDefinition } from '@/admin/molecules';
-import { useReports } from '@/hooks/useReports';
+import { useReports } from '@/admin/hooks';
 import { DailyReportData } from '@/types';
 
 const filterDefinitions: FilterDefinition[] = [

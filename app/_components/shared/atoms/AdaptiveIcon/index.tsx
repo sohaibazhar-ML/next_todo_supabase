@@ -1,8 +1,7 @@
 "use client";
 import React from 'react';
 import * as MuiIcons from '@mui/icons-material';
-import { HelpCircle } from 'lucide-react';
-import { AdaptiveIconProps } from '@/shared/atoms/AdaptiveIcon/AdaptiveIcon.types';
+import { HelpCircle, LucideProps } from 'lucide-react';
 
 /**
  * AdaptiveIcon Atom
@@ -11,12 +10,24 @@ import { AdaptiveIconProps } from '@/shared/atoms/AdaptiveIcon/AdaptiveIcon.type
  * and Lucide Icons (for Website). This eliminates the need for inline SVGs 
  * and ensures a consistent icon API across the entire project.
  */
-export const AdaptiveIcon = ({ 
-    name, 
-    lucide: Lucide, 
-    size = 24, 
-    color, 
-    className 
+export type IconName = keyof typeof MuiIcons;
+
+
+interface AdaptiveIconProps {
+    name?: IconName;
+    lucide?: React.ComponentType<LucideProps>;
+    size?: number | string;
+    color?: string;
+    className?: string;
+}
+
+
+export const AdaptiveIcon = ({
+    name,
+    lucide: Lucide,
+    size = 24,
+    color,
+    className
 }: AdaptiveIconProps) => {
     // If a Lucide icon is explicitly provided, use it (preferred for Website)
     if (Lucide) {

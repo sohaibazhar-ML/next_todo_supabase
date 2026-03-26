@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import { useProfileForm } from '@/hooks/useProfileForm';
+import { useProfileForm } from '@/website/hooks';
 import { AdaptiveIcon } from '@/shared/atoms/AdaptiveIcon';
 import { User } from 'lucide-react';
 

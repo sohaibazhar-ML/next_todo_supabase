@@ -1,6 +1,6 @@
 import { Title } from 'react-admin';
 import { Box, Typography, CircularProgress, Alert, Paper, Divider, Button } from '@mui/material';
-import { useAdminProfile } from '@/hooks/useAdminProfile';
+import { useAdminProfile } from '@/admin/hooks';
 import { UserProfile } from '@/types';
 
 export const SettingsPage = () => {

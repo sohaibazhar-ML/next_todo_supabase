@@ -1,7 +1,7 @@
 import { Title } from 'react-admin';
 import { Box, Typography, CircularProgress, Alert, Paper } from '@mui/material';
 import { StatisticsDashboard as MuiStatisticsCards } from '@/admin/organisms/StatisticsDashboard';
-import { useAdminStats } from '@/hooks/useAdminStats';
+import { useAdminStats } from '@/admin/hooks';
 
 export const StatisticsPage = () => {
     const { data: stats, isLoading, error } = useAdminStats();
