@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { isAdmin, isSubadmin } from '@/utils/roles';
+import { getUserPermissions } from '@/utils/roles';
 import { prisma } from '@/lib/prisma';
 import { startOfMonth, endOfMonth, eachDayOfInterval, format } from 'date-fns';
 
@@ -14,21 +14,13 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userIsAdmin = await isAdmin(user.id);
-    const userIsSubadmin = await isSubadmin(user.id);
+    const { isAdmin, isSubadmin } = await getUserPermissions(user.id);
 
-    if (!userIsAdmin && !userIsSubadmin) {
+    if (!isAdmin && !isSubadmin) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const searchParams = request.nextUrl.searchParams;
-    const id = searchParams.get('id');
-
-    // Single record by ID (getOne) - for reports, ID is the date
-    if (id) {
-        return NextResponse.json({ id, info: "Report for specific ID is not implemented, use getList with filters" });
-    }
-
     const fromParam = searchParams.get('from');
     const toParam = searchParams.get('to');
 
@@ -39,10 +31,8 @@ export async function GET(request: NextRequest) {
         if (fromParam && toParam) {
             start = new Date(fromParam);
             end = new Date(toParam);
-            // Ensure 'end' includes the entire day
             end.setHours(23, 59, 59, 999);
         } else {
-            // Default to current month if no dates provided
             start = startOfMonth(new Date());
             end = endOfMonth(new Date());
         }
@@ -51,43 +41,53 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'Invalid date format' }, { status: 400 });
         }
 
-        // Get all uploads in this interval
-        const uploads = await prisma.documents.findMany({
-            where: {
-                created_at: {
-                    gte: start,
-                    lte: end,
-                },
-            },
-            select: {
-                created_at: true,
-            },
+        // Get total counts for the period (Efficiently via DB)
+        const [totalUploads, totalDownloads] = await Promise.all([
+            prisma.documents.count({
+                where: { created_at: { gte: start, lte: end } }
+            }),
+            prisma.download_logs.count({
+                where: { downloaded_at: { gte: start, lte: end } }
+            })
+        ]);
+
+        // Aggregate by day via Prisma's groupBy (optimizing for larger datasets)
+        const uploadsByDay = await (prisma.documents as any).groupBy({
+            by: ['created_at'],
+            where: { created_at: { gte: start, lte: end } },
+            _count: true,
         });
 
-        // Get all downloads in this interval
-        const downloads = await prisma.download_logs.findMany({
-            where: {
-                downloaded_at: {
-                    gte: start,
-                    lte: end,
-                },
-            },
-            select: {
-                downloaded_at: true,
-            },
+        const downloadsByDay = await (prisma.download_logs as any).groupBy({
+            by: ['downloaded_at'],
+            where: { downloaded_at: { gte: start, lte: end } },
+            _count: true,
         });
 
-        // Aggregate by day
+        // Helper: Format date for daily matching
+        const toDayKey = (date: Date | null) => date ? format(date, 'yyyy-MM-dd') : '';
+
+        // Aggregate results into maps
+        const uploadMap = new Map<string, number>();
+        uploadsByDay.forEach((group: any) => {
+            const key = toDayKey(group.created_at);
+            uploadMap.set(key, (uploadMap.get(key) || 0) + (group._count || 0));
+        });
+
+        const downloadMap = new Map<string, number>();
+        downloadsByDay.forEach((group: any) => {
+            const key = toDayKey(group.downloaded_at);
+            downloadMap.set(key, (downloadMap.get(key) || 0) + (group._count || 0));
+        });
+
+        // Map interval to aggregated data
         const days = eachDayOfInterval({ start, end });
         const reportData = days.map(day => {
             const dayStr = format(day, 'yyyy-MM-dd');
-            const dailyUploads = uploads.filter(u => u.created_at && format(u.created_at, 'yyyy-MM-dd') === dayStr).length;
-            const dailyDownloads = downloads.filter(d => d.downloaded_at && format(d.downloaded_at, 'yyyy-MM-dd') === dayStr).length;
-
             return {
                 date: dayStr,
-                uploads: dailyUploads,
-                downloads: dailyDownloads,
+                uploads: uploadMap.get(dayStr) || 0,
+                downloads: downloadMap.get(dayStr) || 0,
             };
         });
 
@@ -96,8 +96,8 @@ export async function GET(request: NextRequest) {
             total: reportData.length,
             from: format(start, 'yyyy-MM-dd'),
             to: format(end, 'yyyy-MM-dd'),
-            totalUploads: uploads.length,
-            totalDownloads: downloads.length,
+            totalUploads,
+            totalDownloads,
             dailyData: reportData,
         });
     } catch (error) {

@@ -163,15 +163,23 @@ describe('Generic Admin CRUD API — /api/admin/[resource]', () => {
         const params = Promise.resolve({ resource: 'documents' })
         const body = { title: 'New Doc', category: 'work' }
 
-        it('should create record on POST', async () => {
+        it('should create record on POST with field whitelisting', async () => {
             setupAuth(true) // admin
+            const dirtyBody = { ...body, id: 'malicious-id', role: 'admin' }
             prismaMock.documents.create.mockResolvedValue({ id: 'new', ...body } as any)
 
-            const response = await POST(createMockRequest('http://local', { method: 'POST', body: JSON.stringify(body) }), { params })
+            const response = await POST(createMockRequest('http://local', { 
+                method: 'POST', 
+                body: JSON.stringify(dirtyBody) 
+            }), { params })
             const { status, data } = await validateResponse<any>(response)
 
             expect(status).toBe(201)
             expect(data.id).toBe('new')
+            // Verify Prisma was called WITH whitelisted data (id and role removed for documents)
+            expect(prismaMock.documents.create).toHaveBeenCalledWith(expect.objectContaining({
+                data: expect.not.objectContaining({ id: 'malicious-id', role: 'admin' })
+            }))
         })
 
         it('should update record on PUT', async () => {
@@ -197,6 +205,17 @@ describe('Generic Admin CRUD API — /api/admin/[resource]', () => {
 
             expect(status).toBe(200)
             expect(prismaMock.documents.delete).toHaveBeenCalledWith({ where: { id } })
+        })
+
+        it('should return 400 if admin attempts to delete themselves', async () => {
+            setupAuth(true) // Current user is mockUserId
+            const params = Promise.resolve({ resource: 'profiles' })
+
+            const response = await DELETE(createMockRequest(`http://local?id=${mockUserId}`, { method: 'DELETE' }), { params })
+            const { status, error } = await validateResponse<any>(response)
+
+            expect(status).toBe(400)
+            expect(error).toBe('You cannot delete your own account')
         })
 
         it('should return 403 for non-admin on POST', async () => {

@@ -12,6 +12,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
+import { isAdmin, isSubadmin } from '@/utils/roles'
 import { isErrorWithMessage } from '@/utils'
 import { CONSOLE_MESSAGES, ERROR_MESSAGES, STORAGE_BUCKETS, STORAGE_CONFIG } from '@/constants'
 
@@ -26,6 +27,14 @@ export async function GET(
 
     if (!user) {
       return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
+    }
+
+    // SECURITY: Enforce admin/subadmin role for the admin namespace
+    const userIsAdmin = await isAdmin(user.id)
+    const userIsSubadmin = await isSubadmin(user.id)
+
+    if (!userIsAdmin && !userIsSubadmin) {
+      return NextResponse.json({ error: ERROR_MESSAGES.FORBIDDEN }, { status: 403 })
     }
 
     const { id } = await params
@@ -50,11 +59,33 @@ export async function GET(
     // Get document to get file path
     const document = await prisma.documents.findUnique({
       where: { id },
-      select: { file_path: true }
+      select: { file_path: true, id: true }
     })
 
     if (!document) {
       return NextResponse.json({ error: ERROR_MESSAGES.DOCUMENT_NOT_FOUND }, { status: 404 })
+    }
+
+    // AUDIT: Create download log entry server-side during URL generation
+    // This ensures every generated link is tracked regardless of client behavior
+    try {
+      const forwardedFor = request.headers.get('x-forwarded-for')
+      const ip_address = forwardedFor?.split(',')[0]?.trim() || null
+      const user_agent = request.headers.get('user-agent') || null
+
+      await prisma.download_logs.create({
+        data: {
+          document_id: document.id,
+          user_id: user.id,
+          ip_address,
+          user_agent,
+          context: 'Admin Download URL Generation',
+          metadata: { source: 'api/admin/documents/[id]/download-url' }
+        }
+      })
+    } catch (logError) {
+      console.error('Failed to create audit log for download:', logError)
+      // We don't block the download if logging fails, but we error it in production monitoring
     }
 
     // Get signed URL from Supabase Storage using centralized configuration

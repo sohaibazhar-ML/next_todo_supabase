@@ -333,6 +333,31 @@ export async function GET(
     }
 }
 
+// SECURITY: Whitelist of fields allowed for each resource to prevent mass assignment
+const RESOURCE_FIELD_WHITELISTS: Record<ResourceName, string[]> = {
+    profiles: ['first_name', 'last_name', 'role', 'current_address', 'country_of_origin', 'phone_number', 'number_of_adults', 'number_of_children', 'pets_type', 'new_address_switzerland', 'marketing_consent', 'terms_accepted', 'data_privacy_accepted', 'keep_me_logged_in'],
+    users: ['first_name', 'last_name', 'role', 'current_address', 'country_of_origin', 'phone_number', 'number_of_adults', 'number_of_children', 'pets_type', 'new_address_switzerland', 'marketing_consent', 'terms_accepted', 'data_privacy_accepted', 'keep_me_logged_in'],
+    documents: ['title', 'description', 'category', 'tags', 'is_active', 'is_featured', 'file_name', 'file_path', 'file_size', 'file_type', 'mime_type', 'version', 'parent_document_id', 'google_drive_template_id', 'searchable_content'],
+    'documents-list': ['title', 'description', 'category', 'tags', 'is_active', 'is_featured'],
+    download_logs: [], // Usually read-only via this API
+    user_document_versions: ['is_draft', 'version_name', 'html_content'],
+    stats: [], // Read-only
+    settings: [], // Custom
+};
+
+function whitelistFields(data: any, resource: ResourceName): any {
+    const allowedFields = RESOURCE_FIELD_WHITELISTS[resource];
+    if (!allowedFields || allowedFields.length === 0) return data;
+    
+    const cleanData: any = {};
+    for (const field of allowedFields) {
+        if (data[field] !== undefined) {
+            cleanData[field] = data[field];
+        }
+    }
+    return cleanData;
+}
+
 // POST — create a new record
 export async function POST(
     request: NextRequest,
@@ -356,9 +381,12 @@ export async function POST(
     const model = getPrismaModel(resource);
     const body = await request.json();
 
+    // SECURITY: Whitelist fields to prevent mass assignment
+    const data = whitelistFields(body, resource);
+
     try {
-        const record = await model.create({ data: body });
-        return NextResponse.json(serializeRecord(record), { status: 201 });
+        const record = await model.create({ data });
+        return NextResponse.json(serializeRecord(record, resource), { status: 201 });
     } catch (error) {
         console.error('[Admin API] create error:', error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -387,11 +415,14 @@ export async function PUT(
 
     const model = getPrismaModel(resource);
     const body = await request.json();
-    const { id, ...data } = body;
+    const { id, ...inputData } = body;
+
+    // SECURITY: Whitelist fields to prevent mass assignment
+    const data = whitelistFields(inputData, resource);
 
     try {
         const record = await model.update({ where: { id }, data });
-        return NextResponse.json(serializeRecord(record));
+        return NextResponse.json(serializeRecord(record, resource));
     } catch (error) {
         console.error('[Admin API] update error:', error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -424,6 +455,11 @@ export async function DELETE(
 
     if (!id) {
         return NextResponse.json({ error: 'id is required' }, { status: 400 });
+    }
+
+    // SECURITY: Prevent admins from deleting themselves to avoid accidental lockout
+    if ((resource === 'profiles' || resource === 'users') && id === auth.user.id) {
+        return NextResponse.json({ error: 'You cannot delete your own account' }, { status: 400 });
     }
 
     try {

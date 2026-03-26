@@ -53,10 +53,15 @@ async function callBridge(action: string, payload: Record<string, unknown>) {
  * Used by Admin when creating a template.
  */
 export async function uploadTemplateToDrive(fileBuffer: Buffer, fileName: string) {
-    // Verify Admin (Optional but recommended)
+    // Verify Admin role (Required for template management)
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw new Error('Unauthorized')
+
+    const { isAdmin } = await import('@/utils/roles');
+    if (!await isAdmin(user.id)) {
+        throw new Error('Admin access required to upload templates');
+    }
 
     try {
         console.log(`[DEBUG] Converting buffer to base64 for ${fileName} (${fileBuffer.length} bytes)`)
@@ -111,28 +116,33 @@ export async function createEditingSession(documentId: string, templateFileId: s
         // 3. Get the URL via Bridge (or build it manually)
         const editUrl = `https://docs.google.com/document/d/${fileId}/edit`;
 
-        // 4. Update Database (create or update user_document_version)
-        const lastVersion = await prisma.user_document_versions.findFirst({
-            where: {
-                original_document_id: documentId,
-                user_id: user.id
-            },
-            orderBy: { version_number: 'desc' }
-        })
+        // 4. Update Database (create user_document_version)
+        // SECURITY: Use a transaction to prevent race conditions in version counting
+        const version = await prisma.$transaction(async (tx) => {
+            const lastVersion = await tx.user_document_versions.findFirst({
+                where: {
+                    original_document_id: documentId,
+                    user_id: user.id
+                },
+                orderBy: { version_number: 'desc' },
+                // Use a lock if possible, but findFirst doesn't support select for update in Prisma easily
+                // Instead, we rely on the transaction serializability or unique constraint failure
+            })
 
-        const nextVersion = (lastVersion?.version_number || 0) + 1
+            const nextVersion = (lastVersion?.version_number || 0) + 1
 
-        const version = await prisma.user_document_versions.create({
-            data: {
-                original_document_id: documentId,
-                user_id: user.id,
-                version_number: nextVersion,
-                version_name: `Draft ${nextVersion}`,
-                original_file_type: 'google',
-                google_drive_file_id: fileId,
-                google_edit_link: editUrl,
-                is_draft: true
-            }
+            return await tx.user_document_versions.create({
+                data: {
+                    original_document_id: documentId,
+                    user_id: user.id,
+                    version_number: nextVersion,
+                    version_name: `Draft ${nextVersion}`,
+                    original_file_type: 'google',
+                    google_drive_file_id: fileId,
+                    google_edit_link: editUrl,
+                    is_draft: true
+                }
+            })
         })
 
         return {

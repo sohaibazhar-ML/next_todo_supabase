@@ -259,22 +259,23 @@ describe('Profiles API', () => {
             expect(error).toBe(ERROR_MESSAGES.USERNAME_EXISTS)
         })
 
-        it('should log warning if authenticated user ID mismatches creation ID (stale session)', async () => {
+        it('should return 401 if authenticated user ID mismatches creation ID', async () => {
             setupSupabaseMock(createSupabaseMock({ user: { id: 'different-id', email: 'different@example.com' } }))
             prismaMock.profiles.findUnique.mockResolvedValue(null)
-            prismaMock.profiles.create.mockResolvedValue(mockProfile as any)
 
             const request = createMockRequest('http://localhost/api/website/profiles', {
                 method: 'POST',
                 body: JSON.stringify({ id: mockUserId, username: 'testuser', email: 'user@example.com' })
             })
-            await POST(request)
+            const response = await POST(request)
+            const { status, error } = await validateResponse<any>(response)
 
-            expect(console.warn).toHaveBeenCalled()
+            expect(status).toBe(401)
+            expect(error).toBe(ERROR_MESSAGES.UNAUTHORIZED)
         })
 
-        it('should create profile successfully and serialize dates with email_confirmed_at', async () => {
-            setupSupabaseMock(createSupabaseMock({ user: null }))
+        it('should create profile successfully when authenticated and IDs match', async () => {
+            setupSupabaseMock(createSupabaseMock({ user: mockUser }))
             prismaMock.profiles.findUnique.mockResolvedValue(null)
             const createdProfile = {
                 ...mockProfile,

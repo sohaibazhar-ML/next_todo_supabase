@@ -1,7 +1,12 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 export function useDocumentDownload() {
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
     const download = useCallback(async (url: string, fileName: string) => {
+        setLoading(true);
+        setError(null);
         try {
             const response = await fetch(url);
             if (!response.ok) throw new Error('Download failed');
@@ -15,11 +20,14 @@ export function useDocumentDownload() {
             link.click();
             link.parentNode?.removeChild(link);
             window.URL.revokeObjectURL(downloadUrl);
-        } catch (error) {
-            console.error('Download error:', error);
-            throw error;
+        } catch (err: any) {
+            console.error('Download error:', err);
+            setError(err.message || 'Download failed');
+            throw err;
+        } finally {
+            setLoading(false);
         }
     }, []);
 
-    return { download };
+    return { download, loading, error };
 }

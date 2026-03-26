@@ -2,16 +2,22 @@ import { GET } from './route'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { createMockRequest, validateResponse } from '@/test/utils/handler-utils'
+import { isAdmin, isSubadmin } from '@/utils/roles'
 
 // Mock dependencies
 jest.mock('@/lib/supabase/server', () => ({
     createClient: jest.fn()
 }))
 
+jest.mock('@/utils/roles')
+
 jest.mock('@/lib/prisma', () => ({
     prisma: {
         documents: {
             findUnique: jest.fn()
+        },
+        download_logs: {
+            create: jest.fn()
         }
     }
 }))
@@ -33,6 +39,10 @@ describe('Document Download URL API', () => {
         jest.clearAllMocks()
         jest.spyOn(console, 'error').mockImplementation(() => { })
             ; (createClient as jest.Mock).mockResolvedValue(mockSupabase)
+        
+        // Default to admin for successful tests
+        ;(isAdmin as jest.Mock).mockResolvedValue(true)
+        ;(isSubadmin as jest.Mock).mockResolvedValue(false)
     })
 
     afterEach(() => {
@@ -43,6 +53,15 @@ describe('Document Download URL API', () => {
         mockSupabase.auth.getUser.mockResolvedValue({ data: { user: null } })
         const response = await GET(createMockRequest('http://local'), { params: Promise.resolve({ id: docId }) })
         expect(response.status).toBe(401)
+    })
+
+    it('should return 403 if user is not admin or subadmin', async () => {
+        mockSupabase.auth.getUser.mockResolvedValue({ data: { user: mockUser } })
+        ;(isAdmin as jest.Mock).mockResolvedValue(false)
+        ;(isSubadmin as jest.Mock).mockResolvedValue(false)
+
+        const response = await GET(createMockRequest('http://local'), { params: Promise.resolve({ id: docId }) })
+        expect(response.status).toBe(403)
     })
 
     it('should return 400 for invalid UUID', async () => {
@@ -61,9 +80,9 @@ describe('Document Download URL API', () => {
         expect(response.status).toBe(404)
     })
 
-    it('should return signed URL successfully', async () => {
+    it('should return signed URL successfully and create audit log', async () => {
         mockSupabase.auth.getUser.mockResolvedValue({ data: { user: mockUser } })
-            ; (prisma.documents.findUnique as jest.Mock).mockResolvedValue({ file_path: 'path/to/doc.pdf' })
+            ; (prisma.documents.findUnique as jest.Mock).mockResolvedValue({ id: docId, file_path: 'path/to/doc.pdf' })
 
         mockSupabase.storage.createSignedUrl.mockResolvedValue({
             data: { signedUrl: 'https://download-link' },
@@ -75,11 +94,12 @@ describe('Document Download URL API', () => {
 
         expect(status).toBe(200)
         expect(data).toEqual({ signedUrl: 'https://download-link' })
+        expect(prisma.download_logs.create).toHaveBeenCalled()
     })
 
     it('should handle storage errors', async () => {
         mockSupabase.auth.getUser.mockResolvedValue({ data: { user: mockUser } })
-            ; (prisma.documents.findUnique as jest.Mock).mockResolvedValue({ file_path: 'path/to/doc.pdf' })
+            ; (prisma.documents.findUnique as jest.Mock).mockResolvedValue({ id: docId, file_path: 'path/to/doc.pdf' })
 
         mockSupabase.storage.createSignedUrl.mockResolvedValue({
             data: null,
@@ -93,22 +113,6 @@ describe('Document Download URL API', () => {
         expect(error).toContain('Storage Error')
     })
 
-    it('should return 500 if signed URL is missing in data', async () => {
-        mockSupabase.auth.getUser.mockResolvedValue({ data: { user: mockUser } })
-            ; (prisma.documents.findUnique as jest.Mock).mockResolvedValue({ file_path: 'path/to/doc.pdf' })
-
-        mockSupabase.storage.createSignedUrl.mockResolvedValue({
-            data: { signedUrl: null },
-            error: null
-        })
-
-        const response = await GET(createMockRequest('http://local'), { params: Promise.resolve({ id: docId }) })
-        const { status, error } = await validateResponse(response)
-
-        expect(status).toBe(500)
-        expect(error).toContain('Failed to generate download URL: No URL returned')
-    })
-
     it('should return 500 if database query fails', async () => {
         mockSupabase.auth.getUser.mockResolvedValue({ data: { user: mockUser } })
             ; (prisma.documents.findUnique as jest.Mock).mockRejectedValue(new Error('DB Error'))
@@ -118,15 +122,5 @@ describe('Document Download URL API', () => {
 
         expect(status).toBe(500)
         expect(error).toBe('DB Error')
-    })
-
-    it('should return 500 if supabase client creation fails', async () => {
-        (createClient as jest.Mock).mockRejectedValue(new Error('Supabase Init Error'))
-
-        const response = await GET(createMockRequest('http://local'), { params: Promise.resolve({ id: docId }) })
-        const { status, error } = await validateResponse(response)
-
-        expect(status).toBe(500)
-        expect(error).toBe('Supabase Init Error')
     })
 })

@@ -156,28 +156,16 @@ export async function POST(request: Request) {
       )
     }
 
-    // For signup flow: During manual signup, user creates profile immediately
-    // The user.id comes from signUp response, so it's trusted
-    // We don't require authentication check here because:
-    // 1. User just signed up and might not have a session yet
-    // 2. The user.id is from Supabase's signUp response (trusted source)
-    // 3. We've validated UUID format and checked profile doesn't exist
-
-    // Check authentication status (for logging and security)
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    // Security check: If user is authenticated and IDs match, allow (normal flow)
-    // If user is authenticated but IDs don't match, still allow IF profile doesn't exist
-    // This handles the case where there's a stale session from another user during signup
-    // The profile doesn't exist check above ensures we're not overwriting existing profiles
-    if (user && body.id !== user.id) {
-      // Log the mismatch but allow it during signup (profile doesn't exist = signup flow)
+    // SECURITY: Enforce authentication and ownership
+    if (!user || body.id !== user.id) {
       console.warn(CONSOLE_MESSAGES.PROFILE_CREATION_STALE_SESSION, {
-        authenticatedUserId: user.id,
+        authenticatedUserId: user?.id || 'none',
         requestedUserId: body.id
       })
-      // Don't block - this is a signup flow and the profile doesn't exist
+      return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 })
     }
 
     console.log(CONSOLE_MESSAGES.CREATING_PROFILE, {
@@ -200,9 +188,10 @@ export async function POST(request: Request) {
       )
     }
 
+    // SECURITY: Strict whitelisting of fields to prevent mass assignment (e.g., 'role')
     const profile = await prisma.profiles.create({
       data: {
-        id: body.id,
+        id: user.id, // Use authenticated user.id for safety
         username: body.username,
         first_name: body.first_name,
         last_name: body.last_name,
@@ -220,7 +209,7 @@ export async function POST(request: Request) {
         email_confirmed: body.email_confirmed ?? false,
         email_confirmed_at: body.email_confirmed_at ? new Date(body.email_confirmed_at) : null,
         keep_me_logged_in: body.keep_me_logged_in ?? true,
-        role: body.role || 'user',
+        role: 'user', // Always default to 'user' for new self-created profiles
       }
     })
 
