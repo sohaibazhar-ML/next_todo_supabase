@@ -1,5 +1,5 @@
 import { Show, SimpleShowLayout, TextField, NumberField, DateField, FunctionField } from "react-admin";
-import { Document } from "@/shared/types";
+import { Document } from "@/types";
 
 export const DocumentShow = () => (
     <Show>

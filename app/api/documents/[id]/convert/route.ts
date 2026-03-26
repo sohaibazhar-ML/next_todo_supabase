@@ -14,8 +14,8 @@ import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import mammoth from 'mammoth'
 import { PDFDocument } from 'pdf-lib'
-import { isErrorWithMessage } from '@/shared/utils'
-import { CONSOLE_MESSAGES, ERROR_MESSAGES, STORAGE_BUCKETS, STORAGE_CONFIG } from '@/shared/constants'
+import { isErrorWithMessage } from '@/utils'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES, STORAGE_BUCKETS, STORAGE_CONFIG } from '@/constants'
 
 // GET - Convert document to editable format (HTML for DOCX, text for PDF)
 export async function GET(

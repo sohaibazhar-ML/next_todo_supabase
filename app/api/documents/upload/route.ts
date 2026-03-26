@@ -8,9 +8,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
-import { isAdmin } from '@/shared/utils/roles'
-import { isErrorWithMessage } from '@/shared/utils/error-utils'
-import { CONSOLE_MESSAGES, ERROR_MESSAGES, STORAGE_BUCKETS, STORAGE_CONFIG } from '@/shared/constants'
+import { isAdmin } from '@/utils/roles'
+import { isErrorWithMessage } from '@/utils/error-utils'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES, STORAGE_BUCKETS, STORAGE_CONFIG } from '@/constants'
 
 function getFileType(fileName: string): string {
   const ext = fileName.split('.').pop()?.toLowerCase()

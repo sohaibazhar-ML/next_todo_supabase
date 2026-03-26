@@ -12,8 +12,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
-import { isErrorWithMessage } from '@/shared/utils'
-import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/shared/constants'
+import { isErrorWithMessage } from '@/utils'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
 
 // GET - Get all versions of a document (including the document itself and its versions)
 export async function GET(

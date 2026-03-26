@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { downloadService } from '../services/downloadService';
-import { QUERY_KEYS } from '@/shared/constants/queryKeys';
+import { QUERY_KEYS } from '@/constants/queryKeys';
 
 export const useDownloadLogs = (params?: Record<string, unknown>) => {
     return useQuery({

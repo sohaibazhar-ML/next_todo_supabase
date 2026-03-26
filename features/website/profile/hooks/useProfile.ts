@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { profileService } from '../services/profileService';
-import { QUERY_KEYS } from '@/shared/constants/queryKeys';
-import { UserProfile } from '@/shared/types';
+import { QUERY_KEYS } from '@/constants/queryKeys';
+import { UserProfile } from '@/types';
 
 export const useProfile = () => {
     return useQuery({

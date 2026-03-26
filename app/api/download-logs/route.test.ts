@@ -2,7 +2,7 @@ import { GET, POST } from './route'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { createMockRequest, validateResponse, cleanupMocks } from '@/test/utils/handler-utils'
-import { ERROR_MESSAGES } from '@/shared/constants'
+import { ERROR_MESSAGES } from '@/constants'
 
 // Mock dependencies
 jest.mock('@/lib/supabase/server', () => ({

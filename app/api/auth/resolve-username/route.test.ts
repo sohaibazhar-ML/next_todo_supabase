@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { DeepMockProxy } from 'jest-mock-extended'
 import { PrismaClient } from '@prisma/client'
 import { createMockRequest, validateResponse, cleanupMocks } from '@/test/utils/handler-utils'
-import { ERROR_MESSAGES } from '@/shared/constants'
+import { ERROR_MESSAGES } from '@/constants'
 
 // Mock dependencies
 jest.mock('@/lib/prisma', () => ({

@@ -1,5 +1,5 @@
-import { api } from '@/shared/services/apiClient';
-import { API_ROUTES } from '@/shared/constants/routes';
+import { api } from '@/services/apiClient';
+import { API_ROUTES } from '@/constants/routes';
 import { ReportStats } from '../types';
 
 export const reportService = {

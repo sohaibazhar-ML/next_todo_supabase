@@ -1,8 +1,8 @@
 import { GET, PUT, DELETE } from './route'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
-import { isAdmin } from '@/shared/utils/roles'
-import { ERROR_MESSAGES } from '@/shared/constants'
+import { isAdmin } from '@/utils/roles'
+import { ERROR_MESSAGES } from '@/constants'
 import { createMockRequest, validateResponse, cleanupMocks } from '@/test/utils/handler-utils'
 
 // Mock dependencies
@@ -20,7 +20,7 @@ jest.mock('@/lib/prisma', () => ({
     }
 }))
 
-jest.mock('@/shared/utils/roles', () => ({
+jest.mock('@/utils/roles', () => ({
     isAdmin: jest.fn()
 }))
 

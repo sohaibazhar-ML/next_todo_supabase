@@ -27,8 +27,8 @@ import {
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import * as cheerio from 'cheerio'
 import type { Element, Text, AnyNode } from 'domhandler'
-import { isErrorWithMessage } from '@/shared/utils'
-import { CONSOLE_MESSAGES, ERROR_MESSAGES, STORAGE_BUCKETS, STORAGE_CONFIG } from '@/shared/constants'
+import { isErrorWithMessage } from '@/utils'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES, STORAGE_BUCKETS, STORAGE_CONFIG } from '@/constants'
 
 /**
  * Type for cheerio element (can be Element or Text node from domhandler)

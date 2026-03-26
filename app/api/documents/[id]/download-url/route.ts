@@ -12,8 +12,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
-import { isErrorWithMessage } from '@/shared/utils'
-import { CONSOLE_MESSAGES, ERROR_MESSAGES, STORAGE_BUCKETS, STORAGE_CONFIG } from '@/shared/constants'
+import { isErrorWithMessage } from '@/utils'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES, STORAGE_BUCKETS, STORAGE_CONFIG } from '@/constants'
 
 // GET - Get signed download URL for a document
 export async function GET(

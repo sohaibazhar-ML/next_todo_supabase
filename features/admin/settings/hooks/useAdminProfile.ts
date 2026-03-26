@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { adminSettingsService } from '../services/adminSettingsService';
-import { QUERY_KEYS } from '@/shared/constants/queryKeys';
+import { QUERY_KEYS } from '@/constants/queryKeys';
 import { createClient } from '@/lib/supabase/client';
 
 export const useAdminProfile = () => {

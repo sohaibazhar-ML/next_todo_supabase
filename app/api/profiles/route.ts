@@ -15,10 +15,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
-import { isAdmin } from '@/shared/utils/roles'
+import { isAdmin } from '@/utils/roles'
 import type { Prisma } from '@prisma/client'
-import { isErrorWithMessage } from '@/shared/utils'
-import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/shared/constants'
+import { isErrorWithMessage } from '@/utils'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
 
 // GET - Get profile(s)
 export async function GET(request: Request) {

@@ -1,6 +1,6 @@
-import { api } from '@/shared/services/apiClient';
-import { API_ROUTES } from '@/shared/constants/routes';
-import { SerializedDocument } from '@/shared/types';
+import { api } from '@/services/apiClient';
+import { API_ROUTES } from '@/constants/routes';
+import { SerializedDocument } from '@/types';
 
 export const documentService = {
     getAll: (params?: Record<string, unknown>) => 

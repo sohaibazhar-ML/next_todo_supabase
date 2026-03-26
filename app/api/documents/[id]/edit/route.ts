@@ -15,8 +15,8 @@ import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { Document, Packer, Paragraph, TextRun } from 'docx'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
-import { isErrorWithMessage } from '@/shared/utils'
-import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/shared/constants'
+import { isErrorWithMessage } from '@/utils'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
 
 // POST - Save edited document version
 export async function POST(

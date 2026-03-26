@@ -1,9 +1,11 @@
-import { api } from '@/shared/services/apiClient';
-import { API_ROUTES } from '@/shared/constants/routes';
-import { UserProfile, SignUpFormData } from '@/shared/types';
+import { api } from '@/services/apiClient';
+import { API_ROUTES } from '@/constants/routes';
+import { UserProfile, SignUpFormData } from '@/types';
+
+import { LoginCredentials } from '../hooks/useAuth';
 
 export const authService = {
-    login: (credentials: any) => 
+    login: (credentials: LoginCredentials) => 
         api.post<{ user: UserProfile, token: string }>('/api/auth/login', credentials),
     
     signup: (data: SignUpFormData) => 

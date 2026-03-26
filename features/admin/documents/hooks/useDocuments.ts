@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { documentService } from '../services/documentService';
-import { QUERY_KEYS } from '@/shared/constants/queryKeys';
-import { SerializedDocument } from '@/shared/types';
+import { QUERY_KEYS } from '@/constants/queryKeys';
+import { SerializedDocument } from '@/types';
 
 export const useDocuments = (params?: Record<string, unknown>) => {
     return useQuery({
