@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Title } from 'react-admin';
-import { ProfileForm } from '@/components/forms/ProfileForm';
-import { createClient } from '@/lib/supabase/client';
 import { Box, Typography, CircularProgress, Alert, Paper, Divider, Button } from '@mui/material';
+import { createClient } from '@/lib/supabase/client';
 
 const SettingsPage = () => {
     const [profile, setProfile] = useState<any>(null);
@@ -64,15 +63,30 @@ const SettingsPage = () => {
                 <Divider sx={{ mb: 3 }} />
                 
                 {profile && (
-                    <ProfileForm
-                        userId={profile.id}
-                        initialProfile={profile}
-                        userInfo={{
-                            email: profile.email,
-                            firstName: profile.first_name,
-                            lastName: profile.last_name,
-                        }}
-                    />
+                    <Box sx={{ mt: 2 }}>
+                        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 3 }}>
+                            <Box>
+                                <Typography variant="subtitle2" color="textSecondary">Username</Typography>
+                                <Typography variant="body1">{profile.username}</Typography>
+                            </Box>
+                            <Box>
+                                <Typography variant="subtitle2" color="textSecondary">Email</Typography>
+                                <Typography variant="body1">{profile.email}</Typography>
+                            </Box>
+                            <Box>
+                                <Typography variant="subtitle2" color="textSecondary">First Name</Typography>
+                                <Typography variant="body1">{profile.first_name}</Typography>
+                            </Box>
+                            <Box>
+                                <Typography variant="subtitle2" color="textSecondary">Last Name</Typography>
+                                <Typography variant="body1">{profile.last_name}</Typography>
+                            </Box>
+                            <Box>
+                                <Typography variant="subtitle2" color="textSecondary">Role</Typography>
+                                <Typography variant="body1">{profile.role}</Typography>
+                            </Box>
+                        </Box>
+                    </Box>
                 )}
             </Paper>
 
