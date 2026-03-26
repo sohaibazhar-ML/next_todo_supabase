@@ -2,7 +2,7 @@ import { api } from '@/services/apiClient';
 import { API_ROUTES } from '@/constants/routes';
 import { UserProfile, SignUpFormData } from '@/types';
 
-import { LoginCredentials } from '@/features/website/auth/hooks/useAuth';
+import { LoginCredentials } from '@/hooks/useAuth';
 
 export const authService = {
     login: (credentials: LoginCredentials) => 

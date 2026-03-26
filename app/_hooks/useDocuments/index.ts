@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { documentService } from '../services/documentService';
+import { documentService } from '@/features/admin/documents/services/documentService';
 import { QUERY_KEYS } from '@/constants/queryKeys';
 import { SerializedDocument } from '@/types';
 
