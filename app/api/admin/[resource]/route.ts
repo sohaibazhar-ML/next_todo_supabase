@@ -206,7 +206,7 @@ export async function GET(
     if (filterParam) {
         try {
             const filters = JSON.parse(filterParam);
-            const { q, fromDate, lte_created_at, gte_created_at, ...exactFilters } = filters;
+            const { q, fromDate, toDate, lte_created_at, gte_created_at, ...exactFilters } = filters;
 
             // Global search (q)
             if (q) {
@@ -217,6 +217,10 @@ export async function GET(
                         { file_name: { contains: q, mode: 'insensitive' } },
                         { category: { contains: q, mode: 'insensitive' } },
                         { file_type: { contains: q, mode: 'insensitive' } },
+                        { mime_type: { contains: q, mode: 'insensitive' } },
+                        { version: { contains: q, mode: 'insensitive' } },
+                        { google_drive_template_id: { contains: q, mode: 'insensitive' } },
+                        { searchable_content: { contains: q, mode: 'insensitive' } },
                     ];
                 } else if (resource === 'profiles' || resource === 'users') {
                     where.OR = [
@@ -225,6 +229,11 @@ export async function GET(
                         { email: { contains: q, mode: 'insensitive' } },
                         { username: { contains: q, mode: 'insensitive' } },
                         { role: { contains: q, mode: 'insensitive' } },
+                        { current_address: { contains: q, mode: 'insensitive' } },
+                        { country_of_origin: { contains: q, mode: 'insensitive' } },
+                        { phone_number: { contains: q, mode: 'insensitive' } },
+                        { pets_type: { contains: q, mode: 'insensitive' } },
+                        { new_address_switzerland: { contains: q, mode: 'insensitive' } },
                     ];
                 } else if (resource === 'download_logs') {
                     // Raw search for download logs across multiple fields
