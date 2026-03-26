@@ -1,6 +1,4 @@
-import { Header } from '@/components/website/organisms/Header';
-import { Hero } from '@/components/website/organisms/Hero';
-import { Footer } from '@/components/website/organisms/Footer';
+import { Header, Hero, Footer } from '@/website/organisms';
 
 export default function Home() {
   return (

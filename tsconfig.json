@@ -26,12 +26,10 @@
       "@/shared_assets/*": ["./app/_shared_assets/*"],
       "@/i18n/*": ["./app/_i18n/*"],
       "@/features/*": ["./app/_features/*"],
-      "@/components/website/*": ["./app/_components/website/*"],
-      "@/components/admin/*": ["./app/_components/admin/*"],
-      "@/atoms/*": ["./app/_components/shared/atoms/*"],
-      "@/molecules/*": ["./app/_components/shared/molecules/*"],
-      "@/organisms/*": ["./app/_components/shared/organisms/*"],
-      "@/components/shared/*": ["./app/_components/shared/*"],
+      "@/components/*": ["./app/_components/*"],
+      "@/admin/*": ["./app/_components/admin/*"],
+      "@/website/*": ["./app/_components/website/*"],
+      "@/shared/*": ["./app/_components/shared/*"],
       "@/hooks": ["./app/_hooks/index"],
       "@/hooks/*": ["./app/_hooks/*"],
       "@/services": ["./app/_services/index"],
@@ -41,9 +39,7 @@
       "@/constants": ["./app/_constants/index"],
       "@/constants/*": ["./app/_constants/*"],
       "@/utils": ["./app/_utils/index"],
-      "@/utils/*": ["./app/_utils/*"],
-      "@/icons": ["./app/_components/shared/atoms/AdaptiveIcon/index"],
-      "@/icons/*": ["./app/_components/shared/atoms/AdaptiveIcon/*"]
+      "@/utils/*": ["./app/_utils/*"]
     }
   },
   "include": [

@@ -1,6 +1,6 @@
 import { api } from '@/services/apiClient';
 import { API_ROUTES } from '@/constants/routes';
-import { ReportStats } from '@/features/admin/reports/types';
+import { ReportStats } from '@/types';
 
 export const reportService = {
     getStats: (from?: string, to?: string) => {

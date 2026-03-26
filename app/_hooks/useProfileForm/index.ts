@@ -19,7 +19,7 @@ import {
   type EditProfileFormData,
   type PasswordChangeFormData,
   passwordChangeSchema,
-} from '@/features/website/profile/types/profileFormSchema'
+} from '@/types';
 import {
   updateProfile,
   checkUsernameAvailability,
