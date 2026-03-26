@@ -75,7 +75,7 @@ export async function GET(request: Request) {
     const perPage = parseInt(searchParams.get('_perPage') || searchParams.get('perPage') || '10')
 
     // Parse filter from JSON if present (React Admin style)
-    const filterStr = searchParams.get('filter')
+    const filterStr = searchParams.get('_filters') || searchParams.get('filter')
     let filterObj: any = {}
     if (filterStr) {
         try {
@@ -96,8 +96,11 @@ export async function GET(request: Request) {
     const sortField = searchParams.get('_sortField') || searchParams.get('sort') || 'created_at'
     const sortOrder = (searchParams.get('_sortOrder') || searchParams.get('order') || 'DESC').toLowerCase()
 
-    // Build where clause with proper typing
-    const where: Prisma.documentsWhereInput = {}
+    // Build where clause
+    const where: Prisma.documentsWhereInput = {
+      parent_document_id: null, // Only top-level documents for the main list
+    }
+
     if (category) where.category = category
     if (fileType) where.file_type = fileType
     if (featuredOnly) where.is_featured = true
@@ -105,9 +108,7 @@ export async function GET(request: Request) {
     // Date range filters
     if (fromDate || toDate) {
       where.created_at = {}
-      if (fromDate) {
-        where.created_at.gte = new Date(fromDate)
-      }
+      if (fromDate) where.created_at.gte = new Date(fromDate)
       if (toDate) {
         const toDateEnd = new Date(toDate)
         toDateEnd.setHours(23, 59, 59, 999)
@@ -115,73 +116,55 @@ export async function GET(request: Request) {
       }
     }
 
-    // If search query exists, use RPC function
+    // Search logic
     if (searchQuery && searchQuery.trim()) {
-      interface SearchResult {
-        id: string
-        rank?: number
-        [key: string]: unknown
-      }
-      const results = await prisma.$queryRawUnsafe<SearchResult[]>(
-        `SELECT * FROM search_documents($1::text, $2::text, $3::text, $4::integer, $5::integer)`,
-        searchQuery,
-        category || null,
-        fileType || null,
-        100, // Search limit
-        0
-      )
+      // Try RPC search first for better relevance
+      try {
+        const results = await prisma.$queryRawUnsafe<{ id: string, rank?: number }[]>(
+          `SELECT id, rank FROM search_documents($1::text, $2::text, $3::text, $4::integer, $5::integer)`,
+          searchQuery,
+          category || null,
+          fileType || null,
+          100,
+          0
+        )
 
-      if (!results || results.length === 0) {
-        return NextResponse.json({ data: [], total: 0 })
-      }
-
-      const documentIds = results.map((doc) => doc.id)
-      const searchWhere: Prisma.documentsWhereInput = {
-        id: { in: documentIds },
-        ...where
-      }
-
-      const [fullDocuments, total] = await Promise.all([
-        prisma.documents.findMany({
-          where: searchWhere,
-          skip: (page - 1) * perPage,
-          take: perPage,
-          orderBy: { [sortField]: sortOrder as 'asc' | 'desc' }
-        }),
-        prisma.documents.count({ where: searchWhere })
-      ])
-
-      const searchResultsMap = new Map(results.map((r) => [r.id, r] as [string, SearchResult]))
-
-      const serializedDocuments = fullDocuments.map((doc) => {
-        const searchResult = searchResultsMap.get(doc.id)
-        return {
-          ...doc,
-          file_size: typeof doc.file_size === 'bigint' ? Number(doc.file_size) : doc.file_size,
-          _rank: searchResult?.rank || 0,
+        if (results && results.length > 0) {
+          const documentIds = results.map((doc) => doc.id)
+          where.id = { in: documentIds }
+        } else {
+          // Fallback to basic Prisma 'contains' search if RPC returns nothing
+          where.OR = [
+            { title: { contains: searchQuery, mode: 'insensitive' } },
+            { description: { contains: searchQuery, mode: 'insensitive' } },
+            { category: { contains: searchQuery, mode: 'insensitive' } },
+            { file_type: { contains: searchQuery, mode: 'insensitive' } },
+            { file_name: { contains: searchQuery, mode: 'insensitive' } },
+            { searchable_content: { contains: searchQuery, mode: 'insensitive' } },
+          ]
         }
-      })
-
-      return NextResponse.json({ data: serializedDocuments, total })
+      } catch (e) {
+        console.warn('[Admin Documents API] RPC search failed, falling back to basic search:', e)
+        where.OR = [
+          { title: { contains: searchQuery, mode: 'insensitive' } },
+          { description: { contains: searchQuery, mode: 'insensitive' } },
+          { category: { contains: searchQuery, mode: 'insensitive' } },
+          { file_type: { contains: searchQuery, mode: 'insensitive' } },
+          { file_name: { contains: searchQuery, mode: 'insensitive' } },
+          { searchable_content: { contains: searchQuery, mode: 'insensitive' } },
+        ]
+      }
     }
 
-    // Regular query
+    // Regular query with all filters applied
     const [documents, total] = await Promise.all([
       prisma.documents.findMany({
-        where: {
-          ...where,
-          parent_document_id: null,
-        },
+        where,
         skip: (page - 1) * perPage,
         take: perPage,
         orderBy: { [sortField]: sortOrder as 'asc' | 'desc' }
       }),
-      prisma.documents.count({
-        where: {
-          ...where,
-          parent_document_id: null,
-        }
-      })
+      prisma.documents.count({ where })
     ])
 
     const serializedDocuments = documents.map((doc) => ({

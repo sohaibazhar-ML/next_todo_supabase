@@ -92,7 +92,7 @@ export async function GET(request: Request) {
     }
 
     // Parse filter from JSON if present
-    const filterStr = searchParams.get('filter')
+    const filterStr = searchParams.get('_filters') || searchParams.get('filter')
     let filterObj: any = {}
     if (filterStr) {
         try {
@@ -119,6 +119,19 @@ export async function GET(request: Request) {
     // Users can only see their own logs unless admin
     if (!admin) {
       where.user_id = user.id
+    }
+
+    // Search logic for download logs
+    if (searchQuery && searchQuery.trim()) {
+      where.OR = [
+        { ip_address: { contains: searchQuery, mode: 'insensitive' } },
+        { user_agent: { contains: searchQuery, mode: 'insensitive' } },
+        { context: { contains: searchQuery, mode: 'insensitive' } },
+        // Join searches are harder in Prisma 'where', but we can search in documents title if document_id matches
+        { documents: { title: { contains: searchQuery, mode: 'insensitive' } } },
+        { profiles: { username: { contains: searchQuery, mode: 'insensitive' } } },
+        { profiles: { email: { contains: searchQuery, mode: 'insensitive' } } },
+      ]
     }
 
     const logs = await prisma.download_logs.findMany({
