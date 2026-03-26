@@ -107,6 +107,48 @@ describe('Document Export API — POST /api/admin/documents/[id]/export', () => 
         expect(prismaMock.user_document_versions.update).toHaveBeenCalled()
     })
 
+
+    it('should export PDF successfully using text content', async () => {
+        const supabaseMock = createSupabaseMock({ user: mockUser })
+        setupSupabaseMock(supabaseMock)
+        prismaMock.user_document_versions.findUnique.mockResolvedValue(makeVersion({ 
+            original_file_type: 'pdf',
+            html_content: null, 
+            pdf_text_content: 'Some raw text content' 
+        }) as any)
+
+        const response = await POST(createMockRequest('http://local', { 
+            method: 'POST', 
+            body: JSON.stringify({ version_id: 'v1', export_format: 'pdf' }) 
+        }), { params })
+        const { status } = await validateResponse(response)
+        expect(status).toBe(200)
+    })
+
+    it('should return 500 when PDFDocument.save throws', async () => {
+        setupSupabaseMock(createSupabaseMock({ user: mockUser }))
+        prismaMock.user_document_versions.findUnique.mockResolvedValue(makeVersion({
+            original_file_type: 'pdf',
+            pdf_text_content: 'Some content'
+        }) as any)
+        
+        const mockPdf = {
+            embedFont: jest.fn().mockResolvedValue({ widthOfTextAtSize: jest.fn().mockReturnValue(10) }),
+            addPage: jest.fn().mockReturnValue({ drawText: jest.fn() }),
+            save: jest.fn().mockRejectedValue(new Error('PDF Save Failed'))
+        }
+        ;(PDFDocument.create as jest.Mock).mockResolvedValue(mockPdf)
+
+        const response = await POST(createMockRequest('http://local', { 
+            method: 'POST', 
+            body: JSON.stringify({ version_id: 'v1', export_format: 'pdf' }) 
+        }), { params })
+        const { status, error } = await validateResponse(response)
+
+        expect(status).toBe(500)
+        expect(error).toContain('PDF Save Failed')
+    })
+
     it('should return 500 when storage upload fails', async () => {
         const supabaseMock = createSupabaseMock({ user: mockUser })
         supabaseMock.storage.upload.mockResolvedValue({ error: { message: 'Bucket full' } })

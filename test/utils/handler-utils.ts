@@ -12,14 +12,16 @@ export interface ResponseContract<T = any> {
 /**
  * Creates a mock Request object for API handler tests
  */
-export function createMockRequest(url: string, options: RequestInit = {}): Request {
-    return new Request(url, {
+export function createMockRequest(url: string, options: RequestInit = {}): any {
+    const request = new Request(url, {
         headers: {
             'Content-Type': 'application/json',
-            ...options.headers,
+            ...(options.headers || {}),
         },
         ...options,
-    })
+    }) as any
+    request.nextUrl = new URL(url)
+    return request
 }
 
 /**

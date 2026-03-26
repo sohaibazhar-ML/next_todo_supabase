@@ -1,4 +1,4 @@
-import { GET, POST } from './route'
+import { GET, POST, PUT, DELETE } from './route'
 import { prismaMock } from '@/lib/__mocks__/prisma'
 import { isAdmin } from '@/utils/roles'
 import { ERROR_MESSAGES } from '@/constants'
@@ -241,6 +241,38 @@ describe('Documents API', () => {
             })
         })
 
+        it('should return a single document by ?id=', async () => {
+            setupSupabaseMock(createSupabaseMock({ user: mockUser }))
+            const mockDoc = mockDocuments[0]
+            prismaMock.documents.findUnique.mockResolvedValue(mockDoc as any)
+
+            const request = createMockRequest(`http://localhost/api/admin/documents?id=${mockDoc.id}`)
+            const response = await GET(request)
+            const { status, data } = await validateResponse<any>(response)
+
+            expect(status).toBe(200)
+            expect(data.id).toBe(mockDoc.id)
+            expect(prismaMock.documents.findUnique).toHaveBeenCalledWith({
+                where: { id: mockDoc.id }
+            })
+        })
+
+        it('should return multiple documents by ?ids=[]', async () => {
+            setupSupabaseMock(createSupabaseMock({ user: mockUser }))
+            prismaMock.documents.findMany.mockResolvedValue(mockDocuments as any)
+
+            const ids = JSON.stringify(['doc-1', 'doc-2'])
+            const request = createMockRequest(`http://localhost/api/admin/documents?ids=${ids}`)
+            const response = await GET(request)
+            const { status, data } = await validateResponse<any[]>(response)
+
+            expect(status).toBe(200)
+            expect(data).toHaveLength(2)
+            expect(prismaMock.documents.findMany).toHaveBeenCalledWith({
+                where: { id: { in: ['doc-1', 'doc-2'] } }
+            })
+        })
+
         it('should return 500 if prisma throws on GET', async () => {
             setupSupabaseMock(createSupabaseMock({ user: mockUser }))
             prismaMock.documents.findMany.mockRejectedValue(new Error('DB Panic'))
@@ -314,6 +346,82 @@ describe('Documents API', () => {
             expect(status).toBe(201)
             expect(data.id).toBe('new-id')
             expect(typeof data.file_size).toBe('number')
+        })
+    })
+
+    describe('PUT Handler', () => {
+        const updateBody = { id: 'doc-1', title: 'Updated Title', file_size: 2048 }
+
+        it('should update document successfully', async () => {
+            setupSupabaseMock(createSupabaseMock({ user: mockUser }))
+            ;(isAdmin as jest.Mock).mockResolvedValue(true)
+
+            prismaMock.documents.update.mockResolvedValue({
+                ...mockDocuments[0],
+                title: 'Updated Title',
+                file_size: BigInt(2048)
+            } as any)
+
+            const request = createMockRequest('http://localhost/api/admin/documents', {
+                method: 'PUT',
+                body: JSON.stringify(updateBody)
+            })
+            const response = await PUT(request)
+            const { status, data } = await validateResponse<any>(response)
+
+            expect(status).toBe(200)
+            expect(data.title).toBe('Updated Title')
+            expect(prismaMock.documents.update).toHaveBeenCalledWith({
+                where: { id: 'doc-1' },
+                data: expect.objectContaining({
+                    title: 'Updated Title',
+                    file_size: BigInt(2048)
+                })
+            })
+        })
+
+        it('should return 400 if ID is missing', async () => {
+            setupSupabaseMock(createSupabaseMock({ user: mockUser }))
+            ;(isAdmin as jest.Mock).mockResolvedValue(true)
+
+            const request = createMockRequest('http://localhost/api/admin/documents', {
+                method: 'PUT',
+                body: JSON.stringify({ title: 'No ID' })
+            })
+            const response = await PUT(request)
+            expect(response.status).toBe(400)
+        })
+    })
+
+    describe('DELETE Handler', () => {
+        it('should delete document successfully', async () => {
+            setupSupabaseMock(createSupabaseMock({ user: mockUser }))
+            ;(isAdmin as jest.Mock).mockResolvedValue(true)
+
+            prismaMock.documents.delete.mockResolvedValue(mockDocuments[0] as any)
+
+            const request = createMockRequest('http://localhost/api/admin/documents?id=doc-1', {
+                method: 'DELETE'
+            })
+            const response = await DELETE(request)
+            const { status, data } = await validateResponse<any>(response)
+
+            expect(status).toBe(200)
+            expect(data.id).toBe('doc-1')
+            expect(prismaMock.documents.delete).toHaveBeenCalledWith({
+                where: { id: 'doc-1' }
+            })
+        })
+
+        it('should return 400 if ID is missing on DELETE', async () => {
+            setupSupabaseMock(createSupabaseMock({ user: mockUser }))
+            ;(isAdmin as jest.Mock).mockResolvedValue(true)
+
+            const request = createMockRequest('http://localhost/api/admin/documents', {
+                method: 'DELETE'
+            })
+            const response = await DELETE(request)
+            expect(response.status).toBe(400)
         })
     })
 })

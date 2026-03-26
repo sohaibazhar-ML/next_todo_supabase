@@ -170,7 +170,7 @@ export async function GET(
             if (!record) {
                 return NextResponse.json({ error: 'Not found' }, { status: 404 });
             }
-            return NextResponse.json(serializeRecord(record));
+            return NextResponse.json(serializeRecord(record, resource));
         } catch (error) {
             console.error('[Admin API] getOne error:', error);
             return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -328,7 +328,7 @@ export async function GET(
             total,
         });
     } catch (error) {
-        console.error('[Admin API] getList error:', error);
+        console.error('[Admin API] getList error catch:', error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
