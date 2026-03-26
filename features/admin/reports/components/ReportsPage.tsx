@@ -17,7 +17,7 @@ import {
     Button
 } from '@mui/material';
 import { format, startOfMonth } from 'date-fns';
-import { CustomFilterToolbar, FilterDefinition } from '@/components/shared/admin/react-admin/common/CustomFilterToolbar';
+import { CustomFilterToolbar, FilterDefinition } from '@/components/admin/common/CustomFilterToolbar';
 import { useReports } from '../hooks/useReports';
 import { DailyReportData } from '../types';
 

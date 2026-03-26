@@ -1,6 +1,6 @@
 import { Title } from 'react-admin';
 import { Box, Typography, CircularProgress, Alert, Paper } from '@mui/material';
-import MuiStatisticsCards from '@/components/shared/admin/react-admin/MuiStatisticsCards';
+import MuiStatisticsCards from '@/components/admin/MuiStatisticsCards';
 import { useAdminStats } from '../hooks/useAdminStats';
 
 const StatisticsPage = () => {
