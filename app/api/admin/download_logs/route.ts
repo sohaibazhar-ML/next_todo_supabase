@@ -123,15 +123,23 @@ export async function GET(request: Request) {
 
     // Search logic for download logs
     if (searchQuery && searchQuery.trim()) {
-      where.OR = [
-        { ip_address: { contains: searchQuery, mode: 'insensitive' } },
+      const orConditions: Prisma.download_logsWhereInput[] = [
         { user_agent: { contains: searchQuery, mode: 'insensitive' } },
         { context: { contains: searchQuery, mode: 'insensitive' } },
-        // Join searches are harder in Prisma 'where', but we can search in documents title if document_id matches
         { documents: { title: { contains: searchQuery, mode: 'insensitive' } } },
         { profiles: { username: { contains: searchQuery, mode: 'insensitive' } } },
         { profiles: { email: { contains: searchQuery, mode: 'insensitive' } } },
       ]
+
+      // IP address is an 'inet' type in Postgres. We must only query it if the search
+      // query is a valid IP address to avoid 'AddrParseError'.
+      const ipv4Regex = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/
+      const ipv6Regex = /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/
+      if (ipv4Regex.test(searchQuery) || ipv6Regex.test(searchQuery)) {
+        orConditions.push({ ip_address: { equals: searchQuery } })
+      }
+
+      where.OR = orConditions
     }
 
     const logs = await prisma.download_logs.findMany({
