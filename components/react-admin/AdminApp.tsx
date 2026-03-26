@@ -10,8 +10,10 @@ import { authProvider } from "./authProvider";
 import { DocumentList, DocumentEdit, DocumentShow, DocumentCreate } from "./resources/Documents";
 import { UserList, UserEdit, UserShow } from "./resources/Users";
 import { DownloadLogList } from "./resources/DownloadLogs";
+import { SubadminPermissionList, SubadminPermissionEdit, SubadminPermissionCreate } from "./resources/SubadminPermissions";
 import SettingsPage from "./Settings";
 import ReportsPage from "./resources/Reports";
+import ShieldIcon from "@mui/icons-material/Shield";
 
 const AdminApp = () => (
     <Admin 
@@ -62,15 +64,24 @@ const AdminApp = () => (
             />,
             
             // Administrative Sections: Admin Only
-            permissions === 'admin' ? (
+            permissions === 'admin' ? [
                 <Resource
                     name="settings"
                     key="settings"
                     options={{ label: 'Settings' }}
                     icon={SettingsIcon}
                     list={SettingsPage}
+                />,
+                <Resource
+                    name="subadmin_permissions"
+                    key="subadmin_permissions"
+                    options={{ label: 'Subadmin Access' }}
+                    icon={ShieldIcon}
+                    list={SubadminPermissionList}
+                    edit={SubadminPermissionEdit}
+                    create={SubadminPermissionCreate}
                 />
-            ) : null,
+            ] : null,
         ]}
     </Admin>
 );

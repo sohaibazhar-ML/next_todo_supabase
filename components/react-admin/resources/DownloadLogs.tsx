@@ -5,14 +5,14 @@ import {
     TextField,
     DateField,
     ReferenceField,
-    TextInput,
-    DateInput,
     Filter,
+    SearchInput,
+    DateInput,
 } from "react-admin";
 
 const DownloadLogFilter = (props: any) => (
     <Filter {...props}>
-        <TextInput label="Search IP/User Agent" source="q" alwaysOn />
+        <SearchInput placeholder="Search IP/User Agent" source="q" alwaysOn />
         <DateInput label="From Date" source="fromDate" />
         <DateInput label="To Date" source="toDate" />
     </Filter>

@@ -18,6 +18,7 @@ import {
     FileField,
     BooleanInput,
     FunctionField,
+    SearchInput,
 } from "react-admin";
 
 export const DocumentCreate = () => (
@@ -61,7 +62,7 @@ export const DocumentCreate = () => (
 
 const DocumentFilter = (props: any) => (
     <Filter {...props}>
-        <TextInput label="Search" source="q" alwaysOn />
+        <SearchInput source="q" alwaysOn />
         <SelectInput
             label="Category"
             source="category"

@@ -13,11 +13,12 @@ import {
     SimpleForm,
     Show,
     SimpleShowLayout,
+    SearchInput,
 } from "react-admin";
 
 const UserFilter = (props: any) => (
     <Filter {...props}>
-        <TextInput label="Search" source="q" alwaysOn />
+        <SearchInput source="q" alwaysOn />
         <SelectInput
             label="Role"
             source="role"
