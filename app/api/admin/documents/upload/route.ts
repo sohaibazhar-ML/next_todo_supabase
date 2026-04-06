@@ -123,9 +123,20 @@ export async function POST(request: Request) {
         })
     }
 
-    return NextResponse.json(
-      files.length === 1 ? createdDocuments[0] : createdDocuments,
-      { status: 201 }
+    if (createdDocuments.length === 0) {
+      return NextResponse.json({ error: "Upload failed: All files were rejected by the storage provider due to permission policies or other errors." }, { status: 400 })
+    }
+
+    const responsePayload = files.length === 1 ? createdDocuments[0] : createdDocuments;
+    
+    return new NextResponse(
+      JSON.stringify(responsePayload, (key, value) => 
+        typeof value === 'bigint' ? Number(value) : value
+      ), 
+      { 
+        status: 201,
+        headers: { 'Content-Type': 'application/json' }
+      }
     )
   } catch (error: unknown) {
     console.error(CONSOLE_MESSAGES.UPLOAD_ERROR, error)

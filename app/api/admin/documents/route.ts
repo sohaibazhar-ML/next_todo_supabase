@@ -60,7 +60,7 @@ export async function GET(request: Request) {
             const documents = await prisma.documents.findMany({
                 where: { id: { in: idList } }
             })
-            const serialized = documents.map((doc: any) => ({
+            const serialized = documents.map((doc: Prisma.documentsGetPayload<{}>) => ({
                 ...doc,
                 file_size: typeof doc.file_size === 'bigint' ? Number(doc.file_size) : doc.file_size,
             }))
@@ -130,7 +130,7 @@ export async function GET(request: Request) {
         )
 
         if (results && results.length > 0) {
-          const documentIds = results.map((doc) => doc.id)
+          const documentIds = results.map((doc: { id: string, rank?: number }) => doc.id)
           where.id = { in: documentIds }
         } else {
           // Fallback to basic Prisma 'contains' search if RPC returns nothing
@@ -167,7 +167,7 @@ export async function GET(request: Request) {
       prisma.documents.count({ where })
     ])
 
-    const serializedDocuments = documents.map((doc) => ({
+    const serializedDocuments = documents.map((doc: Prisma.documentsGetPayload<{}>) => ({
       ...doc,
       file_size: typeof doc.file_size === 'bigint' ? Number(doc.file_size) : doc.file_size,
     }))
@@ -219,12 +219,15 @@ export async function POST(request: Request) {
       }
     })
 
-    return NextResponse.json(
+    return new NextResponse(
+      JSON.stringify(
+        { ...document, file_size: Number(document.file_size) },
+        (key, value) => typeof value === 'bigint' ? Number(value) : value
+      ),
       {
-        ...document,
-        file_size: Number(document.file_size),
-      },
-      { status: 201 }
+        status: 201,
+        headers: { 'Content-Type': 'application/json' }
+      }
     )
   } catch (error: unknown) {
     console.error(CONSOLE_MESSAGES.ERROR_CREATING_DOCUMENT, error)
