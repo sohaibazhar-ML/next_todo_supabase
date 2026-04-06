@@ -10,14 +10,50 @@ import { DashboardHeaderProps } from '@/website/organisms/DashboardHeader/Dashbo
 import { logoutAction } from '@/actions/website/auth.actions';
 
 import { useToggle } from '@/app/_hooks/website/useToggle';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useDebounce } from '@/app/_hooks/website/useDebounce';
 
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   className = '',
   activeTab = 'documents'
 }) => {
   const t = useTranslations('Dashboard.header');
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [isPending, startTransition] = React.useTransition();
   const { value: isSearchOpen, toggle: toggleSearch } = useToggle(false);
+
+  // Search State
+  const [searchValue, setSearchValue] = React.useState(searchParams.get('q') || '');
+  const debouncedSearch = useDebounce(searchValue, 500);
+
+  // Sync Search with URL
+  React.useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    const currentSearch = searchParams.get('q') || '';
+    
+    if (debouncedSearch !== currentSearch) {
+      if (debouncedSearch) {
+        params.set('q', debouncedSearch);
+      } else {
+        params.delete('q');
+      }
+      // Reset to page 1 on new search
+      params.delete('page');
+      
+      router.push(`${pathname}?${params.toString()}`);
+    }
+  }, [debouncedSearch, router, pathname, searchParams]);
+
+  // Sync search input with URL (e.g. on back button)
+  React.useEffect(() => {
+    const q = searchParams.get('q') || '';
+    if (q !== searchValue) {
+      setSearchValue(q);
+    }
+  }, [searchParams]);
 
   const handleLogout = () => {
     startTransition(async () => {
@@ -102,6 +138,8 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 id="search-desktop"
                 inputSize="sm"
                 type='search'
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
                 placeholder={t('searchPlaceholder')}
                 rightIcon={Search}
                 className="w-[180px] lg:w-[320px]"
@@ -147,6 +185,8 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               autoFocus
               id="search-mobile"
               type='search'
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
               placeholder={t('searchPlaceholder')}
               rightIcon={Search}
               className="w-full h-[40px] shadow-inner"

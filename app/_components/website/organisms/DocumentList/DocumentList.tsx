@@ -1,19 +1,29 @@
 "use client";
 
 import React from 'react';
-import { DocumentRow } from '@/website/molecules';
-import { DashboardPagination } from '@/website/molecules';
+import { DocumentRow, DashboardPagination } from '@/website/molecules';
+import { Text } from '@/website/atoms';
 import { DocumentListProps } from '@/website/organisms/DocumentList/DocumentList.types';
-import { usePagination } from '@/app/_hooks/website/usePagination';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 
 export const DocumentList: React.FC<DocumentListProps> = ({ 
-  documents, 
+  documents,
+  totalPages,
+  currentPage,
   className = '' 
 }) => {
-  const { currentPage, totalPages, currentData, onPageChange, startIndex } = usePagination({
-    data: documents,
-    itemsPerPage: 20
-  });
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const handlePageChange = (page: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', page.toString());
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const itemsPerPage = 20;
+  const startIndex = (currentPage - 1) * itemsPerPage;
 
   return (
     <div className={`w-full flex flex-col ${className}`}>
@@ -21,12 +31,12 @@ export const DocumentList: React.FC<DocumentListProps> = ({
       <DashboardPagination 
         currentPage={currentPage}
         totalPages={totalPages}
-        onPageChange={onPageChange}
+        onPageChange={handlePageChange}
       />
 
       {/* List Container */}
-      <div className="w-full flex flex-col">
-        {currentData.map((doc: any, idx: number) => (
+      <div className="w-full flex flex-col min-h-[400px]">
+        {documents.map((doc: any, idx: number) => (
           <DocumentRow 
             key={doc.id}
             document={doc}
@@ -34,20 +44,24 @@ export const DocumentList: React.FC<DocumentListProps> = ({
           />
         ))}
         
-        {/* Fill empty rows if needed to maintain height (optional) */}
-        {currentData.length < 20 && currentData.length > 0 && (
-          Array.from({ length: 20 - currentData.length }).map((_, i) => (
-            <div key={`empty-${i}`} className={`h-[52px] ${(currentData.length + i) % 2 !== 0 ? 'bg-background-neutral/30' : 'bg-white'}`} />
-          ))
+        {/* Empty State */}
+        {documents.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-20 bg-white rounded-lg border border-dashed border-secondary/20">
+            <Text variant="text-s" className="text-secondary/50 font-medium">
+              No documents found
+            </Text>
+          </div>
         )}
       </div>
 
       {/* Bottom Pagination */}
-      <DashboardPagination 
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={onPageChange}
-      />
+      {totalPages > 1 && (
+        <DashboardPagination 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      )}
     </div>
   );
 };
