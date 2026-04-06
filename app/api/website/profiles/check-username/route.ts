@@ -23,7 +23,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: ERROR_MESSAGES.USERNAME_REQUIRED }, { status: 400 })
     }
 
-    const existing = await prisma.profiles.findUnique({
+    const existing = await prisma.profiles.findFirst({
       where: { username },
       select: { id: true }
     })

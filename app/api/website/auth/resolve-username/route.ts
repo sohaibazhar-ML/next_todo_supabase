@@ -14,7 +14,7 @@ export async function GET(request: Request) {
         }
 
         // Prisma bypasses RLS, so this lookup is safe for unauthenticated users
-        const profile = await prisma.profiles.findUnique({
+        const profile = await prisma.profiles.findFirst({
             where: { username },
             select: { email: true }
         })
