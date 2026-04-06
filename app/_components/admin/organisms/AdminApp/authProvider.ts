@@ -8,12 +8,26 @@ const supabase = createClient();
 export const authProvider: AuthProvider = {
     // Called when the user attempts to log in
     login: async ({ username, password }: { username: string; password: string }) => {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
             email: username,
             password,
         });
         if (error) {
             throw new Error(error.message);
+        }
+
+        // Verify if the user has admin/subadmin privileges
+        try {
+            const profile = await api.get<UserProfile>(`/api/website/profiles?userId=${data.user?.id}`);
+            const role = profile?.role ?? "user";
+            if (role === 'user') {
+                await supabase.auth.signOut();
+                throw new Error("You're forbidden to use the admin panel");
+            }
+        } catch (e) {
+            console.error("[AuthProvider] Login Role Verification Error:", e);
+            await supabase.auth.signOut();
+            throw new Error("You're forbidden to use the admin panel");
         }
     },
 
@@ -39,6 +53,20 @@ export const authProvider: AuthProvider = {
         const { data } = await supabase.auth.getUser();
         if (!data.user) {
             throw new Error("Not authenticated");
+        }
+
+        // Periodically verify the user still has appropriate permissions
+        try {
+            const profile = await api.get<UserProfile>(`/api/website/profiles?userId=${data.user.id}`);
+            const role = profile?.role ?? "user";
+            if (role === 'user') {
+                await supabase.auth.signOut();
+                throw new Error("You're forbidden to use the admin panel");
+            }
+        } catch (e) {
+            console.error("[AuthProvider] Auth Check Role Verification Error:", e);
+            await supabase.auth.signOut();
+            throw new Error("You're forbidden to use the admin panel");
         }
     },
 

@@ -49,7 +49,15 @@ export async function middleware(request: NextRequest) {
   const publicRoutes = [
     '/auth/callback',
     '/',
-    '/admin'
+    '/about',
+    '/faq',
+    '/login',
+    '/register',
+    '/forgot-password',
+    '/reset-password',
+    '/imprint',
+    '/terms',
+    '/privacy'
   ]
 
   const isPublicRoute = publicRoutes.some(route =>
@@ -88,10 +96,17 @@ export async function middleware(request: NextRequest) {
     error,
   } = await supabase.auth.getUser()
 
-  // If authentication fails (expired/invalid token), redirect to login
   if (error || !user) {
     const url = request.nextUrl.clone()
-    url.pathname = `/${locale}/admin`
+    const isAdminRoute = pathWithoutLocale.startsWith('/admin')
+    const targetPath = `/${locale}${isAdminRoute ? '/admin' : '/login'}`
+    
+    // BREAK LOOP: If already at target, don't redirect again
+    if (pathname === targetPath) {
+        return intlResponse
+    }
+
+    url.pathname = targetPath
     return NextResponse.redirect(url)
   }
 

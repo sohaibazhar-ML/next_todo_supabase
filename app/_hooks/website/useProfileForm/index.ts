@@ -13,13 +13,15 @@ import { useMutation } from '@tanstack/react-query'
 import { useQueryClient } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
 import {
-  createProfileSchema,
-  editProfileSchema,
   type CreateProfileFormData,
   type EditProfileFormData,
   type PasswordChangeFormData,
-  passwordChangeSchema,
 } from '@/website/types';
+import {
+  createProfileSchema,
+  editProfileSchema,
+  passwordChangeSchema,
+} from '@/schemas/website/profile.schema';
 import { 
     completeProfileSetup 
 } from '@/services/website/profiles';

@@ -1,15 +1,142 @@
 @import "tailwindcss";
 
+html {
+  scroll-behavior: smooth;
+}
+
+#how-it-works,
+#my-documents,
+#contact {
+  scroll-margin-top: 100px;
+}
+
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --background-secondary: #f9f8f4;
+  --background-neutral: #ebecec;
+  --background-dark: #362e2d;
+  --background-nav: #6A5E58;
+  --foreground: #030221;
+  --primary: #e3311d;
+  --primary-hover: #da1701;
+  --secondary: #362e2d;
+  --accent: #0272a2;
+  --error: #ef4444;
+  --error-dark: #ce3c03;
+  --success: #16a34a;
+  --success-light: #f0fdf4;
+  --success-border: #bbf7d0;
+  --border-input: #A0A2A1;
+  --input-placeholder: #8B8281;
+
+  /* Grid & Layout System */
+  --container-max-width: 1440px;
+  --container-padding: 80px;
+  --spacing-gutter: 24px;
+
+  /* Typography */
+  --font-heading: "Acumin Variable Concept", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body: var(--font-body), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-secondary: var(--font-secondary), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-background-secondary: var(--background-secondary);
+  --color-background-neutral: var(--background-neutral);
+  --color-background-dark: var(--background-dark);
+  --color-background-nav: var(--background-nav);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-error: var(--error);
+  --color-error-dark: var(--error-dark);
+  --color-success: var(--success);
+  --color-success-light: var(--success-light);
+  --color-success-border: var(--success-border);
+  --color-border-input: var(--border-input);
+  --color-input-placeholder: var(--input-placeholder);
+
+  /* Spacing and Layout - Using Tailwind 4.0 scale convention */
+  --spacing-gutter: clamp(16px, 3vw, 24px);
+  --spacing-container-padding: clamp(20px, 5vw, 80px);
+  --container-width-desktop: 1440px;
+
+  /* Typography Families */
+  --font-heading: var(--font-heading);
+  --font-body: var(--font-body);
+  --font-secondary: var(--font-secondary);
+
+  /* Typography Scale */
+  /* New Standardized Typography Scale with Responsive Sizing */
+  --text-heading-xl: clamp(32px, 5vw, 42px);
+  --text-heading-xl--line-height: 1.25;
+  --text-heading-xl--font-weight: 500;
+
+  --text-heading-l: clamp(28px, 4vw, 38px);
+  --text-heading-l--line-height: 1.2;
+  --text-heading-l--font-weight: 500;
+
+  --text-heading-m: clamp(18px, 2.5vw, 22px);
+  --text-heading-m--line-height: 1.2;
+  --text-heading-m--font-weight: 500;
+
+  --text-text-xl: clamp(22px, 3vw, 27px);
+  --text-text-xl--line-height: 1.2;
+  --text-text-xl--font-weight: 500;
+  /* SemiCondensed in Figma - mapping to Medium for now if no specific stretch */
+
+  --text-text-l: clamp(20px, 2.5vw, 24px);
+  --text-text-l--line-height: 1.1;
+  --text-text-l--font-weight: 500;
+
+  --text-text-m: clamp(18px, 2vw, 23px);
+  --text-text-m--line-height: 1.35;
+  --text-text-m--font-weight: 400;
+
+  --text-text-s: clamp(16px, 1.8vw, 21px);
+  --text-text-s--line-height: 1.35;
+  --text-text-s--font-weight: 500;
+
+  --text-text-xs: clamp(14px, 1.5vw, 18px);
+  --text-text-xs--line-height: 1.3;
+  --text-text-xs--font-weight: 400;
+
+  --text-text-xxs: clamp(12px, 1.2vw, 16px);
+  --text-text-xxs--line-height: 1.25;
+  --text-text-xxs--font-weight: 400;
+
+  /* CTA Specific */
+  --text-cta: clamp(16px, 2vw, 19px);
+  --text-cta--line-height: 1.4;
+  --text-cta--font-weight: 500;
+
+  /* Login Page Specific */
+  --text-login-title: clamp(32px, 5vw, 43px);
+  --text-login-title--line-height: 1.25;
+  --text-login-title--font-weight: 600;
+
+  --text-login-description: clamp(18px, 2.5vw, 23px);
+  --text-login-description--line-height: 1.35;
+  --text-login-description--font-weight: 600;
+
+  --text-login-forgot: clamp(18px, 2vw, 22px);
+  --text-login-forgot--line-height: 1.3;
+  --text-login-forgot--font-weight: 500;
+
+  /* Legacy aliases for compatibility */
+  --text-h1: var(--text-heading-xl);
+  --text-h2: var(--text-heading-l);
+  --text-h3: var(--text-text-xl);
+  --text-h4: var(--text-text-l);
+  --text-h5: var(--text-heading-m);
+
+  --text-body-lg: var(--text-text-l);
+  --text-body-md: var(--text-text-m);
+  --text-body-sm: var(--text-text-s);
+  --text-body-xs: var(--text-text-xs);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -20,15 +147,49 @@
 }
 
 body {
-  background: var(--background);
+  background: var(--background-neutral);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Navigation Marquee Animation */
+@keyframes navMarquee {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(calc(-100% + 120px));
+  }
+}
+
+.hover-marquee:hover {
+  animation: navMarquee 3s linear infinite alternate;
+  width: max-content;
+  max-width: none !important;
+}
+
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-  20%, 40%, 60%, 80% { transform: translateX(5px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
+
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
+  }
 }
 
 .animate-shake {
@@ -38,13 +199,15 @@ body {
 /* TipTap Editor Styles - Preserve original document styling */
 .ProseMirror {
   outline: none;
-  color: #111827; /* Default dark text color for readability */
+  color: #111827;
+  /* Default dark text color for readability */
   /* Inline styles from document will override this */
 }
 
 .ProseMirror p {
   margin: 0.5em 0;
-  color: #111827; /* Default dark text color */
+  color: #111827;
+  /* Default dark text color */
   /* Inline styles from document will override this */
 }
 
@@ -57,31 +220,36 @@ body {
   font-weight: 600;
   margin-top: 1em;
   margin-bottom: 0.5em;
-  color: #111827; /* Default dark text color */
+  color: #111827;
+  /* Default dark text color */
   /* Inline styles from document will override this */
 }
 
 .ProseMirror ul,
 .ProseMirror ol {
   padding-left: 1.5em;
-  color: #111827; /* Default dark text color */
+  color: #111827;
+  /* Default dark text color */
   /* Inline styles from document will override this */
 }
 
 .ProseMirror li {
-  color: #111827; /* Default dark text color */
+  color: #111827;
+  /* Default dark text color */
   /* Inline styles from document will override this */
 }
 
 .ProseMirror strong {
   font-weight: 600;
-  color: #111827; /* Default dark text color */
+  color: #111827;
+  /* Default dark text color */
   /* Inline styles from document will override this */
 }
 
 .ProseMirror em {
   font-style: italic;
-  color: #111827; /* Default dark text color */
+  color: #111827;
+  /* Default dark text color */
   /* Inline styles from document will override this */
 }
 
@@ -107,12 +275,7 @@ body {
   /* Preserve original blockquote styling */
 }
 
-/* Preserve inline styles from original document - inline styles override defaults */
-.ProseMirror [style] {
-  /* Inline styles will override default color */
-}
-
-/* Preserve font families, sizes, and colors from document */
+/* Preserve inline styles from document */
 .ProseMirror span[style*="font-family"],
 .ProseMirror span[style*="font-size"],
 .ProseMirror span[style*="color"],
@@ -122,10 +285,11 @@ body {
 .ProseMirror div[style*="font-family"],
 .ProseMirror div[style*="font-size"],
 .ProseMirror div[style*="color"] {
-  /* Inline styles will override default color */
+  color: inherit !important;
 }
 
 /* Ensure text with inline color styles takes precedence */
 .ProseMirror [style*="color"] {
-  color: inherit !important; /* Let inline style attribute control color */
+  color: inherit !important;
+  /* Let inline style attribute control color */
 }

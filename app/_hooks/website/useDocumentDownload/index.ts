@@ -20,9 +20,10 @@ export function useDocumentDownload() {
             link.click();
             link.parentNode?.removeChild(link);
             window.URL.revokeObjectURL(downloadUrl);
-        } catch (err: any) {
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Download failed';
             console.error('Download error:', err);
-            setError(err.message || 'Download failed');
+            setError(message);
             throw err;
         } finally {
             setLoading(false);

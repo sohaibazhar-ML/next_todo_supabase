@@ -1,5 +1,13 @@
 export type DocumentFileType = 'PDF' | 'DOCX' | 'XLSX' | 'ZIP'
 
+export interface DocumentItem {
+  id: string;
+  name: string;
+  type: 'pdf' | 'doc';
+  size: string;
+  url: string;
+}
+
 export interface Document {
   id: string
   title: string

@@ -29,6 +29,7 @@
       "@/components/*": ["./app/_components/*"],
       "@/admin/*": ["./app/_components/admin/*"],
       "@/website/*": ["./app/_components/website/*"],
+      "@/schemas/website/*": ["./app/_schemas/website/*"],
 
       "@/admin/hooks": ["./app/_hooks/admin/index"],
       "@/admin/hooks/*": ["./app/_hooks/admin/*"],

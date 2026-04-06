@@ -132,9 +132,9 @@ export async function POST(request: Request) {
     const body = await request.json()
 
     // Validate required fields
-    if (!body.id || !body.username || !body.email) {
+    if (!body.id || !body.email) {
       return NextResponse.json(
-        { error: `${ERROR_MESSAGES.MISSING_REQUIRED_FIELDS}: id, username, email` },
+        { error: `${ERROR_MESSAGES.MISSING_REQUIRED_FIELDS}: id, email` },
         { status: 400 }
       )
     }
@@ -176,16 +176,18 @@ export async function POST(request: Request) {
       authenticatedUserId: user?.id || 'none (signup flow)'
     })
 
-    // Check if username exists
-    const existing = await prisma.profiles.findUnique({
-      where: { username: body.username }
-    })
+    // Check if username exists (only if provided)
+    if (body.username) {
+      const existing = await prisma.profiles.findFirst({
+        where: { username: body.username }
+      })
 
-    if (existing) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.USERNAME_EXISTS },
-        { status: 400 }
-      )
+      if (existing) {
+        return NextResponse.json(
+          { error: ERROR_MESSAGES.USERNAME_EXISTS },
+          { status: 400 }
+        )
+      }
     }
 
     // SECURITY: Strict whitelisting of fields to prevent mass assignment (e.g., 'role')
@@ -202,6 +204,9 @@ export async function POST(request: Request) {
         new_address_switzerland: body.new_address_switzerland,
         number_of_adults: body.number_of_adults || 1,
         number_of_children: body.number_of_children || 0,
+        total_persons: body.total_persons || 1,
+        gender: body.gender || null,
+        preferred_call_time: body.preferred_call_time || null,
         pets_type: body.pets_type || null,
         marketing_consent: body.marketing_consent || false,
         terms_accepted: body.terms_accepted || false,
@@ -290,6 +295,9 @@ export async function PUT(request: Request) {
       new_address_switzerland: body.new_address_switzerland,
       number_of_adults: body.number_of_adults,
       number_of_children: body.number_of_children,
+      total_persons: body.total_persons,
+      gender: body.gender,
+      preferred_call_time: body.preferred_call_time,
       pets_type: body.pets_type,
       marketing_consent: body.marketing_consent,
       keep_me_logged_in:

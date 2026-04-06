@@ -1,28 +1,40 @@
-import { useState, useCallback } from 'react';
+"use client";
 
-export interface PaginationState {
-    page: number;
-    perPage: number;
+import { useState, useMemo, useCallback } from 'react';
+
+interface UsePaginationOptions<T> {
+  data: T[];
+  itemsPerPage?: number;
+  initialPage?: number;
 }
 
-export function usePagination(initialPage = 1, initialPerPage = 10) {
-    const [pagination, setPagination] = useState<PaginationState>({
-        page: initialPage,
-        perPage: initialPerPage,
-    });
+/**
+ * Enhanced pagination hook to handle data slicing and page state.
+ */
+export const usePagination = <T,>(options: UsePaginationOptions<T>) => {
+  const { data, itemsPerPage = 20, initialPage = 1 } = options;
+  const [currentPage, setCurrentPage] = useState(initialPage);
 
-    const setPage = useCallback((page: number) => {
-        setPagination(prev => ({ ...prev, page }));
-    }, []);
+  const totalPages = useMemo(() => {
+    return Math.ceil(data.length / itemsPerPage) || 1;
+  }, [data.length, itemsPerPage]);
 
-    const setPerPage = useCallback((perPage: number) => {
-        setPagination(prev => ({ ...prev, perPage, page: 1 }));
-    }, []);
+  const currentData = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return data.slice(startIndex, startIndex + itemsPerPage);
+  }, [data, currentPage, itemsPerPage]);
 
-    return {
-        ...pagination,
-        setPage,
-        setPerPage,
-        setPagination,
-    };
-}
+  const onPageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, []);
+
+  const startIndex = useMemo(() => (currentPage - 1) * itemsPerPage, [currentPage, itemsPerPage]);
+
+  return {
+    currentPage,
+    totalPages,
+    currentData,
+    onPageChange,
+    startIndex,
+  };
+};

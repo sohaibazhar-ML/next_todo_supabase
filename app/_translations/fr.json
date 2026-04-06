@@ -1,1 +1,460 @@
-{}
+{
+  "Header": {
+    "home": "Accueil",
+    "howItWorks": "Comment ça marche",
+    "myDocuments": "Mes documents",
+    "contact": "Contact",
+    "login": "Connexion",
+    "register": "S'inscrire gratuitement",
+    "languages": {
+      "fr": "Français",
+      "it": "Italiano",
+      "de": "Deutsch",
+      "en": "English"
+    }
+  },
+  "Hero": {
+    "heading": "Plus de 90 modèles pour votre déménagement en Suisse. Téléchargez-les gratuitement dès maintenant.",
+    "subheading": "Organisez votre déménagement en Suisse de manière numérique, simple et étape par étape.",
+    "register": "S'inscrire gratuitement"
+  },
+  "TrustBar": {
+    "expats": "Conçu pour les expatriés s'installant en Suisse",
+    "hosting": "Hébergement suisse sécurisé"
+  },
+  "HowItWorks": {
+    "title": "Comment ça marche",
+    "step1": "Inscrivez-vous gratuitement en moins d'une minute",
+    "step2": "Téléchargez et remplissez les modèles appropriés",
+    "step3": "Modifiez, imprimez, enregistrez ou envoyez les modèles"
+  },
+  "MyDocuments": {
+    "title": "Mes documents",
+    "description": "Se connecter, signaler, se connecter. Avec myswissmove, emménager en Suisse est un jeu d'enfant.",
+    "list": [
+      "La liste de contrôle ultime des documents",
+      "Autorités, banque, assurance – tout est réglé ?",
+      "Ces 15 documents dont vous avez besoin pour votre nouveau départ en Suisse",
+      "Déménagement en Suisse 2026 : Ce que vous devez impérativement observer",
+      "Bien préparé pour s'expatrier : Ainsi, vous évitez les erreurs coûteuses"
+    ],
+    "register": "S'inscrire gratuitement"
+  },
+  "DocumentsOverview": {
+    "title": "Tous les documents et modèles importants en un seul endroit",
+    "description": "Vous envisagez de vous expatrier, vous êtes en plein milieu des préparatifs ou vous avez déjà immigré ? Alors myswissmove est exactement ce qu'il vous faut. Toutes les informations nécessaires à l'expatriation en Suisse, nous les avons rassemblées pour vous. Et avec nos plans de déménagement gratuits, vous obtenez tous les modèles et listes de contrôle importants à télécharger.",
+    "list": [
+      "90 modèles de documents sous forme de fichiers Word concernant le déménagement",
+      "Modèles librement modifiables et enregistrables pour PC",
+      "Un an de stockage gratuit et accessible en ligne à tout moment",
+      "Checklists avec tous les ToDo importants pour le déménagement en Suisse"
+    ]
+  },
+  "Footer": {
+    "questions": "Vous avez des questions ou besoin d'aide ? Alors lancez votre rappel personnel.",
+    "form": {
+      "name": "Prénom, Nom",
+      "time": "Jour, Heure",
+      "phone": "Mon numéro de rappel",
+      "cta": "Confirmer le rappel"
+    },
+    "about": "À propos de nous",
+    "faq": "FAQ",
+    "service": "myswissmove est un service de Mehrwek Schweiz AG",
+    "links": {
+      "imprint": "Mentions légales",
+      "privacy": "Confidentialité",
+      "terms": "CGV",
+      "hotline": "Hotline : +49 78 123 4567"
+    },
+    "partnership": "en collaboration avec"
+  },
+  "Login": {
+    "title": "Connexion",
+    "description": "Veuillez saisir votre adresse e-mail et votre mot de passe pour vous connecter.",
+    "email": "Adresse e-mail",
+    "password": "Mot de passe",
+    "submit": "Connexion",
+    "forgot": "Mot de passe oublié ?",
+    "forgotPassword": {
+      "title": "Mot de passe oublié ?",
+      "subtitle": "Pas de problème. Vous pouvez en créer un nouveau ici.",
+      "instruction": "Veuillez saisir l'adresse e-mail de votre compte afin que nous puissions réinitialiser votre mot de passe.",
+      "emailLabel": "Adresse e-mail",
+      "submit": "Réinitialiser le mot de passe",
+      "backToLogin": "Connexion",
+      "successMessage": "Lien de réinitialisation envoyé ! Veuillez vérifier votre boîte de réception."
+    },
+    "resetPassword": {
+      "title": "Réinitialiser le mot de passe",
+      "subtitle": "Veuillez saisir votre nouveau mot de passe",
+      "newPasswordLabel": "Nouveau mot de passe",
+      "confirmPasswordLabel": "Répéter le nouveau mot de passe",
+      "submit": "Confirmer le mot de passe",
+      "backToLogin": "Connexion",
+      "successMessage": "Mot de passe réinitialisé avec succès ! Vous pouvez maintenant vous connecter avec votre nouveau mot de passe."
+    },
+    "successMessage": "Connexion réussie ! Redirection...",
+    "keepMeLoggedIn": "Rester connecté",
+    "noAccount": "Pas encore de compte ?",
+    "register": "S'inscrire gratuitement"
+  },
+  "Register": {
+    "title": "Sans si ni mais.",
+    "subtitle": "myswissmove est gratuit et sans publicité.",
+    "instruction": "Veuillez remplir les champs",
+    "fields": {
+      "gender": {
+        "label": "Genre",
+        "placeholder": "Sélectionner",
+        "options": {
+          "male": "Homme",
+          "female": "Femme",
+          "other": "Autre"
+        }
+      },
+      "email": {
+        "label": "Adresse e-mail",
+        "placeholder": "exemple@mail.ch"
+      },
+      "password": {
+        "label": "Mot de passe",
+        "placeholder": "Au moins 8 caractères"
+      },
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "currentAddress": "Adresse actuelle (Rue, Code postal, Ville)",
+      "country": {
+        "label": "Pays",
+        "placeholder": "Sélectionner",
+        "options": {
+          "AF": "Afghanistan",
+          "AL": "Albanie",
+          "DZ": "Algérie",
+          "AR": "Argentine",
+          "AM": "Arménie",
+          "AU": "Australie",
+          "AT": "Autriche",
+          "AZ": "Azerbaïdjan",
+          "BD": "Bangladesh",
+          "BY": "Biélorussie",
+          "BE": "Belgique",
+          "BO": "Bolivie",
+          "BA": "Bosnie-Herzégovine",
+          "BR": "Brésil",
+          "BG": "Bulgarie",
+          "KH": "Cambodge",
+          "CM": "Cameroun",
+          "CA": "Canada",
+          "CL": "Chili",
+          "CN": "Chine",
+          "CO": "Colombie",
+          "HR": "Croatie",
+          "CU": "Cuba",
+          "CZ": "République Tchèque",
+          "DK": "Danemark",
+          "EC": "Équateur",
+          "EG": "Égypte",
+          "EE": "Estonie",
+          "ET": "Éthiopie",
+          "FI": "Finlande",
+          "FR": "France",
+          "GE": "Géorgie",
+          "DE": "Allemagne",
+          "GH": "Ghana",
+          "GR": "Grèce",
+          "HU": "Hongrie",
+          "IS": "Islande",
+          "IN": "Inde",
+          "ID": "Indonésie",
+          "IR": "Iran",
+          "IQ": "Irak",
+          "IE": "Irlande",
+          "IL": "Israël",
+          "IT": "Italie",
+          "JP": "Japon",
+          "JO": "Jordanie",
+          "KZ": "Kazakhstan",
+          "KE": "Kenya",
+          "KW": "Koweït",
+          "LV": "Lettonie",
+          "LB": "Liban",
+          "LY": "Libye",
+          "LT": "Lituanie",
+          "LU": "Luxembourg",
+          "MY": "Malaisie",
+          "MX": "Mexique",
+          "MA": "Maroc",
+          "NL": "Pays-Bas",
+          "NZ": "Nouvelle-Zélande",
+          "NG": "Nigéria",
+          "MK": "Macédoine du Nord",
+          "NO": "Norvège",
+          "PK": "Pakistan",
+          "PE": "Pérou",
+          "PH": "Philippines",
+          "PL": "Pologne",
+          "PT": "Portugal",
+          "QA": "Qatar",
+          "RO": "Roumanie",
+          "RU": "Russie",
+          "SA": "Arabie Saoudite",
+          "RS": "Serbie",
+          "SG": "Singapur",
+          "SK": "Slovaquie",
+          "SI": "Slovénie",
+          "ZA": "Afrique du Sud",
+          "KR": "Corée du Sud",
+          "ES": "Espagne",
+          "LK": "Sri Lanka",
+          "SE": "Suède",
+          "CH": "Suisse",
+          "TH": "Thaïlande",
+          "TN": "Tunisie",
+          "TR": "Turquie",
+          "UA": "Ukraine",
+          "AE": "Émirats Arabes Unis",
+          "GB": "Royaume-Uni",
+          "US": "États-Unis",
+          "VN": "Vietnam"
+        }
+      },
+      "newAddress": "Nouvelle adresse en Suisse (Rue, Code postal, Ville)",
+      "numPersons": "Nombre de personnes",
+      "numAdults": "Dont adultes",
+      "numChildren": "Dont enfants",
+      "pets": {
+        "label": "Animaux domestiques ?",
+        "placeholder": "Sélectionner",
+        "options": {
+          "yes": "Oui",
+          "no": "Non"
+        }
+      },
+      "whichPets": "Lesquels (Chiens/Chats)",
+      "phone": "Numéro de téléphone avec indicatif pays",
+      "preferredTime": {
+        "label": "Jour / heure préféré(e) pour l'appel",
+        "placeholder": "Sélectionner",
+        "options": {
+          "morning": "Matin",
+          "afternoon": "Après-midi",
+          "evening": "Soir"
+        }
+      }
+    },
+    "consent": "Oui, je souhaite bénéficier d'un conseil téléphonique gratuit sur les assurances et la prévoyance en Suisse et je prends note de la déclaration de protection des données.",
+    "legalNote": "J'accepte que mes données fournies lors de l'inscription (notamment mon nom, mon adresse e-mail, mon numéro de téléphone) puissent être utilisées pour m'informer par e-mail, téléphone, SMS ou autres moyens de communication électronique sur les produits, services et promotions dans le domaine des assurances et de la prévoyance. Ce consentement est volontaire et peut être révoqué à tout moment avec effet pour l'avenir, par exemple par e-mail à hello@myswissmove.ch ou via le lien de désinscription présent dans chaque message. Vous trouverez de plus amples informations sur le traitement des données dans la déclaration de protection des données.",
+    "submit": "S'inscrire gratuitement",
+    "successMessage": "Inscription réussie ! Nous avons envoyé un e-mail de confirmation dans votre boîte de réception. Veuillez vérifier votre compte pour commencer avec MySwissMove."
+  },
+  "FAQ": {
+    "title": "FAQ",
+    "description": "Foire aux questions sur notre service et votre déménagement.",
+    "items": [
+      {
+        "question": "L'inscription est-elle vraiment gratuite ?",
+        "answer": "Oui. L'inscription sur notre portail est entièrement gratuite et sans engagement pour vous. Il n'y a pas de frais cachés ou de frais de suivi."
+      },
+      {
+        "question": "Quels documents de déménagement puis-je télécharger ?",
+        "answer": "Nous proposons tous les modèles pertinents pour votre déménagement : résiliations de bail, changements d'adresse, listes de contrôle et protocoles de remise."
+      },
+      {
+        "question": "Existe-t-il des obligations après l'inscription ?",
+        "answer": "Non. Il n'y a pas de durée minimale de contrat ou de renouvellement automatique. Vous décidez vous-même de la durée d'utilisation du service."
+      },
+      {
+        "question": "Comment mes données seront-elles utilisées ?",
+        "answer": "Vos données seront utilisées exclusivement aux fins que vous avez choisies (par exemple, la création de documents). Nous ne transmettons aucune donnée à des tiers."
+      },
+      {
+        "question": "Puis-je retirer mon consentement à la publicité ?",
+        "answer": "Oui, un retrait est possible à tout moment sans problème dans les paramètres de votre compte ou par e-mail à notre support."
+      },
+      {
+        "question": "Mes données sont-elles sécurisées ?",
+        "answer": "Oui. Nous utilisons des technologies de cryptage de pointe et des emplacements de serveurs en Suisse pour protéger vos données selon les normes de sécurité les plus élevées."
+      },
+      {
+        "question": "Pendant combien de temps aurai-je accès aux documents ?",
+        "answer": "Tant que votre compte utilisateur existe, vous avez un accès illimité à tous les documents que vous avez créés et enregistrés."
+      },
+      {
+        "question": "Puis-je supprimer mon compte utilisateur ?",
+        "answer": "Oui. Vous pouvez supprimer votre compte de manière irrévocable à tout moment. Toutes vos données personnelles seront complètement supprimées conformément au RGPD."
+      },
+      {
+        "question": "Qui puis-je contacter si j'ai des questions ?",
+        "answer": "Notre équipe de support est à votre disposition à tout moment par e-mail ou via le formulaire de contact en pied de page."
+      },
+      {
+        "question": "En combien de langues les modèles sont-ils disponibles ?",
+        "answer": "Nous proposons actuellement nos modèles en allemand, français et italien pour couvrir l'ensemble de la Suisse."
+      }
+    ]
+  },
+  "About": {
+    "Hero": {
+      "title": "À propos de nous",
+      "subtitle": "Mehrwerk et Helvetia. Deux partenaires solides pour plus de service et de sécurité.",
+      "description": "myswissmove.ch est un service de Mehrwerk Suisse. En collaboration avec Helvetia Assurances, nous mettons gratuitement à votre disposition des documents et services utiles pour votre déménagement.\nNotre objectif est de vous accompagner au mieux dans la planification et l'organisation de votre déménagement. Simple, numérique et gratuit."
+    },
+    "Info": {
+      "title": "Conseils et soutien pour votre nouvelle vie en Suisse",
+      "description": "Et si vous avez des questions sur l'assurance pour les événements de la vie ainsi que des questions concrètes sur votre nouvelle vie en Suisse... notre personnel amical se fera un plaisir de vous aider. Vous pouvez nous joindre à hello@myswissmove.ch ou au +41 78 123 456."
+    },
+    "Partners": {
+      "mehrwerk": {
+        "linkText": "En savoir plus sur Mehrwerk"
+      },
+      "helvetia": {
+        "linkText": "En savoir plus sur Helvetia"
+      }
+    }
+  },
+  "Dashboard": {
+    "header": {
+      "account": "Mon compte",
+      "documents": "Mes documents",
+      "searchPlaceholder": "Terme de recherche",
+      "logout": "Déconnexion"
+    },
+    "list": {
+      "download": "Télécharger",
+      "pagination": {
+        "prev": "retour",
+        "next": "suivant"
+      }
+    }
+  },
+  "Imprint": {
+    "title": "Mentions légales",
+    "company": "Mehrwerk Schweiz AG",
+    "addressLine": "Wohlerstrasse 51a",
+    "cityLine": "CH- 5605 Dottikon",
+    "phone": "Tél. : +41 78 245 9636",
+    "email": "E-mail : hello@myswissmove.ch",
+    "director": "Directeur général : Norbert Petter",
+    "registry": "Tribunal de registre : Amtsgericht Aargau",
+    "regNumber": "N° de registre / municipalité : 1701",
+    "vatId": "N° de TVA : CHE-439.886.185",
+    "responsible": "Responsable au sens de l'article 55, paragraphe 2, du Traité interétatique sur la radiodiffusion (RStV) : Norbert Petter",
+    "imageSources": {
+      "title": "Sources des images :",
+      "pexels": "Pexels - https://www.pexels.com/de-de/",
+      "pixabay": "Pixabay - https://pixabay.com/de/"
+    },
+    "disclaimer": "Avertissement – Disclaimer :",
+    "liabilityContent": {
+      "title": "Responsabilité pour le contenu",
+      "content": "Tous les contenus de notre site internet ont été créés avec le plus grand soin et en toute bonne conscience. Nous ne pouvons toutefois pas garantir l'exactitude, l'exhaustivité et l'actualité des contenus. En tant que prestataire de services, nous sommes responsables de nos propres contenus sur ces pages conformément à l'article 7, paragraphe 1, de la loi allemande sur les télémédias (TMG). Toutefois, selon les articles 8 à 10 de la TMG, nous ne sommes pas tenus, en tant que prestataire de services, de surveiller les informations tierces transmises ou stockées ou de rechercher des circonstances indiquant une activité illégale. Les obligations de suppression ou de blocage de l'utilisation d'informations conformément aux lois générales ne sont pas affectées par cette disposition. Une responsabilité à cet égard n'est toutefois possible qu'à partir du moment de la connaissance d'une violation concrète de la loi. Dès la prise de connaissance de telles violations de la loi, nous supprimerons immédiatement ces contenus."
+    },
+    "liabilityLinks": {
+      "title": "Limitation de responsabilité pour les liens externes",
+      "content": "Notre site web contient des liens vers des sites web externes de tiers. Nous n'avons aucune influence sur le contenu de ces sites web liés directement ou indirectement. Par conséquent, we ne pouvons pas garantir l'exactitude du contenu des \"liens externes\". Ce sont les fournisseurs ou exploitants (auteurs) respectifs des pages liées qui sont responsables de leur contenu.\n\nLes liens externes ont été vérifiés au moment de leur création afin de détecter d'éventuelles violations de la loi et ne présentaient aucun contenu illégal à ce moment-là. Un contrôle permanent du contenu des liens externes n'est pas possible sans indices concrets d'une violation du droit. En cas de liens directs ou indirects vers des pages web tierces se trouvant en dehors de notre domaine de responsabilité, une obligation de responsabilité n'existerait que dans le cas où nous aurions connaissance des contenus et qu'il nous serait techniquement possible et raisonnable d'en empêcher l'utilisation en cas de contenus illégaux.\n\nCette déclaration d'exclusion de responsabilité s'applique également aux liens et renvois posés sur notre propre site Internet \"www.myswissmove.ch\" par des personnes posant des questions, des entrées de blog, des invités du forum de discussion. Pour les contenus illégaux, erronés ou incomplets et en particulier pour les dommages résultant de l'utilisation ou de la non-utilisation de ces informations, seul le prestataire de services de la page à laquelle il a été renvoyé est responsable, et non celui qui ne fait que renvoyer à la publication correspondante par le biais de liens. Si nous avons connaissance de violations de la loi, nous supprimerons immédiatement les liens externes."
+    },
+    "copyright": {
+      "title": "Droit d'auteur",
+      "content": "Les contenus et œuvres publiés sur notre site web sont soumis au droit d'auteur allemand (http://www.gesetze-im-internet.de/bundesrecht/urhg/gesamt.pdf). La reproduction, la modification, la distribution et tout type d'exploitation de la propriété intellectuelle d'un point de vue idéel et matériel en dehors des limites du droit d'auteur nécessitent l'accord écrit préalable de l'auteur respectif au sens de la loi sur le droit d'auteur (http://www.gesetze-im-internet.de/bundesrecht/urhg/gesamt.pdf). Les téléchargements et les copies de cette page ne sont autorisés que pour un usage privé et non commercial. Si les contenus de notre site web n'ont pas été créés par nous, les droits d'auteur de tiers doivent être respectés. Les contenus de tiers sont signalés comme tels. Si vous remarquez malgré tout une violation du droit d'auteur, nous vous prions de nous en informer. En cas de violation de la loi, nous supprimerons immédiatement de tels contenus."
+    }
+  },
+  "Gtc": {
+    "title": "Conditions Générales de Vente (CGV) de Mehrwerk Schweiz AG pour myswissmove.ch",
+    "sections": [
+      {
+        "title": "1. Champ d'application",
+        "content": "Les présentes Conditions Générales de Vente (« CGV ») régissent l'utilisation de la plateforme en ligne exploitée par Mehrwerk Schweiz AG (« le Fournisseur ») pour la mise à disposition de modèles de documents numériques."
+      },
+      {
+        "title": "2. Fournisseur",
+        "content": "Mehrwerk Schweiz AG\nWohler Str. 51a, CH-5605 Dottikon\nE-Mail: hello@myswissmove.ch | Site Internet: www.myswissmove.ch"
+      },
+      {
+        "title": "3. Enregistrement et conclusion du contrat",
+        "content": "L'utilisation de la plateforme nécessite une inscription. À l'issue de l'inscription, un contrat d'utilisation gratuit est conclu conformément au Code des obligations (CO) suisse. L'utilisateur confirme que :\n\n• il/elle est âgé(e) d'au moins 18 ans\n\n• toutes les informations fournies sont exactes et complètes\n\nLe Fournisseur se réserve le droit de refuser les inscriptions sans donner de motifs."
+      },
+      {
+        "title": "4. Étendue des prestations",
+        "content": "Le Fournisseur met à la disposition des utilisateurs inscrits des modèles de documents gratuits à télécharger.\n\nLes modèles sont fournis à titre d'information uniquement et ne constituent pas un conseil juridique. Aucune garantie n'est donnée quant à :\n\n• l'exactitude\n\n• l'exhaustivité\n\n• l'actualité\n\n• l'adéquation à un usage particulier"
+      },
+      {
+        "title": "4.5 Caractère non contraignant des modèles",
+        "content": "Les modèles de documents fournis par le Fournisseur ne prétendent pas à la validité juridique, à l'exhaustivité ou à l'applicabilité dans des cas individuels. L'utilisation des modèles se fait aux risques et périls de l'utilisateur. Il est de la seule responsabilité de l'utilisateur de vérifier le contenu pour :\n\n• l'admissibilité juridique\n\n• l'exhaustivité\n\n• ainsi que l'adéquation au cas d'application concret\n\net, si nécessaire, de le faire examiner par des professionnels qualifiés (par exemple, des avocats). Le Fournisseur n'assume aucune responsabilité à cet égard."
+      },
+      {
+        "title": "5. Droits d'utilisation",
+        "content": "Tous les contenus sont protégés par le droit d'auteur. L'utilisateur reçoit un droit d'utilisation :\n\n• simple\n\n• non exclusif\n\n• non transférable\n\nAutorisé :\n\n• Téléchargement et stockage\n\n• Utilisation pour ses propres besoins privés ou internes à l'entreprise\n\n• Adaptation des contenus\n\nInterdit :\n\n• utilisation commerciale\n\n• revente ou distribution\n\n• publication (p. ex. sites Web, plateformes)\n\n• reproduction au-delà de l'usage personnel"
+      },
+      {
+        "title": "6. Disponibilité",
+        "content": "Le Fournisseur ne garantit pas la disponibilité ininterrompue de la plateforme. Des maintenances et des dérangements techniques peuvent survenir."
+      },
+      {
+        "title": "7. Obligations de l'utilisateur",
+        "content": "L'utilisateur s'engage :\n\n• à ne pas faire d'utilisation illicite\n\n• à ne pas porter atteinte aux droits de tiers\n\n• à ne pas contourner les mécanismes de sécurité"
+      },
+      {
+        "title": "8. Protection des données",
+        "content": "Le traitement des données s'effectue conformément à la loi suisse sur la protection des données (LPD). De plus amples informations figurent dans la déclaration de protection des données."
+      },
+      {
+        "title": "9. Responsabilité",
+        "content": "Le Fournisseur n'est responsable que des dommages résultant d'un acte intentionnel ou d'une négligence grave. Dans la mesure où la loi le permet, toute responsabilité est exclue pour :\n\n• les dommages indirects\n\n• les dommages consécutifs\n\n• le manque à gagner"
+      },
+      {
+        "title": "10. Modifications",
+        "content": "Le Fournisseur peut modifier les présentes CGV à tout moment. Les modifications sont considérées comme acceptées si aucune objection n'est formulée dans les 30 jours."
+      },
+      {
+        "title": "11. Durée du contrat",
+        "content": "Le contrat est conclu pour une durée indéterminée et peut être résilié à tout moment."
+      },
+      {
+        "title": "12. Droit applicable",
+        "content": "Le droit suisse est applicable. Le for juridique est le siège du Fournisseur."
+      },
+      {
+        "title": "13. Clause salvatrice",
+        "content": "Si certaines dispositions étaient inefficaces, le reste demeure valable.\n\n(État : 05.04.2026)"
+      }
+    ]
+  },
+  "Privacy": {
+    "title": "Déclaration de protection des données myswissmove.ch",
+    "sections": [
+      {
+        "title": "§ 1 Informations sur la collecte de données à caractère personnel",
+        "content": "(1) Dans cette déclaration de protection des données, nous vous informons de la collecte de données à caractère personnel lors de l'utilisation de nos services. Les données à caractère personnel sont toutes les données qui peuvent vous être rapportées personnellement, par exemple le nom, l'adresse, les adresses e-mail et le comportement de l'utilisateur.\n\n(2) Le responsable conformément à l'art. 4, al. 7 du règlement général sur la protection des données de l'UE (RGPD) est Mehrwerk Schweiz AG, Wohler Str. 51, CH-5605 Dottikon, E-mail : hello@myswissmove.ch.\n\n(3) Lors de votre prise de contact avec nous par e-mail ou via un formulaire de contact, les données que vous nous communiquez (votre adresse e-mail, éventuellement votre nom et votre numéro de téléphone) sont enregistrées par nos soins afin de répondre à vos questions. Nous supprimons les données générées dans ce contexte dès que leur conservation n'est plus nécessaire, ou nous en limitons le traitement si des obligations légales de conservation existent. La base juridique de la collecte est votre intérêt légitime à obtenir une réponse à votre demande conformément à l'art. 6, let. f. du RGPD.\n\n(4) Si nous faisons appel à des prestataires de services mandatés pour certaines fonctions de notre offre ou si nous souhaitons utiliser vos données à des fins publicitaires, nous vous informerons en détail sur les processus respectifs. Nous y indiquerons également les critères définis pour la durée de conservation."
+      },
+      {
+        "title": "§ 2 Vos droits",
+        "content": "(1) Vous disposez des droits suivants à notre égard concernant les données à caractère personnel vous concernant :\n\n• Droit à l'information\n\n• Droit de rectification ou de suppression\n\n• Droit à la limitation du traitement\n\n• Droit d'opposition au traitement\n\n• Droit à la portabilité des données\n\n(2) Vous avez également le droit de déposer une plainte auprès d'une autorité de contrôle de la protection des données concernant le traitement de vos données à caractère personnel par nos soins."
+      },
+      {
+        "title": "§ 3 Collecte de données à caractère personnel lors de la visite de notre site web",
+        "content": "(1) En cas d'utilisation du site web à des fins purement informatives, c'est-à-dire si vous ne vous inscrivez pas ou ne nous communiquez pas d'informations d'une autre manière, nous ne collectons que les données à caractère personnel que votre navigateur transmet à notre serveur.\n\nSi vous souhaitez consulter notre site web, nous collectons les données suivantes, qui nous sont techniquement nécessaires pour vous afficher notre site web et pour garantir la stabilité et la sécurité (la base juridique est l'art. 6, al. 1, p. 1, let. f du RGPD) :\n\n• Adresse IP\n\n• Date et heure de la demande\n\n• Différence de fuseau horaire avec le temps moyen de Greenwich (GMT)\n\n• Contenu de la demande (page concrète)\n\n• Statut d'accès/code de statut HTTP\n\n• Quantité de données transmises à chaque fois\n\n• Site web d'où provient la demande\n\n• Navigateur\n\n• Système d'exploitation et son interface\n\n• Langue et version du logiciel du navigateur."
+      },
+      {
+        "title": "§ 4 Newsletter",
+        "content": "(1) Avec votre consentement, vous pouvez vous abonner à notre newsletter, par laquelle nous vous informons à intervalles réguliers de nos nouvelles offres ou de celles de nos partenaires.\n\n(2) Pour l'inscription à notre newsletter ainsi que pour l'inscription à l'utilisation de nos services, nous utilisons la procédure dite de double opt-in. Cela signifie qu'après votre inscription, nous vous envoyons un e-mail à l'adresse e-mail indiquée, dans lequel nous vous demandons de confirmer que vous souhaitez recevoir la newsletter ou d'autres informations de notre part ou de tiers coopérant avec nous. Si vous ne confirmez pas votre inscription dans les 24 heures, vos informations seront bloquées et supprimées automatiquement après un mois. En outre, nous enregistrons à chaque fois vos adresses IP utilisées et les moments de l'inscription et de la confirmation. Le but de la procédure est de pouvoir prouver votre inscription et, le cas échéant, de pouvoir élucider une éventuelle utilisation abusive de vos données personnelles.\n\n(3) L'adresse e-mail est la seule information obligatoire pour l'envoi de la newsletter. La communication d'autres données marquées séparément est facultative et sert à pouvoir vous adresser personnellement. Après votre confirmation, nous enregistrons votre adresse e-mail dans le but de vous envoyer la newsletter. La base juridique est l'art. 6, al. 1, p. 1, let. a du RGPD.\n\n(4) Vous pouvez révoquer votre consentement à l'envoi de la newsletter à tout moment et vous désabonner de la newsletter. Vous pouvez déclarer la révocation en cliquant sur le lien fourni dans chaque e-mail de newsletter, via le formulaire du site web ou par e-mail à hello@myswissmove.ch."
+      },
+      {
+        "title": "§ 5 Utilisation des Google Web Fonts",
+        "content": "Cette page utilise des polices de caractères dites Web Fonts fournies par Google LLC., 1600 Amphitheatre Parkway, Mountain View, CA 94043, États-Unis (« Google ») pour une présentation uniforme des polices. Lors de l'appel d'une page, votre navigateur charge les Web Fonts nécessaires dans son cache afin d'afficher correctement les textes et les polices.\n\nÀ cette fin, le navigateur que vous utilisez doit se connecter aux serveurs de Google. Google apprend ainsi que notre site web a été consulté via votre adresse IP. L'utilisation de Google Web Fonts se fait dans l'intérêt d'une présentation uniforme et attrayante de nos offres en ligne. Cela constitue un intérêt légitime au sens de l'art. 6, al. 1, let. f du RGPD. Si votre navigateur ne supporte pas les Web Fonts, une police standard de votre ordinateur sera utilisée.\n\nGoogle LLC, dont le siège est aux États-Unis, est certifié pour l'accord de protection des données américano-européen « Privacy Shield », qui garantit le respect du niveau de protection des données applicable dans l'UE. Vous trouverez de plus amples informations sur les Google Web Fonts à l'adresse https://developers.google.com/fonts/faq et dans la déclaration de protection des données de Google : https://www.google.com/policies/privacy/"
+      },
+      {
+        "title": "§ 6 Transfert de données à des partenaires",
+        "content": "Si vous venez chez nous via un partenaire, nous pouvons, dans certaines circonstances, vous attribuer à ce partenaire. Cela peut se faire par le lien vers nous avec des codes spéciaux de la part du partenaire. Si vous venez chez nous via un tel lien attribuable au partenaire, un cookie est placé, ce qui permet d'attribuer votre commande au partenaire.\n\nLes cookies sont de petits fichiers texte qui sont enregistrés localement dans la mémoire cache du navigateur Internet du visiteur du site. Les cookies permettent la reconnaissance du navigateur Internet.\n\nSi un accord de commission correspondant existe avec le partenaire, nous transmettons des données pseudonymisées pour l'évaluation des commissions sur les forfaits réservés et le statut du contrat. La base juridique de ce traitement de données est l'intérêt légitime conformément à l'art. 6, al. 1, let. f du RGPD."
+      },
+      {
+        "title": "§ 7 Durée de conservation de vos données",
+        "content": "La durée de conservation des données à caractère personnel est mesurée en fonction du délai de conservation légal respectif (par exemple, les délais de conservation prévus par le droit commercial et fiscal). À l'expiration de ce délai, les données correspondantes sont systématiquement supprimées, à moins qu'elles ne soient plus nécessaires à l'exécution ou à la préparation du contrat et/ou qu'il n'existe plus d'intérêt légitime de notre part à les conserver davantage.\n\n(État : 5 avril 2026)"
+      }
+    ]
+  },
+  "DateTimeInput": {
+    "confirm": "Confirmer",
+    "time": "Heure"
+  }
+}

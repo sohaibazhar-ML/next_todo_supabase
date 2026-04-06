@@ -71,28 +71,33 @@ model download_logs {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model profiles {
-  id                      String                @id @db.Uuid
-  username                String                @unique
+  id                      String                   @id @db.Uuid
+  username                String?
   first_name              String
   last_name               String
   current_address         String
   country_of_origin       String
-  email                   String
-  phone_number            String
-  number_of_adults        Int                   @default(1)
-  number_of_children      Int                   @default(0)
+  email                   String                   @unique
+  phone_number            String?
+  number_of_adults        Int                      @default(1)
+  number_of_children      Int                      @default(0)
   pets_type               String?
   new_address_switzerland String
-  marketing_consent       Boolean               @default(false)
-  terms_accepted          Boolean               @default(false)
-  data_privacy_accepted   Boolean               @default(false)
-  email_confirmed         Boolean               @default(false)
-  email_confirmed_at      DateTime?             @db.Timestamptz(6)
-  role                    String                @default("user")
-  created_at              DateTime              @default(now()) @db.Timestamptz(6)
-  updated_at              DateTime              @default(now()) @db.Timestamptz(6)
-  keep_me_logged_in       Boolean               @default(true)
+  marketing_consent       Boolean                  @default(false)
+  terms_accepted          Boolean                  @default(false)
+  data_privacy_accepted   Boolean                  @default(false)
+  email_confirmed         Boolean                  @default(false)
+  email_confirmed_at      DateTime?                @db.Timestamptz(6)
+  role                    String                   @default("user")
+  created_at              DateTime                 @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime                 @default(now()) @db.Timestamptz(6)
+  keep_me_logged_in       Boolean                  @default(true)
+  gender                  String?
+  preferred_call_time     String?
+  total_persons           Int                      @default(1)
+  has_pets                Boolean                  @default(false)
   download_logs           download_logs[]
+  user_document_versions  user_document_versions[]
 
   @@index([email], map: "idx_profiles_email")
   @@index([role], map: "idx_profiles_role")
@@ -121,6 +126,7 @@ model user_document_versions {
   google_drive_file_id String?
   google_edit_link     String?
   documents            documents @relation(fields: [original_document_id], references: [id], onDelete: Cascade)
+  profiles             profiles  @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([original_document_id, user_id, version_number])
   @@index([user_id])

@@ -1,19 +1,21 @@
-import { Header, Hero, Footer } from '@/website/organisms';
+import { Header, Hero, HowItWorks, MyDocuments, DocumentsOverview, Footer } from '@/website/organisms';
+import { TrustBar } from '@/website/molecules';
+import { Text } from '@/website/atoms';
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-[2330px] bg-background-neutral flex flex-col items-center">
       <Header />
-      <Hero />
-      <div className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Experience Excellence</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Our commitment to quality ensures that every aspect of your Swiss move is handled with precision.
-          </p>
-        </div>
+
+      {/* Landing Page Content */}
+      <div className="w-full flex flex-col items-center pt-[100px]">
+        <Hero />
+        <TrustBar />
+        <HowItWorks />
+        <MyDocuments />
+        <DocumentsOverview />
+        <Footer />
       </div>
-      <Footer />
     </main>
   )
 }
