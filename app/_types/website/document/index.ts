@@ -3,7 +3,7 @@ export type DocumentFileType = 'PDF' | 'DOCX' | 'XLSX' | 'ZIP'
 export interface DocumentItem {
   id: string;
   name: string;
-  type: 'pdf' | 'doc';
+  type: 'pdf' | 'doc' | 'xls' | 'zip' | 'other';
   size: string;
   url: string;
 }
