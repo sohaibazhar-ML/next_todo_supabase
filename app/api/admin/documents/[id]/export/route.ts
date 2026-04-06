@@ -38,13 +38,12 @@ type CheerioElement = Element | Text
 /**
  * Type for cheerio DOM element (cheerio's internal Element type)
  */
-type CheerioDomElement = cheerio.Element
+type CheerioDomElement = any
 
 /**
  * Type for cheerio selection (jQuery-like wrapper)
- * Using cheerio's Cheerio type alias without generics for compatibility.
  */
-type CheerioSelection = cheerio.Cheerio
+type CheerioSelection = any
 
 /**
  * Type for TextRun options (extends IRunOptions from docx)
@@ -159,10 +158,10 @@ function htmlToDocx(html: string): Paragraph[] {
   const paragraphs: Paragraph[] = []
 
   // Process body content
-  const body = $('body').length > 0 ? $('body') : $.root()
+  const body = ($('body').length > 0 ? $('body') : $.root()) as any
 
-  body.contents().each((_, element) => {
-    const node = element as unknown as AnyNode
+  body.contents().each((_: any, element: any) => {
+    const node = element as AnyNode
     if (node.type === 'text') {
       const text = $(node).text().trim()
       if (text) {
@@ -580,7 +579,7 @@ export async function POST(
           let y = pageHeight - margin
           let page = pdfDoc.addPage([pageWidth, pageHeight])
 
-          const lines = pdfTextContent.split('\n')
+          const lines: string[] = pdfTextContent.split('\n')
 
           // Handle empty content
           if (!lines || lines.length === 0 || lines.every(line => !line.trim())) {
@@ -591,7 +590,7 @@ export async function POST(
               font: font,
             })
           } else {
-            for (const line of lines) {
+            for (const line of lines as string[]) {
               if (y < margin) {
                 page = pdfDoc.addPage([pageWidth, pageHeight])
                 y = pageHeight - margin

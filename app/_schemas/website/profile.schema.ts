@@ -44,14 +44,12 @@ export const baseProfileSchema = z.object({
   number_of_adults: z
     .number()
     .int('Number of adults must be a whole number')
-    .min(1, 'Number of adults must be at least 1')
-    .default(DEFAULT_VALUES.NUMBER_OF_ADULTS),
+    .min(1, 'Number of adults must be at least 1'),
   
   number_of_children: z
     .number()
     .int('Number of children must be a whole number')
-    .min(0, 'Number of children cannot be negative')
-    .default(DEFAULT_VALUES.NUMBER_OF_CHILDREN),
+    .min(0, 'Number of children cannot be negative'),
   
   pets_type: z
     .string()
@@ -60,8 +58,7 @@ export const baseProfileSchema = z.object({
     .optional(),
   
   marketing_consent: z
-    .boolean()
-    .default(false),
+    .boolean(),
   
   terms_accepted: z
     .boolean()

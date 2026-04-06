@@ -16,6 +16,7 @@ import {
   type CreateProfileFormData,
   type EditProfileFormData,
   type PasswordChangeFormData,
+  type ProfileFormData,
 } from '@/website/types';
 import {
   createProfileSchema,
@@ -64,7 +65,7 @@ export function useProfileForm({
   // Use appropriate schema based on create/edit mode
   const schema = isCreating ? createProfileSchema : editProfileSchema
 
-  const form = useForm<CreateProfileFormData | EditProfileFormData>({
+  const form = useForm<ProfileFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       first_name: defaultValues?.first_name || '',
