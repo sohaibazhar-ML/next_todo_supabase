@@ -1,9 +1,9 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Download } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { Image, Text } from '@/website/atoms';
+import { Image, Text, Button } from '@/website/atoms';
 import { DocumentRowProps } from '@/website/molecules/DocumentRow/DocumentRow.types';
 
 export const DocumentRow: React.FC<DocumentRowProps> = ({
@@ -12,10 +12,44 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({
   className = ''
 }) => {
   const t = useTranslations('Dashboard.list');
+  const [isDownloading, setIsDownloading] = useState(false);
 
-  const iconSrc = document.type === 'pdf'
-    ? '/assets/website/dashboard/pdf.png'
-    : '/assets/website/dashboard/word.png';
+  const getIconSrc = (type: string) => {
+    switch (type) {
+      case 'pdf': return '/assets/website/dashboard/pdf.png';
+      case 'doc': return '/assets/website/dashboard/word.png';
+      case 'xls': return '/assets/website/dashboard/excel.png';
+      case 'zip': return '/assets/website/dashboard/zip.jpg';
+      default: return '/assets/website/dashboard/file.jpg';
+    }
+  };
+
+  const iconSrc = getIconSrc(document.type);
+  const handleDownload = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDownloading(true);
+    try {
+      const response = await fetch(`/api/website/documents/${document.id}/download-url`);
+      const data = await response.json();
+      
+      if (data.signedUrl) {
+        // Create a temporary link to trigger the download
+        const link = window.document.createElement('a');
+        link.href = data.signedUrl;
+        link.setAttribute('download', document.name);
+        window.document.body.appendChild(link);
+        link.click();
+        link.remove();
+      } else {
+        alert(t('download_error') || 'Error downloading file');
+      }
+    } catch (err) {
+      console.error('Download error:', err);
+      alert(t('download_error') || 'Error downloading file');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   return (
     <div className={`w-full flex items-center h-[34px] px-4 transition-colors hover:bg-black/5 bg-white border border-secondary/5 rounded-[4px] mb-1 ${className}`}>
@@ -24,9 +58,10 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({
         <Image
           src={iconSrc}
           alt={document.type}
-          width={14}
-          height={14}
-          className="object-contain h-auto"
+          width={24}
+          height={24}
+          style={{ width: 'auto', height: 'auto' }}
+          className="object-contain"
         />
       </div>
 
@@ -53,16 +88,17 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({
       </div>
 
       {/* Download Action */}
-      <a
-        href={document.url}
-        download
-        className="flex items-center gap-2 md:gap-3 text-secondary transition-opacity hover:opacity-70 ml-2 md:ml-4 group flex-shrink-0"
+      <Button
+        variant="unstyled"
+        isLoading={isDownloading}
+        onClick={handleDownload}
+        className="flex items-center gap-2 md:gap-3 text-secondary transition-opacity hover:opacity-70 ml-2 md:ml-4 group flex-shrink-0 cursor-pointer"
       >
         <Text variant="text-xxs" className="font-bold hidden md:block">
           {t('download')}
         </Text>
         <Download size={16} className="text-secondary group-hover:text-secondary" />
-      </a>
+      </Button>
     </div>
   );
 };
