@@ -29,21 +29,32 @@ export const DashboardPagination: React.FC<DashboardPaginationProps> = ({
       </Button>
 
       {/* Pages */}
-      <div className="flex items-center gap-1.5 sm:gap-3">
-        {pages.map((page) => (
-          <Button
-            key={page}
-            variant="ghost"
-            size="sm"
-            onClick={() => onPageChange(page)}
-            className={`transition-all flex items-center justify-center h-6 min-w-[20px] rounded-none p-0 ${currentPage === page
-              ? 'text-secondary border-b-2 border-secondary font-bold'
-              : 'text-secondary/60 hover:text-secondary'
-              }`}
-          >
-            {page}
-          </Button>
-        ))}
+      <div className="flex items-center gap-1.5 sm:gap-3 px-2 overflow-x-auto no-scrollbar">
+        {pages.filter(page => {
+          if (totalPages <= 5) return true;
+          return page === 1 || 
+                 page === totalPages || 
+                 (page >= currentPage - 1 && page <= currentPage + 1);
+        }).map((page, idx, filtered) => {
+          const showEllipsisBefore = page > 1 && idx > 0 && page !== filtered[idx-1] + 1;
+          
+          return (
+            <React.Fragment key={page}>
+              {showEllipsisBefore && <span className="text-secondary/30">...</span>}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onPageChange(page)}
+                className={`transition-all flex items-center justify-center h-6 min-w-[20px] rounded-none p-0 ${currentPage === page
+                  ? 'text-secondary border-b-2 border-secondary font-bold'
+                  : 'text-secondary/60 hover:text-secondary'
+                  }`}
+              >
+                {page}
+              </Button>
+            </React.Fragment>
+          );
+        })}
       </div>
 
       {/* Next */}

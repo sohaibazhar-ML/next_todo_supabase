@@ -15,7 +15,8 @@ import { useDebounce } from '@/app/_hooks/website/useDebounce';
 
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   className = '',
-  activeTab = 'documents'
+  activeTab = 'documents',
+  isAccountPage = false
 }) => {
   const t = useTranslations('Dashboard.header');
   const router = useRouter();
@@ -65,12 +66,12 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     <header className={`w-full flex flex-col ${className}`}>
       {/* Top Tier: White background with Logo and Banner */}
       <div className="w-full bg-white flex justify-center py-4 lg:py-0 h-auto lg:h-[120px]">
-        <div className="max-w-(--container-width-desktop) w-full px-(--spacing-container-padding) flex items-center justify-between h-full">
+        <div className="max-w-7xl w-full px-4 sm:px-6 lg:px-10 flex items-center justify-between lg:h-full">
           {/* Logo */}
           <Link href="/">
             <Logo
               variant="primary"
-              className="w-[150px] h-[37px] sm:w-[180px] h-[45px] lg:w-[260px] lg:h-[65px]"
+              className="w-[120px] h-[30px] sm:w-[150px] sm:h-[37px] lg:w-[260px] lg:h-[65px]"
             />
           </Link>
 
@@ -94,7 +95,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           </div>
 
           {/* Banner Image (Right Aligned) - Desktop Only */}
-          <div className="hidden lg:block relative h-full w-[400px]">
+          <div className="hidden lg:block relative h-[120px] w-[400px]">
             <Image
               src="/assets/website/dashboard/dashboard-header-right.png"
               alt="Dashboard Banner"
@@ -108,54 +109,89 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       </div>
 
       {/* Bottom Tier: Nav Bar */}
-      <div className="w-full bg-background-nav flex justify-center h-[50px] lg:h-[60px]">
-        <div className="max-w-(--container-width-desktop) w-full px-(--spacing-container-padding) flex items-center justify-between gap-4">
+      <div className="w-full bg-background-nav flex justify-center h-auto min-h-[50px] lg:min-h-[60px]">
+        <div className="max-w-7xl w-full px-4 sm:px-6 lg:px-10 flex items-center justify-between gap-4">
           {/* Left: Nav Tabs - Scrollable on mobile */}
           <nav className="flex items-center h-full gap-4 lg:gap-8 overflow-x-auto no-scrollbar whitespace-nowrap">
-            <Link
-              href="/account"
-              className={`text-white transition-opacity hover:opacity-100 h-full flex items-center border-b-2 transition-all ${activeTab === 'account' ? 'border-primary opacity-100' : 'border-transparent opacity-70'}`}
-            >
-              <Text variant="text-xxs" className="font-semibold uppercase tracking-wider">
-                {t('account')}
-              </Text>
-            </Link>
-            <Link
-              href="/dashboard"
-              className={`text-white transition-opacity hover:opacity-100 h-full flex items-center border-b-2 transition-all ${activeTab === 'documents' ? 'border-primary opacity-100' : 'border-transparent opacity-70'}`}
-            >
-              <Text variant="text-xxs" className="font-semibold uppercase tracking-wider">
-                {t('documents')}
-              </Text>
-            </Link>
+            {!isAccountPage ? (
+              <>
+                <Link
+                  href="/account"
+                  className={`text-white transition-opacity hover:opacity-100 h-full flex items-center border-b-2 transition-all ${activeTab === 'account' ? 'border-primary opacity-100' : 'border-transparent opacity-70'}`}
+                >
+                  <Text variant="text-xxs" className="font-semibold uppercase tracking-wider">
+                    {t('account')}
+                  </Text>
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className={`text-white transition-opacity hover:opacity-100 h-full flex items-center border-b-2 transition-all ${activeTab === 'documents' ? 'border-primary opacity-100' : 'border-transparent opacity-70'}`}
+                >
+                  <Text variant="text-xxs" className="font-semibold uppercase tracking-wider">
+                    {t('documents')}
+                  </Text>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/account"
+                  className={`text-white transition-opacity hover:opacity-100 h-full flex items-center border-b-2 transition-all ${activeTab === 'profile' ? 'border-primary opacity-100' : 'border-transparent opacity-70'}`}
+                >
+                  <Text variant="text-xxs" className="font-semibold uppercase tracking-wider">
+                    {t('profile')}
+                  </Text>
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className={`text-white transition-opacity hover:opacity-100 h-full flex items-center border-b-2 transition-all ${activeTab === 'dashboard' ? 'border-primary opacity-100' : 'border-transparent opacity-70'}`}
+                >
+                  <Text variant="text-xxs" className="font-semibold uppercase tracking-wider">
+                    {t('dashboardNav')}
+                  </Text>
+                </Link>
+                <Link
+                  href="/account/settings"
+                  className={`text-white transition-opacity hover:opacity-100 h-full flex items-center border-b-2 transition-all ${activeTab === 'settings' ? 'border-primary opacity-100' : 'border-transparent opacity-70'}`}
+                >
+                  <Text variant="text-xxs" className="font-semibold uppercase tracking-wider">
+                    {t('settings')}
+                  </Text>
+                </Link>
+              </>
+            )}
           </nav>
 
           {/* Right: Search and Logout/Lang (Desktop Only Logout/Lang) */}
           <div className="flex items-center gap-3 lg:gap-10 ml-auto">
-            {/* Search Bar - Desktop */}
-            <div className="hidden md:block">
-              <Input
-                id="search-desktop"
-                inputSize="sm"
-                type='search'
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                placeholder={t('searchPlaceholder')}
-                rightIcon={Search}
-                className="w-[180px] lg:w-[320px]"
-              />
-            </div>
+            {!isAccountPage && (
+              <>
+                {/* Search Bar - Desktop */}
+                <div className="hidden md:block">
+                  <Input
+                    id="search-desktop"
+                    inputSize="sm"
+                    type='search'
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
+                    placeholder={t('searchPlaceholder')}
+                    rightIcon={Search}
+                    className="w-[180px] lg:w-[320px]"
+                  />
+                </div>
 
-            {/* Search Trigger - Mobile */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleSearch}
-              className="md:hidden text-white p-2 h-auto hover:bg-white/10"
-              aria-label="Toggle search"
-            >
-              <Search size={22} />
-            </Button>
+                {/* Search Trigger - Mobile */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleSearch}
+                  className="md:hidden text-white p-2 h-auto hover:bg-white/10"
+                  aria-label="Toggle search"
+                >
+                  <Search size={22} />
+                </Button>
+              </>
+            )}
 
             {/* Actions Tier (Desktop Only) */}
             <div className="hidden md:flex items-center gap-4 lg:gap-10">

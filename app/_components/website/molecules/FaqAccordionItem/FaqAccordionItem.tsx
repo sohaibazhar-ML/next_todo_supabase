@@ -40,11 +40,11 @@ export const FaqAccordionItem: React.FC<FaqAccordionItemProps> = ({
       <div className={`absolute transition-all duration-300 ${isOpen ? 'top-4 right-4 rotate-270' : 'bottom-4 right-4'
         }`}>
         <Image
-          src="/assets/website/icons/grey-down-arrow-icon.png"
+          src="/assets/website/icons/black-down-arrow-icon.png"
           alt="Toggle"
           width={16}
           height={16}
-          className="w-3 h-auto object-contain opacity-60"
+          className="w-3 h-auto object-contain opacity-100"
         />
       </div>
     </Button>

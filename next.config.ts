@@ -5,6 +5,21 @@ const withNextIntl = createNextIntlPlugin('./app/_i18n/request.ts');
 
 const nextConfig: NextConfig = {
   /* config options here */
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'mlesabvweritzyjvswcg.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      },
+    ],
+  },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '5mb',
+    },
+  },
   // Ensure .mjs files are served with correct MIME type
   async headers() {
     return [

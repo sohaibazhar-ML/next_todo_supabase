@@ -61,8 +61,8 @@ export default async function DashboardPage(props: PageProps) {
 
       {/* Main Content Area */}
       <section className="flex-1 w-full flex justify-center pt-10 pb-24 bg-background-secondary mb-50">
-        <div className="max-w-(--container-width-desktop) w-full px-(--spacing-container-padding) grid grid-cols-12 gap-x-(--spacing-gutter)">
-          <div className="col-span-12">
+        <div className="max-w-7xl w-full px-4 sm:px-6 lg:px-10 flex flex-col items-center">
+          <div className="w-full">
             <DocumentList 
               documents={documents} 
               totalPages={totalPages}

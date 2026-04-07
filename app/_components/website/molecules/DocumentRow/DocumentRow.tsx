@@ -52,7 +52,7 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({
   };
 
   return (
-    <div className={`w-full flex items-center h-[34px] px-4 transition-colors hover:bg-black/5 bg-white border border-secondary/5 rounded-[4px] mb-1 ${className}`}>
+    <div className={`w-full flex items-center h-[40px] md:h-auto md:min-h-[48px] px-3 md:px-4 transition-colors hover:bg-black/5 bg-white border border-secondary/5 rounded-[4px] mb-1 ${className}`}>
       {/* Icon */}
       <div className="flex-shrink-0 w-6 md:w-8 h-6 md:h-8 flex items-center justify-center">
         <Image
@@ -66,12 +66,12 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({
       </div>
 
       {/* Separator */}
-      <div className="h-4 md:h-6 w-[1px] bg-secondary/10 mx-3 md:mx-6" />
+      <div className="h-4 md:h-6 w-[1px] bg-secondary/10 mx-2 md:mx-6 flex-shrink-0" />
 
       {/* Name with Marquee on Hover - Mobile Only */}
-      <div className="flex-1 min-w-0 overflow-hidden ml-2 md:ml-0">
+      <div className="flex-1 min-w-0 overflow-hidden">
         <div className="max-md:hover-marquee group/marquee flex items-center h-full">
-          <Text variant="text-xxs" className="text-secondary font-medium truncate md:whitespace-normal md:overflow-visible overflow-hidden transition-all duration-300">
+          <Text variant="text-xxs" className="text-secondary font-medium truncate md:whitespace-normal md:overflow-visible transition-all duration-300">
             {document.name}
           </Text>
         </div>

@@ -317,6 +317,9 @@
     "header": {
       "account": "Mon compte",
       "documents": "Mes documents",
+      "profile": "Profil",
+      "settings": "Paramètres",
+      "dashboardNav": "Tableau de bord",
       "searchPlaceholder": "Terme de recherche",
       "logout": "Déconnexion"
     },
@@ -325,7 +328,50 @@
       "pagination": {
         "prev": "retour",
         "next": "suivant"
+      },
+      "emptyState": "Aucun document trouvé"
+    },
+    "account": {
+      "breadcrumb": "Mon Compte / Profil",
+      "myNameLabel": "Mon Nom *",
+      "emailLabel": "E-mail *",
+      "myDocuments": "Mes Documents",
+      "settings": "Paramètres",
+      "profile": "Profil",
+      "contactDetails": "Coordonnées",
+      "currentAddress": "Adresse actuelle (Rue, CP, Ville)",
+      "country": "Pays",
+      "newAddressSwitzerland": "Nouvelle adresse en Suisse (Rue, CP, Ville)",
+      "phoneNumber": "Numéro de téléphone",
+      "breadcrumbs": {
+        "account": "Mon Compte",
+        "profile": "Profil"
+      },
+      "avatar": {
+        "success": "Photo de profil mise à jour!",
+        "tooLarge": "Le fichier est trop volumineux (max 5 Mo)",
+        "failed": "Échec du téléchargement"
       }
+    },
+    "settings": {
+      "breadcrumbs": {
+        "account": "Mon Compte",
+        "settings": "Paramètres"
+      },
+      "preferredLanguage": "Langue préférée",
+      "keepMeLoggedIn": "Rester connecté",
+      "securityPassword": "Changer le mot de passe",
+      "oldPassword": "Ancien mot de passe",
+      "newPassword": "Nouveau mot de passe",
+      "confirmNewPassword": "Confirmer le nouveau mot de passe",
+      "cancel": "Annuler",
+      "saveChanges": "Enregistrer les modifications",
+      "passwordChanged": "Mot de passe modifié avec succès",
+      "passwordMismatch": "Les nouveaux mots de passe ne correspondent pas",
+      "passwordTooShort": "Le mot de passe doit comporter au moins 8 caractères",
+      "passwordChangeFailed": "Échec de la modification du mot de passe",
+      "unexpectedError": "Une erreur inattendue s'est produite",
+      "helpFaq": "Aide ?"
     }
   },
   "Imprint": {

@@ -110,6 +110,7 @@ export async function registerAction(prevState: ActionState, formData: FormData)
         terms_accepted: true,
         data_privacy_accepted: true,
         role: 'user',
+        preferred_language: (data.locale as string) || 'de',
       }
     });
 
@@ -176,23 +177,42 @@ export async function loginAction(prevState: ActionState, formData: FormData): P
 
   try {
     const supabase = await createClient();
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data: { user }, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (error) {
-      return { errors: { form: error.message } };
+    if (error || !user) {
+      return { errors: { form: error?.message || 'Invalid email or password.' } };
     }
 
-    // Set persistence preference in a cookie for the middleware
+    // 2. Fetch user profile to get preferred language
+    const profile = await prisma.profiles.findUnique({
+      where: { id: user.id },
+      select: { preferred_language: true }
+    });
+
+    // 3. Set persistence preference and locale cookies for the middleware
     const cookieStore = await cookies();
-    cookieStore.set('keep_me_logged_in', keepMeLoggedIn.toString(), {
+    const cookieOptions = {
       path: '/',
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'lax' as const,
+    };
+
+    cookieStore.set('keep_me_logged_in', keepMeLoggedIn.toString(), {
+      ...cookieOptions,
       maxAge: 60 * 60 * 24 * 30, // 30 days
     });
+
+    if (profile?.preferred_language) {
+      const localeOptions = {
+        ...cookieOptions,
+        maxAge: 60 * 60 * 24 * 365, // 1 year
+      };
+      cookieStore.set('NEXT_LOCALE', profile.preferred_language, localeOptions);
+      cookieStore.set('user_locale', profile.preferred_language, localeOptions);
+    }
 
     // Success - redirect to dashboard
   } catch (err) {
@@ -203,9 +223,9 @@ export async function loginAction(prevState: ActionState, formData: FormData): P
     return { errors: { form: 'Invalid email or password.' } };
   }
 
-  // Get current locale for redirect
+  // Get preferred locale for redirect
   const cookieStore = await cookies();
-  const locale = cookieStore.get('NEXT_LOCALE')?.value || 'de';
+  const locale = cookieStore.get('user_locale')?.value || cookieStore.get('NEXT_LOCALE')?.value || 'de';
 
   redirect(`/${locale}/dashboard`);
 }

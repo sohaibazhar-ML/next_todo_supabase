@@ -176,6 +176,18 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Sync NEXT_LOCALE with the user's preferred language setting.
+  // The settings action writes 'user_locale' when the user changes language.
+  const userLocaleCookie = request.cookies.get('user_locale');
+  const nextLocaleCookie = request.cookies.get('NEXT_LOCALE');
+  if (userLocaleCookie?.value && userLocaleCookie.value !== nextLocaleCookie?.value) {
+    supabaseResponse.cookies.set('NEXT_LOCALE', userLocaleCookie.value, {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: 'lax',
+    });
+  }
+
   return supabaseResponse
 }
 

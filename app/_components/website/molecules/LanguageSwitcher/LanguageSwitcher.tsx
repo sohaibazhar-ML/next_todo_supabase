@@ -5,6 +5,8 @@ import { useLocale, useTranslations } from 'next-intl';
 import { usePathname, useRouter } from '@/i18n/routing';
 import { Image, Text, Button } from '@/website/atoms';
 import { useToggle } from '@/app/_hooks/website/useToggle';
+import { updateLanguageAction } from '@/app/_actions/website/settings.actions';
+import { updateProfileField } from '@/app/_actions/website/profile.actions';
 
 export interface LanguageSwitcherProps {
   customIcon?: string;
@@ -28,8 +30,17 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     { code: 'en', name: t('languages.en'), flag: '/assets/website/icons/uk.png' },
   ] as const;
 
-  const handleLanguageChange = (newLocale: string) => {
+  const handleLanguageChange = async (newLocale: string) => {
     close();
+    // 1. Update persistent cookies
+    await updateLanguageAction(newLocale);
+    // 2. Try to update DB if user is logged in (best effort)
+    try {
+      await updateProfileField('preferred_language', newLocale);
+    } catch (e) {
+      // Ignore if not logged in
+    }
+    // 3. Perform the redirect
     router.replace(pathname, { locale: newLocale as "en" | "de" | "fr" | "it" });
   };
 
@@ -40,15 +51,24 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
       <Button
         variant="unstyled"
         onClick={toggle}
-        className="flex items-center justify-center transition-opacity hover:opacity-80 p-0 h-auto border-none bg-transparent hover:bg-transparent shadow-none"
+        className="flex items-end gap-0 transition-opacity hover:opacity-80 p-0 h-auto border-none bg-transparent hover:bg-transparent shadow-none"
         aria-label="Select language"
       >
-        <div className="relative w-[32px] h-[32px] sm:w-[40px] sm:h-[40px]">
+        <div className="relative w-[28px] h-[28px] sm:w-[32px] sm:h-[32px] flex-shrink-0">
           <Image
-            src={customIcon || "/assets/website/icons/dropdown.png"}
-            alt="Language"
+            src={currentLang.flag}
+            alt={currentLang.name}
             fill
-            sizes="40px"
+            sizes="32px"
+            className="object-contain"
+          />
+        </div>
+        <div className="relative w-[11px] h-[11px] flex-shrink-0 ">
+          <Image
+            src="/assets/website/icons/black-down-arrow-icon.png"
+            alt="Dropdown"
+            fill
+            sizes="11px"
             className="object-contain"
           />
         </div>

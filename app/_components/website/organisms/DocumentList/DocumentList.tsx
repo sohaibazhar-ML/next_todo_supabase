@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import { useTranslations } from 'next-intl';
 import { DocumentRow, DashboardPagination } from '@/website/molecules';
 import { Text } from '@/website/atoms';
 import { DocumentListProps } from '@/website/organisms/DocumentList/DocumentList.types';
@@ -12,6 +12,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
   currentPage,
   className = '' 
 }) => {
+  const t = useTranslations('Dashboard.list');
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -48,7 +49,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
         {documents.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 bg-white rounded-lg border border-dashed border-secondary/20">
             <Text variant="text-s" className="text-secondary/50 font-medium">
-              No documents found
+              {t('emptyState')}
             </Text>
           </div>
         )}

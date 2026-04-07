@@ -16,3 +16,4 @@ export { Select } from '@/website/atoms/Select/Select';
 export type { SelectProps, SelectOption } from '@/website/atoms/Select/Select.types';
 export { Textarea } from '@/website/atoms/Textarea/Textarea';
 export type { TextareaProps } from '@/website/atoms/Textarea/Textarea.types';
+export { Switch } from '@/website/atoms/Switch/Switch';

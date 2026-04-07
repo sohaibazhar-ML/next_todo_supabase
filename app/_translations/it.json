@@ -317,6 +317,9 @@
     "header": {
       "account": "Il mio account",
       "documents": "I miei documenti",
+      "profile": "Profilo",
+      "settings": "Impostazioni",
+      "dashboardNav": "Dashboard",
       "searchPlaceholder": "Termine di ricerca",
       "logout": "Disconnetti"
     },
@@ -325,7 +328,50 @@
       "pagination": {
         "prev": "indietro",
         "next": "avanti"
+      },
+      "emptyState": "Nessun documento trovato"
+    },
+    "account": {
+      "breadcrumb": "Il mio account / Profilo",
+      "myNameLabel": "Il mio nome *",
+      "emailLabel": "E-mail *",
+      "myDocuments": "I miei documenti",
+      "settings": "Impostazioni",
+      "profile": "Profilo",
+      "contactDetails": "Dettagli di contatto",
+      "currentAddress": "Indirizzo attuale (Via, CAP, Città)",
+      "country": "Paese",
+      "newAddressSwitzerland": "Nuovo indirizzo in Svizzera (Via, CAP, Città)",
+      "phoneNumber": "Numero di telefono",
+      "breadcrumbs": {
+        "account": "Il mio account",
+        "profile": "Profilo"
+      },
+      "avatar": {
+        "success": "Immagine del profilo aggiornata!",
+        "tooLarge": "Il file è troppo grande (max 5 MB)",
+        "failed": "Caricamento fallito"
       }
+    },
+    "settings": {
+      "breadcrumbs": {
+        "account": "Il mio account",
+        "settings": "Impostazioni"
+      },
+      "preferredLanguage": "Lingua preferita",
+      "keepMeLoggedIn": "Rimani connesso",
+      "securityPassword": "Cambia password",
+      "oldPassword": "Vecchia password",
+      "newPassword": "Nuova password",
+      "confirmNewPassword": "Conferma nuova password",
+      "cancel": "Annulla",
+      "saveChanges": "Salva modifiche",
+      "passwordChanged": "Password modificata con successo",
+      "passwordMismatch": "Le nuove password non corrispondono",
+      "passwordTooShort": "La password deve contenere almeno 8 caratteri",
+      "passwordChangeFailed": "Impossibile modificare la password",
+      "unexpectedError": "Si è verificato un errore imprevisto",
+      "helpFaq": "Aiuto ?"
     }
   },
   "Imprint": {

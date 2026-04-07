@@ -317,6 +317,9 @@
     "header": {
       "account": "My Account",
       "documents": "My documents",
+      "profile": "Profile",
+      "settings": "Settings",
+      "dashboardNav": "Dashboard",
       "searchPlaceholder": "Search term",
       "logout": "Logout"
     },
@@ -325,7 +328,50 @@
       "pagination": {
         "prev": "back",
         "next": "next"
+      },
+      "emptyState": "No documents found"
+    },
+    "account": {
+      "breadcrumb": "My Account / Profile",
+      "myNameLabel": "My Name *",
+      "emailLabel": "Email *",
+      "myDocuments": "My Documents",
+      "settings": "Settings",
+      "profile": "Profile",
+      "contactDetails": "Contact Details",
+      "currentAddress": "Current Address (Street, ZIP, City)",
+      "country": "Country",
+      "newAddressSwitzerland": "New Address in Switzerland (Street, ZIP, City)",
+      "phoneNumber": "Phone Number",
+      "breadcrumbs": {
+        "account": "My Account",
+        "profile": "Profile"
+      },
+      "avatar": {
+        "success": "Profile picture updated!",
+        "tooLarge": "File is too large (max 5MB)",
+        "failed": "Upload failed"
       }
+    },
+    "settings": {
+      "breadcrumbs": {
+        "account": "My Account",
+        "settings": "Settings"
+      },
+      "preferredLanguage": "Preferred Language",
+      "keepMeLoggedIn": "Keep me logged in",
+      "securityPassword": "Change Password",
+      "oldPassword": "Old Password",
+      "newPassword": "New Password",
+      "confirmNewPassword": "Confirm New Password",
+      "cancel": "Cancel",
+      "saveChanges": "Save Changes",
+      "passwordChanged": "Password changed successfully",
+      "passwordMismatch": "New passwords do not match",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "passwordChangeFailed": "Failed to change password",
+      "unexpectedError": "An unexpected error occurred",
+      "helpFaq": "Help ?"
     }
   },
   "Imprint": {

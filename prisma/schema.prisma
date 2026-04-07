@@ -94,6 +94,8 @@ model profiles {
   preferred_call_time     String?
   total_persons           Int                      @default(1)
   has_pets                Boolean                  @default(false)
+  preferred_language      String                   @default("de")
+  avatar_url              String?
   download_logs           download_logs[]
   user_document_versions  user_document_versions[]
 

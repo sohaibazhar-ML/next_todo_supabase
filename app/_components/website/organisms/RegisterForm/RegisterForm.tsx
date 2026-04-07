@@ -1,6 +1,6 @@
 "use client";
 import React, { useActionState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Text, Button, Input, Select, Checkbox, SelectOption, DateTimeInput } from '@/website/atoms';
 import { RegisterFormProps } from '@/website/organisms/RegisterForm/RegisterForm.types';
 import { registerAction } from '@/actions/website/auth.actions';
@@ -8,6 +8,7 @@ import { useRouter } from '@/i18n/routing';
 
 export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) => {
   const t = useTranslations('Register');
+  const locale = useLocale();
   const router = useRouter();
   const [state, formAction, isPending] = useActionState(registerAction, {});
   const [petsSelection, setPetsSelection] = React.useState<string>('');
@@ -47,6 +48,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
       </div>
 
       <form action={formAction} className="w-full flex flex-col items-center">
+        <input type="hidden" name="locale" value={locale} />
         <div className="grid grid-cols-12 gap-x-6 gap-y-6 w-full mb-6">
           {/* Row 1 */}
           <div className="col-span-12 md:col-span-4">

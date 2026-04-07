@@ -17,4 +17,6 @@ export * from '@/website/organisms/RegisterForm';
 export * from '@/website/organisms/ImprintContent';
 export * from '@/website/organisms/GtcContent';
 export * from '@/website/organisms/PrivacyContent';
+export * from '@/website/organisms/ProfileSection/ProfileSection';
+export * from '@/website/organisms/SettingsSection/SettingsSection';
 

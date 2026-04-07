@@ -2,5 +2,6 @@ import { ReactNode } from 'react';
 
 export interface DashboardHeaderProps {
   className?: string;
-  activeTab?: 'account' | 'documents';
+  activeTab?: 'account' | 'documents' | 'profile' | 'dashboard' | 'settings';
+  isAccountPage?: boolean;
 }
