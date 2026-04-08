@@ -77,14 +77,18 @@ export const Button: React.FC<ButtonProps> = ({
         children
       ) : (
         <div className="relative flex items-center justify-center gap-2">
-          {actualLoading && <Loader2 className="w-4 h-4 animate-spin shrink-0" />}
+          {actualLoading && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Loader2 className="w-5 h-5 animate-spin text-current" />
+            </div>
+          )}
           <Text
             as="span"
             variant={textVariantMap[size]}
             className={twMerge(
               "flex items-center gap-2 font-semibold",
               textClassName,
-              actualLoading ? 'opacity-70' : 'opacity-100'
+              actualLoading ? 'opacity-0' : 'opacity-100'
             )}
           >
             {!actualLoading && LeftIcon && <LeftIcon className="w-4 h-4 shrink-0" />}

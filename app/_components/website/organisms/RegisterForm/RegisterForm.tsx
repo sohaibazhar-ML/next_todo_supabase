@@ -2,7 +2,7 @@
 import React, { useActionState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Text, Button, Input, Select, Checkbox, SelectOption, DateTimeInput } from '@/website/atoms';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { RegisterFormProps } from '@/website/organisms/RegisterForm/RegisterForm.types';
 import { registerSchema } from '@/schemas/website/register.schema';
 import { registerAction } from '@/actions/website/auth.actions';
@@ -16,7 +16,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
   const [petsSelection, setPetsSelection] = React.useState<string>('');
   const [touchedFields, setTouchedFields] = React.useState<Record<string, boolean>>({});
   const [showPassword, setShowPassword] = React.useState(false);
-  const [formData, setFormData] = React.useState({
+  const initialFormData = {
     gender: '',
     firstName: '',
     lastName: '',
@@ -33,7 +33,22 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
     phone: '',
     preferredTime: '',
     consent: false,
-  });
+  };
+
+  const [formData, setFormData] = React.useState(initialFormData);
+  const [showSuccess, setShowSuccess] = React.useState(false);
+
+  React.useEffect(() => {
+    if (state.success) {
+      setFormData(initialFormData);
+      setTouchedFields({});
+      setShowSuccess(true);
+      const timer = setTimeout(() => {
+        setShowSuccess(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [state.success]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     let { name, value } = e.target;
@@ -99,8 +114,14 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
     { label: t('fields.pets.options.no'), value: 'no' },
   ];
 
+
   return (
-    <div className={`w-full bg-white mt-10 md:mt-20 pt-12 md:pt-16 pb-0 md:pb-4 px-2 md:px-4 flex flex-col items-center rounded-none shadow-sm ${className}`}>
+    <div className={`w-full bg-white mt-10 md:mt-20 pt-12 md:pt-16 pb-0 md:pb-4 px-2 md:px-4 flex flex-col items-center rounded-none shadow-sm relative overflow-hidden ${className}`}>
+      {isPending && (
+        <div className="fixed inset-0 z-[9999] bg-white/10 cursor-wait flex items-center justify-center animate-in fade-in duration-300">
+          <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+        </div>
+      )}
       <div className="flex flex-col items-center gap-4 text-center w-full mb-10">
         <Text className="text-secondary font-semibold text-[43px]">
           {t('title')}
@@ -389,32 +410,28 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
           </Text>
         </div>
 
-        {state.success && (
-          <div className="w-full bg-success-light border border-success-border p-4 rounded-[4px] mb-8 text-center animate-in fade-in slide-in-from-top-2">
-            <Text variant="body-sm" className="text-success">
-              {t('successMessage')}
-            </Text>
-          </div>
-        )}
-
-        {!state.success && (
-          <div className="w-full flex justify-start px-1 pb-2">
-            <Button
-              type="submit"
-              variant="primary"
-              isLoading={isPending}
-              disabled={!isFormValid || isPending}
-              className="!rounded-[6px] normal-case py-[8.5px] px-[16px] disabled:opacity-50 disabled:cursor-not-allowed"
-              textClassName="text-[22px] font-medium"
-            >
-              {t('submit')}
-            </Button>
-          </div>
-        )}
+        <div className="w-full flex justify-start px-1 pb-2">
+          <Button
+            type="submit"
+            variant="primary"
+            isLoading={isPending}
+            disabled={!isFormValid || isPending}
+            className="!rounded-[6px] normal-case py-[8.5px] px-[16px] disabled:opacity-50 disabled:cursor-not-allowed min-w-[200px]"
+            textClassName="text-[22px] font-medium"
+          >
+            {t('submit')}
+          </Button>
+        </div>
 
         {(state as any).errors?.form && (
           <Text variant="body-sm" className="text-error-dark mt-4 text-center">
             {(state as any).errors.form}
+          </Text>
+        )}
+
+        {showSuccess && (
+          <Text variant="body-sm" className="text-success mt-4 text-center font-bold">
+            {t('successMessage')}
           </Text>
         )}
       </form>

@@ -252,7 +252,10 @@
     "consent": "Sì, desidero ricevere una consulenza telefonica gratuita sulle assicurazioni e sulla previdenza in Svizzera e prendo atto dell'informativa sulla protezione dei dati.",
     "legalNote": "Acconsento al trattamento dei dati forniti durante la registrazione (in particolare nome, indirizzo e-mail, numero di telefono) per essere informato via e-mail, telefono, SMS o altri mezzi di comunicazione elettronica su prodotti, servizi e promozioni nel settore assicurativo e previdenziale. Questo consenso è volontario e può essere revocato in qualsiasi momento con effetto per il futuro, ad esempio via e-mail a hello@myswissmove.ch o tramite il link di disiscrizione presente in ogni messaggio. Ulteriori informazioni sul trattamento dei dati sono disponibili nell'informativa sulla protezione dei dati.",
     "submit": "Registrati gratuitamente",
-    "successMessage": "Registrazione avvenuta con successo! Ti abbiamo inviato un'e-mail di conferma alla tua casella di posta. Verifica il tuo account per iniziare con MySwissMove."
+    "successMessage": "Registrazione avvenuta con successo! Ti abbiamo inviato un'e-mail di conferma alla tua casella di posta. Verifica il tuo account per iniziare con MySwissMove.",
+    "loading": "Caricamento...",
+    "successMessageTitle": "Grazie mille!",
+    "backToHome": "Torna alla Home"
   },
   "FAQ": {
     "title": "FAQ",
