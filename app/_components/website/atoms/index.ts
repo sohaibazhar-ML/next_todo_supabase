@@ -17,3 +17,4 @@ export type { SelectProps, SelectOption } from '@/website/atoms/Select/Select.ty
 export { Textarea } from '@/website/atoms/Textarea/Textarea';
 export type { TextareaProps } from '@/website/atoms/Textarea/Textarea.types';
 export { Switch } from '@/website/atoms/Switch/Switch';
+export { LoadingOverlay } from '@/website/atoms/LoadingOverlay/LoadingOverlay';

@@ -1,7 +1,8 @@
 "use client";
 import React, { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Text, Button, Input } from '@/website/atoms';
+import { Text, Button, Input, LoadingOverlay } from '@/website/atoms';
+import { Eye, EyeOff } from 'lucide-react';
 import { ResetPasswordFormProps } from '@/website/organisms/ResetPasswordForm/ResetPasswordForm.types';
 import { resetPasswordAction } from '@/actions/website/auth.actions';
 import { useRouter } from '@/i18n/routing';
@@ -10,9 +11,35 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ className 
   const t = useTranslations('Login.resetPassword');
   const router = useRouter();
   const [state, formAction, isPending] = useActionState(resetPasswordAction, {});
+  const [showFeedback, setShowFeedback] = React.useState(false);
+  const [showNewPassword, setShowNewPassword] = React.useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
+  const [formData, setFormData] = React.useState({ newPassword: '', confirmPassword: '' });
+
+  React.useEffect(() => {
+    if (state.errors?.form || state.success) {
+      setShowFeedback(true);
+      if (state.success) {
+        setFormData({ newPassword: '', confirmPassword: '' });
+        const timer = setTimeout(() => {
+          setShowFeedback(false);
+        }, 5000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [state.errors?.form, state.success]);
+
+  const clearFeedback = () => setShowFeedback(false);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    clearFeedback();
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   return (
-    <div className={`w-full bg-white mt-10 md:mt-20 pt-12 md:pt-16 pb-16 md:pb-20 px-6 md:px-20 flex flex-col items-center rounded-none shadow-sm ${className}`}>
+    <div className={`w-full bg-white mt-10 md:mt-20 pt-12 md:pt-16 pb-16 md:pb-20 px-6 md:px-20 flex flex-col items-center rounded-none shadow-sm relative ${className}`}>
+      <LoadingOverlay isVisible={isPending} />
       <div className="flex flex-col items-center gap-4 text-center mb-10">
         <Text variant="login-title" className="text-secondary uppercase">
           {t('title')}
@@ -28,10 +55,15 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ className 
             id="newPassword"
             name="newPassword"
             label={t('newPasswordLabel')}
-            type="password"
+            type={showNewPassword ? "text" : "password"}
             placeholder=" "
+            value={formData.newPassword}
+            onChange={handleInputChange}
             error={!!state.errors?.newPassword}
             errorText={state.errors?.newPassword?.[0]}
+            onFocus={clearFeedback}
+            rightIcon={showNewPassword ? EyeOff : Eye}
+            onRightIconClick={() => setShowNewPassword(!showNewPassword)}
             required
             className="w-full"
           />
@@ -39,26 +71,35 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ className 
             id="confirmPassword"
             name="confirmPassword"
             label={t('confirmPasswordLabel')}
-            type="password"
+            type={showConfirmPassword ? "text" : "password"}
             placeholder=" "
+            value={formData.confirmPassword}
+            onChange={handleInputChange}
             error={!!state.errors?.confirmPassword}
             errorText={state.errors?.confirmPassword?.[0]}
+            onFocus={clearFeedback}
+            rightIcon={showConfirmPassword ? EyeOff : Eye}
+            onRightIconClick={() => setShowConfirmPassword(!showConfirmPassword)}
             required
             className="w-full"
           />
 
-          {state.errors?.form && (
-            <Text variant="body-sm" className="text-error-dark text-center">
-              {state.errors.form}
-            </Text>
-          )}
+          {showFeedback && (
+            <>
+              {state.errors?.form && (
+                <Text variant="body-sm" className="text-error-dark text-center">
+                  {state.errors.form}
+                </Text>
+              )}
 
-          {state.success && (
-            <div className="bg-success-light border border-success-border p-4 rounded-[4px] text-center">
-              <Text variant="body-sm" className="text-success">
-                {t('successMessage')}
-              </Text>
-            </div>
+              {state.success && (
+                <div className="bg-success-light border border-success-border p-4 rounded-[4px] text-center">
+                  <Text variant="body-sm" className="text-success">
+                    {t('successMessage')}
+                  </Text>
+                </div>
+              )}
+            </>
           )}
         </div>
 

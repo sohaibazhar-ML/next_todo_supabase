@@ -97,7 +97,11 @@
     "successMessage": "Einloggen erfolgreich! Weiterleitung...",
     "keepMeLoggedIn": "Angemeldet bleiben",
     "noAccount": "Noch kein Konto?",
-    "register": "Kostenlos registrieren"
+    "register": "Kostenlos registrieren",
+    "errors": {
+      "userNotFound": "Benutzer nicht gefunden oder Benutzer existiert nicht",
+      "invalidCredentials": "Ungültige E-Mail oder Passwort."
+    }
   },
   "Register": {
     "title": "Ohne Wenn und Aber.",

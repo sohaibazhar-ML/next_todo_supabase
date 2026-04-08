@@ -1,7 +1,7 @@
 "use client";
 import React, { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Text, Button, Input } from '@/website/atoms';
+import { Text, Button, Input, LoadingOverlay } from '@/website/atoms';
 import { ForgotPasswordFormProps } from '@/website/organisms/ForgotPasswordForm/ForgotPasswordForm.types';
 import { forgotPasswordAction } from '@/actions/website/auth.actions';
 import { useRouter } from '@/i18n/routing';
@@ -10,9 +10,32 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ classNam
   const t = useTranslations('Login.forgotPassword');
   const router = useRouter();
   const [state, formAction, isPending] = useActionState(forgotPasswordAction, {});
+  const [showFeedback, setShowFeedback] = React.useState(false);
+  const [email, setEmail] = React.useState('');
+
+  React.useEffect(() => {
+    if (state.errors?.form || state.success) {
+      setShowFeedback(true);
+      if (state.success) {
+        setEmail('');
+        const timer = setTimeout(() => {
+          setShowFeedback(false);
+        }, 5000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [state.errors?.form, state.success]);
+
+  const clearFeedback = () => setShowFeedback(false);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    clearFeedback();
+    setEmail(e.target.value);
+  };
 
   return (
-    <div className={`w-full bg-white mt-10 md:mt-20 pt-12 md:pt-16 pb-16 md:pb-20 px-6 md:px-20 flex flex-col items-center rounded-none shadow-sm ${className}`}>
+    <div className={`w-full bg-white mt-10 md:mt-20 pt-12 md:pt-16 pb-16 md:pb-20 px-6 md:px-20 flex flex-col items-center rounded-none shadow-sm relative ${className}`}>
+      <LoadingOverlay isVisible={isPending} />
       <div className="flex flex-col items-center gap-4 text-center mb-10">
         <Text variant="login-title" className="text-secondary uppercase">
           {t('title')}
@@ -33,24 +56,31 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ classNam
             label={t('emailLabel')}
             type="email"
             placeholder=" "
+            value={email}
+            onChange={handleInputChange}
             error={!!state.errors?.email}
             errorText={state.errors?.email?.[0]}
+            onFocus={clearFeedback}
             required
             className="w-full"
           />
 
-          {state.errors?.form && (
-            <Text variant="body-sm" className="text-error-dark text-center">
-              {state.errors.form}
-            </Text>
-          )}
+          {showFeedback && (
+            <>
+              {state.errors?.form && (
+                <Text variant="body-sm" className="text-error-dark text-center">
+                  {state.errors.form}
+                </Text>
+              )}
 
-          {state.success && (
-            <div className="bg-success-light border border-success-border p-4 rounded-[4px] text-center">
-              <Text variant="body-sm" className="text-success">
-                {t('successMessage')}
-              </Text>
-            </div>
+              {state.success && (
+                <div className="bg-success-light border border-success-border p-4 rounded-[4px] text-center">
+                  <Text variant="body-sm" className="text-success">
+                    {t('successMessage')}
+                  </Text>
+                </div>
+              )}
+            </>
           )}
         </div>
 

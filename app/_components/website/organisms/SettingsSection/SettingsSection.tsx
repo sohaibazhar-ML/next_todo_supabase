@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Languages, ShieldCheck, Lock, HelpCircle, Check, Loader2 } from 'lucide-react';
+import { Languages, ShieldCheck, Lock, HelpCircle, Check, Loader2, Eye, EyeOff } from 'lucide-react';
 import { ProfileAvatar } from '@/website/molecules/ProfileAvatar/ProfileAvatar';
 import { ProfileItem } from '@/website/molecules/ProfileItem/ProfileItem';
 import { Text, Button, Input, Switch } from '@/website/atoms';
@@ -38,6 +38,14 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState(false);
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const clearPasswordFeedback = () => {
+    setPasswordError('');
+    setPasswordSuccess(false);
+  };
 
   const languageOptions = [
     { label: 'English', value: 'en' },
@@ -47,8 +55,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
   ];
 
   const handlePasswordChange = async () => {
-    setPasswordError('');
-    setPasswordSuccess(false);
+    clearPasswordFeedback();
 
     if (passwordState.newPassword !== passwordState.confirmPassword) {
       setPasswordError(t('passwordMismatch'));
@@ -164,24 +171,42 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
             <div className="flex flex-col gap-4 p-6 border-l-2 border-primary/10 bg-secondary/[0.01] animate-in fade-in slide-in-from-top-2 duration-300">
               <div className="flex flex-col gap-3">
                 <Input 
-                  type="password"
+                  type={showOldPassword ? "text" : "password"}
                   placeholder={t('oldPassword')}
                   value={passwordState.oldPassword}
-                  onChange={(e) => setPasswordState({ ...passwordState, oldPassword: e.target.value })}
+                  onChange={(e) => {
+                    clearPasswordFeedback();
+                    setPasswordState({ ...passwordState, oldPassword: e.target.value });
+                  }}
+                  onFocus={clearPasswordFeedback}
+                  rightIcon={showOldPassword ? EyeOff : Eye}
+                  onRightIconClick={() => setShowOldPassword(!showOldPassword)}
                   inputSize="sm"
                 />
                 <Input 
-                  type="password"
+                  type={showNewPassword ? "text" : "password"}
                   placeholder={t('newPassword')}
                   value={passwordState.newPassword}
-                  onChange={(e) => setPasswordState({ ...passwordState, newPassword: e.target.value })}
+                  onChange={(e) => {
+                    clearPasswordFeedback();
+                    setPasswordState({ ...passwordState, newPassword: e.target.value });
+                  }}
+                  onFocus={clearPasswordFeedback}
+                  rightIcon={showNewPassword ? EyeOff : Eye}
+                  onRightIconClick={() => setShowNewPassword(!showNewPassword)}
                   inputSize="sm"
                 />
                 <Input 
-                  type="password"
+                  type={showConfirmPassword ? "text" : "password"}
                   placeholder={t('confirmNewPassword')}
                   value={passwordState.confirmPassword}
-                  onChange={(e) => setPasswordState({ ...passwordState, confirmPassword: e.target.value })}
+                  onChange={(e) => {
+                    clearPasswordFeedback();
+                    setPasswordState({ ...passwordState, confirmPassword: e.target.value });
+                  }}
+                  onFocus={clearPasswordFeedback}
+                  rightIcon={showConfirmPassword ? EyeOff : Eye}
+                  onRightIconClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   inputSize="sm"
                 />
               </div>

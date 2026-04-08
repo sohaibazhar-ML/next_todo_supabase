@@ -9,6 +9,7 @@ import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { ActionState } from '@/app/_types/website/actions/auth.types';
+import { getTranslations } from 'next-intl/server';
 
 export async function forgotPasswordAction(prevState: ActionState, formData: FormData): Promise<ActionState> {
   const email = formData.get('email') as string;
@@ -175,7 +176,19 @@ export async function loginAction(prevState: ActionState, formData: FormData): P
     };
   }
 
+  const t = await getTranslations('Login');
+
   try {
+    // 1. Check if user exists in the profiles table to provide a specific error
+    const profile = await prisma.profiles.findUnique({
+      where: { email },
+      select: { id: true, preferred_language: true }
+    });
+
+    if (!profile) {
+      return { errors: { form: t('errors.userNotFound') } };
+    }
+
     const supabase = await createClient();
     const { data: { user }, error } = await supabase.auth.signInWithPassword({
       email,
@@ -183,14 +196,8 @@ export async function loginAction(prevState: ActionState, formData: FormData): P
     });
 
     if (error || !user) {
-      return { errors: { form: error?.message || 'Invalid email or password.' } };
+      return { errors: { form: t('errors.invalidCredentials') } };
     }
-
-    // 2. Fetch user profile to get preferred language
-    const profile = await prisma.profiles.findUnique({
-      where: { id: user.id },
-      select: { preferred_language: true }
-    });
 
     // 3. Set persistence preference and locale cookies for the middleware
     const cookieStore = await cookies();
@@ -220,7 +227,7 @@ export async function loginAction(prevState: ActionState, formData: FormData): P
       throw err;
     }
     console.error('Login error:', err);
-    return { errors: { form: 'Invalid email or password.' } };
+    return { errors: { form: t('errors.invalidCredentials') } };
   }
 
   // Get preferred locale for redirect

@@ -97,7 +97,11 @@
     "successMessage": "Login successful! Redirecting...",
     "keepMeLoggedIn": "Keep me logged in",
     "noAccount": "No account yet?",
-    "register": "Register for free"
+    "register": "Register for free",
+    "errors": {
+      "userNotFound": "User not found or user does not exist",
+      "invalidCredentials": "Invalid email or password."
+    }
   },
   "Register": {
     "title": "Without if and but.",

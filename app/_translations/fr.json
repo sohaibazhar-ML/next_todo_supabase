@@ -97,7 +97,11 @@
     "successMessage": "Connexion réussie ! Redirection...",
     "keepMeLoggedIn": "Rester connecté",
     "noAccount": "Pas encore de compte ?",
-    "register": "S'inscrire gratuitement"
+    "register": "S'inscrire gratuitement",
+    "errors": {
+      "userNotFound": "Utilisateur non trouvé ou l'utilisateur n'existe pas",
+      "invalidCredentials": "E-mail ou mot de passe invalide."
+    }
   },
   "Register": {
     "title": "Sans si ni mais.",

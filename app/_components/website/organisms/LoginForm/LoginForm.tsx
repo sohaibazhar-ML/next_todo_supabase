@@ -2,7 +2,8 @@
 import React, { useActionState } from 'react';
 
 import { useTranslations } from 'next-intl';
-import { Text, Button, Input } from '@/website/atoms';
+import { Text, Button, Input, LoadingOverlay } from '@/website/atoms';
+import { Eye, EyeOff } from 'lucide-react';
 import { LoginFormProps } from '@/website/organisms/LoginForm/LoginForm.types';
 import { loginAction } from '@/actions/website/auth.actions';
 import { useRouter } from '@/i18n/routing';
@@ -11,9 +12,34 @@ export const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
   const t = useTranslations('Login');
   const router = useRouter();
   const [state, formAction, isPending] = useActionState(loginAction, {});
+  const [showFeedback, setShowFeedback] = React.useState(false);
+  const [showPassword, setShowPassword] = React.useState(false);
+  const [formData, setFormData] = React.useState({ email: '', password: '' });
+
+  React.useEffect(() => {
+    if (state.errors?.form || state.success) {
+      setShowFeedback(true);
+      if (state.success) {
+        setFormData({ email: '', password: '' });
+        const timer = setTimeout(() => {
+          setShowFeedback(false);
+        }, 5000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [state.errors?.form, state.success]);
+
+  const clearFeedback = () => setShowFeedback(false);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    clearFeedback();
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   return (
-    <div className={`w-full bg-white mt-10 md:mt-20 pt-12 md:pt-16 pb-16 md:pb-20 px-6 md:px-20 flex flex-col items-center rounded-none shadow-sm ${className}`}>
+    <div className={`w-full bg-white mt-10 md:mt-20 pt-12 md:pt-16 pb-16 md:pb-20 px-6 md:px-20 flex flex-col items-center rounded-none shadow-sm relative ${className}`}>
+      <LoadingOverlay isVisible={isPending} />
       <div className="flex flex-col items-center gap-4 text-center mb-10">
         <Text variant="login-title" className="text-secondary uppercase">
           {t('title')}
@@ -30,30 +56,42 @@ export const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
             name="email"
             label={t('email')}
             type="email"
+            value={formData.email}
+            onChange={handleInputChange}
             error={!!state.errors?.email}
             errorText={state.errors?.email?.[0]}
+            onFocus={clearFeedback}
             required
           />
           <Input
             id="password"
             name="password"
             label={t('password')}
-            type="password"
+            type={showPassword ? "text" : "password"}
+            value={formData.password}
+            onChange={handleInputChange}
             error={!!state.errors?.password}
             errorText={state.errors?.password?.[0]}
+            onFocus={clearFeedback}
+            rightIcon={showPassword ? EyeOff : Eye}
+            onRightIconClick={() => setShowPassword(!showPassword)}
             required
           />
 
-          {state.errors?.form && (
-            <Text variant="body-sm" className="text-error-dark text-center">
-              {state.errors.form}
-            </Text>
-          )}
+          {showFeedback && (
+            <>
+              {state.errors?.form && (
+                <Text variant="body-sm" className="text-error-dark text-center">
+                  {state.errors.form}
+                </Text>
+              )}
 
-          {state.success && (
-            <Text variant="body-sm" className="text-success text-center">
-              {t('successMessage')}
-            </Text>
+              {state.success && (
+                <Text variant="body-sm" className="text-success text-center">
+                  {t('successMessage')}
+                </Text>
+              )}
+            </>
           )}
         </div>
 
