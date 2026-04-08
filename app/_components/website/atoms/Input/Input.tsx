@@ -27,7 +27,7 @@ export const Input: React.FC<InputProps> = ({
 
   const sizeClasses = {
     sm: "h-[34px] min-h-[34px] py-1 px-3 text-[14px]",
-    md: "h-[44px] min-h-[44px] px-4",
+    md: "h-[44px] min-h-[44px] py-[5px] px-5",
   };
 
   const baseClasses = isCheckbox 
@@ -90,7 +90,7 @@ export const Input: React.FC<InputProps> = ({
           isCheckbox ? "cursor-pointer select-none order-2" : "order-1",
           labelClassName
         )}>
-          <Text variant="text-xxs" className="font-medium text-secondary/70 leading-none">
+          <Text variant="text-xxs" className="font-normal text-text-label leading-none">
             {label}
           </Text>
         </label>

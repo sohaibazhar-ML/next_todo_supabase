@@ -25,7 +25,7 @@ export const Select: React.FC<SelectProps> = ({
     <div className="flex flex-col gap-1.5 w-full">
       {label && (
         <label htmlFor={id}>
-          <Text variant="text-xxs" className="font-medium text-secondary/70">
+          <Text variant="text-xxs" className="font-normal text-text-label">
             {label}
           </Text>
         </label>
@@ -38,7 +38,7 @@ export const Select: React.FC<SelectProps> = ({
           disabled={disabled}
           className={twMerge(
             baseClasses,
-            "h-[44px] px-4 pr-10", // Match Input md size
+            "h-[44px] py-[5px] px-5 pr-10", // Match Input md size
             defaultClasses,
             focusClasses,
             errorClasses,

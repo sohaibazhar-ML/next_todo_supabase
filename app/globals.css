@@ -28,6 +28,7 @@ html {
   --success-border: #bbf7d0;
   --border-input: #A0A2A1;
   --input-placeholder: #8B8281;
+  --text-label: #868281;
 
   /* Grid & Layout System */
   --container-max-width: 1440px;
@@ -58,6 +59,7 @@ html {
   --color-success-border: var(--success-border);
   --color-border-input: var(--border-input);
   --color-input-placeholder: var(--input-placeholder);
+  --color-text-label: var(--text-label);
 
   /* Spacing and Layout - Using Tailwind 4.0 scale convention */
   --spacing-gutter: clamp(16px, 3vw, 24px);

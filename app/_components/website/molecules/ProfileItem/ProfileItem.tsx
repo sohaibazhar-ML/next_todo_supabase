@@ -98,8 +98,7 @@ export const ProfileItem: React.FC<ProfileItemProps> = ({
         isField || isEditing ? "gap-0.5" : "justify-center"
       )}>
         <Text variant="text-xxs" className={twMerge(
-          "text-secondary/50 font-bold uppercase tracking-wider",
-          !isField && !isEditing && "text-secondary/70"
+          "text-text-label font-bold uppercase tracking-wider"
         )}>
           {label}
         </Text>

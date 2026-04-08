@@ -18,7 +18,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
         <Text variant="login-title" className="text-secondary uppercase">
           {t('title')}
         </Text>
-        <Text variant="login-description" className="text-secondary/70 max-w-[450px]">
+        <Text variant="login-description" className="text-secondary max-w-[450px] font-semibold">
           {t('description')}
         </Text>
       </div>
@@ -63,7 +63,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
             variant="primary"
             minWidth={294}
             isLoading={isPending}
-            className="!h-[46px] !rounded-[6px] flex items-center justify-center gap-[10px] uppercase font-bold px-10"
+            className="!h-[46px] !rounded-[6px] flex items-center justify-center gap-[10px] uppercase font-medium text-[22px] py-[8.5px] px-4"
           >
             {t('submit')}
           </Button>
@@ -75,7 +75,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
               onClick={() => router.push('/forgot-password')}
               className="!p-0 !h-auto hover:bg-transparent"
             >
-              <Text variant="body-sm" className="text-secondary/60 hover:text-secondary transition-colors">
+              <Text variant="body-sm" className="text-secondary font-medium text-[22px] hover:text-secondary transition-colors">
                 {t('forgot')}
               </Text>
             </Button>

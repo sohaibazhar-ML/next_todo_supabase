@@ -1,10 +1,10 @@
 {
   "Header": {
     "home": "Home",
-    "howItWorks": "Wie funktioniert's",
-    "myDocuments": "Meine Dokumente",
+    "howItWorks": "So geht’s",
+    "myDocuments": "My documents",
     "contact": "Kontakt",
-    "login": "Anmelden",
+    "login": "Einloggen",
     "register": "Kostenlos registrieren",
     "languages": {
       "fr": "Français",
@@ -23,7 +23,7 @@
     "hosting": "Sicheres Schweizer Hosting"
   },
   "HowItWorks": {
-    "title": "Wie funktioniert's",
+    "title": "So geht’s",
     "step1": "In weniger als 1 Minute kostenlos registrieren",
     "step2": "Passende Vorlagen downloaden und ausfüllen",
     "step3": "Vorlagen bearbeiten, drucken, speichern oder versenden"
@@ -70,19 +70,19 @@
     "partnership": "in Kooperation mit"
   },
   "Login": {
-    "title": "Anmelden",
-    "description": "Bitte geben Sie Ihre E-Mail-Adresse und Ihr Passwort ein, um sich anzumelden.",
-    "email": "E-Mail-Adresse",
+    "title": "Einloggen",
+    "description": "Bitte geben Sie Ihre E-Mailadresse und Ihr Passwort ein, um sich einzuloggen.",
+    "email": "E-Mailadresse",
     "password": "Passwort",
-    "submit": "Anmelden",
+    "submit": "Einloggen",
     "forgot": "Passwort vergessen?",
     "forgotPassword": {
       "title": "Passwort vergessen?",
       "subtitle": "Kein Problem. Hier können Sie ein neues erstellen.",
-      "instruction": "Bitte geben Sie die E-Mail-Adresse Ihres Kontos ein, damit wir Ihr Passwort zurücksetzen können.",
-      "emailLabel": "E-Mail-Adresse",
+      "instruction": "Bitte geben Sie die E-Mailadresse Ihres Kontos ein, damit wir Ihr Passwort zurücksetzen können.",
+      "emailLabel": "E-Mailadresse",
       "submit": "Passwort zurücksetzen",
-      "backToLogin": "Anmelden",
+      "backToLogin": "Einloggen",
       "successMessage": "Reset-Link gesendet! Bitte prüfen Sie Ihren Posteingang."
     },
     "resetPassword": {
@@ -91,10 +91,10 @@
       "newPasswordLabel": "Neues Passwort",
       "confirmPasswordLabel": "Neues Passwort wiederholen",
       "submit": "Passwort bestätigen",
-      "backToLogin": "Anmelden",
-      "successMessage": "Passwort erfolgreich zurückgesetzt! Sie können sich jetzt mit Ihrem neuen Passwort anmelden."
+      "backToLogin": "Einloggen",
+      "successMessage": "Passwort erfolgreich zurückgesetzt! Sie können sich jetzt mit Ihrem neuen Passwort einloggen."
     },
-    "successMessage": "Anmeldung erfolgreich! Weiterleitung...",
+    "successMessage": "Einloggen erfolgreich! Weiterleitung...",
     "keepMeLoggedIn": "Angemeldet bleiben",
     "noAccount": "Noch kein Konto?",
     "register": "Kostenlos registrieren"
@@ -114,7 +114,7 @@
         }
       },
       "email": {
-        "label": "E-Mail-Adresse",
+        "label": "E-Mailadresse",
         "placeholder": "beispiel@mail.ch"
       },
       "password": {
@@ -244,7 +244,7 @@
       }
     },
     "consent": "Ja, ich wünsche eine kostenlose telefonische Beratung zu Versicherungen und Vorsorge in der Schweiz und nehme die Datenschutzerklärung zur Kenntnis.",
-    "legalNote": "Ich bin damit einverstanden, dass meine bei der Registrierung angegebenen Daten (insbesondere Name, E-Mail-Adresse, Telefonnummer) verwendet werden dürfen, um mich per E-Mail, Telefon, SMS oder andere elektronische Kommunikationsmittel über Produkte, Dienstleistungen und Aktionen aus dem Bereich Versicherungen und Vorsorge zu informieren. Diese Einwilligung ist freiwillig und kann jederzeit mit Wirkung für die Zukunft widerrufen werden, z. B. per E-Mail an hello@myswissmove.ch oder über den Abmeldelink in jeder Nachricht. Weitere Informationen zur Datenverarbeitung finden Sie in der Datenschutzerklärung.",
+    "legalNote": "Ich bin damit einverstanden, dass meine bei der Registrierung angegebenen Daten (insbesondere Name, E-Mailadresse, Telefonnummer) verwendet werden dürfen, um mich per E-Mail, Telefon, SMS oder andere elektronische Kommunikationsmittel über Produkte, Dienstleistungen und Aktionen aus dem Bereich Versicherungen und Vorsorge zu informieren. Diese Einwilligung ist freiwillig und kann jederzeit mit Wirkung für die Zukunft widerrufen werden, z. B. per E-Mail an hello@myswissmove.ch oder über den Abmeldelink in jeder Nachricht. Weitere Informationen zur Datenverarbeitung finden Sie in der Datenschutzerklärung.",
     "submit": "Kostenlos registrieren",
     "successMessage": "Registrierung erfolgreich! Wir haben eine Bestätigungs-E-Mail an Ihren Posteingang gesendet. Bitte verifizieren Sie Ihr Konto, um mit MySwissMove zu starten."
   },
@@ -334,7 +334,7 @@
     "account": {
       "breadcrumb": "Mein Konto / Profil",
       "myNameLabel": "Mein Name *",
-      "emailLabel": "E-Mail *",
+      "emailLabel": "E-Mailadresse *",
       "myDocuments": "Meine Dokumente",
       "settings": "Einstellungen",
       "profile": "Profil",
@@ -471,7 +471,7 @@
     "sections": [
       {
         "title": "§ 1 Information über die Erhebung personenbezogener Daten",
-        "content": "(1) In dieser Datenschutzerklärung informieren wir über die Erhebung personenbezogener Daten bei Nutzung unserer Services. Personenbezogene Daten sind hierbei alle Daten, die auf Sie persönlich beziehbar sind, z. B. Name, Adresse, E-Mail-Adressen und Nutzerverhalten.\n\n(2) Verantwortlicher gem. Art. 4 Abs. 7 EU-Datenschutz-Grundverordnung (DS-GVO) ist die Mehrwerk Schweiz AG, Wohler Str. 51, CH-5605 Dottikon, E-Mail: hello@myswissmove.ch.\n\n(3) Bei Ihrer Kontaktaufnahme mit uns per E-Mail oder über ein Kontaktformular werden die von Ihnen mitgeteilten Daten (Ihre E-Mail-Adresse, ggf. Ihr Name und Ihre Telefonnummer) von uns gespeichert, um Ihre Fragen zu beantworten. Die in diesem Zusammenhang anfallenden Daten löschen wir, nachdem die Speicherung nicht mehr erforderlich ist, oder schränken die Verarbeitung ein, falls gesetzliche Aufbewahrungspflichten bestehen. Die Rechtsgrundlage der Erhebung ist Ihr berechtigtes Interesse, Ihre Anfrage beantwortet zu bekommen gem. Art. 6 lit. f. DSGVO.\n\n(4) Falls wir für einzelne Funktionen unseres Angebots auf beauftragte Dienstleister zurückgreifen oder Ihre Daten für werbliche Zwecke nutzen möchten, werden wir Sie im Detail über die jeweiligen Vorgänge informieren. Dabei nennen wir auch die festgelegten Kriterien der Speicherdauer."
+        "content": "(1) In dieser Datenschutzerklärung informieren wir über die Erhebung personenbezogener Daten bei Nutzung unserer Services. Personenbezogene Daten sind hierbei alle Daten, die auf Sie persönlich beziehbar sind, z. B. Name, Adresse, E-Mailadressen und Nutzerverhalten.\n\n(2) Verantwortlicher gem. Art. 4 Abs. 7 EU-Datenschutz-Grundverordnung (DS-GVO) ist die Mehrwerk Schweiz AG, Wohler Str. 51, CH-5605 Dottikon, E-Mail: hello@myswissmove.ch.\n\n(3) Bei Ihrer Kontaktaufnahme mit uns per E-Mail oder über ein Kontaktformular werden die von Ihnen mitgeteilten Daten (Ihre E-Mailadresse, ggf. Ihr Name und Ihre Telefonnummer) von uns gespeichert, um Ihre Fragen zu beantworten. Die in diesem Zusammenhang anfallenden Daten löschen wir, nachdem die Speicherung nicht mehr erforderlich ist, oder schränken die Verarbeitung ein, falls gesetzliche Aufbewahrungspflichten bestehen. Die Rechtsgrundlage der Erhebung ist Ihr berechtigtes Interesse, Ihre Anfrage beantwortet zu bekommen gem. Art. 6 lit. f. DSGVO.\n\n(4) Falls wir für einzelne Funktionen unseres Angebots auf beauftragte Dienstleister zurückgreifen oder Ihre Daten für werbliche Zwecke nutzen möchten, werden wir Sie im Detail über die jeweiligen Vorgänge informieren. Dabei nennen wir auch die festgelegten Kriterien der Speicherdauer."
       },
       {
         "title": "§ 2 Ihre Rechte",
@@ -483,7 +483,7 @@
       },
       {
         "title": "§ 4 Newsletter",
-        "content": "(1) Mit Ihrer Einwilligung können Sie unseren Newsletter abonnieren, mit dem wir Sie in regelmäßigen Abständen über neue Angebote von uns oder unseren Partnern informieren.\n\n(2) Für die Anmeldung zu unserem Newsletter sowie zur Registrierung zur Nutzung unseres Services verwenden wir das so genannte Double-Opt-in-Verfahren. Das heißt, dass wir Ihnen nach Ihrer Anmeldung eine E-Mail an die angegebene E-Mail-Adresse senden, in welcher wir Sie um Bestätigung bitten, dass Sie den Versand des Newsletters oder weiterer Information von uns oder mit uns kooperierenden Dritten wünschen. Wenn Sie Ihre Anmeldung nicht innerhalb von 24 Stunden bestätigen, werden Ihre Informationen gesperrt und nach einem Monat automatisch gelöscht. Darüber hinaus speichern wir jeweils Ihre eingesetzten IP-Adressen und Zeitpunkte der Anmeldung und Bestätigung. Zweck des Verfahrens ist, Ihre Anmeldung nachweisen und ggf. einen möglichen Missbrauch Ihrer persönlichen Daten aufklären zu können.\n\n(3) Pflichtangabe für die Übersendung des Newsletters ist allein Ihre E-Mail-Adresse. Die Angabe weiterer, gesondert markierter Daten ist freiwillig und wird verwendet, um Sie persönlich ansprechen zu können. Nach Ihrer Bestätigung speichern wir Ihre E-Mail-Adresse zum Zweck der Zusendung des Newsletters. Rechtsgrundlage ist Art. 6 Abs. 1 S. 1 lit. a DS-GVO.\n\n(4) Ihre Einwilligung in die Übersendung des Newsletters können Sie jederzeit widerrufen und den Newsletter abbestellen. Den Widerruf können Sie durch Klick auf den in jeder Newsletter-E-Mail bereitgestellten Link, über das Formular der Website oder per E-Mail an hello@myswissmove.ch erklären."
+        "content": "(1) Mit Ihrer Einwilligung können Sie unseren Newsletter abonnieren, mit dem wir Sie in regelmäßigen Abständen über neue Angebote von uns oder unseren Partnern informieren.\n\n(2) Für die Anmeldung zu unserem Newsletter sowie zur Registrierung zur Nutzung unseres Services verwenden wir das so genannte Double-Opt-in-Verfahren. Das heißt, dass wir Ihnen nach Ihrer Anmeldung eine E-Mail an die angegebene E-Mailadresse senden, in welcher wir Sie um Bestätigung bitten, dass Sie den Versand des Newsletters oder weiterer Information von uns oder mit uns kooperierenden Dritten wünschen. Wenn Sie Ihre Anmeldung nicht innerhalb von 24 Stunden bestätigen, werden Ihre Informationen gesperrt und nach einem Monat automatisch gelöscht. Darüber hinaus speichern wir jeweils Ihre eingesetzten IP-Adressen und Zeitpunkte der Anmeldung und Bestätigung. Zweck des Verfahrens ist, Ihre Anmeldung nachweisen und ggf. einen möglichen Missbrauch Ihrer persönlichen Daten aufklären zu können.\n\n(3) Pflichtangabe für die Übersendung des Newsletters ist allein Ihre E-Mailadresse. Die Angabe weiterer, gesondert markierter Daten ist freiwillig und wird verwendet, um Sie persönlich ansprechen zu können. Nach Ihrer Bestätigung speichern wir Ihre E-Mailadresse zum Zweck der Zusendung des Newsletters. Rechtsgrundlage ist Art. 6 Abs. 1 S. 1 lit. a DS-GVO.\n\n(4) Ihre Einwilligung in die Übersendung des Newsletters können Sie jederzeit widerrufen und den Newsletter abbestellen. Den Widerruf können Sie durch Klick auf den in jeder Newsletter-E-Mail bereitgestellten Link, über das Formular der Website oder per E-Mail an hello@myswissmove.ch erklären."
       },
       {
         "title": "§ 5 Einsatz von Google Web Fonts",

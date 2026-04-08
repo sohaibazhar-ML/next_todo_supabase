@@ -20,7 +20,7 @@ export const Textarea: React.FC<TextareaProps> = ({
 }) => {
   const sizeClasses = {
     sm: "py-2 px-3 text-[14px]",
-    md: "py-3 px-4",
+    md: "py-[5px] px-5",
   };
 
   const baseClasses = "w-full bg-white rounded-[2px] border transition-all outline-none disabled:opacity-50 disabled:bg-background-neutral disabled:cursor-not-allowed resize-y";
@@ -35,7 +35,7 @@ export const Textarea: React.FC<TextareaProps> = ({
     <div className="flex flex-col gap-1.5 w-full">
       {label && (
         <label htmlFor={id}>
-          <Text variant="text-xxs" className="font-medium text-secondary/70">
+          <Text variant="text-xxs" className="font-normal text-text-label">
             {label}
           </Text>
         </label>
