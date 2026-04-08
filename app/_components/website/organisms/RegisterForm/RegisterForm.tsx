@@ -2,6 +2,7 @@
 import React, { useActionState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Text, Button, Input, Select, Checkbox, SelectOption, DateTimeInput } from '@/website/atoms';
+import { Eye, EyeOff } from 'lucide-react';
 import { RegisterFormProps } from '@/website/organisms/RegisterForm/RegisterForm.types';
 import { registerSchema } from '@/schemas/website/register.schema';
 import { registerAction } from '@/actions/website/auth.actions';
@@ -14,6 +15,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
   const [state, formAction, isPending] = useActionState(registerAction, {});
   const [petsSelection, setPetsSelection] = React.useState<string>('');
   const [touchedFields, setTouchedFields] = React.useState<Record<string, boolean>>({});
+  const [showPassword, setShowPassword] = React.useState(false);
   const [formData, setFormData] = React.useState({
     gender: '',
     firstName: '',
@@ -34,7 +36,13 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
+    let { name, value } = e.target;
+    
+    // Sanitize phone input: only allow numbers, +, and -
+    if (name === 'phone') {
+      value = value.replace(/[^0-9+\-]/g, '');
+    }
+
     setFormData(prev => ({ ...prev, [name]: value }));
     setTouchedFields(prev => ({ ...prev, [name]: true }));
   };
@@ -135,6 +143,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               name="firstName"
               label={t('fields.firstName')}
               required
+              maxLength={50}
               value={formData.firstName}
               onChange={handleInputChange}
               error={!!getFieldError('firstName')}
@@ -147,6 +156,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               name="lastName"
               label={t('fields.lastName')}
               required
+              maxLength={50}
               value={formData.lastName}
               onChange={handleInputChange}
               error={!!getFieldError('lastName')}
@@ -163,6 +173,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               label={t('fields.email.label')}
               placeholder={t('fields.email.placeholder')}
               required
+              maxLength={100}
               value={formData.email}
               onChange={handleInputChange}
               error={!!getFieldError('email')}
@@ -173,7 +184,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
             <Input
               id="password"
               name="password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               label={t('fields.password.label')}
               placeholder={t('fields.password.placeholder')}
               required
@@ -181,6 +192,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               onChange={handleInputChange}
               error={formData.password === '' && !!getFieldError('password')}
               errorText={formData.password === '' ? getFieldError('password') : undefined}
+              rightIcon={showPassword ? EyeOff : Eye}
+              onRightIconClick={() => setShowPassword(!showPassword)}
               helperText={
                 unmetPasswordRules.length > 0 && (
                   <div className="flex flex-col gap-0.5 mt-1">
@@ -200,6 +213,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               name="currentAddress"
               label={t('fields.currentAddress')}
               required
+              maxLength={200}
               value={formData.currentAddress}
               onChange={handleInputChange}
               error={!!getFieldError('currentAddress')}
@@ -231,6 +245,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               name="newAddress"
               label={t('fields.newAddress')}
               required
+              maxLength={200}
               value={formData.newAddress}
               onChange={handleInputChange}
               error={!!getFieldError('newAddress')}
@@ -246,6 +261,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               label={t('fields.numPersons')}
               type="number"
               min="0"
+              max="999"
               required
               value={formData.numPersons}
               onChange={handleInputChange}
@@ -260,6 +276,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               label={t('fields.numAdults')}
               type="number"
               min="0"
+              max="999"
               required
               value={formData.numAdults}
               onChange={handleInputChange}
@@ -274,6 +291,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               label={t('fields.numChildren')}
               type="number"
               min="0"
+              max="999"
               value={formData.numChildren}
               onChange={handleInputChange}
               error={!!getFieldError('numChildren')}
@@ -306,6 +324,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               name="whichPets"
               label={t('fields.whichPets')}
               disabled={petsSelection === 'no'}
+              maxLength={300}
               value={formData.whichPets}
               onChange={handleInputChange}
               error={!!getFieldError('whichPets')}
@@ -340,6 +359,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               id="phone"
               name="phone"
               label={t('fields.phone')}
+              maxLength={20}
               value={formData.phone}
               onChange={handleInputChange}
               error={!!getFieldError('phone')}

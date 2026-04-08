@@ -20,6 +20,8 @@ export const Input: React.FC<InputProps> = ({
   disabled,
   type,
   layout = 'vertical',
+  onRightIconClick,
+  onLeftIconClick,
   ref,
   ...props
 }) => {
@@ -41,14 +43,22 @@ export const Input: React.FC<InputProps> = ({
     
   const focusClasses = !isCheckbox ? "focus:border-accent focus:text-accent" : "";
   const filledClasses = (!isCheckbox && type !== 'number') ? "[&:not(:placeholder-shown)]:border-secondary [&:not(:placeholder-shown)]:text-secondary" : "";
-  const errorClasses = error ? "!border-error-dark !text-error-dark" : "";
+  const errorClasses = error ? "!border-error-dark" : "";
 
   const content = (
     <div className="relative flex-1">
       {LeftIcon && !isCheckbox && (
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary/40">
+        <button
+          type="button"
+          onClick={onLeftIconClick}
+          className={twMerge(
+            "absolute left-3 top-1/2 -translate-y-1/2 text-secondary/40 transition-colors",
+            onLeftIconClick ? "cursor-pointer hover:text-secondary pointer-events-auto" : "pointer-events-none"
+          )}
+          tabIndex={onLeftIconClick ? 0 : -1}
+        >
           <LeftIcon size={inputSize === 'sm' ? 16 : 18} />
-        </div>
+        </button>
       )}
       <input
         id={id}
@@ -72,9 +82,17 @@ export const Input: React.FC<InputProps> = ({
         {...props}
       />
       {RightIcon && !isCheckbox && (
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary/40">
+        <button
+          type="button"
+          onClick={onRightIconClick}
+          className={twMerge(
+            "absolute right-3 top-1/2 -translate-y-1/2 text-secondary/40 transition-colors",
+            onRightIconClick ? "cursor-pointer hover:text-secondary pointer-events-auto" : "pointer-events-none"
+          )}
+          tabIndex={onRightIconClick ? 0 : -1}
+        >
           <RightIcon size={inputSize === 'sm' ? 16 : 18} />
-        </div>
+        </button>
       )}
     </div>
   );

@@ -12,4 +12,6 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   type?: string;
   layout?: 'vertical' | 'horizontal';
   inputClassName?: string;
+  onRightIconClick?: () => void;
+  onLeftIconClick?: () => void;
 }

@@ -265,7 +265,8 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                     type="button"
                     size="sm"
                     variant="primary"
-                    className="w-full !h-[36px] sm:!h-[42px] !rounded-[4px] uppercase font-bold text-[12px] items-center justify-center flex cursor-pointer"
+                    className="w-full !h-[36px] sm:!h-[42px] !rounded-[4px] items-center justify-center flex cursor-pointer uppercase"
+                    textClassName="text-[10px] font-bold"
                     disabled={!selectedDate || !selectedTime}
                     onClick={handleConfirm}
                   >

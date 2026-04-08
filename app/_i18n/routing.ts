@@ -9,7 +9,10 @@ export const routing = defineRouting({
   defaultLocale: 'de',
 
   // Use prefix for all locales (including default)
-  localePrefix: 'always'
+  localePrefix: 'always',
+
+  // Disable automatic browser language detection
+  localeDetection: false
 });
 
 export const {Link, redirect, usePathname, useRouter, getPathname} =

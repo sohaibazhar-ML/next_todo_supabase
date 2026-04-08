@@ -77,6 +77,9 @@ export const Footer: React.FC<FooterProps> = ({ className = '' }) => {
                     placeholder={t('form.phone')}
                     className="w-full"
                     inputClassName="!h-[36px] !min-h-0"
+                    onInput={(e: React.FormEvent<HTMLInputElement>) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9+\-]/g, '');
+                    }}
                   />
                 </div>
 
