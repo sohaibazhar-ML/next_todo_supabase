@@ -7,9 +7,10 @@ export interface SelectOption {
 }
 
 export interface SelectProps {
-  id: string;
+  id?: string;
   name?: string;
   label?: string;
+  autoFocus?: boolean;
   error?: boolean;
   errorText?: string;
   options: SelectOption[];

@@ -10,6 +10,7 @@ export const Select: React.FC<SelectProps> = ({
   id,
   name,
   label,
+  autoFocus,
   error,
   errorText,
   options,
@@ -69,7 +70,7 @@ export const Select: React.FC<SelectProps> = ({
             onValueChange={handleValueChange}
             disabled={disabled}
           >
-            <SelectPrimitive.Trigger id={id} className={triggerClasses}>
+            <SelectPrimitive.Trigger id={id} className={triggerClasses} autoFocus={autoFocus}>
               <div className="flex items-center gap-2 flex-1 truncate pointer-events-none">
                 {selectedOption?.flag && (
                   <div className="relative w-[22px] h-[15px] flex-shrink-0 shadow-sm overflow-hidden rounded-[1px]">
