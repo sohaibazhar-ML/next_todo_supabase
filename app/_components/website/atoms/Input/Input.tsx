@@ -90,7 +90,7 @@ export const Input: React.FC<InputProps> = ({
           isCheckbox ? "cursor-pointer select-none order-2" : "order-1",
           labelClassName
         )}>
-          <Text variant="text-xxs" className="font-normal text-text-label leading-none">
+          <Text className="font-normal text-text-label text-[16px] leading-none">
             {label}
           </Text>
         </label>

@@ -35,7 +35,7 @@ export const Textarea: React.FC<TextareaProps> = ({
     <div className="flex flex-col gap-1.5 w-full">
       {label && (
         <label htmlFor={id}>
-          <Text variant="text-xxs" className="font-normal text-text-label">
+          <Text className="font-normal text-text-label text-[16px]">
             {label}
           </Text>
         </label>

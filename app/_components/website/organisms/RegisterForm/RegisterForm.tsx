@@ -22,7 +22,11 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
   const countryOptions: SelectOption[] = Object.entries(
     t.raw('fields.country.options') as Record<string, string>
   )
-    .map(([value, label]) => ({ value, label }))
+    .map(([value, label]) => ({
+      value,
+      label,
+      flag: `https://flagcdn.com/w40/${value.toLowerCase()}.png`
+    }))
     .sort((a, b) => a.label.localeCompare(b.label));
 
   const petOptions: SelectOption[] = [
@@ -33,16 +37,16 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
   return (
     <div className={`w-full bg-white mt-10 md:mt-20 pt-12 md:pt-16 pb-0 md:pb-4 px-2 md:px-4 flex flex-col items-center rounded-none shadow-sm ${className}`}>
       <div className="flex flex-col items-center gap-4 text-center w-full mb-10">
-        <Text variant="heading-xl" className="text-secondary font-bold">
+        <Text className="text-secondary font-semibold text-[43px]">
           {t('title')}
         </Text>
-        <Text variant="text-m" className="text-secondary/70">
+        <Text className="text-secondary font-semibold text-[29px]">
           {t('subtitle')}
         </Text>
       </div>
 
       <div className="w-full mb-8">
-        <Text variant="text-xs" className="text-secondary font-bold text-left px-1">
+        <Text className="text-[#565655] font-semibold text-[23px] text-left px-1">
           {t('instruction')}
         </Text>
       </div>

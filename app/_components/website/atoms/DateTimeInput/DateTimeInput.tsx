@@ -110,7 +110,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
     <div className={twMerge("flex w-full", layout === 'vertical' ? "flex-col gap-1.5" : "flex-row items-center gap-3", className)}>
       {label && (
         <label htmlFor={id} className={twMerge("order-1", labelClassName)}>
-          <Text variant="text-xxs" className="font-medium text-secondary/70 leading-none">
+          <Text className="font-normal text-text-label text-[16px] leading-none">
             {label}
           </Text>
         </label>
