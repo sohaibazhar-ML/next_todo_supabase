@@ -119,7 +119,13 @@
       },
       "password": {
         "label": "Password",
-        "placeholder": "At least 8 characters"
+        "placeholder": "At least 8 characters",
+        "rules": {
+          "length": "Password must be at least 8 characters",
+          "uppercase": "Password must contain at least one uppercase letter",
+          "number": "Password must contain at least one number",
+          "special": "Password must contain at least one special character"
+        }
       },
       "firstName": "First name",
       "lastName": "Last name",

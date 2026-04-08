@@ -18,4 +18,5 @@ export interface SelectProps {
   onChange?: (event: { target: { name?: string; value: string } }) => void;
   className?: string;
   disabled?: boolean;
+  required?: boolean;
 }

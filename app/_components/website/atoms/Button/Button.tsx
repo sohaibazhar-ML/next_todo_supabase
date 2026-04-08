@@ -40,6 +40,7 @@ export const Button: React.FC<ButtonProps> = ({
   disabled,
   width,
   minWidth,
+  textClassName = '',
   className = '',
   style = {},
   children,
@@ -82,6 +83,7 @@ export const Button: React.FC<ButtonProps> = ({
             variant={textVariantMap[size]}
             className={twMerge(
               "flex items-center gap-2 font-semibold",
+              textClassName,
               actualLoading ? 'opacity-70' : 'opacity-100'
             )}
           >

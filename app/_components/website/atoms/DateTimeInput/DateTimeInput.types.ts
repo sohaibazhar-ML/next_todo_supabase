@@ -18,4 +18,5 @@ export interface DateTimeInputProps {
   maxDate?: Date;
   leftIcon?: LucideIcon;
   layout?: 'vertical' | 'horizontal';
+  required?: boolean;
 }

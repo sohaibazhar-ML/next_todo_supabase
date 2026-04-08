@@ -37,6 +37,7 @@ export const Textarea: React.FC<TextareaProps> = ({
         <label htmlFor={id}>
           <Text className="font-normal text-text-label text-[16px]">
             {label}
+            {props.required && <span className="text-primary ml-1">*</span>}
           </Text>
         </label>
       )}

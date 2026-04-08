@@ -16,6 +16,7 @@ export const Select: React.FC<SelectProps> = ({
   placeholder = "Select an option",
   className = '',
   disabled,
+  required,
   value: controlledValue,
   onChange,
 }) => {
@@ -56,6 +57,7 @@ export const Select: React.FC<SelectProps> = ({
         <label htmlFor={id} className="order-1">
           <Text className="font-normal text-text-label text-[16px] leading-none">
             {label}
+            {required && <span className="text-primary ml-1">*</span>}
           </Text>
         </label>
       )}

@@ -3,6 +3,7 @@ import React, { useActionState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Text, Button, Input, Select, Checkbox, SelectOption, DateTimeInput } from '@/website/atoms';
 import { RegisterFormProps } from '@/website/organisms/RegisterForm/RegisterForm.types';
+import { registerSchema } from '@/schemas/website/register.schema';
 import { registerAction } from '@/actions/website/auth.actions';
 import { useRouter } from '@/i18n/routing';
 
@@ -12,6 +13,62 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
   const router = useRouter();
   const [state, formAction, isPending] = useActionState(registerAction, {});
   const [petsSelection, setPetsSelection] = React.useState<string>('');
+  const [touchedFields, setTouchedFields] = React.useState<Record<string, boolean>>({});
+  const [formData, setFormData] = React.useState({
+    gender: '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    currentAddress: '',
+    country: '',
+    newAddress: '',
+    numPersons: '',
+    numAdults: '',
+    numChildren: '',
+    pets: '',
+    whichPets: '',
+    phone: '',
+    preferredTime: '',
+    consent: false,
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    setTouchedFields(prev => ({ ...prev, [name]: true }));
+  };
+
+  const clientValidation = registerSchema.safeParse(formData);
+  const clientErrors: Record<string, string[]> = !clientValidation.success
+    ? clientValidation.error.flatten().fieldErrors as Record<string, string[]>
+    : {};
+
+  const isFormValid = clientValidation.success;
+
+  const getFieldError = (name: string) => {
+    const value = formData[name as keyof typeof formData];
+    // Rule 1: Don't show validation if field is empty (matching user request: "validation should disappear if the user clears the field")
+    if (value === '' || value === false || value === undefined) return undefined;
+
+    // Rule 2: Only show validation if the field has been touched
+    const serverError = (state as any).errors?.[name]?.[0];
+    if (!touchedFields[name]) return serverError;
+
+    // Rule 3: Prioritize client-side real-time errors, fallback to server errors
+    return clientErrors[name]?.[0] || serverError;
+  };
+
+  const passwordRules = [
+    { key: 'length', label: t('fields.password.rules.length'), check: (val: string) => val.length >= 8 },
+    { key: 'uppercase', label: t('fields.password.rules.uppercase'), check: (val: string) => /[A-Z]/.test(val) },
+    { key: 'number', label: t('fields.password.rules.number'), check: (val: string) => /[0-9]/.test(val) },
+    { key: 'special', label: t('fields.password.rules.special'), check: (val: string) => /[^a-zA-Z0-9]/.test(val) },
+  ];
+
+  const unmetPasswordRules = formData.password === ''
+    ? []
+    : passwordRules.filter(rule => !rule.check(formData.password));
 
   const genderOptions: SelectOption[] = [
     { label: t('fields.gender.options.male'), value: 'male' },
@@ -62,8 +119,14 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               label={t('fields.gender.label')}
               placeholder={t('fields.gender.placeholder')}
               options={genderOptions}
-              error={!!state.errors?.gender}
-              errorText={state.errors?.gender?.[0]}
+              required
+              value={formData.gender}
+              onChange={(e) => {
+                setFormData(prev => ({ ...prev, gender: e.target.value }));
+                setTouchedFields(prev => ({ ...prev, gender: true }));
+              }}
+              error={!!getFieldError('gender')}
+              errorText={getFieldError('gender')}
             />
           </div>
           <div className="col-span-12 md:col-span-4">
@@ -71,8 +134,11 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               id="firstName"
               name="firstName"
               label={t('fields.firstName')}
-              error={!!state.errors?.firstName}
-              errorText={state.errors?.firstName?.[0]}
+              required
+              value={formData.firstName}
+              onChange={handleInputChange}
+              error={!!getFieldError('firstName')}
+              errorText={getFieldError('firstName')}
             />
           </div>
           <div className="col-span-12 md:col-span-4">
@@ -80,8 +146,11 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               id="lastName"
               name="lastName"
               label={t('fields.lastName')}
-              error={!!state.errors?.lastName}
-              errorText={state.errors?.lastName?.[0]}
+              required
+              value={formData.lastName}
+              onChange={handleInputChange}
+              error={!!getFieldError('lastName')}
+              errorText={getFieldError('lastName')}
             />
           </div>
 
@@ -93,8 +162,11 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               type="email"
               label={t('fields.email.label')}
               placeholder={t('fields.email.placeholder')}
-              error={!!state.errors?.email}
-              errorText={state.errors?.email?.[0]}
+              required
+              value={formData.email}
+              onChange={handleInputChange}
+              error={!!getFieldError('email')}
+              errorText={getFieldError('email')}
             />
           </div>
           <div className="col-span-12 md:col-span-6">
@@ -104,8 +176,20 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               type="password"
               label={t('fields.password.label')}
               placeholder={t('fields.password.placeholder')}
-              error={!!state.errors?.password}
-              errorText={state.errors?.password?.[0]}
+              required
+              value={formData.password}
+              onChange={handleInputChange}
+              error={formData.password === '' && !!getFieldError('password')}
+              errorText={formData.password === '' ? getFieldError('password') : undefined}
+              helperText={
+                unmetPasswordRules.length > 0 && (
+                  <div className="flex flex-col gap-0.5 mt-1">
+                    {unmetPasswordRules.map((rule) => (
+                      <span key={rule.key} className="block">• {rule.label}</span>
+                    ))}
+                  </div>
+                )
+              }
             />
           </div>
 
@@ -115,8 +199,11 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               id="currentAddress"
               name="currentAddress"
               label={t('fields.currentAddress')}
-              error={!!state.errors?.currentAddress}
-              errorText={state.errors?.currentAddress?.[0]}
+              required
+              value={formData.currentAddress}
+              onChange={handleInputChange}
+              error={!!getFieldError('currentAddress')}
+              errorText={getFieldError('currentAddress')}
             />
           </div>
           <div className="col-span-12 md:col-span-4">
@@ -126,8 +213,14 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               label={t('fields.country.label')}
               placeholder={t('fields.country.placeholder')}
               options={countryOptions}
-              error={!!state.errors?.country}
-              errorText={state.errors?.country?.[0]}
+              required
+              value={formData.country}
+              onChange={(e) => {
+                setFormData(prev => ({ ...prev, country: e.target.value }));
+                setTouchedFields(prev => ({ ...prev, country: true }));
+              }}
+              error={!!getFieldError('country')}
+              errorText={getFieldError('country')}
             />
           </div>
 
@@ -137,8 +230,11 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               id="newAddress"
               name="newAddress"
               label={t('fields.newAddress')}
-              error={!!state.errors?.newAddress}
-              errorText={state.errors?.newAddress?.[0]}
+              required
+              value={formData.newAddress}
+              onChange={handleInputChange}
+              error={!!getFieldError('newAddress')}
+              errorText={getFieldError('newAddress')}
             />
           </div>
 
@@ -150,8 +246,11 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               label={t('fields.numPersons')}
               type="number"
               min="0"
-              error={!!state.errors?.numPersons}
-              errorText={state.errors?.numPersons?.[0]}
+              required
+              value={formData.numPersons}
+              onChange={handleInputChange}
+              error={!!getFieldError('numPersons')}
+              errorText={getFieldError('numPersons')}
             />
           </div>
           <div className="col-span-12 md:col-span-4">
@@ -161,8 +260,11 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               label={t('fields.numAdults')}
               type="number"
               min="0"
-              error={!!state.errors?.numAdults}
-              errorText={state.errors?.numAdults?.[0]}
+              required
+              value={formData.numAdults}
+              onChange={handleInputChange}
+              error={!!getFieldError('numAdults')}
+              errorText={getFieldError('numAdults')}
             />
           </div>
           <div className="col-span-12 md:col-span-4">
@@ -172,8 +274,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               label={t('fields.numChildren')}
               type="number"
               min="0"
-              error={!!state.errors?.numChildren}
-              errorText={state.errors?.numChildren?.[0]}
+              value={formData.numChildren}
+              onChange={handleInputChange}
+              error={!!getFieldError('numChildren')}
+              errorText={getFieldError('numChildren')}
             />
           </div>
 
@@ -185,10 +289,15 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               label={t('fields.pets.label')}
               placeholder={t('fields.pets.placeholder')}
               options={petOptions}
-              value={petsSelection}
-              onChange={(e) => setPetsSelection(e.target.value)}
-              error={!!state.errors?.pets}
-              errorText={state.errors?.pets?.[0]}
+              required
+              value={formData.pets}
+              onChange={(e) => {
+                setPetsSelection(e.target.value);
+                setFormData(prev => ({ ...prev, pets: e.target.value }));
+                setTouchedFields(prev => ({ ...prev, pets: true }));
+              }}
+              error={!!getFieldError('pets')}
+              errorText={getFieldError('pets')}
             />
           </div>
           <div className="col-span-12 md:col-span-8">
@@ -197,8 +306,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               name="whichPets"
               label={t('fields.whichPets')}
               disabled={petsSelection === 'no'}
-              error={!!state.errors?.whichPets}
-              errorText={state.errors?.whichPets?.[0]}
+              value={formData.whichPets}
+              onChange={handleInputChange}
+              error={!!getFieldError('whichPets')}
+              errorText={getFieldError('whichPets')}
             />
           </div>
 
@@ -208,11 +319,17 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               id="consent"
               name="consent"
               label={t('consent')}
-              error={!!state.errors?.consent}
+              labelClassName="text-[21px] font-medium text-[#362E2D]"
+              checked={formData.consent}
+              onChange={(e: any) => {
+                setFormData(prev => ({ ...prev, consent: e.target.checked }));
+                setTouchedFields(prev => ({ ...prev, consent: true }));
+              }}
+              error={!!getFieldError('consent')}
             />
-            {state.errors?.consent && (
+            {getFieldError('consent') && (
               <Text variant="text-xxs" className="text-error-dark mt-2 block">
-                {state.errors.consent[0]}
+                {getFieldError('consent')}
               </Text>
             )}
           </div>
@@ -223,8 +340,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               id="phone"
               name="phone"
               label={t('fields.phone')}
-              error={!!state.errors?.phone}
-              errorText={state.errors?.phone?.[0]}
+              value={formData.phone}
+              onChange={handleInputChange}
+              error={!!getFieldError('phone')}
+              errorText={getFieldError('phone')}
             />
           </div>
           <div className="col-span-12 md:col-span-4">
@@ -233,14 +352,19 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               name="preferredTime"
               label={t('fields.preferredTime.label')}
               placeholder={t('fields.preferredTime.placeholder')}
-              error={!!state.errors?.preferredTime}
-              errorText={state.errors?.preferredTime?.[0]}
+              value={formData.preferredTime}
+              onChange={(val) => {
+                setFormData(prev => ({ ...prev, preferredTime: val || '' }));
+                setTouchedFields(prev => ({ ...prev, preferredTime: true }));
+              }}
+              error={!!getFieldError('preferredTime')}
+              errorText={getFieldError('preferredTime')}
             />
           </div>
         </div>
 
         <div className="w-full mb-10 px-1">
-          <Text variant="text-xs" className="text-secondary/60 leading-relaxed text-left">
+          <Text variant="text-xs" className="text-secondary leading-relaxed text-left">
             {t('legalNote')}
           </Text>
         </div>
@@ -258,19 +382,19 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
             <Button
               type="submit"
               variant="primary"
-              size="sm"
-              minWidth={294}
               isLoading={isPending}
-              className="!h-[46px] !rounded-[6px] uppercase font-bold px-10"
+              disabled={!isFormValid || isPending}
+              className="!rounded-[6px] normal-case py-[8.5px] px-[16px] disabled:opacity-50 disabled:cursor-not-allowed"
+              textClassName="text-[22px] font-medium"
             >
               {t('submit')}
             </Button>
           </div>
         )}
 
-        {state.errors?.form && (
+        {(state as any).errors?.form && (
           <Text variant="body-sm" className="text-error-dark mt-4 text-center">
-            {state.errors.form}
+            {(state as any).errors.form}
           </Text>
         )}
       </form>

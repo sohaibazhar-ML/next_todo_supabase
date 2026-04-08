@@ -13,6 +13,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   fullWidth?: boolean;
   width?: number | string;
   minWidth?: number | string;
+  textClassName?: string;
   className?: string;
   children: ReactNode;
   ref?: React.Ref<HTMLButtonElement>;

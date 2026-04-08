@@ -34,6 +34,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
   maxDate,
   leftIcon: LeftIcon = CalendarIcon,
   layout = 'vertical',
+  required,
 }) => {
   const currentLocale = useLocale();
   const t = useTranslations('DateTimeInput');
@@ -112,6 +113,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
         <label htmlFor={id} className={twMerge("order-1", labelClassName)}>
           <Text className="font-normal text-text-label text-[16px] leading-none">
             {label}
+            {required && <span className="text-primary ml-1">*</span>}
           </Text>
         </label>
       )}
@@ -127,7 +129,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
               className={twMerge(
                 clsx(
                   "w-full bg-white rounded-[2px] border transition-all outline-none flex items-center text-left cursor-pointer",
-                  "h-[40px] sm:h-[44px] px-3 sm:px-4",
+                  "h-[44px] min-h-[44px] py-[5px] px-5",
                   isOpen ? "border-accent" : (displayValue ? "border-secondary" : "border-border-input"),
                   error ? "!border-error-dark" : "",
                   disabled && "opacity-50 bg-background-neutral cursor-not-allowed",
