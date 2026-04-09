@@ -56,6 +56,10 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
       setSelectedDate(date);
       setSelectedTime(format(date, 'HH:mm'));
       setFinalValue(value);
+    } else if (value === "" || value === undefined || value === null) {
+      setSelectedDate(undefined);
+      setSelectedTime(undefined);
+      setFinalValue("");
     }
   }, [value]);
 

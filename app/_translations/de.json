@@ -56,7 +56,9 @@
       "name": "Vorname, Nachname",
       "time": "Tag, Uhrzeit",
       "phone": "Meine Rückrufnummer",
-      "cta": "Rückruf bestätigen"
+      "cta": "Rückruf bestätigen",
+      "success": "Rückruf bestätigt! Wir melden uns zum gewünschten Zeitpunkt.",
+      "error": "Fehler beim Senden. Bitte versuchen Sie es später erneut."
     },
     "about": "Über uns",
     "faq": "FAQ",

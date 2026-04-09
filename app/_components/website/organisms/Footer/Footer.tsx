@@ -1,13 +1,69 @@
 "use client";
 
-import React from 'react';
-import { useTranslations } from 'next-intl';
+import React, { useTransition } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { Input, Text, Image, Button, DateTimeInput } from '@/website/atoms';
 import { FooterProps } from '@/website/organisms/Footer/Footer.types';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { contactSchema, ContactInput } from '@/schemas/website/contact.schema';
+import { submitContactAction } from '@/actions/website/contact.actions';
+import { toast } from 'sonner';
 
 export const Footer: React.FC<FooterProps> = ({ className = '' }) => {
   const t = useTranslations('Footer');
+  const locale = useLocale();
+  const [isPending, startTransition] = useTransition();
+  const [status, setStatus] = React.useState<'idle' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    watch,
+    formState: { errors },
+  } = useForm<ContactInput>({
+    resolver: zodResolver(contactSchema),
+    defaultValues: {
+      footer_name: '',
+      footer_phone: '',
+      footer_time: '',
+    },
+  });
+
+  // Watch for any changes to clear the error status
+  const watchedFields = watch();
+  React.useEffect(() => {
+    if (status === 'error') {
+      setStatus('idle');
+      setErrorMessage(null);
+    }
+  }, [watchedFields.footer_name, watchedFields.footer_phone, watchedFields.footer_time]);
+
+  const onSubmit = (data: ContactInput) => {
+    startTransition(async () => {
+      setStatus('idle');
+      const result = await submitContactAction({
+        ...data,
+        locale,
+      });
+
+      if (result.success) {
+        setStatus('success');
+        toast.success(t('form.success'));
+        reset();
+        
+        // Hide success message after 5 seconds
+        setTimeout(() => setStatus('idle'), 5000);
+      } else {
+        setStatus('error');
+        setErrorMessage(result.error || t('form.error'));
+        toast.error(result.error || t('form.error'));
+      }
+    });
+  };
 
   return (
     <footer id="contact" className="w-full bg-background-dark flex justify-center pt-16 pb-10 text-white h-auto">
@@ -48,44 +104,75 @@ export const Footer: React.FC<FooterProps> = ({ className = '' }) => {
               </div>
 
               {/* Form Inputs & CTA Button */}
-              <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6 w-full">
+              <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col lg:flex-row items-start lg:items-center gap-6 w-full">
                 <div className="flex flex-col gap-4 w-full max-w-[513px]">
                   <div className="flex flex-col sm:flex-row gap-4 w-full">
-                    <Input
-                      id="footer-name"
-                      label={t('form.name')}
-                      labelClassName="sr-only"
-                      placeholder={t('form.name')}
-                      className="w-[315px]"
-                      inputClassName="!h-[36px] !min-h-0"
-                      type='text'
+                    <Controller
+                      name="footer_name"
+                      control={control}
+                      render={({ field }) => (
+                        <Input
+                          {...field}
+                          id="footer-name"
+                          label={t('form.name')}
+                          labelClassName="sr-only"
+                          placeholder={t('form.name')}
+                          className="w-[315px]"
+                          inputClassName="!h-[36px] !min-h-0"
+                          type='text'
+                          error={!!errors.footer_name}
+                          errorText={errors.footer_name?.message}
+                          disabled={isPending}
+                        />
+                      )}
                     />
-                    <DateTimeInput
-                      id="footer-time"
-                      name="preferred_time"
-                      label={t('form.time')}
-                      labelClassName="sr-only"
-                      placeholder={t('form.time')}
-                      className="w-[182px]"
-                      inputClassName="!h-[36px] !min-h-0"
+                    <Controller
+                      name="footer_time"
+                      control={control}
+                      render={({ field }) => (
+                        <DateTimeInput
+                          {...field}
+                          id="footer-time"
+                          label={t('form.time')}
+                          labelClassName="sr-only"
+                          placeholder={t('form.time')}
+                          className="w-[182px]"
+                          inputClassName="!h-[36px] !min-h-0"
+                          error={!!errors.footer_time}
+                          errorText={errors.footer_time?.message}
+                          disabled={isPending}
+                        />
+                      )}
                     />
                   </div>
-                  <Input
-                    id="footer-phone"
-                    label={t('form.phone')}
-                    labelClassName="sr-only"
-                    placeholder={t('form.phone')}
-                    className="w-full"
-                    inputClassName="!h-[36px] !min-h-0"
-                    onInput={(e: React.FormEvent<HTMLInputElement>) => {
-                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9+\-]/g, '');
-                    }}
+                  <Controller
+                    name="footer_phone"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        id="footer-phone"
+                        label={t('form.phone')}
+                        labelClassName="sr-only"
+                        placeholder={t('form.phone')}
+                        className="w-full"
+                        inputClassName="!h-[36px] !min-h-0"
+                        error={!!errors.footer_phone}
+                        errorText={errors.footer_phone?.message}
+                        disabled={isPending}
+                        onInput={(e: React.FormEvent<HTMLInputElement>) => {
+                          e.currentTarget.value = e.currentTarget.value.replace(/[^0-9+\-\s]/g, '');
+                        }}
+                      />
+                    )}
                   />
                 </div>
 
                 <Button
+                  type="submit"
                   variant="unstyled"
-                  className="relative w-[80px] h-[80px] p-0 flex-shrink-0 transition-transform hover:scale-105 active:scale-95 border-none bg-transparent hover:bg-transparent"
+                  disabled={isPending}
+                  className="relative w-[80px] h-[80px] p-0 flex-shrink-0 transition-transform hover:scale-105 active:scale-95 border-none bg-transparent hover:bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Image
                     src="/assets/website/icons/Button_call-me-back 1.png"
@@ -95,6 +182,20 @@ export const Footer: React.FC<FooterProps> = ({ className = '' }) => {
                     className="object-contain"
                   />
                 </Button>
+              </form>
+
+              {/* Status Messages */}
+              <div className="h-6 -mt-4">
+                {status === 'success' && (
+                  <Text variant="text-xxs" className="text-accent font-medium animate-in fade-in slide-in-from-top-1">
+                    {t('form.success')}
+                  </Text>
+                )}
+                {status === 'error' && (
+                  <Text variant="text-xxs" className="text-error-dark font-medium animate-in fade-in slide-in-from-top-1">
+                    {errorMessage}
+                  </Text>
+                )}
               </div>
             </div>
 

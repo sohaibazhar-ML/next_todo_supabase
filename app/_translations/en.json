@@ -56,7 +56,9 @@
       "name": "First Name, Last Name",
       "time": "Day, Time",
       "phone": "My callback number",
-      "cta": "Confirm callback"
+      "cta": "Confirm callback",
+      "success": "Callback confirmed! We will contact you at the requested time.",
+      "error": "Error sending request. Please try again later."
     },
     "about": "About us",
     "faq": "FAQ",
