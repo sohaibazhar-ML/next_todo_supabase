@@ -161,7 +161,23 @@ body {
   }
 
   100% {
-    transform: translateX(calc(-100% + 120px));
+    transform: translateX(calc(-100% + var(--actual-width, 120px)));
+  }
+}
+
+.hover-marquee {
+  --actual-width: var(--marquee-width, 120px);
+}
+
+@media (min-width: 1024px) {
+  .hover-marquee {
+    --actual-width: var(--marquee-width-lg, var(--marquee-width, 130px));
+  }
+}
+
+@media (min-width: 1280px) {
+  .hover-marquee {
+    --actual-width: var(--marquee-width-xl, var(--marquee-width-lg, var(--marquee-width, 160px)));
   }
 }
 

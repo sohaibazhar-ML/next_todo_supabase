@@ -41,7 +41,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
         </div>
 
         {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center gap-[12px] xl:gap-[40px]">
+        <nav className={`hidden lg:flex items-center ${locale === 'en' ? 'gap-[12px] xl:gap-[40px]' : 'gap-[8px] xl:gap-[16px]'}`}>
           {navLinks.map((link) => (
             <NavLink 
               key={link.name} 
@@ -55,24 +55,52 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
         </nav>
 
         {/* Desktop Actions */}
-        <div className="hidden lg:flex items-center gap-[4px] xl:gap-[24px]">
+        <div className={`hidden lg:flex items-center ${locale === 'en' ? 'gap-[4px] xl:gap-[24px]' : 'gap-[4px] xl:gap-[16px]'}`}>
           <Link href="/login">
             <Button
               size="sm"
               variant="outline"
-              className="bg-white border-none text-secondary font-semibold hover:bg-white/90 lg:px-3 xl:px-6"
+              className="bg-white border-none text-secondary font-semibold hover:bg-white/90 lg:px-3 xl:px-6 overflow-hidden relative"
             >
-              {t('login')}
+              <span 
+                className={`block ${locale === 'en' ? 'max-w-none' : 'overflow-hidden lg:max-w-[80px] xl:max-w-[100px]'}`}
+                style={{ 
+                  '--marquee-width': locale === 'en' ? 'none' : '80px',
+                  '--marquee-width-lg': '80px',
+                  '--marquee-width-xl': '100px'
+                } as React.CSSProperties}
+              >
+                <span 
+                  className={`block truncate ${locale === 'en' ? '' : 'hover-marquee'}`}
+                  title={t('login')}
+                >
+                  {t('login')}
+                </span>
+              </span>
             </Button>
           </Link>
-
+ 
           <Link href="/register">
             <Button
               size="sm"
               variant="primary"
-              className="lg:px-3 xl:px-6"
+              className="lg:px-3 xl:px-6 overflow-hidden relative"
             >
-              {t('register')}
+              <span 
+                className={`block ${locale === 'en' ? 'max-w-none' : 'overflow-hidden lg:max-w-[120px] xl:max-w-[160px]'}`}
+                style={{ 
+                  '--marquee-width': locale === 'en' ? 'none' : '120px',
+                  '--marquee-width-lg': '120px',
+                  '--marquee-width-xl': '160px'
+                } as React.CSSProperties}
+              >
+                <span 
+                  className={`block truncate ${locale === 'en' ? '' : 'hover-marquee'}`}
+                  title={t('register')}
+                >
+                  {t('register')}
+                </span>
+              </span>
             </Button>
           </Link>
 

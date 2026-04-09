@@ -18,7 +18,14 @@ export const NavLink: React.FC<NavLinkProps> = ({
       title={typeof children === 'string' ? children : undefined}
       className={`group relative py-2 transition-colors duration-200 ${className}`}
     >
-      <div className={`relative ${disableTruncate ? 'w-auto' : 'max-w-[120px] lg:max-w-[130px] xl:max-w-[160px] overflow-hidden'}`}>
+      <div 
+        className={`relative ${disableTruncate ? 'w-auto' : 'max-w-[120px] lg:max-w-[130px] xl:max-w-[160px] overflow-hidden'}`}
+        style={{
+          '--marquee-width': '120px',
+          '--marquee-width-lg': '130px',
+          '--marquee-width-xl': '160px'
+        } as React.CSSProperties}
+      >
         <Text
           variant="body-md"
           title={typeof children === 'string' ? children : undefined}
