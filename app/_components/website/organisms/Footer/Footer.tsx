@@ -54,7 +54,7 @@ export const Footer: React.FC<FooterProps> = ({ className = '' }) => {
         setStatus('success');
         toast.success(t('form.success'));
         reset();
-        
+
         // Hide success message after 5 seconds
         setTimeout(() => setStatus('idle'), 5000);
       } else {
@@ -70,7 +70,7 @@ export const Footer: React.FC<FooterProps> = ({ className = '' }) => {
       <div className="max-w-(--container-width-desktop) w-full px-(--spacing-container-padding) flex flex-col gap-14">
         <div className="grid grid-cols-12 gap-x-(--spacing-gutter) gap-y-12 items-start">
           {/* Column 1: Links Sidebar */}
-          <div className="col-span-12 lg:col-span-4 flex flex-col gap-4 lg:pt-[76px]">
+          <div className="col-span-12 lg:col-span-3 flex flex-col gap-4 lg:pt-[76px]">
             <Link href="/about" className="block w-fit">
               <Text variant="text-xs" className="text-white font-normal text-[23px] hover:text-white/80 transition-colors">{t('about')}</Text>
             </Link>
@@ -85,7 +85,7 @@ export const Footer: React.FC<FooterProps> = ({ className = '' }) => {
           </div>
 
           {/* Column 2: Main Contact & Legal section */}
-          <div className="col-span-12 lg:col-span-8 flex flex-col gap-8">
+          <div className="col-span-12 lg:col-span-9 flex flex-col gap-8">
             {/* Top: Phone icon & Questions */}
             <div className="flex flex-col gap-6">
               <div className="flex items-center gap-4">
