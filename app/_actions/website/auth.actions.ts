@@ -11,6 +11,20 @@ import { cookies } from 'next/headers';
 import { ActionState } from '@/app/_types/website/actions/auth.types';
 import { getTranslations } from 'next-intl/server';
 
+/**
+ * Checks if an error is related to a network connection failure or timeout.
+ */
+function isConnectionError(err: any): boolean {
+  if (!err) return false;
+  
+  // Check for common connection error signatures
+  const isTimeout = err.code === 'UND_ERR_CONNECT_TIMEOUT' || err.cause?.code === 'UND_ERR_CONNECT_TIMEOUT';
+  const isFetchFailed = err.message?.toLowerCase().includes('fetch failed');
+  const isNetworkError = err.message?.toLowerCase().includes('network error') || err.message?.toLowerCase().includes('eai_again');
+
+  return isTimeout || isFetchFailed || isNetworkError;
+}
+
 export async function forgotPasswordAction(prevState: ActionState, formData: FormData): Promise<ActionState> {
   const email = formData.get('email') as string;
 
@@ -25,7 +39,19 @@ export async function forgotPasswordAction(prevState: ActionState, formData: For
     };
   }
 
+  const t = await getTranslations('Login');
+
   try {
+    // 1. Check if user exists in the profiles table
+    const profile = await prisma.profiles.findUnique({
+      where: { email },
+      select: { id: true }
+    });
+
+    if (!profile) {
+      return { errors: { form: t('errors.userNotFound') } };
+    }
+
     const supabase = await createClient();
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/callback?type=recovery`,
@@ -38,6 +64,9 @@ export async function forgotPasswordAction(prevState: ActionState, formData: For
     return { success: true };
   } catch (err) {
     console.error('Forgot password error:', err);
+    if (isConnectionError(err)) {
+      return { errors: { form: t('errors.connectionError') } };
+    }
     return { errors: { form: 'An unexpected error occurred. Please try again.' } };
   }
 }
@@ -118,6 +147,13 @@ export async function registerAction(prevState: ActionState, formData: FormData)
     return { success: true };
   } catch (err) {
     console.error('Registration error:', err);
+    
+    // Check for connection error first
+    const t = await getTranslations('Login');
+    if (isConnectionError(err)) {
+      return { errors: { form: t('errors.connectionError') } };
+    }
+
     // Handle unique constraint violation for username/email
     if (err instanceof Error && err.message.includes('Unique constraint')) {
       return { errors: { form: 'Username or email already exists.' } };
@@ -155,6 +191,10 @@ export async function resetPasswordAction(prevState: ActionState, formData: Form
     return { success: true };
   } catch (err) {
     console.error('Reset password error:', err);
+    if (isConnectionError(err)) {
+      const t = await getTranslations('Login');
+      return { errors: { form: t('errors.connectionError') } };
+    }
     return { errors: { form: 'An unexpected error occurred. Please try again.' } };
   }
 }
@@ -227,6 +267,11 @@ export async function loginAction(prevState: ActionState, formData: FormData): P
       throw err;
     }
     console.error('Login error:', err);
+    
+    if (isConnectionError(err)) {
+      return { errors: { form: t('errors.connectionError') } };
+    }
+    
     return { errors: { form: t('errors.invalidCredentials') } };
   }
 

@@ -102,7 +102,8 @@
     "register": "Kostenlos registrieren",
     "errors": {
       "userNotFound": "Benutzer nicht gefunden oder Benutzer existiert nicht",
-      "invalidCredentials": "Ungültige E-Mail oder Passwort."
+      "invalidCredentials": "Ungültige E-Mail oder Passwort.",
+      "connectionError": "Verbindung fehlgeschlagen. Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut."
     }
   },
   "Register": {

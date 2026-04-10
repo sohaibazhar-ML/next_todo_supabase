@@ -128,7 +128,6 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
 
   return (
     <div className={`w-full bg-white mt-10 md:mt-20 pt-12 md:pt-16 pb-0 md:pb-4 px-2 md:px-4 flex flex-col items-center rounded-none shadow-sm relative overflow-hidden ${className}`}>
-      <LoadingOverlay isVisible={isPending} />
       <div className="flex flex-col items-center gap-4 text-center w-full mb-10">
         <Text className="text-secondary font-semibold text-[43px]">
           {t('title')}
@@ -423,7 +422,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
             variant="primary"
             isLoading={isPending}
             disabled={!isFormValid || isPending}
-            className="!rounded-[6px] normal-case py-[8.5px] px-[16px] disabled:opacity-50 disabled:cursor-not-allowed min-w-[200px]"
+            className="!h-[46px] !rounded-[6px] uppercase py-[8.5px] px-4 min-w-[294px]"
             textClassName="text-[22px] font-medium"
           >
             {t('submit')}

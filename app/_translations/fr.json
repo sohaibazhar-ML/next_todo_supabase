@@ -100,7 +100,8 @@
     "register": "S'inscrire gratuitement",
     "errors": {
       "userNotFound": "Utilisateur non trouvé ou l'utilisateur n'existe pas",
-      "invalidCredentials": "E-mail ou mot de passe invalide."
+      "invalidCredentials": "E-mail ou mot de passe invalide.",
+      "connectionError": "Échec de la connexion. Veuillez vérifier votre connexion Internet et réessayer."
     }
   },
   "Register": {

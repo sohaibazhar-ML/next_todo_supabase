@@ -39,7 +39,6 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ className 
 
   return (
     <div className={`w-full bg-white mt-10 md:mt-20 pt-12 md:pt-16 pb-16 md:pb-20 px-6 md:px-20 flex flex-col items-center rounded-none shadow-sm relative ${className}`}>
-      <LoadingOverlay isVisible={isPending} />
       <div className="flex flex-col items-center gap-4 text-center mb-10">
         <Text variant="login-title" className="text-secondary uppercase">
           {t('title')}
@@ -109,9 +108,9 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ className 
               type="submit"
               variant="primary"
               size="sm"
-              minWidth={294}
               isLoading={isPending}
-              className="!h-[46px] !rounded-[6px] flex items-center justify-center gap-[10px] uppercase font-bold px-10"
+              className="!h-[46px] !rounded-[6px] flex items-center justify-center gap-[10px] uppercase font-medium text-[22px] py-[8.5px] px-4"
+              width={294}
             >
               {t('submit')}
             </Button>

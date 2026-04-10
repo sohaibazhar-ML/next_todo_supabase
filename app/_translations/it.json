@@ -100,7 +100,8 @@
     "register": "Registrati gratuitamente",
     "errors": {
       "userNotFound": "Utente non trovato o l'utente non esiste",
-      "invalidCredentials": "Email o password non valida."
+      "invalidCredentials": "Email o password non valida.",
+      "connectionError": "Connessione non riuscita. Controlla la tua connessione Internet e riprova."
     }
   },
   "Register": {

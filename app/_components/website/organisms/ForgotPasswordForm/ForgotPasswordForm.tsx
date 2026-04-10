@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { Text, Button, Input, LoadingOverlay } from '@/website/atoms';
 import { ForgotPasswordFormProps } from '@/website/organisms/ForgotPasswordForm/ForgotPasswordForm.types';
 import { forgotPasswordAction } from '@/actions/website/auth.actions';
+import { forgotPasswordSchema } from '@/app/_schemas/website/forgot-password.schema';
 import { useRouter } from '@/i18n/routing';
 
 export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ className = '' }) => {
@@ -12,6 +13,7 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ classNam
   const [state, formAction, isPending] = useActionState(forgotPasswordAction, {});
   const [showFeedback, setShowFeedback] = React.useState(false);
   const [email, setEmail] = React.useState('');
+  const [touchedFields, setTouchedFields] = React.useState<Record<string, boolean>>({});
 
   React.useEffect(() => {
     if (state.errors?.form || state.success) {
@@ -30,20 +32,37 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ classNam
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     clearFeedback();
-    setEmail(e.target.value);
+    const { name, value } = e.target;
+    setEmail(value);
+    setTouchedFields(prev => ({ ...prev, [name]: true }));
+  };
+
+  const clientValidation = forgotPasswordSchema.safeParse({ email });
+  const clientErrors: Record<string, string[]> = !clientValidation.success
+    ? clientValidation.error.flatten().fieldErrors as Record<string, string[]>
+    : {};
+
+  const getFieldError = (name: string) => {
+    const value = email;
+    // Don't show validation if field is empty
+    if (value === '') return undefined;
+    // Only show validation if the field has been touched
+    const serverErrors = (state.errors as any);
+    if (!touchedFields[name]) return serverErrors?.[name]?.[0];
+    // Prioritize client-side errors
+    return clientErrors[name]?.[0] || serverErrors?.[name]?.[0];
   };
 
   return (
     <div className={`w-full bg-white mt-10 md:mt-20 pt-12 md:pt-16 pb-16 md:pb-20 px-6 md:px-20 flex flex-col items-center rounded-none shadow-sm relative ${className}`}>
-      <LoadingOverlay isVisible={isPending} />
       <div className="flex flex-col items-center gap-4 text-center mb-10">
         <Text variant="login-title" className="text-secondary uppercase">
           {t('title')}
         </Text>
-        <Text variant="login-description" className="text-secondary font-bold max-w-prose">
+        <Text className="text-secondary font-semibold text-[29px] font-heading max-w-prose">
           {t('subtitle')}
         </Text>
-        <Text variant="text-xs" className="text-secondary/70 max-w-[450px] leading-relaxed mt-2">
+        <Text className="text-secondary font-semibold text-[23px] max-w-[550px] leading-relaxed mt-2">
           {t('instruction')}
         </Text>
       </div>
@@ -58,9 +77,12 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ classNam
             placeholder=" "
             value={email}
             onChange={handleInputChange}
-            error={!!state.errors?.email}
-            errorText={state.errors?.email?.[0]}
-            onFocus={clearFeedback}
+            error={!!getFieldError('email')}
+            errorText={getFieldError('email')}
+            onFocus={() => {
+              clearFeedback();
+              setTouchedFields(prev => ({ ...prev, email: true }));
+            }}
             required
             className="w-full"
           />
@@ -84,15 +106,16 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ classNam
           )}
         </div>
 
-        {!state.success && (
+        {!(state.success && showFeedback) && (
           <div className="flex flex-col items-center w-full">
-            <Button
+             <Button
               type="submit"
               variant="primary"
               size="sm"
               minWidth={294}
               isLoading={isPending}
-              className="!h-[46px] !rounded-[6px] flex items-center justify-center gap-[10px] uppercase font-bold px-10"
+              disabled={!email.trim() || isPending}
+              className="!h-[46px] !rounded-[6px] flex items-center justify-center gap-[10px] uppercase font-medium text-[22px] py-[8.5px] px-4"
             >
               {t('submit')}
             </Button>

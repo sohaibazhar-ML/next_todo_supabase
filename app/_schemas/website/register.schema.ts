@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { passwordSchema } from './password.schema';
 
 export const registerSchema = z.object({
-  email: z.string().email('Invalid email address').max(50, 'Email is too long'),
+  email: z.string().email('Please enter a valid email address').max(50, 'Email is too long'),
   password: passwordSchema,
   gender: z.string().min(1, 'Please select your gender'),
   firstName: z.string().min(1, 'First name is required').min(2, 'First name is too short').max(50, 'First name is too long'),

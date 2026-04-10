@@ -48,8 +48,9 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const { pending } = useFormStatus();
-  const actualLoading = isLoading || pending;
-  const baseClasses = 'inline-flex items-center justify-center font-medium transition-all cursor-pointer active:scale-[0.98] disabled:opacity-50 disabled:bg-background-neutral disabled:cursor-not-allowed disabled:active:scale-100';
+  const isSubmitButton = !props.type || props.type === 'submit';
+  const actualLoading = isLoading || (pending && isSubmitButton);
+  const baseClasses = 'inline-flex items-center justify-center font-medium transition-all cursor-pointer active:scale-[0.98] disabled:cursor-not-allowed disabled:active:scale-100';
 
   const customStyles = {
     ...style,
@@ -67,6 +68,7 @@ export const Button: React.FC<ButtonProps> = ({
         variant !== 'unstyled' && variantClasses[variant],
         variant !== 'unstyled' && sizeClasses[size],
         fullWidth && 'w-full',
+        (disabled && !actualLoading) && 'opacity-50 bg-background-neutral',
         className
       )}
       disabled={disabled || actualLoading}
@@ -79,7 +81,7 @@ export const Button: React.FC<ButtonProps> = ({
         <div className="relative flex items-center justify-center gap-2">
           {actualLoading && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <Loader2 className="w-5 h-5 animate-spin text-current" />
+              <div className="w-5 h-5 border-2 border-current/20 border-t-current rounded-full animate-spin" />
             </div>
           )}
           <Text
@@ -88,7 +90,7 @@ export const Button: React.FC<ButtonProps> = ({
             className={twMerge(
               "flex items-center gap-2 font-semibold",
               textClassName,
-              actualLoading ? 'opacity-0' : 'opacity-100'
+              actualLoading ? 'opacity-20' : 'opacity-100'
             )}
           >
             {!actualLoading && LeftIcon && <LeftIcon className="w-4 h-4 shrink-0" />}
