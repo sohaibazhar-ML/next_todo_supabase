@@ -422,7 +422,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
             variant="primary"
             isLoading={isPending}
             disabled={!isFormValid || isPending}
-            className="!h-[46px] !rounded-[6px] uppercase py-[8.5px] px-4 min-w-[294px]"
+            className="!h-[46px] !rounded-[6px] py-[8.5px] px-4 min-w-[294px]"
             textClassName="text-[22px] font-medium"
           >
             {t('submit')}

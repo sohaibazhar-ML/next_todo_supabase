@@ -126,7 +126,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
             minWidth={294}
             isLoading={isPending}
             disabled={!formData.email.trim() || !formData.password.trim()}
-            className="!h-[46px] !rounded-[6px] flex items-center justify-center gap-[10px] uppercase font-medium text-[22px] py-[8.5px] px-4"
+            className="!h-[46px] !rounded-[6px] flex items-center justify-center gap-[10px] font-medium text-[22px] py-[8.5px] px-4"
           >
             {t('submit')}
           </Button>

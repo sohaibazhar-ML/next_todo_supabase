@@ -123,6 +123,7 @@ html {
   --text-login-description: clamp(18px, 2.5vw, 23px);
   --text-login-description--line-height: 1.35;
   --text-login-description--font-weight: 600;
+  --text-login-description--font-stretch: 85%; /* SemiCondensed mapping */
 
   --text-login-forgot: clamp(18px, 2vw, 22px);
   --text-login-forgot--line-height: 1.3;

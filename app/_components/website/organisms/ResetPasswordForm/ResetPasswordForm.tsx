@@ -43,7 +43,7 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ className 
         <Text variant="login-title" className="text-secondary uppercase">
           {t('title')}
         </Text>
-        <Text variant="login-description" className="text-secondary font-bold max-w-prose">
+        <Text variant="login-description" className="text-secondary max-w-prose">
           {t('subtitle')}
         </Text>
       </div>
@@ -109,7 +109,7 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ className 
               variant="primary"
               size="sm"
               isLoading={isPending}
-              className="!h-[46px] !rounded-[6px] flex items-center justify-center gap-[10px] uppercase font-medium text-[22px] py-[8.5px] px-4"
+              className="!h-[46px] !rounded-[6px] flex items-center justify-center gap-[10px] font-medium text-[22px] py-[8.5px] px-4"
               width={294}
             >
               {t('submit')}
