@@ -57,8 +57,10 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ className 
       setShowFeedback(true);
       if (state.success) {
         setFormData({ newPassword: '', confirmPassword: '' });
+        setTouchedFields({}); // Clear validation state
         const timer = setTimeout(() => {
           setShowFeedback(false);
+          router.push('/login'); // Redirect to login
         }, 5000);
         return () => clearTimeout(timer);
       }
