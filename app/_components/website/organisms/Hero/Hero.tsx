@@ -15,15 +15,19 @@ export const Hero: React.FC<HeroProps> = ({ className = '' }) => {
         <div className="bg-white w-full grid grid-cols-12 overflow-hidden shadow-sm">
           {/* Left: Content */}
           <div className="col-span-12 lg:col-span-6 flex flex-col justify-center p-8 lg:p-12 xl:p-20 bg-white">
-            <Text variant="heading-xl" className="text-secondary mb-4 lg:mb-6 leading-[1.1] xl:leading-[1.2]">
+            <Text variant="heading-l" className="text-secondary mb-4 lg:mb-6 leading-[1.1] xl:leading-[1.2]">
               {t('heading')}
             </Text>
-            <Text variant="text-m" className="text-secondary/80 mb-6 lg:mb-10 max-w-[540px] leading-relaxed">
+            <Text variant="text-m" className="text-secondary mb-6 lg:mb-10 max-w-[540px] leading-relaxed">
               {t('subheading')}
             </Text>
             <div className="flex">
               <Link href="/register">
-                <Button size="sm" variant="primary">
+                <Button 
+                  variant="primary" 
+                  className="!h-auto py-[8.5px] px-[16px]"
+                  textClassName="text-[20px] font-medium"
+                >
                   {t('register')}
                 </Button>
               </Link>
