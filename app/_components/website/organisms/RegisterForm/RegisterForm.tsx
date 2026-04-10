@@ -2,7 +2,7 @@
 import React, { useActionState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Text, Button, Input, Select, Checkbox, SelectOption, DateTimeInput, LoadingOverlay } from '@/website/atoms';
-import { Eye, EyeOff, CheckCircle } from 'lucide-react';
+import { Eye, EyeOff, CheckCircle, CheckCircle2 } from 'lucide-react';
 import { RegisterFormProps } from '@/website/organisms/RegisterForm/RegisterForm.types';
 import { registerSchema } from '@/schemas/website/register.schema';
 import { registerAction } from '@/actions/website/auth.actions';
@@ -100,9 +100,12 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
     { key: 'special', label: t('fields.password.rules.special'), check: (val: string) => /[^a-zA-Z0-9]/.test(val) },
   ];
 
-  const unmetPasswordRules = formData.password === ''
-    ? []
-    : passwordRules.filter(rule => !rule.check(formData.password));
+  const passwordRulesStatus = passwordRules.map(rule => ({
+    ...rule,
+    isMet: rule.check(formData.password)
+  }));
+
+  const showRulesList = formData.password.length > 0 || touchedFields.password;
 
   const genderOptions: SelectOption[] = [
     { label: t('fields.gender.options.male'), value: 'male' },
@@ -222,10 +225,13 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               rightIcon={showPassword ? EyeOff : Eye}
               onRightIconClick={() => setShowPassword(!showPassword)}
               helperText={
-                unmetPasswordRules.length > 0 && (
-                  <div className="flex flex-col gap-0.5 mt-1">
-                    {unmetPasswordRules.map((rule) => (
-                      <span key={rule.key} className="block">• {rule.label}</span>
+                showRulesList && (
+                  <div className="flex flex-col gap-1 mt-2">
+                    {passwordRulesStatus.map((rule) => (
+                      <div key={rule.key} className={`flex items-center gap-2 text-xs transition-colors ${rule.isMet ? 'text-success' : 'text-secondary/60'}`}>
+                        {rule.isMet ? <CheckCircle2 size={12} className="shrink-0" /> : <span className="w-3 h-3 flex items-center justify-center">•</span>}
+                        <span>{rule.label}</span>
+                      </div>
                     ))}
                   </div>
                 )
