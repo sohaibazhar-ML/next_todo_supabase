@@ -3,6 +3,7 @@ import React, { useActionState } from 'react';
 
 import { useTranslations } from 'next-intl';
 import { Text, Button, Input, LoadingOverlay } from '@/website/atoms';
+import { FormMessage } from '@/website/molecules';
 import { Eye, EyeOff } from 'lucide-react';
 import { LoginFormProps } from '@/website/organisms/LoginForm/LoginForm.types';
 import { loginAction, resendConfirmationAction } from '@/actions/website/auth.actions';
@@ -117,21 +118,24 @@ export const LoginForm: React.FC<LoginFormProps> = ({ className = '', initialSuc
           {showFeedback && (
             <>
               {state.errors?.form && (
-                <div className="flex flex-col items-center">
-                  <Text variant="body-sm" className="text-error-dark text-center">
-                    {state.errors.form}
-                  </Text>
+                <div className="flex flex-col items-center w-full gap-2">
+                  <FormMessage 
+                    variant="error" 
+                    message={state.errors.form} 
+                  />
                   
                   {state.needsConfirmation && (
                     <div className="mt-2">
                       {resendStatus === 'success' ? (
-                        <Text variant="body-xs" className="text-success text-center">
-                          {t('resendSuccess')}
-                        </Text>
+                        <FormMessage 
+                          variant="success" 
+                          message={t('resendSuccess')} 
+                        />
                       ) : resendStatus === 'error' ? (
-                        <Text variant="body-xs" className="text-error-dark text-center">
-                          {t('resendError')}
-                        </Text>
+                        <FormMessage 
+                          variant="error" 
+                          message={t('resendError')} 
+                        />
                       ) : (
                         <button
                           type="button"
@@ -148,9 +152,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({ className = '', initialSuc
               )}
 
               {(state.success || initialSuccessMessage) && (
-                <Text variant="body-sm" className="text-success text-center">
-                  {state.success ? t('successMessage') : initialSuccessMessage}
-                </Text>
+                <FormMessage 
+                  variant="success" 
+                  message={state.success ? t('successMessage') : initialSuccessMessage} 
+                />
               )}
             </>
           )}

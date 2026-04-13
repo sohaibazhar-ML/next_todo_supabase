@@ -4,6 +4,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Camera, PawPrint, Loader2, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Text, Image, Button } from '@/website/atoms';
+import { FormMessage } from '@/website/molecules';
 
 interface ProfileAvatarProps {
   firstName: string;
@@ -148,24 +149,28 @@ export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({ firstName, imageUr
         {firstName}
       </Text>
 
-      {/* Success/Error Toast */}
+      {/* Success/Error Message */}
       <div
-        className={`transition-all duration-500 overflow-hidden ${
+        className={`w-full transition-all duration-500 overflow-hidden ${
           showSuccess || error ? 'max-h-20 opacity-100 translate-y-0' : 'max-h-0 opacity-0 -translate-y-1'
         }`}
       >
-        {showSuccess && (
-          <div className="flex items-center gap-1.5 bg-green-50 border border-green-200 text-green-700 text-xs font-semibold px-3 py-1.5 rounded-full shadow-sm whitespace-nowrap mb-2">
-            <CheckCircle2 size={13} />
-            {t('success')}
-          </div>
-        )}
-        {error && (
-          <div className="flex items-center gap-1.5 bg-red-50 border border-red-200 text-red-700 text-xs font-semibold px-3 py-1.5 rounded-full shadow-sm whitespace-nowrap mb-2">
-            <AlertTriangle size={13} />
-            {error}
-          </div>
-        )}
+        <div className="pt-2">
+          {showSuccess && (
+            <FormMessage 
+              variant="success" 
+              message={t('success')} 
+              className="!min-h-0 py-2 px-4 shadow-none rounded-full"
+            />
+          )}
+          {error && (
+            <FormMessage 
+              variant="error" 
+              message={error} 
+              className="!min-h-0 py-2 px-4 shadow-none rounded-full"
+            />
+          )}
+        </div>
       </div>
     </div>
   );

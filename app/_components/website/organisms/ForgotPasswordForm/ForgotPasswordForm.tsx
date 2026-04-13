@@ -2,6 +2,7 @@
 import React, { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Text, Button, Input, LoadingOverlay } from '@/website/atoms';
+import { FormMessage } from '@/website/molecules';
 import { ForgotPasswordFormProps } from '@/website/organisms/ForgotPasswordForm/ForgotPasswordForm.types';
 import { forgotPasswordAction } from '@/actions/website/auth.actions';
 import { forgotPasswordSchema } from '@/app/_schemas/website/forgot-password.schema';
@@ -90,17 +91,17 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ classNam
           {showFeedback && (
             <>
               {state.errors?.form && (
-                <Text variant="body-sm" className="text-error-dark text-center">
-                  {state.errors.form}
-                </Text>
+                <FormMessage 
+                  variant="error" 
+                  message={state.errors.form} 
+                />
               )}
 
               {state.success && (
-                <div className="bg-success-light border border-success-border p-4 rounded-[4px] text-center">
-                  <Text variant="body-sm" className="text-success">
-                    {t('successMessage')}
-                  </Text>
-                </div>
+                <FormMessage 
+                  variant="success" 
+                  message={t('successMessage')} 
+                />
               )}
             </>
           )}

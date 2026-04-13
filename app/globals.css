@@ -19,6 +19,7 @@ html {
   --foreground: #030221;
   --primary: #e3311d;
   --primary-hover: #da1701;
+  --primary-light: #fdf4f3;
   --secondary: #362e2d;
   --accent: #0272a2;
   --error: #ef4444;
@@ -50,6 +51,7 @@ html {
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
+  --color-primary-light: var(--primary-light);
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
   --color-error: var(--error);

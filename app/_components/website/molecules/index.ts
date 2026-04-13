@@ -5,3 +5,4 @@ export * from '@/website/molecules/FaqAccordionItem';
 export * from '@/website/molecules/DocumentRow';
 export * from '@/website/molecules/DashboardPagination';
 export * from '@/website/molecules/Popup';
+export * from '@/website/molecules/FormMessage/FormMessage';

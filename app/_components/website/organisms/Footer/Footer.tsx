@@ -4,6 +4,7 @@ import React, { useTransition } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { Input, Text, Image, Button, DateTimeInput } from '@/website/atoms';
+import { FormMessage } from '@/website/molecules';
 import { FooterProps } from '@/website/organisms/Footer/Footer.types';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -185,16 +186,20 @@ export const Footer: React.FC<FooterProps> = ({ className = '' }) => {
               </form>
 
               {/* Status Messages */}
-              <div className="h-6 -mt-4">
+              <div className="w-full max-w-[513px] mt-2 h-auto min-h-6">
                 {status === 'success' && (
-                  <Text variant="text-xxs" className="text-accent font-medium animate-in fade-in slide-in-from-top-1">
-                    {t('form.success')}
-                  </Text>
+                  <FormMessage 
+                    variant="success" 
+                    message={t('form.success')} 
+                    className="!min-h-0 py-2 px-4 shadow-none border-success-border/50"
+                  />
                 )}
                 {status === 'error' && (
-                  <Text variant="text-xxs" className="text-error-dark font-medium animate-in fade-in slide-in-from-top-1">
-                    {errorMessage}
-                  </Text>
+                  <FormMessage 
+                    variant="error" 
+                    message={errorMessage} 
+                    className="!min-h-0 py-2 px-4 shadow-none border-primary/50"
+                  />
                 )}
               </div>
             </div>

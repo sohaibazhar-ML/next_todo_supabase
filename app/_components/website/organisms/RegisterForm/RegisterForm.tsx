@@ -2,6 +2,7 @@
 import React, { useActionState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Text, Button, Input, Select, Checkbox, SelectOption, DateTimeInput, LoadingOverlay } from '@/website/atoms';
+import { FormMessage } from '@/website/molecules';
 import { Eye, EyeOff, CheckCircle, CheckCircle2 } from 'lucide-react';
 import { RegisterFormProps } from '@/website/organisms/RegisterForm/RegisterForm.types';
 import { registerSchema } from '@/schemas/website/register.schema';
@@ -446,25 +447,31 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
         </div>
 
         {showError && (state as any).errors?.form && (
-          <Text variant="body-sm" className="text-error-dark mt-4 text-center">
-            {(state as any).errors.form}
-          </Text>
+          <div className="w-full mt-4">
+            <FormMessage 
+              variant="error" 
+              message={(state as any).errors.form} 
+            />
+          </div>
         )}
 
         {showSuccess && (
-          <div className="flex flex-col items-center mt-4 text-center">
-            <Text variant="body-sm" className="text-success font-bold">
-              {t('successMessage')}
-            </Text>
+          <div className="flex flex-col items-center w-full mt-4 text-center gap-2">
+            <FormMessage 
+              variant="success" 
+              message={t('successMessage')} 
+            />
             
             {resendStatus === 'success' ? (
-              <Text variant="body-xs" className="text-success mt-2">
-                {t('resendSuccess')}
-              </Text>
+              <FormMessage 
+                variant="success" 
+                message={t('resendSuccess')} 
+              />
             ) : resendStatus === 'error' ? (
-              <Text variant="body-xs" className="text-error-dark mt-2">
-                {t('resendError')}
-              </Text>
+              <FormMessage 
+                variant="error" 
+                message={t('resendError')} 
+              />
             ) : (
               <button
                 type="button"

@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Languages, ShieldCheck, Lock, HelpCircle, Check, Loader2, Eye, EyeOff } from 'lucide-react';
 import { ProfileAvatar } from '@/website/molecules/ProfileAvatar/ProfileAvatar';
 import { ProfileItem } from '@/website/molecules/ProfileItem/ProfileItem';
+import { FormMessage } from '@/website/molecules/FormMessage/FormMessage';
 import { Text, Button, Input, Switch } from '@/website/atoms';
 import { Link, useRouter } from '@/i18n/routing';
 import { updateLanguageAction, updateKeepLoggedInAction, changePasswordAction } from '@/app/_actions/website/settings.actions';
@@ -212,15 +213,19 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
               </div>
 
               {passwordError && (
-                <Text variant="text-xxs" className="text-error-dark font-medium">
-                  {passwordError}
-                </Text>
+                <FormMessage 
+                  variant="error" 
+                  message={passwordError} 
+                  className="!min-h-0 py-2 px-4 shadow-none"
+                />
               )}
 
               {passwordSuccess && (
-                <Text variant="text-xxs" className="text-success font-medium flex items-center gap-2">
-                  <Check size={14} /> {t('passwordChanged')}
-                </Text>
+                <FormMessage 
+                  variant="success" 
+                  message={t('passwordChanged')} 
+                  className="!min-h-0 py-2 px-4 shadow-none"
+                />
               )}
 
               <div className="flex justify-end gap-2 mt-2">

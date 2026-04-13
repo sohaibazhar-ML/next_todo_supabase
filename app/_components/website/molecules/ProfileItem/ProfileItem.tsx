@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronRight, LucideIcon, Check, X, Loader2 } from 'lucide-react';
 import { Text, Button, Input, Select } from '@/website/atoms';
+import { FormMessage } from '@/website/molecules';
 import { Link } from '@/i18n/routing';
 import { twMerge } from 'tailwind-merge';
 
@@ -41,6 +42,8 @@ export const ProfileItem: React.FC<ProfileItemProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(typeof value === 'string' ? value : '');
   const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // Sync edit value with external value prop
   useEffect(() => {
@@ -48,6 +51,16 @@ export const ProfileItem: React.FC<ProfileItemProps> = ({
       setEditValue(value);
     }
   }, [value]);
+
+  useEffect(() => {
+    if (status !== 'idle') {
+      const timer = setTimeout(() => {
+        setStatus('idle');
+        setErrorMsg(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [status]);
 
   const handleEditToggle = (e: React.MouseEvent) => {
     if (!isEditable || isEditing) return;
@@ -60,11 +73,15 @@ export const ProfileItem: React.FC<ProfileItemProps> = ({
     if (!onSave) return;
     
     setIsLoading(true);
+    setStatus('idle');
     try {
       await onSave(editValue);
       setIsEditing(false);
-    } catch (error) {
+      setStatus('success');
+    } catch (error: any) {
       console.error('Failed to save:', error);
+      setStatus('error');
+      setErrorMsg(error.message || 'Failed to save');
     } finally {
       setIsLoading(false);
     }
@@ -143,6 +160,16 @@ export const ProfileItem: React.FC<ProfileItemProps> = ({
               <div className="pt-1">{value}</div>
             )
           )
+        )}
+        
+        {status !== 'idle' && (
+          <div className="pt-2 animate-in fade-in slide-in-from-top-1 duration-300">
+            <FormMessage 
+              variant={status === 'success' ? 'success' : 'error'} 
+              message={status === 'success' ? 'Saved successfully' : errorMsg} 
+              className="!min-h-0 py-1 px-3 text-[14px]"
+            />
+          </div>
         )}
       </div>
 
