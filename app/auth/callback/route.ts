@@ -50,11 +50,11 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${origin}/${locale}/login?error=${encodeURIComponent(error?.message || 'Authentication failed')}`)
     }
 
-    // If user just confirmed email (first opt-in) or OAuth signin
-    if (finalData.user && type !== 'recovery') {
+    // If user just confirmed email (first opt-in), OAuth signin, or Password Recovery
+    if (finalData.user) {
       const userId = finalData.user.id;
 
-      // Update Prisma profile to confirmed
+      // Update Prisma profile to confirmed (Recovery also proves control over email)
       await prisma.profiles.update({
         where: { id: userId },
         data: {
@@ -64,16 +64,20 @@ export async function GET(request: Request) {
       });
 
       // Update the session JWT metadata using the authenticated user client
-      // This ensures the confirmation flag is in the browser cookies before redirecting to dashboard
       await supabase.auth.updateUser({
         data: { email_confirmed: true }
       });
 
-      // Sync confirmation status to Supabase metadata to allow middleware to check it
+      // Sync confirmation status to Supabase metadata
       const admin = createServiceClient();
       await admin.auth.admin.updateUserById(userId, {
         user_metadata: { email_confirmed: true }
       });
+
+      // Branch redirect based on flow type
+      if (type === 'recovery') {
+        return NextResponse.redirect(`${origin}/${locale}/reset-password`)
+      }
 
       return NextResponse.redirect(`${origin}/${locale}/login?confirmed=true`)
     }
@@ -114,6 +118,11 @@ export async function GET(request: Request) {
     await admin.auth.admin.updateUserById(userId, {
       user_metadata: { email_confirmed: true }
     });
+
+    // Branch redirect based on flow type
+    if (type === 'recovery') {
+      return NextResponse.redirect(`${origin}/${locale}/reset-password`)
+    }
 
     return NextResponse.redirect(`${origin}/${locale}/login?confirmed=true`)
   }

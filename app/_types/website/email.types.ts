@@ -27,8 +27,11 @@ export interface AuthConfirmationData {
  * Data structure for Password Reset template
  */
 export interface PasswordResetData {
-  first_name: string;
-  reset_link: string;
+  user: string;
+  link: string;
+  homepagelink: string;
+  dataprotectionlink: string;
+  impressumlink: string;
 }
 
 /**

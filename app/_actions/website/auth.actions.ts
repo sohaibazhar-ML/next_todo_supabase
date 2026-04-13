@@ -72,12 +72,19 @@ export async function forgotPasswordAction(prevState: ActionState, formData: For
     }
 
     // 3. Send the email via SendGrid
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const cookieStore = await cookies();
+    const locale = cookieStore.get('NEXT_LOCALE')?.value || 'de';
+
     const emailResult = await sendGridService.sendTemplateEmail({
       to: email,
       templateKey: 'PASSWORD_RESET',
       dynamicTemplateData: {
-        first_name: profile.first_name || 'User',
-        reset_link: linkData.properties.action_link,
+        user: profile.first_name || 'User',
+        link: `${baseUrl}/auth/callback?token_hash=${linkData.properties.hashed_token}&type=recovery`,
+        homepagelink: `${baseUrl}/${locale}`,
+        dataprotectionlink: `${baseUrl}/${locale}/privacy`,
+        impressumlink: `${baseUrl}/${locale}/imprint`,
       },
     });
 
