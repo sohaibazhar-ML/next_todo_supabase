@@ -3,18 +3,21 @@ import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { CONSOLE_MESSAGES } from '@/constants'
-import type { User, Session, AuthError } from '@supabase/supabase-js'
+import { createServiceClient } from '@/lib/supabase/service'
+import type { User, Session, AuthError, EmailOtpType } from '@supabase/supabase-js'
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
   const type = requestUrl.searchParams.get('type')
+  const token_hash = requestUrl.searchParams.get('token_hash')
   const origin = requestUrl.origin
 
   // Get the locale from cookie or default to 'de'
   const cookieStore = await cookies()
   const locale = cookieStore.get('NEXT_LOCALE')?.value || 'de'
 
+  // Standard PKCE Code Flow
   if (code) {
     const supabase = await createClient()
 
@@ -49,57 +52,70 @@ export async function GET(request: Request) {
 
     // If user just confirmed email (first opt-in) or OAuth signin
     if (finalData.user && type !== 'recovery') {
-      // Check if profile exists using Prisma
-      const profile = await prisma.profiles.findUnique({
-        where: { id: finalData.user.id },
-        select: { email_confirmed: true, email_confirmed_at: true }
-      })
+      const userId = finalData.user.id;
 
-      // If no profile exists (e.g., Google OAuth signup), redirect to profile creation
-      if (!profile) {
-        return NextResponse.redirect(`${origin}/${locale}/profile?setup=true`)
-      }
-
-      // Profile exists - this means manual signup (profile was created during signup)
-      // Handle email confirmation flow for manual signup
-      // First confirmation - update profile and send second confirmation email
-      if (!profile.email_confirmed) {
-        // Update profile to mark first confirmation
-        await prisma.profiles.update({
-          where: { id: finalData.user.id },
-          data: { email_confirmed: true }
-        })
-
-        // Send second confirmation email
-        const { error: emailError } = await supabase.auth.resend({
-          type: 'signup',
-          email: finalData.user.email!,
-          options: {
-            emailRedirectTo: `${origin}/auth/callback?type=double-confirm`,
-          }
-        })
-
-        if (!emailError) {
-          return NextResponse.redirect(`${origin}/${locale}/login?message=${encodeURIComponent('First confirmation successful. Please check your email for the second confirmation.')}`)
+      // Update Prisma profile to confirmed
+      await prisma.profiles.update({
+        where: { id: userId },
+        data: {
+          email_confirmed: true,
+          email_confirmed_at: new Date()
         }
-      }
-      // Second confirmation - mark as fully confirmed
-      else if (profile.email_confirmed && !profile.email_confirmed_at) {
-        await prisma.profiles.update({
-          where: { id: finalData.user.id },
-          data: {
-            email_confirmed: true,
-            email_confirmed_at: new Date()
-          }
-        })
+      });
 
-        return NextResponse.redirect(`${origin}/${locale}/dashboard?message=${encodeURIComponent('Account fully confirmed!')}`)
-      }
-      // Already fully confirmed, just redirect to dashboard
-      else {
-        return NextResponse.redirect(`${origin}/${locale}/dashboard`)
-      }
+      // Update the session JWT metadata using the authenticated user client
+      // This ensures the confirmation flag is in the browser cookies before redirecting to dashboard
+      await supabase.auth.updateUser({
+        data: { email_confirmed: true }
+      });
+
+      // Sync confirmation status to Supabase metadata to allow middleware to check it
+      const admin = createServiceClient();
+      await admin.auth.admin.updateUserById(userId, {
+        user_metadata: { email_confirmed: true }
+      });
+
+      return NextResponse.redirect(`${origin}/${locale}/login?confirmed=true`)
     }
+  }
+
+  // Token Hash Flow (for manual email confirmation links)
+  if (token_hash && type) {
+    const supabase = await createClient()
+
+    const { data, error } = await supabase.auth.verifyOtp({
+      token_hash,
+      type: type as EmailOtpType,
+    })
+
+    if (error || !data.user) {
+      console.error(CONSOLE_MESSAGES.ERROR_SESSION_EXCHANGE, error || 'Verification failed')
+      return NextResponse.redirect(`${origin}/${locale}/login?error=${encodeURIComponent(error?.message || 'Verification failed')}`)
+    }
+
+    const userId = data.user.id;
+
+    // Update Prisma profile to confirmed
+    await prisma.profiles.update({
+      where: { id: userId },
+      data: {
+        email_confirmed: true,
+        email_confirmed_at: new Date()
+      }
+    });
+
+    // Update the session JWT metadata using the authenticated user client
+    await supabase.auth.updateUser({
+      data: { email_confirmed: true }
+    });
+
+    // Sync confirmation status to Supabase metadata
+    const admin = createServiceClient();
+    await admin.auth.admin.updateUserById(userId, {
+      user_metadata: { email_confirmed: true }
+    });
+
+    return NextResponse.redirect(`${origin}/${locale}/login?confirmed=true`)
   }
 
   // Password recovery

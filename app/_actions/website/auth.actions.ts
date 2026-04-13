@@ -9,6 +9,8 @@ import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { ActionState } from '@/app/_types/website/actions/auth.types';
+import { createServiceClient } from '@/lib/supabase/service';
+import { sendGridService } from '@/app/_services/website/email-service/sendgrid.service';
 import { getTranslations } from 'next-intl/server';
 
 /**
@@ -45,20 +47,42 @@ export async function forgotPasswordAction(prevState: ActionState, formData: For
     // 1. Check if user exists in the profiles table
     const profile = await prisma.profiles.findUnique({
       where: { email },
-      select: { id: true }
+      select: { id: true, first_name: true }
     });
 
     if (!profile) {
       return { errors: { form: t('errors.userNotFound') } };
     }
 
-    const supabase = await createClient();
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/callback?type=recovery`,
+    // 2. Generate a recovery link using the admin API
+    const admin = createServiceClient();
+    const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
+      type: 'recovery',
+      email,
+      options: {
+        redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/callback?type=recovery`,
+      },
     });
 
-    if (error) {
-      return { errors: { form: error.message } };
+    if (linkError || !linkData.properties?.action_link) {
+      if (isConnectionError(linkError)) {
+        return { errors: { form: t('errors.connectionError') } };
+      }
+      return { errors: { form: linkError?.message || 'Failed to generate reset link' } };
+    }
+
+    // 3. Send the email via SendGrid
+    const emailResult = await sendGridService.sendTemplateEmail({
+      to: email,
+      templateKey: 'PASSWORD_RESET',
+      dynamicTemplateData: {
+        first_name: profile.first_name || 'User',
+        reset_link: linkData.properties.action_link,
+      },
+    });
+
+    if (!emailResult.success) {
+      return { errors: { form: emailResult.error || 'Failed to send reset email' } };
     }
 
     return { success: true };
@@ -108,6 +132,10 @@ export async function registerAction(prevState: ActionState, formData: FormData)
     });
 
     if (authError) {
+      if (isConnectionError(authError)) {
+        const loginT = await getTranslations('Login');
+        return { errors: { form: loginT('errors.connectionError') } };
+      }
       return { errors: { form: authError.message } };
     }
 
@@ -144,7 +172,42 @@ export async function registerAction(prevState: ActionState, formData: FormData)
       }
     });
 
-    return { success: true };
+    // 3. Generate confirmation link and send via SendGrid
+    const admin = createServiceClient();
+    const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
+      type: 'signup',
+      email,
+      password,
+      options: {
+        redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/callback`,
+      },
+    });
+
+    if (linkError || !linkData.properties?.action_link) {
+      console.error('Failed to generate confirmation link:', linkError);
+      // If it's a connection error, we should still notify the user even if they are semi-registered
+      if (isConnectionError(linkError)) {
+        const loginT = await getTranslations('Login');
+        return { errors: { form: loginT('errors.connectionError') } };
+      }
+    } else {
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      const locale = (data.locale as string) || 'de';
+
+      await sendGridService.sendTemplateEmail({
+        to: email,
+        templateKey: 'AUTH_CONFIRMATION',
+        dynamicTemplateData: {
+          user: firstName,
+          link: `${baseUrl}/auth/callback?token_hash=${linkData.properties.hashed_token}&type=signup`,
+          homepagelink: `${baseUrl}/${locale}`,
+          dataprotectionlink: `${baseUrl}/${locale}/privacy`,
+          impressumlink: `${baseUrl}/${locale}/imprint`,
+        },
+      });
+    }
+
+    return { success: true, email };
   } catch (err) {
     console.error('Registration error:', err);
     
@@ -185,6 +248,10 @@ export async function resetPasswordAction(prevState: ActionState, formData: Form
     });
 
     if (error) {
+      if (isConnectionError(error)) {
+        const t = await getTranslations('Login');
+        return { errors: { form: t('errors.connectionError') } };
+      }
       return { errors: { form: error.message } };
     }
 
@@ -222,11 +289,20 @@ export async function loginAction(prevState: ActionState, formData: FormData): P
     // 1. Check if user exists in the profiles table to provide a specific error
     const profile = await prisma.profiles.findUnique({
       where: { email },
-      select: { id: true, preferred_language: true }
+      select: { id: true, preferred_language: true, email_confirmed: true }
     });
 
     if (!profile) {
       return { errors: { form: t('errors.userNotFound') } };
+    }
+
+    // 2. Block login if email is not confirmed
+    if (!profile.email_confirmed) {
+      return { 
+        errors: { form: t('errors.emailNotConfirmed') },
+        needsConfirmation: true,
+        email: email
+      };
     }
 
     const supabase = await createClient();
@@ -236,6 +312,9 @@ export async function loginAction(prevState: ActionState, formData: FormData): P
     });
 
     if (error || !user) {
+      if (isConnectionError(error)) {
+        return { errors: { form: t('errors.connectionError') } };
+      }
       return { errors: { form: t('errors.invalidCredentials') } };
     }
 
@@ -280,6 +359,69 @@ export async function loginAction(prevState: ActionState, formData: FormData): P
   const locale = cookieStore.get('user_locale')?.value || cookieStore.get('NEXT_LOCALE')?.value || 'de';
 
   redirect(`/${locale}/dashboard`);
+}
+
+export async function resendConfirmationAction(email: string): Promise<ActionState> {
+  const t = await getTranslations('Register');
+  const loginT = await getTranslations('Login');
+
+  try {
+    // 1. Check if user exists and is not confirmed
+    const profile = await prisma.profiles.findUnique({
+      where: { email },
+      select: { id: true, email_confirmed: true, first_name: true, preferred_language: true }
+    });
+
+    if (!profile) {
+      return { errors: { form: t('resendError') } };
+    }
+
+    if (profile.email_confirmed) {
+      return { success: true }; // Already confirmed
+    }
+
+    // 2. Generate a new confirmation link (using magiclink as it doesn't require password)
+    const admin = createServiceClient();
+    const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
+      type: 'magiclink',
+      email,
+      options: {
+        redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/callback`,
+      },
+    });
+
+    if (linkError || !linkData.properties?.action_link) {
+      console.error('Failed to generate resend link:', linkError);
+      if (isConnectionError(linkError)) {
+        return { errors: { form: loginT('errors.connectionError') } };
+      }
+      return { errors: { form: t('resendError') } };
+    }
+
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const locale = profile.preferred_language || 'de';
+
+    // 3. Send email via SendGrid
+    await sendGridService.sendTemplateEmail({
+      to: email,
+      templateKey: 'AUTH_CONFIRMATION',
+      dynamicTemplateData: {
+        user: profile.first_name,
+        link: `${baseUrl}/auth/callback?token_hash=${linkData.properties.hashed_token}&type=magiclink`,
+        homepagelink: `${baseUrl}/${locale}`,
+        dataprotectionlink: `${baseUrl}/${locale}/privacy`,
+        impressumlink: `${baseUrl}/${locale}/imprint`,
+      },
+    });
+
+    return { success: true };
+  } catch (err) {
+    console.error('Resend confirmation error:', err);
+    if (isConnectionError(err)) {
+      return { errors: { form: loginT('errors.connectionError') } };
+    }
+    return { errors: { form: t('resendError') } };
+  }
 }
 
 export async function logoutAction(): Promise<void> {

@@ -103,7 +103,16 @@
     "errors": {
       "userNotFound": "User not found or user does not exist",
       "invalidCredentials": "Invalid email or password.",
+      "emailNotConfirmed": "Your email address has not been confirmed yet. Please check your inbox.",
       "connectionError": "Unable to connect. Please check your internet connection and try again."
+    },
+    "resendConfirmation": "Resend confirmation email",
+    "resendSuccess": "Confirmation email has been resent!",
+    "resendError": "Failed to resend confirmation email. Please try again later.",
+    "confirmation": {
+      "title": "Account Confirmation",
+      "description": "Your account has been confirmed successfully.",
+      "redirect": "Registration Confirmed. Please Login to continue to User Dashboard"
     }
   },
   "Register": {
@@ -260,6 +269,9 @@
     "legalNote": "I agree that my data provided during registration (in particular name, email address, phone number) may be used to inform me by email, telephone, SMS or other electronic communication means about products, services and promotions in the field of insurance and pension. This consent is voluntary and can be revoked at any time with effect for the future, e.g. by email to hello@myswissmove.ch or via the unsubscribe link in every message. You can find further information on data processing in the data protection declaration.",
     "submit": "Register for free",
     "successMessage": "Registration successful! We have sent a confirmation email to your inbox. Please verify your account to start with MySwissMove.",
+    "resendConfirmation": "Resend confirmation email",
+    "resendSuccess": "Confirmation email has been resent!",
+    "resendError": "Failed to resend confirmation email. Please try again later.",
     "loading": "Loading...",
     "successMessageTitle": "Thank you!",
     "backToHome": "Back to Home"

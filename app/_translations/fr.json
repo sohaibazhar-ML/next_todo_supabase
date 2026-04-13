@@ -95,6 +95,14 @@
       "successMessage": "Mot de passe réinitialisé avec succès ! Vous pouvez maintenant vous connecter avec votre nouveau mot de passe."
     },
     "successMessage": "Connexion réussie ! Redirection...",
+    "resendConfirmation": "Renvoyer l'e-mail de confirmation",
+    "resendSuccess": "L'e-mail de confirmation a été renvoyé !",
+    "resendError": "Échec du renvoi de l'e-mail de confirmation. Veuillez réessayer plus tard.",
+    "confirmation": {
+      "title": "Confirmation du compte",
+      "description": "Votre compte a été confirmé avec succès.",
+      "redirect": "Inscription confirmée. Veuillez vous connecter pour accéder à votre tableau de bord."
+    },
     "keepMeLoggedIn": "Rester connecté",
     "noAccount": "Pas encore de compte ?",
     "register": "S'inscrire gratuitement",
@@ -256,6 +264,9 @@
     },
     "consent": "Oui, je souhaite bénéficier d'un conseil téléphonique gratuit sur les assurances et la prévoyance en Suisse et je prends note de la déclaration de protection des données.",
     "legalNote": "J'accepte que mes données fournies lors de l'inscription (notamment mon nom, mon adresse e-mail, mon numéro de téléphone) puissent être utilisées pour m'informer par e-mail, téléphone, SMS ou autres moyens de communication électronique sur les produits, services et promotions dans le domaine des assurances et de la prévoyance. Ce consentement est volontaire et peut être révoqué à tout moment avec effet pour l'avenir, par exemple par e-mail à hello@myswissmove.ch ou via le lien de désinscription présent dans chaque message. Vous trouverez de plus amples informations sur le traitement des données dans la déclaration de protection des données.",
+    "resendConfirmation": "Renvoyer l'e-mail de confirmation",
+    "resendSuccess": "L'e-mail de confirmation a été renvoyé !",
+    "resendError": "Échec du renvoi de l'e-mail de confirmation. Veuillez réessayer plus tard.",
     "submit": "S'inscrire gratuitement",
     "successMessage": "Inscription réussie ! Nous avons envoyé un e-mail de confirmation dans votre boîte de réception. Veuillez vérifier votre compte pour commencer avec MySwissMove.",
     "loading": "Chargement...",

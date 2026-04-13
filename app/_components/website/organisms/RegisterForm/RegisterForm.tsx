@@ -5,7 +5,7 @@ import { Text, Button, Input, Select, Checkbox, SelectOption, DateTimeInput, Loa
 import { Eye, EyeOff, CheckCircle, CheckCircle2 } from 'lucide-react';
 import { RegisterFormProps } from '@/website/organisms/RegisterForm/RegisterForm.types';
 import { registerSchema } from '@/schemas/website/register.schema';
-import { registerAction } from '@/actions/website/auth.actions';
+import { registerAction, resendConfirmationAction } from '@/actions/website/auth.actions';
 import { useRouter } from '@/i18n/routing';
 
 export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) => {
@@ -38,22 +38,32 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
   const [formData, setFormData] = React.useState(initialFormData);
   const [showSuccess, setShowSuccess] = React.useState(false);
   const [showError, setShowError] = React.useState(false);
+  const [lastEmail, setLastEmail] = React.useState<string>('');
+  const [resendStatus, setResendStatus] = React.useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [isResendPending, startResendTransition] = React.useTransition();
 
   React.useEffect(() => {
     if (state.success) {
+      if (state.email) setLastEmail(state.email);
       setFormData(initialFormData);
       setTouchedFields({});
       setShowSuccess(true);
       setShowError(false);
-      const timer = setTimeout(() => {
-        setShowSuccess(false);
-      }, 5000);
-      return () => clearTimeout(timer);
+      // We don't hide success message automatically anymore to allow for resending
     }
     if (state.errors?.form) {
       setShowError(true);
     }
-  }, [state.success, state.errors?.form]);
+  }, [state.success, state.errors?.form, state.email]);
+
+  const handleResend = () => {
+    if (!lastEmail || isResendPending) return;
+    setResendStatus('loading');
+    startResendTransition(async () => {
+      const result = await resendConfirmationAction(lastEmail);
+      setResendStatus(result.success ? 'success' : 'error');
+    });
+  };
 
   const clearFeedback = () => {
     setShowError(false);
@@ -442,9 +452,30 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
         )}
 
         {showSuccess && (
-          <Text variant="body-sm" className="text-success mt-4 text-center font-bold">
-            {t('successMessage')}
-          </Text>
+          <div className="flex flex-col items-center mt-4 text-center">
+            <Text variant="body-sm" className="text-success font-bold">
+              {t('successMessage')}
+            </Text>
+            
+            {resendStatus === 'success' ? (
+              <Text variant="body-xs" className="text-success mt-2">
+                {t('resendSuccess')}
+              </Text>
+            ) : resendStatus === 'error' ? (
+              <Text variant="body-xs" className="text-error-dark mt-2">
+                {t('resendError')}
+              </Text>
+            ) : (
+              <button
+                type="button"
+                onClick={handleResend}
+                disabled={isResendPending}
+                className="mt-2 text-secondary underline underline-offset-4 hover:text-primary transition-colors text-sm font-medium disabled:opacity-50"
+              >
+                {isResendPending ? t('loading') : t('resendConfirmation')}
+              </button>
+            )}
+          </div>
         )}
       </form>
     </div>

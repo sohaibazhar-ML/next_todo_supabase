@@ -13,11 +13,31 @@ export interface CallbackTemplateData {
 }
 
 /**
+ * Data structure for Auth Confirmation template
+ */
+export interface AuthConfirmationData {
+  user: string;
+  link: string;
+  homepagelink: string;
+  dataprotectionlink: string;
+  impressumlink: string;
+}
+
+/**
+ * Data structure for Password Reset template
+ */
+export interface PasswordResetData {
+  first_name: string;
+  reset_link: string;
+}
+
+/**
  * Registry of all dynamic template data types
  */
 export interface EmailTemplateDataMap {
   CALLBACK_REQUEST: CallbackTemplateData;
-  // Add future template data interfaces here
+  AUTH_CONFIRMATION: AuthConfirmationData;
+  PASSWORD_RESET: PasswordResetData;
 }
 
 /**

@@ -21,4 +21,6 @@ export type ActionState = {
     form?: string;
   };
   success?: boolean;
+  needsConfirmation?: boolean;
+  email?: string;
 };

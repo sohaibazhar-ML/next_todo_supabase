@@ -103,7 +103,16 @@
     "errors": {
       "userNotFound": "Benutzer nicht gefunden oder Benutzer existiert nicht",
       "invalidCredentials": "Ungültige E-Mail oder Passwort.",
+      "emailNotConfirmed": "Ihre E-Mail-Adresse wurde noch nicht bestätigt. Bitte überprüfen Sie Ihren Posteingang.",
       "connectionError": "Verbindung fehlgeschlagen. Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut."
+    },
+    "resendConfirmation": "Bestätigungs-E-Mail erneut senden",
+    "resendSuccess": "Bestätigungs-E-Mail wurde erneut gesendet!",
+    "resendError": "Fehler beim erneuten Senden der Bestätigungs-E-Mail. Bitte versuchen Sie es später erneut.",
+    "confirmation": {
+      "title": "Kontobestätigung",
+      "description": "Ihr Konto wurde erfolgreich bestätigt.",
+      "redirect": "Registrierung bestätigt. Bitte loggen Sie sich ein, um zum Dashboard zu gelangen."
     }
   },
   "Register": {
@@ -260,6 +269,9 @@
     "legalNote": "Ich bin damit einverstanden, dass meine bei der Registrierung angegebenen Daten (insbesondere Name, E-Mailadresse, Telefonnummer) verwendet werden dürfen, um mich per E-Mail, Telefon, SMS oder andere elektronische Kommunikationsmittel über Produkte, Dienstleistungen und Aktionen aus dem Bereich Versicherungen und Vorsorge zu informieren. Diese Einwilligung ist freiwillig und kann jederzeit mit Wirkung für die Zukunft widerrufen werden, z. B. per E-Mail an hello@myswissmove.ch oder über den Abmeldelink in jeder Nachricht. Weitere Informationen zur Datenverarbeitung finden Sie in der Datenschutzerklärung.",
     "submit": "Kostenlos registrieren",
     "successMessage": "Registrierung erfolgreich! Wir haben eine Bestätigungs-E-Mail an Ihren Posteingang gesendet. Bitte verifizieren Sie Ihr Konto, um mit MySwissMove zu starten.",
+    "resendConfirmation": "Bestätigungs-E-Mail erneut senden",
+    "resendSuccess": "Bestätigungs-E-Mail wurde erneut gesendet!",
+    "resendError": "Fehler beim erneuten Senden der Bestätigungs-E-Mail. Bitte versuchen Sie es später erneut.",
     "loading": "Wird geladen...",
     "successMessageTitle": "Vielen Dank!",
     "backToHome": "Zur Startseite"

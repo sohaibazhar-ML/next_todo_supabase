@@ -5,11 +5,11 @@ import { useTranslations } from 'next-intl';
 import { Text, Button, Input, LoadingOverlay } from '@/website/atoms';
 import { Eye, EyeOff } from 'lucide-react';
 import { LoginFormProps } from '@/website/organisms/LoginForm/LoginForm.types';
-import { loginAction } from '@/actions/website/auth.actions';
+import { loginAction, resendConfirmationAction } from '@/actions/website/auth.actions';
 import { loginSchema } from '@/app/_schemas/website/login.schema';
 import { useRouter } from '@/i18n/routing';
 
-export const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
+export const LoginForm: React.FC<LoginFormProps> = ({ className = '', initialSuccessMessage }) => {
   const t = useTranslations('Login');
   const router = useRouter();
   const [state, formAction, isPending] = useActionState(loginAction, {});
@@ -17,19 +17,21 @@ export const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
   const [showPassword, setShowPassword] = React.useState(false);
   const [formData, setFormData] = React.useState({ email: '', password: '' });
   const [touchedFields, setTouchedFields] = React.useState<Record<string, boolean>>({});
+  const [resendStatus, setResendStatus] = React.useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [isResendPending, startResendTransition] = React.useTransition();
 
   React.useEffect(() => {
-    if (state.errors?.form || state.success) {
+    if (state.errors?.form || state.success || initialSuccessMessage) {
       setShowFeedback(true);
-      if (state.success) {
-        setFormData({ email: '', password: '' });
+      if (state.success || initialSuccessMessage) {
+        if (state.success) setFormData({ email: '', password: '' });
         const timer = setTimeout(() => {
           setShowFeedback(false);
         }, 5000);
         return () => clearTimeout(timer);
       }
     }
-  }, [state.errors?.form, state.success]);
+  }, [state.errors?.form, state.success, initialSuccessMessage]);
 
   const clearFeedback = () => setShowFeedback(false);
 
@@ -38,6 +40,16 @@ export const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     setTouchedFields(prev => ({ ...prev, [name]: true }));
+    if (resendStatus !== 'idle') setResendStatus('idle');
+  };
+
+  const handleResend = () => {
+    if (!state.email || isResendPending) return;
+    setResendStatus('loading');
+    startResendTransition(async () => {
+      const result = await resendConfirmationAction(state.email!);
+      setResendStatus(result.success ? 'success' : 'error');
+    });
   };
 
   const clientValidation = loginSchema.safeParse(formData);
@@ -105,14 +117,39 @@ export const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
           {showFeedback && (
             <>
               {state.errors?.form && (
-                <Text variant="body-sm" className="text-error-dark text-center">
-                  {state.errors.form}
-                </Text>
+                <div className="flex flex-col items-center">
+                  <Text variant="body-sm" className="text-error-dark text-center">
+                    {state.errors.form}
+                  </Text>
+                  
+                  {state.needsConfirmation && (
+                    <div className="mt-2">
+                      {resendStatus === 'success' ? (
+                        <Text variant="body-xs" className="text-success text-center">
+                          {t('resendSuccess')}
+                        </Text>
+                      ) : resendStatus === 'error' ? (
+                        <Text variant="body-xs" className="text-error-dark text-center">
+                          {t('resendError')}
+                        </Text>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleResend}
+                          disabled={isResendPending}
+                          className="text-secondary underline underline-offset-4 hover:text-primary transition-colors text-sm font-medium disabled:opacity-50"
+                        >
+                          {isResendPending ? t('loading') : t('resendConfirmation')}
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
               )}
 
-              {state.success && (
+              {(state.success || initialSuccessMessage) && (
                 <Text variant="body-sm" className="text-success text-center">
-                  {t('successMessage')}
+                  {state.success ? t('successMessage') : initialSuccessMessage}
                 </Text>
               )}
             </>

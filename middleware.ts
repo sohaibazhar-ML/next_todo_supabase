@@ -110,6 +110,27 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // Check email confirmation status from Supabase user metadata
+  // This is synchronized in the /auth/callback route
+  if (user.user_metadata?.email_confirmed !== true) {
+    console.warn(CONSOLE_MESSAGES.ERROR_SESSION_EXCHANGE, 'Email not confirmed, logging out user.')
+    
+    // Create redirect response to login
+    const loginUrl = new URL(`/${locale}/login`, request.url)
+    loginUrl.searchParams.set('error', 'emailNotConfirmed')
+    const response = NextResponse.redirect(loginUrl)
+    
+    // Effectively log out by clearing Supabase cookies in the response
+    const cookieNames = request.cookies.getAll().map(c => c.name)
+    cookieNames.forEach(name => {
+      if (name.startsWith('sb-') || name.includes('supabase')) {
+        response.cookies.delete(name)
+      }
+    })
+    
+    return response
+  }
+
   // Check user preference for session persistence from cookie (set during login)
   // This avoids Prisma usage in Edge runtime
   // Default to true (keep logged in) if cookie doesn't exist

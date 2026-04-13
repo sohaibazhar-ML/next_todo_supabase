@@ -95,6 +95,14 @@
       "successMessage": "Password reimpostata con successo! Ora puoi accedere con la tua nuova password."
     },
     "successMessage": "Accesso riuscito! Reindirizzamento...",
+    "resendConfirmation": "Reinvia l'e-mail di conferma",
+    "resendSuccess": "L'e-mail di conferma è stata reinviata!",
+    "resendError": "Impossibile reinviare l'e-mail di conferma. Riprova più tardi.",
+    "confirmation": {
+      "title": "Conferma dell'account",
+      "description": "Il tuo account è stato confermato con successo.",
+      "redirect": "Registrazione confermata. Effettua il login per continuare verso la dashboard utente."
+    },
     "keepMeLoggedIn": "Rimani connesso",
     "noAccount": "Non hai un account?",
     "register": "Registrati gratuitamente",
