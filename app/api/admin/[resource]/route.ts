@@ -10,6 +10,7 @@ import { createClient } from '@/lib/supabase/server';
 import { isAdmin, isSubadmin } from '@/utils/roles';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
+import { COUNTRIES } from '@/app/_components/admin/constants/countries';
 
 export const dynamic = 'force-dynamic';
 
@@ -202,112 +203,128 @@ export async function GET(
     const filterParam = searchParams.get('_filters');
 
     // Build Prisma where clause from filters
-    let where: Record<string, unknown> = {};
+    let where: Record<string, any> = {};
+
+    // 1. Direct parameter fallbacks (highest priority/safest)
+    const directId = searchParams.get('id');
+    const directUserId = searchParams.get('user_id');
+    const directDocId = searchParams.get('document_id');
+
+    if (directId && isUuid(directId)) where.id = directId;
+    if (directUserId && isUuid(directUserId)) where.user_id = directUserId;
+    if (directDocId && isUuid(directDocId)) where.document_id = directDocId;
+
     if (filterParam) {
         try {
-            const filters = JSON.parse(filterParam);
-            const { q, fromDate, toDate, lte_created_at, gte_created_at, ...exactFilters } = filters;
+            // Support double-stringified JSON which can occur in some frontend environments
+            let filters = typeof filterParam === 'string' && filterParam.startsWith('"{') 
+                ? JSON.parse(JSON.parse(filterParam)) 
+                : JSON.parse(filterParam);
+            
+            // Ensure filters is actually an object
+            if (filters && typeof filters === 'object' && !Array.isArray(filters)) {
+                const { q, fromDate, toDate, lte_created_at, gte_created_at, ...exactFilters } = filters;
 
-            // Global search (q)
-            if (q) {
-                if (resource === 'documents' || resource === 'documents-list') {
-                    where.OR = [
-                        { title: { contains: q, mode: 'insensitive' } },
-                        { description: { contains: q, mode: 'insensitive' } },
-                        { file_name: { contains: q, mode: 'insensitive' } },
-                        { category: { contains: q, mode: 'insensitive' } },
-                        { file_type: { contains: q, mode: 'insensitive' } },
-                        { mime_type: { contains: q, mode: 'insensitive' } },
-                        { version: { contains: q, mode: 'insensitive' } },
-                        { google_drive_template_id: { contains: q, mode: 'insensitive' } },
-                        { searchable_content: { contains: q, mode: 'insensitive' } },
-                    ];
-                } else if (resource === 'profiles' || resource === 'users') {
-                    where.OR = [
-                        { first_name: { contains: q, mode: 'insensitive' } },
-                        { last_name: { contains: q, mode: 'insensitive' } },
-                        { email: { contains: q, mode: 'insensitive' } },
-                        { username: { contains: q, mode: 'insensitive' } },
-                        { role: { contains: q, mode: 'insensitive' } },
-                        { current_address: { contains: q, mode: 'insensitive' } },
-                        { country_of_origin: { contains: q, mode: 'insensitive' } },
-                        { phone_number: { contains: q, mode: 'insensitive' } },
-                        { pets_type: { contains: q, mode: 'insensitive' } },
-                        { new_address_switzerland: { contains: q, mode: 'insensitive' } },
-                    ];
-                } else if (resource === 'download_logs') {
-                    // Raw search for download logs across multiple fields
-                    (where as any).OR = [
-                        { user_agent: { contains: q, mode: 'insensitive' } },
-                        { context: { contains: q, mode: 'insensitive' } },
-                        // Search in related documents
-                        { documents: { title: { contains: q, mode: 'insensitive' } } },
-                        // Search in related profiles
-                        { profiles: { username: { contains: q, mode: 'insensitive' } } },
-                        { profiles: { email: { contains: q, mode: 'insensitive' } } },
-                        { profiles: { first_name: { contains: q, mode: 'insensitive' } } },
-                        { profiles: { last_name: { contains: q, mode: 'insensitive' } } },
-                    ];
-                    
-                    // Handle IP address - Prisma doesn't support 'contains' on Inet type
-                    // but we can try exact match if q looks like an IP
-                    if (/^[0-9.:]+$/.test(q)) {
-                        (where as any).OR.push({ ip_address: { equals: q } });
-                    }
-                } else {
-                    // Fallback for other resources: only use 'equals' on 'id' if q is a UUID
-                    // This prevents 500 errors when q is a name/string
-                    if (isUuid(q)) {
-                        (where as any).id = q;
+                // Global search (q)
+                if (q) {
+                    if (resource === 'documents' || resource === 'documents-list') {
+                        where.OR = [
+                            { title: { contains: q, mode: 'insensitive' } },
+                            { description: { contains: q, mode: 'insensitive' } },
+                            { file_name: { contains: q, mode: 'insensitive' } },
+                            { category: { contains: q, mode: 'insensitive' } },
+                            { file_type: { contains: q, mode: 'insensitive' } },
+                            { mime_type: { contains: q, mode: 'insensitive' } },
+                            { version: { contains: q, mode: 'insensitive' } },
+                            { google_drive_template_id: { contains: q, mode: 'insensitive' } },
+                            { searchable_content: { contains: q, mode: 'insensitive' } },
+                        ];
+                    } else if (resource === 'profiles' || resource === 'users') {
+                        // Resolve country names to 2-letter codes for DB matching (e.g. "Pakistan" -> "PK")
+                        const matchingCountryCodes = COUNTRIES
+                            .filter(c => c.label.toLowerCase().includes(q.toLowerCase()))
+                            .map(c => c.value);
+
+                        where.OR = [
+                            { first_name: { contains: q, mode: 'insensitive' } },
+                            { last_name: { contains: q, mode: 'insensitive' } },
+                            { email: { contains: q, mode: 'insensitive' } },
+                            { role: { contains: q, mode: 'insensitive' } },
+                            { current_address: { contains: q, mode: 'insensitive' } },
+                            { country_of_origin: { contains: q, mode: 'insensitive' } },
+                            { phone_number: { contains: q, mode: 'insensitive' } },
+                            { pets_type: { contains: q, mode: 'insensitive' } },
+                            { new_address_switzerland: { contains: q, mode: 'insensitive' } },
+                        ];
+
+                        if (matchingCountryCodes.length > 0) {
+                            where.OR.push({ country_of_origin: { in: matchingCountryCodes } });
+                        }
+                    } else if (resource === 'download_logs') {
+                        where.OR = [
+                            { user_agent: { contains: q, mode: 'insensitive' } },
+                            { context: { contains: q, mode: 'insensitive' } },
+                            { documents: { title: { contains: q, mode: 'insensitive' } } },
+                            { profiles: { username: { contains: q, mode: 'insensitive' } } },
+                            { profiles: { email: { contains: q, mode: 'insensitive' } } },
+                            { profiles: { first_name: { contains: q, mode: 'insensitive' } } },
+                            { profiles: { last_name: { contains: q, mode: 'insensitive' } } },
+                        ];
+                        if (/^[0-9.:]+$/.test(q)) {
+                            where.OR.push({ ip_address: { equals: q } });
+                        }
+                    } else if (isUuid(q)) {
+                        where.id = q;
                     }
                 }
-            }
 
-            // Date Range Filtering (standard RA uses gte/lte prefix, custom dashboard used fromDate/toDate)
-            const start = filters.fromDate || filters.gte_created_at;
-            const end = filters.toDate || filters.lte_created_at;
-
-            if (start || end) {
-                (where as any).created_at = {};
-                if (start) (where as any).created_at.gte = new Date(start);
-                if (end) (where as any).created_at.lte = new Date(end);
-            }
-
-            // Other exact or string matches
-            for (const [key, value] of Object.entries(exactFilters)) {
-                if (key === 'role' && value === 'all') continue;
-                if (!value && value !== false && value !== 0) continue;
-
-                let filterKey = key;
-                // Resource-specific mapping
-                if (resource === 'documents' || resource === 'documents-list') {
-                    if (key === 'fileType') filterKey = 'file_type';
+                // Date Range Filtering
+                const start = filters.fromDate || filters.gte_created_at;
+                const end = filters.toDate || filters.lte_created_at;
+                if (start || end) {
+                    where.created_at = {};
+                    if (start) where.created_at.gte = new Date(start);
+                    if (end) where.created_at.lte = new Date(end);
                 }
 
-                if (key === 'tags' && resource === 'documents') {
-                    // Handle tags array filtering
-                    const tagList = typeof value === 'string' ? value.split(',').map(t => t.trim()).filter(Boolean) : value;
-                    if (Array.isArray(tagList) && tagList.length > 0) {
-                        where.tags = { hasSome: tagList };
-                    }
-                } else if (typeof value === 'string' && value.length > 0) {
-                    // Defensive check: Avoid 'contains' on UUID fields
-                    const isUuidField = ['id', 'user_id', 'document_id', 'parent_document_id', 'original_document_id'].includes(filterKey);
-                    if (isUuidField) {
-                        // Only add the filter if it's a valid UUID to avoid Prisma errors
-                        if (isUuid(value)) {
-                            (where as any)[filterKey] = value;
+                // Other exact or string matches
+                for (const [key, value] of Object.entries(exactFilters)) {
+                    if (key === 'role' && value === 'all') continue;
+                    if (value === undefined || value === null || value === '') continue;
+
+                    let filterKey = key;
+                    if ((resource === 'documents' || resource === 'documents-list') && key === 'fileType') filterKey = 'file_type';
+
+                    if (key === 'tags' && resource === 'documents') {
+                        const tagList = typeof value === 'string' ? value.split(',').map(t => t.trim()).filter(Boolean) : value;
+                        if (Array.isArray(tagList) && tagList.length > 0) where.tags = { hasSome: tagList };
+                    } else if (key === 'role' && (resource === 'profiles' || resource === 'users')) {
+                        where[filterKey] = value;
+                    } else if (typeof value === 'string' && value.length > 0) {
+                        const cleanValue = value.trim();
+                        // FORCE exact match for anything that looks like an ID
+                        const isIdField = ['id', 'user_id', 'document_id', 'parent_document_id', 'original_document_id', 'profile_id'].includes(filterKey) || filterKey.endsWith('_id');
+                        
+                        if (isIdField && isUuid(cleanValue)) {
+                            where[filterKey] = cleanValue;
+                        } else if (!isIdField) {
+                            where[filterKey] = { contains: cleanValue, mode: 'insensitive' };
                         }
                     } else {
-                        (where as any)[filterKey] = { contains: value, mode: 'insensitive' };
+                        where[filterKey] = value;
                     }
-                } else if (value !== undefined && value !== '') {
-                    (where as any)[filterKey] = value;
                 }
             }
         } catch (e) {
-            console.error('[Admin API] Filter parse error:', e);
+            console.error('[Admin API] Critical: Filter parsing failed for', filterParam, e);
         }
+    }
+
+    // DIAGNOSTIC LOG: This will show in your terminal exactly what Prisma is looking for
+    if (Object.keys(where).length > 0) {
+        console.log(`[Admin API] Final WHERE clause for ${resource}:`, JSON.stringify(where, null, 2));
+    } else {
+        console.warn(`[Admin API] WARNING: Empty WHERE clause for ${resource} request with filters:`, filterParam);
     }
 
     try {
@@ -335,8 +352,8 @@ export async function GET(
 
 // SECURITY: Whitelist of fields allowed for each resource to prevent mass assignment
 const RESOURCE_FIELD_WHITELISTS: Record<ResourceName, string[]> = {
-    profiles: ['first_name', 'last_name', 'role', 'current_address', 'country_of_origin', 'phone_number', 'number_of_adults', 'number_of_children', 'pets_type', 'new_address_switzerland', 'marketing_consent', 'terms_accepted', 'data_privacy_accepted', 'keep_me_logged_in'],
-    users: ['first_name', 'last_name', 'role', 'current_address', 'country_of_origin', 'phone_number', 'number_of_adults', 'number_of_children', 'pets_type', 'new_address_switzerland', 'marketing_consent', 'terms_accepted', 'data_privacy_accepted', 'keep_me_logged_in'],
+    profiles: ['first_name', 'last_name', 'role', 'current_address', 'country_of_origin', 'phone_number', 'number_of_adults', 'number_of_children', 'pets_type', 'new_address_switzerland', 'marketing_consent', 'terms_accepted', 'data_privacy_accepted', 'keep_me_logged_in', 'admin_notes'],
+    users: ['first_name', 'last_name', 'role', 'current_address', 'country_of_origin', 'phone_number', 'number_of_adults', 'number_of_children', 'pets_type', 'new_address_switzerland', 'marketing_consent', 'terms_accepted', 'data_privacy_accepted', 'keep_me_logged_in', 'admin_notes'],
     documents: ['title', 'description', 'category', 'tags', 'is_active', 'is_featured', 'file_name', 'file_path', 'file_size', 'file_type', 'mime_type', 'version', 'parent_document_id', 'google_drive_template_id', 'searchable_content'],
     'documents-list': ['title', 'description', 'category', 'tags', 'is_active', 'is_featured'],
     download_logs: [], // Usually read-only via this API

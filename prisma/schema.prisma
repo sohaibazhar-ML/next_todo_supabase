@@ -96,6 +96,7 @@ model profiles {
   has_pets                Boolean                  @default(false)
   preferred_language      String                   @default("de")
   avatar_url              String?
+  admin_notes             String?
   download_logs           download_logs[]
   user_document_versions  user_document_versions[]
 

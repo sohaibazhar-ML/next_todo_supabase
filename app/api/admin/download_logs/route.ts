@@ -96,14 +96,18 @@ export async function GET(request: Request) {
     let filterObj: any = {}
     if (filterStr) {
         try {
-            filterObj = JSON.parse(filterStr)
+            // Support double-stringified JSON which can occur in some frontend environments
+            filterObj = typeof filterStr === 'string' && filterStr.startsWith('"{') 
+                ? JSON.parse(JSON.parse(filterStr)) 
+                : JSON.parse(filterStr);
         } catch (e) {
             console.error('[Admin DownloadLogs API] Filter parse error:', e)
         }
     }
 
-    const documentId = filterObj.documentId || searchParams.get('documentId')
-    const userId = filterObj.userId || searchParams.get('userId')
+    // Support both camelCase (old dashboard) and snake_case (React Admin)
+    const documentId = filterObj.document_id || filterObj.documentId || searchParams.get('document_id') || searchParams.get('documentId')
+    const userId = filterObj.user_id || filterObj.userId || searchParams.get('user_id') || searchParams.get('userId')
     const searchQuery = filterObj.q || filterObj.searchQuery || searchParams.get('q')
 
     const admin = await isAdmin(user.id)
@@ -142,9 +146,17 @@ export async function GET(request: Request) {
       where.OR = orConditions
     }
 
+    // Pagination & Sorting (React Admin support)
+    const page = parseInt(searchParams.get('_page') || '1')
+    const perPage = parseInt(searchParams.get('_perPage') || '25')
+    const sortField = searchParams.get('_sortField') || 'downloaded_at'
+    const sortOrder = (searchParams.get('_sortOrder') || 'desc').toLowerCase()
+
     const logs = await prisma.download_logs.findMany({
       where,
-      orderBy: { downloaded_at: 'desc' },
+      skip: (page - 1) * perPage,
+      take: perPage,
+      orderBy: { [sortField]: sortOrder },
       include: {
         documents: {
           select: {
@@ -162,6 +174,8 @@ export async function GET(request: Request) {
       }
     })
 
+    const total = await prisma.download_logs.count({ where })
+
     const serializedLogs = logs.map((log: any) => ({
       ...log,
       document_title: log.documents?.title,
@@ -171,7 +185,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       data: serializedLogs,
-      total: logs.length
+      total: total
     })
   } catch (error: unknown) {
     console.error(CONSOLE_MESSAGES.ERROR_FETCHING_DOWNLOAD_LOGS, error)
