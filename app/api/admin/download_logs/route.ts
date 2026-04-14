@@ -105,10 +105,12 @@ export async function GET(request: Request) {
         }
     }
 
-    // Support both camelCase (old dashboard) and snake_case (React Admin)
     const documentId = filterObj.document_id || filterObj.documentId || searchParams.get('document_id') || searchParams.get('documentId')
     const userId = filterObj.user_id || filterObj.userId || searchParams.get('user_id') || searchParams.get('userId')
     const searchQuery = filterObj.q || filterObj.searchQuery || searchParams.get('q')
+    const category = filterObj.category || searchParams.get('category')
+    const fromDate = filterObj.fromDate || searchParams.get('fromDate')
+    const toDate = filterObj.toDate || searchParams.get('toDate')
 
     const admin = await isAdmin(user.id)
 
@@ -120,6 +122,19 @@ export async function GET(request: Request) {
     if (userId) {
       where.user_id = userId
     }
+    
+    // Category filter
+    if (category) {
+      where.documents = { category: { contains: category, mode: 'insensitive' } }
+    }
+
+    // Date range filter
+    if (fromDate || toDate) {
+      where.downloaded_at = {}
+      if (fromDate) where.downloaded_at.gte = new Date(fromDate)
+      if (toDate) where.downloaded_at.lte = new Date(toDate)
+    }
+
     // Users can only see their own logs unless admin
     if (!admin) {
       where.user_id = user.id
@@ -131,8 +146,11 @@ export async function GET(request: Request) {
         { user_agent: { contains: searchQuery, mode: 'insensitive' } },
         { context: { contains: searchQuery, mode: 'insensitive' } },
         { documents: { title: { contains: searchQuery, mode: 'insensitive' } } },
+        { documents: { category: { contains: searchQuery, mode: 'insensitive' } } },
         { profiles: { username: { contains: searchQuery, mode: 'insensitive' } } },
         { profiles: { email: { contains: searchQuery, mode: 'insensitive' } } },
+        { profiles: { first_name: { contains: searchQuery, mode: 'insensitive' } } },
+        { profiles: { last_name: { contains: searchQuery, mode: 'insensitive' } } },
       ]
 
       // IP address is an 'inet' type in Postgres. We must only query it if the search
@@ -162,13 +180,16 @@ export async function GET(request: Request) {
           select: {
             id: true,
             title: true,
-            file_name: true
+            file_name: true,
+            category: true
           }
         },
         profiles: {
           select: {
             username: true,
-            email: true
+            email: true,
+            first_name: true,
+            last_name: true
           }
         }
       }
@@ -176,12 +197,20 @@ export async function GET(request: Request) {
 
     const total = await prisma.download_logs.count({ where })
 
-    const serializedLogs = logs.map((log: any) => ({
-      ...log,
-      document_title: log.documents?.title,
-      username: log.profiles?.username,
-      email: log.profiles?.email,
-    }))
+    const serializedLogs = logs.map((log: any) => {
+        const { documents, profiles, ...rest } = log;
+        const firstName = profiles?.first_name || '';
+        const lastName = profiles?.last_name || '';
+        const fullName = `${firstName} ${lastName}`.trim() || profiles?.username || 'Unknown User';
+
+        return {
+            ...rest,
+            document_title: documents?.title,
+            document_category: documents?.category,
+            full_name: fullName,
+            email: profiles?.email,
+        };
+    })
 
     return NextResponse.json({
       data: serializedLogs,

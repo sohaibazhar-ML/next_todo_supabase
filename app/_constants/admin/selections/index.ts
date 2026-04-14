@@ -16,7 +16,6 @@ export const DOCUMENT_CATEGORIES = [
     { id: 'Legal', name: 'Legal' },
     { id: 'Financial', name: 'Financial' },
     { id: 'Medical', name: 'Medical' },
-    { id: 'Other', name: 'Other' },
 ] as const;
 
 export type AdminRole = typeof ADMIN_ROLES[number]['id'];
