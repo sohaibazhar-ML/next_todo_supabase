@@ -151,6 +151,14 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                   </Text>
                 </Link>
                 <Link
+                  href="/account/my-documents"
+                  className={`text-white transition-opacity hover:opacity-100 h-full flex items-center border-b-2 transition-all ${activeTab === 'my-documents' ? 'border-primary opacity-100' : 'border-transparent opacity-70'}`}
+                >
+                  <Text variant="text-xxs" className="font-semibold uppercase tracking-wider">
+                    {t('myDocuments')}
+                  </Text>
+                </Link>
+                <Link
                   href="/account/settings"
                   className={`text-white transition-opacity hover:opacity-100 h-full flex items-center border-b-2 transition-all ${activeTab === 'settings' ? 'border-primary opacity-100' : 'border-transparent opacity-70'}`}
                 >
@@ -164,7 +172,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
           {/* Right: Search and Logout/Lang (Desktop Only Logout/Lang) */}
           <div className="flex items-center gap-3 lg:gap-10 ml-auto">
-            {!isAccountPage && (
+            {(!isAccountPage || activeTab === 'my-documents') && (
               <>
                 {/* Search Bar - Desktop */}
                 <div className="hidden md:block">

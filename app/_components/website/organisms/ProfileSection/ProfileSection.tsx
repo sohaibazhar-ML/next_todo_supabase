@@ -163,7 +163,7 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
             <ProfileItem 
               icon={Box} 
               label={t('myDocuments')} 
-              href="#" 
+              href="/account/my-documents" 
             />
             <ProfileItem 
               icon={Settings} 

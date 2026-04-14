@@ -346,7 +346,8 @@
       "settings": "Paramètres",
       "dashboardNav": "Tableau de bord",
       "searchPlaceholder": "Terme de recherche",
-      "logout": "Déconnexion"
+      "logout": "Déconnexion",
+      "myDocuments": "Mes Documents"
     },
     "list": {
       "download": "Télécharger",

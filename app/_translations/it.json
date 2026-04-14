@@ -343,7 +343,8 @@
       "settings": "Impostazioni",
       "dashboardNav": "Dashboard",
       "searchPlaceholder": "Termine di ricerca",
-      "logout": "Disconnetti"
+      "logout": "Disconnetti",
+      "myDocuments": "I Miei Documenti"
     },
     "list": {
       "download": "Scarica",

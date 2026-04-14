@@ -349,7 +349,8 @@
       "settings": "Einstellungen",
       "dashboardNav": "Dashboard",
       "searchPlaceholder": "Suchbegriff",
-      "logout": "Abmelden"
+      "logout": "Abmelden",
+      "myDocuments": "Meine Dokumente"
     },
     "list": {
       "download": "Download",

@@ -349,7 +349,8 @@
       "settings": "Settings",
       "dashboardNav": "Dashboard",
       "searchPlaceholder": "Search term",
-      "logout": "Logout"
+      "logout": "Logout",
+      "myDocuments": "My Documents"
     },
     "list": {
       "download": "Download",
