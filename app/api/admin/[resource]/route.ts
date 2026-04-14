@@ -15,7 +15,7 @@ import { COUNTRIES } from '@/app/_components/admin/constants/countries';
 export const dynamic = 'force-dynamic';
 
 // Whitelist of resources that can be accessed via this API
-const ALLOWED_RESOURCES = ['profiles', 'users', 'documents', 'download_logs', 'user_document_versions', 'documents-list', 'stats', 'settings'] as const;
+const ALLOWED_RESOURCES = ['profiles', 'users', 'documents', 'download_logs', 'documents-list', 'stats', 'settings'] as const;
 type ResourceName = typeof ALLOWED_RESOURCES[number];
 
 function isAllowedResource(resource: string): resource is ResourceName {
@@ -24,13 +24,12 @@ function isAllowedResource(resource: string): resource is ResourceName {
 
 // Maps resource name → Prisma model delegate
 function getPrismaModel(resource: ResourceName) {
-    const models: Record<ResourceName, Prisma.profilesDelegate<any> | Prisma.documentsDelegate<any> | Prisma.download_logsDelegate<any> | Prisma.user_document_versionsDelegate<any>> = {
+    const models: Record<ResourceName, Prisma.profilesDelegate<any> | Prisma.documentsDelegate<any> | Prisma.download_logsDelegate<any>> = {
         profiles: prisma.profiles,
         users: prisma.profiles, // Alias for profiles
         documents: prisma.documents,
         'documents-list': prisma.documents,
         download_logs: prisma.download_logs,
-        user_document_versions: prisma.user_document_versions,
         stats: prisma.profiles, // Dummy mapping for custom view
         settings: prisma.profiles, // Dummy mapping for custom view
     };
@@ -351,10 +350,9 @@ export async function GET(
 const RESOURCE_FIELD_WHITELISTS: Record<ResourceName, string[]> = {
     profiles: ['first_name', 'last_name', 'role', 'current_address', 'country_of_origin', 'phone_number', 'number_of_adults', 'number_of_children', 'pets_type', 'new_address_switzerland', 'marketing_consent', 'terms_accepted', 'data_privacy_accepted', 'keep_me_logged_in', 'admin_notes'],
     users: ['first_name', 'last_name', 'role', 'current_address', 'country_of_origin', 'phone_number', 'number_of_adults', 'number_of_children', 'pets_type', 'new_address_switzerland', 'marketing_consent', 'terms_accepted', 'data_privacy_accepted', 'keep_me_logged_in', 'admin_notes'],
-    documents: ['title', 'description', 'category', 'tags', 'is_active', 'is_featured', 'file_name', 'file_path', 'file_size', 'file_type', 'mime_type', 'version', 'parent_document_id', 'google_drive_template_id', 'searchable_content'],
-    'documents-list': ['title', 'description', 'category', 'tags', 'is_active', 'is_featured'],
+    documents: ['title', 'description', 'category', 'tags', 'is_featured', 'file_name', 'file_path', 'file_size', 'file_type', 'mime_type'],
+    'documents-list': ['title', 'description', 'category', 'tags', 'is_featured'],
     download_logs: [], // Usually read-only via this API
-    user_document_versions: ['is_draft', 'version_name', 'html_content'],
     stats: [], // Read-only
     settings: [], // Custom
 };

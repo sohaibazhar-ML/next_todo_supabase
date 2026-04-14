@@ -28,7 +28,7 @@ const httpClient = async (url: string, options: fetchUtils.Options = {}) => {
  * - Data access: Uses Prisma (direct DB connection) to query/mutate data
  *
  * Supported resources: profiles, documents, download_logs,
- *                      subadmin_permissions, user_document_versions
+ *                      subadmin_permissions
  */
 export const dataProvider: DataProvider = {
 
