@@ -36,10 +36,10 @@ export async function GET(
     // Get document to get file path
     const document = await prisma.documents.findUnique({
       where: { id },
-      select: { file_path: true, id: true, is_active: true }
+      select: { file_path: true, id: true }
     })
 
-    if (!document || !document.is_active) {
+    if (!document) {
       return NextResponse.json({ error: ERROR_MESSAGES.DOCUMENT_NOT_FOUND }, { status: 404 })
     }
 

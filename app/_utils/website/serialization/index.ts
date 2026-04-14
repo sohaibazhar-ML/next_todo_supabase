@@ -11,7 +11,7 @@
  */
 
 import type { Document } from '@/types/document'
-import type { SerializedDocument, SerializedVersion, UserVersionRaw } from '@/types/document'
+import type { SerializedDocument } from '@/types/document'
 import type { UserProfile, UserRole } from '@/types/user'
 
 // ============================================================================
@@ -67,63 +67,7 @@ export function serializeDocuments(
   return docs.map(serializeDocument)
 }
 
-// ============================================================================
-// Version Serialization
-// ============================================================================
 
-/**
- * Serialize user document version, converting BigInt exported_file_size to string
- * 
- * Prisma returns exported_file_size as BigInt, which cannot be serialized to JSON.
- * This function converts it to a string for API responses.
- * 
- * @param version - User document version object with potential BigInt exported_file_size
- * @returns Serialized version with BigInt exported_file_size converted to string
- * 
- * @example
- * ```typescript
- * const version = await prisma.user_document_versions.findUnique({ where: { id } })
- * const serialized = serializeVersion(version) // exported_file_size is now string | null
- * return NextResponse.json(serialized)
- * ```
- */
-export function serializeVersion(version: UserVersionRaw): SerializedVersion {
-  return {
-    ...version,
-    exported_file_size:
-      version.exported_file_size !== null
-        ? version.exported_file_size.toString()
-        : null,
-    // Ensure dates are strings
-    created_at:
-      version.created_at instanceof Date
-        ? version.created_at.toISOString()
-        : version.created_at,
-    updated_at:
-      version.updated_at instanceof Date
-        ? version.updated_at.toISOString()
-        : version.updated_at,
-  }
-}
-
-/**
- * Serialize an array of user document versions
- * 
- * Converts BigInt exported_file_size values to strings for all versions in the array.
- * 
- * @param versions - Array of user document version objects with potential BigInt values
- * @returns Array of serialized versions with BigInt exported_file_size converted to string
- * 
- * @example
- * ```typescript
- * const versions = await prisma.user_document_versions.findMany()
- * const serialized = serializeVersions(versions)
- * return NextResponse.json(serialized)
- * ```
- */
-export function serializeVersions(versions: UserVersionRaw[]): SerializedVersion[] {
-  return versions.map(serializeVersion)
-}
 
 // ============================================================================
 // Profile Serialization

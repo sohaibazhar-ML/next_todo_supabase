@@ -123,18 +123,17 @@ export async function registerAction(prevState: ActionState, formData: FormData)
   const { email, password, firstName, lastName, gender, currentAddress, country, newAddress, numPersons, numAdults, numChildren, pets, whichPets, phone, preferredTime } = validatedFields.data;
 
   try {
-    const supabase = await createClient();
+    const admin = createServiceClient();
 
-    // 1. Sign up user in Supabase
-    const { data: authData, error: authError } = await supabase.auth.signUp({
+    // 1. Sign up user in Supabase via Admin API to bypass the automatic email
+    // This creates an unconfirmed user WITHOUT dispatching the default Supabase template
+    const { data: authData, error: authError } = await admin.auth.admin.createUser({
       email,
       password,
-      options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/callback`,
-        data: {
-          first_name: firstName,
-          last_name: lastName,
-        }
+      email_confirm: false, 
+      user_metadata: {
+        first_name: firstName,
+        last_name: lastName,
       }
     });
 
@@ -180,11 +179,12 @@ export async function registerAction(prevState: ActionState, formData: FormData)
     });
 
     // 3. Generate confirmation link and send via SendGrid
-    const admin = createServiceClient();
+    // Use 'magiclink' type since the user already exists (created via admin.createUser above).
+    // 'signup' type fails silently for existing users. 'magiclink' works and also
+    // confirms the user's email when they click the link.
     const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
-      type: 'signup',
+      type: 'magiclink',
       email,
-      password,
       options: {
         redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/callback`,
       },
@@ -192,7 +192,6 @@ export async function registerAction(prevState: ActionState, formData: FormData)
 
     if (linkError || !linkData.properties?.action_link) {
       console.error('Failed to generate confirmation link:', linkError);
-      // If it's a connection error, we should still notify the user even if they are semi-registered
       if (isConnectionError(linkError)) {
         const loginT = await getTranslations('Login');
         return { errors: { form: loginT('errors.connectionError') } };
@@ -200,18 +199,23 @@ export async function registerAction(prevState: ActionState, formData: FormData)
     } else {
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
       const locale = (data.locale as string) || 'de';
+      const confirmLink = `${baseUrl}/auth/callback?token_hash=${linkData.properties.hashed_token}&type=magiclink`;
 
-      await sendGridService.sendTemplateEmail({
+      const emailResult = await sendGridService.sendTemplateEmail({
         to: email,
         templateKey: 'AUTH_CONFIRMATION',
         dynamicTemplateData: {
           user: firstName,
-          link: `${baseUrl}/auth/callback?token_hash=${linkData.properties.hashed_token}&type=signup`,
+          link: confirmLink,
           homepagelink: `${baseUrl}/${locale}`,
           dataprotectionlink: `${baseUrl}/${locale}/privacy`,
           impressumlink: `${baseUrl}/${locale}/imprint`,
         },
       });
+
+      if (!emailResult.success) {
+        console.error('SendGrid failed to send confirmation email:', emailResult.error);
+      }
     }
 
     return { success: true, email };

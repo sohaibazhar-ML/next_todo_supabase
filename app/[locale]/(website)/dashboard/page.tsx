@@ -5,6 +5,10 @@ import { prisma } from '@/lib/prisma';
 import { formatBytes } from '@/website/utils/formatters';
 import { Prisma } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+export const revalidate = 0;
+
 interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
@@ -18,7 +22,7 @@ export default async function DashboardPage(props: PageProps) {
 
   // Fetch active documents with optional search and pagination
   const where: Prisma.documentsWhereInput = {
-    is_active: true,
+    is_featured: true,
     ...(q ? { title: { contains: q, mode: 'insensitive' } } : {})
   };
 

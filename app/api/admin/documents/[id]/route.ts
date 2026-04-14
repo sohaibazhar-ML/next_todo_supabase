@@ -81,18 +81,14 @@ export async function PUT(
     // Get the document to find root document ID
     const document = await prisma.documents.findUnique({
       where: { id },
-      select: { id: true, parent_document_id: true }
+      select: { id: true }
     })
 
     if (!document) {
       return NextResponse.json({ error: ERROR_MESSAGES.DOCUMENT_NOT_FOUND }, { status: 404 })
     }
 
-    // Determine root document ID (Google Docs behavior: all versions share metadata)
-    // Root is either the document itself (if it has no parent) or its parent
-    const rootId = document.parent_document_id || document.id
-
-    // Prepare update data (only metadata fields, not file-specific fields)
+    // Prepare update data
     const updateData: Prisma.documentsUpdateInput = {
       updated_at: new Date(),
     }
@@ -101,19 +97,10 @@ export async function PUT(
     if (body.category !== undefined) updateData.category = body.category
     if (body.tags !== undefined) updateData.tags = body.tags
     if (body.is_featured !== undefined) updateData.is_featured = body.is_featured
-    if (body.is_active !== undefined) updateData.is_active = body.is_active
-    if (body.searchable_content !== undefined)
-      updateData.searchable_content = body.searchable_content
 
-    // Update all versions in the version tree (root + all children)
-    // This follows Google Docs behavior where metadata is shared across all versions
-    const updateResult = await prisma.documents.updateMany({
-      where: {
-        OR: [
-          { id: rootId },
-          { parent_document_id: rootId }
-        ]
-      },
+    // Update document metadata directly
+    await prisma.documents.update({
+      where: { id: document.id },
       data: updateData
     })
 
@@ -129,7 +116,6 @@ export async function PUT(
     return NextResponse.json({
       ...updatedDocument,
       file_size: Number(updatedDocument.file_size),
-      versionsUpdated: updateResult.count,
     })
   } catch (error: unknown) {
     console.error(CONSOLE_MESSAGES.ERROR_UPDATING_DOCUMENT, error)
