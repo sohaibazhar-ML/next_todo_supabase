@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { usePathname, useRouter } from '@/i18n/routing';
 import { Image, Text, Button } from '@/website/atoms';
@@ -21,7 +21,26 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
-  const { value: isOpen, toggle, close } = useToggle(false);
+   const { value: isOpen, toggle, close } = useToggle(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        close();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen, close]);
 
   const languages = [
     { code: 'fr', name: t('languages.fr'), flag: '/assets/website/icons/french.png' },
@@ -47,7 +66,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   const currentLang = languages.find(l => l.code === locale) || languages.find(l => l.code === 'de')!;
 
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       <Button
         variant="unstyled"
         onClick={toggle}
@@ -75,40 +94,36 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
       </Button>
 
       {isOpen && (
-        <>
-          <div className="fixed inset-0 z-10" onClick={close} />
-
-          <div
-            className="absolute right-0 top-full mt-4 bg-white border border-black/5 shadow-lg z-20 overflow-hidden animate-in fade-in zoom-in-95 duration-200 w-[200px] h-auto rounded-[10px] pt-2 pb-2 flex flex-col gap-0.5"
-          >
-            {languages.map((lang) => (
-              <Button
-                key={lang.code}
-                variant="ghost"
-                onClick={() => handleLanguageChange(lang.code)}
-                className={`w-full flex items-center justify-start gap-4 px-6 py-3 transition-colors hover:bg-background-neutral/50 border-none rounded-none shadow-none text-left ${locale === lang.code ? 'text-primary bg-primary/5' : 'text-secondary'
-                  }`}
+        <div
+          className="absolute right-0 top-full mt-4 bg-white border border-black/5 shadow-lg z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 w-[200px] h-auto rounded-[10px] pt-2 pb-2 flex flex-col gap-0.5"
+        >
+          {languages.map((lang) => (
+            <Button
+              key={lang.code}
+              variant="ghost"
+              onClick={() => handleLanguageChange(lang.code)}
+              className={`w-full flex items-center justify-start gap-4 px-6 py-3 transition-colors hover:bg-background-neutral/50 border-none rounded-none shadow-none text-left ${locale === lang.code ? 'text-primary bg-primary/5' : 'text-secondary'
+                }`}
+            >
+              <div className="relative w-[30px] h-[22px] flex items-center justify-center flex-shrink-0">
+                <Image
+                  src={lang.flag}
+                  alt={lang.name}
+                  fill
+                  sizes="30px"
+                  className="object-contain"
+                />
+              </div>
+              <Text
+                as="span"
+                variant="text-xs"
+                className={`font-medium ${locale === lang.code ? 'text-primary font-bold' : 'text-secondary'}`}
               >
-                <div className="relative w-[30px] h-[22px] flex items-center justify-center flex-shrink-0">
-                  <Image
-                    src={lang.flag}
-                    alt={lang.name}
-                    fill
-                    sizes="30px"
-                    className="object-contain"
-                  />
-                </div>
-                <Text
-                  as="span"
-                  variant="text-xs"
-                  className={`font-medium ${locale === lang.code ? 'text-primary font-bold' : 'text-secondary'}`}
-                >
-                  {lang.name}
-                </Text>
-              </Button>
-            ))}
-          </div>
-        </>
+                {lang.name}
+              </Text>
+            </Button>
+          ))}
+        </div>
       )}
     </div>
   );

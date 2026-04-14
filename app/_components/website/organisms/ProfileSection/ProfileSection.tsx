@@ -41,11 +41,15 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
     return await uploadAvatarAction(formData);
   };
 
-  // Full country list from translations
+  // Full country list from translations with flags
   const countryOptions = Object.entries(
     tRegister.raw('fields.country.options') as Record<string, string>
   )
-    .map(([value, label]) => ({ value, label }))
+    .map(([value, label]) => ({
+      value,
+      label,
+      flag: `https://flagcdn.com/w40/${value.toLowerCase()}.png`
+    }))
     .sort((a, b) => a.label.localeCompare(b.label));
 
   return (
@@ -81,6 +85,7 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
             value={`${firstName} ${lastName}`} 
             isField
             isEditable
+            bottomBorderOnly
             onSave={async (newName) => {
               const res = await updateProfileName(newName);
               if (!res.success) throw new Error(res.error);
@@ -110,6 +115,7 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
                 value={currentAddress} 
                 isField
                 isEditable
+                bottomBorderOnly
                 onSave={async (val) => {
                   const res = await updateProfileField('current_address', val);
                   if (!res.success) throw new Error(res.error);
@@ -121,6 +127,7 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
                 isField
                 isEditable
                 options={countryOptions}
+                bottomBorderOnly
                 onSave={async (val) => {
                   const res = await updateProfileField('country_of_origin', val);
                   if (!res.success) throw new Error(res.error);
@@ -131,6 +138,7 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
                 value={newAddressSwitzerland} 
                 isField
                 isEditable
+                bottomBorderOnly
                 onSave={async (val) => {
                   const res = await updateProfileField('new_address_switzerland', val);
                   if (!res.success) throw new Error(res.error);
@@ -141,6 +149,7 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
                 value={phoneNumber} 
                 isField
                 isEditable
+                bottomBorderOnly
                 onSave={async (val) => {
                   const res = await updateProfileField('phone_number', val);
                   if (!res.success) throw new Error(res.error);

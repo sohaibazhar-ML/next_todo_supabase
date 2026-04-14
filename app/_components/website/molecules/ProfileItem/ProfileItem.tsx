@@ -24,6 +24,7 @@ interface ProfileItemProps {
   isEditable?: boolean;
   options?: Option[]; // If provided, uses Select instead of Input
   isOpen?: boolean; // For rotating the chevron
+  bottomBorderOnly?: boolean; // For Account page styling: only bottom border on input/select
 }
 
 export const ProfileItem: React.FC<ProfileItemProps> = ({
@@ -38,6 +39,7 @@ export const ProfileItem: React.FC<ProfileItemProps> = ({
   isEditable = false,
   options,
   isOpen = false,
+  bottomBorderOnly = false,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(typeof value === 'string' ? value : '');
@@ -128,7 +130,10 @@ export const ProfileItem: React.FC<ProfileItemProps> = ({
                   options={options}
                   value={editValue}
                   onChange={(e) => setEditValue(e.target.value)}
-                  className="w-full"
+                  className={twMerge(
+                    "w-full",
+                    bottomBorderOnly && "border-0 border-b border-secondary/20 rounded-none shadow-none px-0 focus:border-primary"
+                  )}
                   disabled={isLoading}
                 />
               ) : (
@@ -138,7 +143,10 @@ export const ProfileItem: React.FC<ProfileItemProps> = ({
                   onChange={(e) => setEditValue(e.target.value)}
                   inputSize="sm"
                   className="w-full"
-                  inputClassName="font-medium bg-transparent border-primary/20 focus:border-primary"
+                  inputClassName={twMerge(
+                    "font-medium bg-transparent border-primary/20 focus:border-primary",
+                    bottomBorderOnly && "border-0 border-b border-secondary/20 rounded-none shadow-none px-0 focus:border-primary"
+                  )}
                   disabled={isLoading}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleSave(e as any);
