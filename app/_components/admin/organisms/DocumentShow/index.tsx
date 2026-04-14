@@ -12,7 +12,10 @@ export const DocumentShow = () => (
                 render={(record: Document) => Array.isArray(record.tags) ? record.tags.join(', ') : record.tags} 
             />
             <TextField source="file_name" />
-            <NumberField source="file_size" />
+            <FunctionField 
+                label="Size (KB)" 
+                render={(record: Document) => record.file_size ? `${(record.file_size / 1024).toFixed(1)} KB` : '0 KB'} 
+            />
             <DateField source="created_at" showTime />
             <NumberField source="download_count" />
             <TextField source="version" />
