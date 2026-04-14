@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Languages, ShieldCheck, Lock, HelpCircle, Check, Loader2, Eye, EyeOff } from 'lucide-react';
+import { Languages, ShieldCheck, Lock, HelpCircle, Check, Loader2, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
 import { ProfileAvatar } from '@/website/molecules/ProfileAvatar/ProfileAvatar';
 import { ProfileItem } from '@/website/molecules/ProfileItem/ProfileItem';
 import { FormMessage } from '@/website/molecules/FormMessage/FormMessage';
@@ -10,6 +10,7 @@ import { Text, Button, Input, Switch } from '@/website/atoms';
 import { Link, useRouter } from '@/i18n/routing';
 import { updateLanguageAction, updateKeepLoggedInAction, changePasswordAction } from '@/app/_actions/website/settings.actions';
 import { updateProfileField, uploadAvatarAction } from '@/app/_actions/website/profile.actions';
+import { passwordChangeSchema } from '@/app/_schemas/website/profile.schema';
 import { twMerge } from 'tailwind-merge';
 
 interface SettingsSectionProps {
@@ -28,6 +29,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
 }) => {
   const t = useTranslations('Dashboard.settings');
   const tAccount = useTranslations('Dashboard.account');
+  const tr = useTranslations('Register');
   const router = useRouter();
   
   const [isPasswordOpen, setIsPasswordOpen] = useState(false);
@@ -42,6 +44,34 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
+
+  // Real-time client-side validation
+  const clientValidation = passwordChangeSchema.safeParse(passwordState);
+  const clientErrors: Record<string, string[]> = !clientValidation.success
+    ? (clientValidation.error.flatten().fieldErrors as Record<string, string[]>)
+    : {};
+
+  const getFieldError = (name: string) => {
+    const value = (passwordState as any)[name];
+    if (!value && name !== 'confirmPassword') return undefined;
+    if (!touchedFields[name]) return undefined;
+    return clientErrors[name]?.[0];
+  };
+
+  const passwordRules = [
+    { key: 'length', label: tr('fields.password.rules.length'), check: (val: string) => val.length >= 8 },
+    { key: 'uppercase', label: tr('fields.password.rules.uppercase'), check: (val: string) => /[A-Z]/.test(val) },
+    { key: 'number', label: tr('fields.password.rules.number'), check: (val: string) => /[0-9]/.test(val) },
+    { key: 'special', label: tr('fields.password.rules.special'), check: (val: string) => /[^a-zA-Z0-9]/.test(val) },
+  ];
+
+  const passwordRulesStatus = passwordRules.map(rule => ({
+    ...rule,
+    isMet: rule.check(passwordState.newPassword)
+  }));
+
+  const showRulesList = passwordState.newPassword.length > 0 || touchedFields.newPassword;
 
   const clearPasswordFeedback = () => {
     setPasswordError('');
@@ -58,24 +88,35 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
   const handlePasswordChange = async () => {
     clearPasswordFeedback();
 
-    if (passwordState.newPassword !== passwordState.confirmPassword) {
-      setPasswordError(t('passwordMismatch'));
-      return;
-    }
-    if (passwordState.newPassword.length < 8) {
-      setPasswordError(t('passwordTooShort'));
+    if (!clientValidation.success) {
+      setTouchedFields({
+        oldPassword: true,
+        newPassword: true,
+        confirmPassword: true,
+      });
       return;
     }
 
     setIsPasswordLoading(true);
     try {
-      const res = await changePasswordAction(passwordState.oldPassword, passwordState.newPassword);
+      const res = await changePasswordAction(
+        passwordState.oldPassword,
+        passwordState.newPassword,
+        passwordState.confirmPassword
+      );
       if (res.success) {
         setPasswordSuccess(true);
         setPasswordState({ oldPassword: '', newPassword: '', confirmPassword: '' });
+        setTouchedFields({});
         setTimeout(() => setIsPasswordOpen(false), 2000);
       } else {
-        setPasswordError(res.error || t('passwordChangeFailed'));
+        if (res.errors) {
+          // Field-specific validation errors from server (unlikely with client validation but for safety)
+          const firstError = Object.values(res.errors)[0]?.[0];
+          setPasswordError(firstError || t('passwordChangeFailed'));
+        } else {
+          setPasswordError((res as any).error || t('passwordChangeFailed'));
+        }
       }
     } catch {
       setPasswordError(t('unexpectedError'));
@@ -178,8 +219,11 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                   onChange={(e) => {
                     clearPasswordFeedback();
                     setPasswordState({ ...passwordState, oldPassword: e.target.value });
+                    setTouchedFields(prev => ({ ...prev, oldPassword: true }));
                   }}
                   onFocus={clearPasswordFeedback}
+                  error={!!getFieldError('oldPassword')}
+                  errorText={getFieldError('oldPassword')}
                   rightIcon={showOldPassword ? EyeOff : Eye}
                   onRightIconClick={() => setShowOldPassword(!showOldPassword)}
                   inputSize="sm"
@@ -191,11 +235,26 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                   onChange={(e) => {
                     clearPasswordFeedback();
                     setPasswordState({ ...passwordState, newPassword: e.target.value });
+                    setTouchedFields(prev => ({ ...prev, newPassword: true }));
                   }}
                   onFocus={clearPasswordFeedback}
+                  error={!!getFieldError('newPassword')}
+                  errorText={getFieldError('newPassword')}
                   rightIcon={showNewPassword ? EyeOff : Eye}
                   onRightIconClick={() => setShowNewPassword(!showNewPassword)}
                   inputSize="sm"
+                  helperText={
+                    showRulesList && (
+                      <div className="flex flex-col gap-1 mt-2">
+                        {passwordRulesStatus.map((rule) => (
+                          <div key={rule.key} className={`flex items-center gap-2 text-xs transition-colors ${rule.isMet ? 'text-success' : 'text-secondary/60'}`}>
+                            {rule.isMet ? <CheckCircle2 size={12} className="shrink-0" /> : <span className="w-3 h-3 flex items-center justify-center">•</span>}
+                            <span>{rule.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  }
                 />
                 <Input 
                   type={showConfirmPassword ? "text" : "password"}
@@ -204,8 +263,11 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                   onChange={(e) => {
                     clearPasswordFeedback();
                     setPasswordState({ ...passwordState, confirmPassword: e.target.value });
+                    setTouchedFields(prev => ({ ...prev, confirmPassword: true }));
                   }}
                   onFocus={clearPasswordFeedback}
+                  error={!!getFieldError('confirmPassword')}
+                  errorText={getFieldError('confirmPassword')}
                   rightIcon={showConfirmPassword ? EyeOff : Eye}
                   onRightIconClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   inputSize="sm"
@@ -234,6 +296,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                   size="sm" 
                   onClick={() => setIsPasswordOpen(false)}
                   disabled={isPasswordLoading}
+                  textClassName="text-secondary"
                 >
                   {t('cancel')}
                 </Button>
@@ -242,7 +305,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                   size="sm" 
                   onClick={handlePasswordChange}
                   isLoading={isPasswordLoading}
-                  disabled={!passwordState.oldPassword || !passwordState.newPassword}
+                  disabled={!clientValidation.success || isPasswordLoading}
                 >
                   {t('saveChanges')}
                 </Button>

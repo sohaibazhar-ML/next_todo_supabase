@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
+import { passwordChangeSchema } from '@/app/_schemas/website/profile.schema';
 
 /**
  * Updates the preferred language in a cookie
@@ -66,8 +67,22 @@ export async function updateKeepLoggedInAction(value: boolean) {
  * Securely changes the user's password
  * Requires old password for re-authentication
  */
-export async function changePasswordAction(oldPassword: string, newPassword: string) {
+export async function changePasswordAction(oldPassword: string, newPassword: string, confirmPassword: string) {
   try {
+    // 0. Validate input using Zod
+    const validatedFields = passwordChangeSchema.safeParse({
+      oldPassword,
+      newPassword,
+      confirmPassword,
+    });
+
+    if (!validatedFields.success) {
+      return {
+        success: false,
+        errors: validatedFields.error.flatten().fieldErrors,
+      };
+    }
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 

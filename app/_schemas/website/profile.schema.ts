@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { DEFAULT_VALUES } from '@/website/constants';
+import { passwordSchema } from './password.schema';
 
 /**
  * Base profile schema (for both create and edit)
@@ -93,10 +94,11 @@ export const editProfileSchema = baseProfileSchema.extend({
  * Password change schema (separate from profile)
  */
 export const passwordChangeSchema = z.object({
-  newPassword: z
+  oldPassword: z
     .string()
-    .min(6, 'Password must be at least 6 characters')
-    .max(100, 'Password must be less than 100 characters'),
+    .min(1, 'Old password is required'),
+  
+  newPassword: passwordSchema,
   
   confirmPassword: z
     .string()
