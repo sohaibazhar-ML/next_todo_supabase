@@ -14,7 +14,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
-import { isAdmin } from '@/utils/roles'
+import { isAdmin, getUserPermissions } from '@/utils/roles'
 import type { Prisma } from '@prisma/client'
 import { isErrorWithMessage } from '@/utils'
 import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
@@ -112,7 +112,7 @@ export async function GET(request: Request) {
     const fromDate = filterObj.fromDate || searchParams.get('fromDate')
     const toDate = filterObj.toDate || searchParams.get('toDate')
 
-    const admin = await isAdmin(user.id)
+
 
     // Build where clause with proper typing
     const where: Prisma.download_logsWhereInput = {}
@@ -135,8 +135,9 @@ export async function GET(request: Request) {
       if (toDate) where.downloaded_at.lte = new Date(toDate)
     }
 
-    // Users can only see their own logs unless admin
-    if (!admin) {
+    // Users can only see their own logs unless admin or subadmin
+    const { isManager } = await getUserPermissions(user.id)
+    if (!isManager) {
       where.user_id = user.id
     }
 
