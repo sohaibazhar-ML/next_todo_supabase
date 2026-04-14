@@ -187,10 +187,41 @@ export const dataProvider: DataProvider = {
     },
 
     update: async (resource, params) => {
+        // Handle document file replacement
+        if (resource === 'documents' && params.data.file && params.data.file.rawFile) {
+            const formData = new FormData();
+            formData.append('file', params.data.file.rawFile);
+
+            // Append metadata fields
+            for (const [key, value] of Object.entries(params.data)) {
+                if (key === 'file') continue;
+                
+                if (key === 'tags' && typeof value === 'string') {
+                    formData.append(key, JSON.stringify(value.split(',').map((t: string) => t.trim()).filter(Boolean)));
+                } else if (Array.isArray(value)) {
+                    formData.append(key, JSON.stringify(value));
+                } else if (value !== undefined && value !== null) {
+                    formData.append(key, String(value));
+                }
+            }
+            
+            const response = await fetch(`/api/admin/documents/${params.id}/replace-file`, {
+                method: 'PUT',
+                body: formData,
+            });
+            const json = await response.json();
+            if (!response.ok) throw new Error(json.error || 'File replacement failed');
+            return { data: json };
+        }
+
         const data = { id: params.id, ...params.data } as Record<string, unknown>;
         
-        if (resource === 'documents' && typeof data.tags === 'string') {
-            data.tags = (data.tags as string).split(',').map((t: string) => t.trim()).filter(Boolean);
+        // Clean out the file field if it wasn't changed (react-admin sends existing file data back)
+        if (resource === 'documents') {
+            delete data.file;
+            if (typeof data.tags === 'string') {
+                data.tags = (data.tags as string).split(',').map((t: string) => t.trim()).filter(Boolean);
+            }
         }
 
         const { json } = await httpClient(`${apiUrl}/${resource}`, {
