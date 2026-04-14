@@ -18,8 +18,6 @@ export const DocumentShow = () => (
             />
             <DateField source="created_at" showTime />
             <NumberField source="download_count" />
-            <TextField source="version" />
-            <TextField source="searchable_content" />
         </SimpleShowLayout>
     </Show>
 );

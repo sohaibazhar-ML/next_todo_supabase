@@ -19,30 +19,18 @@ model documents {
   file_size                BigInt
   file_type                String
   mime_type                String
-  version                  String?                  @default("1.0")
-  parent_document_id       String?                  @db.Uuid
-  is_active                Boolean?                 @default(true)
   is_featured              Boolean?                 @default(false)
   download_count           Int?                     @default(0)
-  searchable_content       String?
   created_at               DateTime?                @default(now()) @db.Timestamptz(6)
   updated_at               DateTime?                @default(now()) @db.Timestamptz(6)
   created_by               String?                  @db.Uuid
-  google_drive_template_id String?
-  documents                documents?               @relation("documentsTodocuments", fields: [parent_document_id], references: [id], onUpdate: NoAction)
-  other_documents          documents[]              @relation("documentsTodocuments")
   download_logs            download_logs[]
-  user_document_versions   user_document_versions[]
 
   @@index([category], map: "idx_documents_category")
   @@index([category, created_at(sort: Desc)], map: "idx_documents_category_created")
   @@index([created_by], map: "idx_documents_created_by")
   @@index([file_type], map: "idx_documents_file_type")
-  @@index([is_active], map: "idx_documents_is_active")
   @@index([is_featured], map: "idx_documents_is_featured")
-  @@index([parent_document_id], map: "idx_documents_parent_document_id")
-  @@index([parent_document_id, category], map: "idx_documents_parent_category")
-  @@index([parent_document_id, file_type], map: "idx_documents_parent_file_type")
   @@index([tags], map: "idx_documents_tags_gin", type: Gin)
   @@schema("public")
 }
@@ -98,40 +86,10 @@ model profiles {
   avatar_url              String?
   admin_notes             String?
   download_logs           download_logs[]
-  user_document_versions  user_document_versions[]
 
   @@index([email], map: "idx_profiles_email")
   @@index([role], map: "idx_profiles_role")
   @@index([role, created_at(sort: Desc)], map: "idx_profiles_role_created")
   @@index([username], map: "idx_profiles_username")
-  @@schema("public")
-}
-
-/// User-specific document versions for edited documents
-model user_document_versions {
-  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  original_document_id String    @db.Uuid
-  user_id              String    @db.Uuid
-  version_number       Int       @default(1)
-  version_name         String?
-  html_content         String?
-  pdf_text_content     String?
-  pdf_annotations      Json?
-  exported_file_path   String?
-  exported_file_size   BigInt?
-  exported_mime_type   String?
-  original_file_type   String
-  is_draft             Boolean   @default(true)
-  created_at           DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at           DateTime  @default(now()) @db.Timestamptz(6)
-  google_drive_file_id String?
-  google_edit_link     String?
-  documents            documents @relation(fields: [original_document_id], references: [id], onDelete: Cascade)
-  profiles             profiles  @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@unique([original_document_id, user_id, version_number])
-  @@index([user_id])
-  @@index([original_document_id, user_id])
-  @@index([user_id, created_at(sort: Desc)])
   @@schema("public")
 }

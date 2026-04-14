@@ -235,9 +235,6 @@ export async function GET(
                             { category: { contains: q, mode: 'insensitive' } },
                             { file_type: { contains: q, mode: 'insensitive' } },
                             { mime_type: { contains: q, mode: 'insensitive' } },
-                            { version: { contains: q, mode: 'insensitive' } },
-                            { google_drive_template_id: { contains: q, mode: 'insensitive' } },
-                            { searchable_content: { contains: q, mode: 'insensitive' } },
                         ];
                     } else if (resource === 'profiles' || resource === 'users') {
                         // Resolve country names to 2-letter codes for DB matching (e.g. "Pakistan" -> "PK")

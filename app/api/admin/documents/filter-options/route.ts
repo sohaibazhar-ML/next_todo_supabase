@@ -33,7 +33,6 @@ export async function GET(request: Request) {
       prisma.$queryRaw<Array<{ category: string }>>`
         SELECT DISTINCT category 
         FROM documents 
-        WHERE parent_document_id IS NULL
         ORDER BY category ASC
         LIMIT 1000
       `,
@@ -42,7 +41,6 @@ export async function GET(request: Request) {
       prisma.$queryRaw<Array<{ file_type: string }>>`
         SELECT DISTINCT file_type 
         FROM documents 
-        WHERE parent_document_id IS NULL
         ORDER BY file_type ASC
         LIMIT 1000
       `,
@@ -53,8 +51,7 @@ export async function GET(request: Request) {
         FROM (
           SELECT unnest(tags) as tag
           FROM documents
-          WHERE parent_document_id IS NULL 
-            AND tags IS NOT NULL 
+          WHERE tags IS NOT NULL 
             AND tags != '{}'
         ) AS tag_list
         WHERE tag IS NOT NULL AND tag != ''

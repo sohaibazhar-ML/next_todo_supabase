@@ -43,8 +43,6 @@ export async function POST(request: Request) {
     const category = formData.get('category') as string
     const tags = formData.get('tags') as string
     const is_featured = formData.get('is_featured') === 'true'
-    const searchable_content = formData.get('searchable_content') as string | null
-    const parent_document_id = formData.get('parent_document_id') as string | null
 
     if (files.length === 0 || !category) {
       return NextResponse.json(
@@ -63,14 +61,6 @@ export async function POST(request: Request) {
       }
     }
 
-    // If uploading a new version, validate parent document exists and get version number
-    let versionNumber = '1.0'
-    let parentDocumentId: string | null = null
-
-    if (parent_document_id) {
-        // Versioning logic could be added here if needed
-        parentDocumentId = parent_document_id
-    }
 
     const createdDocuments = []
 
@@ -108,11 +98,7 @@ export async function POST(request: Request) {
             file_size: BigInt(file.size),
             file_type: fileType,
             mime_type: file.type,
-            version: versionNumber,
-            parent_document_id: parentDocumentId,
-            is_active: true,
             is_featured: is_featured || false,
-            searchable_content: searchable_content || null,
             created_by: user.id,
           }
         })

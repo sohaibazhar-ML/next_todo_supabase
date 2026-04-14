@@ -20,8 +20,6 @@ export const DocumentEdit = () => (
                 parse={(str: string) => str.split(',').map(t => t.trim()).filter(Boolean)}
             />
             <BooleanInput source="is_featured" label="Featured" />
-            <TextInput source="version" />
-            <TextInput source="searchable_content" multiline fullWidth label="Searchable Content (for OCR)" />
         </SimpleForm>
     </Edit>
 );

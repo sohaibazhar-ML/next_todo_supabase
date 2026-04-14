@@ -10,7 +10,6 @@
 ALTER TABLE "public"."documents" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."download_logs" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."profiles" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE "public"."user_document_versions" ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================================
 -- Functions
@@ -82,8 +81,7 @@ BEGIN
     ts_rank(
       to_tsvector('english', 
         COALESCE(d.title, '') || ' ' || 
-        COALESCE(d.description, '') || ' ' || 
-        COALESCE(d.searchable_content, '')
+        COALESCE(d.description, '')
       ),
       plainto_tsquery('english', search_query)
     ) AS rank
@@ -92,8 +90,7 @@ BEGIN
     (
       to_tsvector('english', 
         COALESCE(d.title, '') || ' ' || 
-        COALESCE(d.description, '') || ' ' || 
-        COALESCE(d.searchable_content, '')
+        COALESCE(d.description, '')
       ) @@ plainto_tsquery('english', search_query)
     )
     AND (p_category IS NULL OR d.category = p_category)
@@ -203,21 +200,7 @@ CREATE POLICY "Users can insert own download logs"
 ON download_logs FOR INSERT
 WITH CHECK (auth.uid() = user_id);
 
--- ============================================================================
--- RLS Policies for user_document_versions table
--- ============================================================================
-DROP POLICY IF EXISTS "Users can manage own document versions" ON user_document_versions;
-CREATE POLICY "Users can manage own document versions"
-ON user_document_versions FOR ALL
-TO authenticated
-USING (auth.uid() = user_id)
-WITH CHECK (auth.uid() = user_id);
 
-DROP POLICY IF EXISTS "Admins can view all user document versions" ON user_document_versions;
-CREATE POLICY "Admins can view all user document versions"
-ON user_document_versions FOR SELECT
-TO authenticated
-USING (public.is_user_admin_for_documents(auth.uid()));
 
 -- ============================================================================
 -- Storage Bucket Setup for Documents

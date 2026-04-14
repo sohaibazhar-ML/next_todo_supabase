@@ -96,10 +96,7 @@ export async function GET(request: Request) {
     const sortField = searchParams.get('_sortField') || searchParams.get('sort') || 'created_at'
     const sortOrder = (searchParams.get('_sortOrder') || searchParams.get('order') || 'DESC').toLowerCase()
 
-    // Build where clause
-    const where: Prisma.documentsWhereInput = {
-      parent_document_id: null, // Only top-level documents for the main list
-    }
+    const where: Prisma.documentsWhereInput = {}
 
     if (category) where.category = category
     if (fileType) where.file_type = fileType
@@ -140,7 +137,6 @@ export async function GET(request: Request) {
             { category: { contains: searchQuery, mode: 'insensitive' } },
             { file_type: { contains: searchQuery, mode: 'insensitive' } },
             { file_name: { contains: searchQuery, mode: 'insensitive' } },
-            { searchable_content: { contains: searchQuery, mode: 'insensitive' } },
           ]
         }
       } catch (e) {
@@ -151,7 +147,6 @@ export async function GET(request: Request) {
           { category: { contains: searchQuery, mode: 'insensitive' } },
           { file_type: { contains: searchQuery, mode: 'insensitive' } },
           { file_name: { contains: searchQuery, mode: 'insensitive' } },
-          { searchable_content: { contains: searchQuery, mode: 'insensitive' } },
         ]
       }
     }
@@ -210,11 +205,7 @@ export async function POST(request: Request) {
         file_size: BigInt(body.file_size),
         file_type: body.file_type,
         mime_type: body.mime_type,
-        version: body.version || '1.0',
-        parent_document_id: body.parent_document_id || null,
-        is_active: body.is_active ?? true,
         is_featured: body.is_featured || false,
-        searchable_content: body.searchable_content || null,
         created_by: user.id,
       }
     })

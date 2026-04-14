@@ -89,7 +89,6 @@ export const DocumentCreate = () => (
             </FileInput>
 
             <BooleanInput source="is_featured" label="Featured" />
-            <TextInput source="searchable_content" multiline fullWidth label="Searchable Content (for OCR)" />
         </SimpleForm>
     </Create>
 );
