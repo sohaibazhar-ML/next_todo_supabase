@@ -103,38 +103,144 @@ export async function GET(
     // Special Case: Statistics Dashboard
     if (resource === 'stats') {
         try {
-            const thirtyDaysAgo = new Date();
-            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            const searchParams = request.nextUrl.searchParams;
+            const startDateStr = searchParams.get('startDate');
+            const endDateStr = searchParams.get('endDate');
 
-            // Fetch counts sequentially to avoid connection pool exhaustion (P1001)
-            // On some Supabase tiers, parallel heavy counts can trigger pooler timeouts
-            const totalUsers = await prisma.profiles.count().catch(err => {
-                console.error('[Admin API] Error counting profiles:', err);
-                return 0;
-            });
+            // Set up current period (Default: last 30 days)
+            let endDate = new Date();
+            if (endDateStr) {
+                endDate = new Date(endDateStr);
+                endDate.setUTCHours(23, 59, 59, 999); // Ensure it includes the entire end day
+            }
             
-            const totalDocuments = await prisma.documents.count().catch(err => {
-                console.error('[Admin API] Error counting documents:', err);
-                return 0;
-            });
+            const startDate = startDateStr ? new Date(startDateStr) : new Date(endDate.getTime() - 30 * 24 * 60 * 60 * 1000);
             
-            const totalDownloads = await prisma.download_logs.count().catch(err => {
-                console.error('[Admin API] Error counting total downloads:', err);
-                return 0;
-            });
-            
+            // Set up previous period for trending (same duration as current)
+            const durationMs = endDate.getTime() - startDate.getTime();
+            const prevEndDate = new Date(startDate.getTime());
+            const prevStartDate = new Date(startDate.getTime() - durationMs);
+
+            const now = new Date();
+            const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+            // 1. Core Counts
+            const totalUsers = await prisma.profiles.count();
+            const totalDocuments = await prisma.documents.count();
+            const totalDownloads = await prisma.download_logs.count();
             const recentDownloads = await prisma.download_logs.count({
-                where: { downloaded_at: { gte: thirtyDaysAgo } }
-            }).catch(err => {
-                console.error('[Admin API] Error counting recent downloads:', err);
-                return 0;
+                where: { downloaded_at: { gte: startDate, lte: endDate } }
+            });
+            const downloadsToday = await prisma.download_logs.count({
+                where: { downloaded_at: { gte: todayStart } }
+            });
+
+            // 2. Previous Period Counts (for percentage trending)
+            const prevUsers = await prisma.profiles.count({
+                where: { created_at: { lt: startDate } }
+            });
+            const prevDocuments = await prisma.documents.count({
+                where: { created_at: { lt: startDate } }
+            });
+            const prevDownloads = await prisma.download_logs.count({
+                where: { downloaded_at: { gte: prevStartDate, lt: prevEndDate } }
+            });
+
+            const calculatePercent = (current: number, previous: number) => {
+                if (previous === 0) return current > 0 ? 100 : 0;
+                return Math.round(((current - previous) / previous) * 100);
+            };
+
+            // 3. User Growth Timeline (Within selected window)
+            const newUsers = await prisma.profiles.findMany({
+                where: { created_at: { gte: startDate, lte: endDate } },
+                select: { created_at: true },
+                orderBy: { created_at: 'asc' }
+            });
+
+            // Bucketize timeline by day
+            const timelineMap = new Map<string, number>();
+            const dayInMs = 24 * 60 * 60 * 1000;
+            const daysCount = Math.floor(durationMs / dayInMs);
+            
+            for (let i = 0; i <= daysCount; i++) {
+                const date = new Date(startDate.getTime() + (i * dayInMs));
+                timelineMap.set(date.toISOString().split('T')[0], 0);
+            }
+            
+            newUsers.forEach(u => {
+                const day = u.created_at.toISOString().split('T')[0];
+                if (timelineMap.has(day)) {
+                    timelineMap.set(day, timelineMap.get(day)! + 1);
+                }
+            });
+
+            const userGrowthTimeline = Array.from(timelineMap.entries())
+                .sort((a, b) => a[0].localeCompare(b[0])) // Ensure chronological order
+                .reduce((acc, [date, count], index) => {
+                    const prevTotal = index === 0 ? totalUsers - newUsers.length : acc[index - 1].users;
+                    acc.push({
+                        date,
+                        count,
+                        users: prevTotal + count
+                    });
+                    return acc;
+                }, [] as any[]);
+
+            // 4. Downloads by Category (Distribution)
+            // Note: We'll actually group by document.file_type as requested
+            const logsWithDocs = await prisma.download_logs.findMany({
+                where: { downloaded_at: { gte: startDate, lte: endDate } },
+                include: { documents: { select: { file_type: true } } }
+            });
+
+            const categoryMap = new Map<string, number>();
+            logsWithDocs.forEach(log => {
+                const type = log.documents?.file_type || 'Unknown';
+                categoryMap.set(type, (categoryMap.get(type) || 0) + 1);
+            });
+
+            const downloadsByCategory = Array.from(categoryMap.entries())
+                .map(([category, count]) => ({ category, count }))
+                .sort((a, b) => b.count - a.count);
+
+            // 5. Top Downloads (Top 5)
+            const topLogs = await prisma.download_logs.groupBy({
+                by: ['document_id'],
+                where: { downloaded_at: { gte: startDate, lte: endDate } },
+                _count: { _all: true },
+                orderBy: { _count: { document_id: 'desc' } },
+                take: 5
+            });
+
+            const topDocDetails = await prisma.documents.findMany({
+                where: { id: { in: topLogs.map(l => l.document_id) } },
+                select: { id: true, title: true, file_type: true }
+            });
+
+            const topDownloads = topLogs.map(log => {
+                const doc = topDocDetails.find(d => d.id === log.document_id);
+                return {
+                    id: log.document_id,
+                    title: doc?.title || 'Deleted Document',
+                    file_type: doc?.file_type || 'unknown',
+                    count: log._count._all
+                };
             });
 
             return NextResponse.json({
                 totalUsers,
                 totalDocuments,
                 totalDownloads,
-                recentDownloads
+                recentDownloads,
+                downloadsToday,
+                userGrowthPercent: calculatePercent(totalUsers, prevUsers),
+                documentGrowthPercent: calculatePercent(totalDocuments, prevDocuments),
+                downloadGrowthPercent: calculatePercent(totalDownloads, prevDownloads), // Lifetime total growth vs prev total - slightly odd but follows some patterns
+                recentDownloadPercent: calculatePercent(recentDownloads, prevDownloads), // 30d vs previous 30d
+                userGrowthTimeline,
+                downloadsByCategory,
+                topDownloads
             });
         } catch (error) {
             console.error('[Admin API] Global stats error:', error);

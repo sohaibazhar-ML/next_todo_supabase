@@ -1,6 +1,8 @@
 import React from "react";
 import { Edit, SimpleForm, TextInput, SelectInput, BooleanInput, FileInput, FileField } from "react-admin";
 import { DOCUMENT_CATEGORIES } from "@/admin/constants";
+import { useQueryClient } from "@tanstack/react-query";
+import { QUERY_KEYS } from "@/constants/queryKeys";
 
 export const DocumentEdit = () => (
     <Edit>

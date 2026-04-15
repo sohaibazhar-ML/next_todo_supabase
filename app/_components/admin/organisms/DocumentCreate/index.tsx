@@ -3,6 +3,8 @@ import { Create, SimpleForm, TextInput, SelectInput, FileInput, FileField, Boole
 import { DOCUMENT_CATEGORIES } from "@/admin/constants";
 import { Box, Typography, Button } from "@mui/material";
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
+import { useQueryClient } from "@tanstack/react-query";
+import { QUERY_KEYS } from "@/constants/queryKeys";
 
 export const DocumentCreate = () => (
     <Create>
