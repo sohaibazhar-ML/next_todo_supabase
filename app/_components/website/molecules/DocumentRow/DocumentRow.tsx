@@ -15,11 +15,13 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({
   const [isDownloading, setIsDownloading] = useState(false);
 
   const getIconSrc = (type: string) => {
-    switch (type) {
+    switch (type.toLowerCase()) {
       case 'pdf': return '/assets/website/dashboard/pdf.png';
-      case 'doc': return '/assets/website/dashboard/word.png';
-      case 'xls': return '/assets/website/dashboard/excel.png';
-      case 'zip': return '/assets/website/dashboard/zip.jpg';
+      case 'doc': 
+      case 'docx': return '/assets/website/dashboard/word.png';
+      case 'xls': 
+      case 'xlsx': return '/assets/website/dashboard/excell.png';
+      case 'zip': return '/assets/website/dashboard/zip.png';
       default: return '/assets/website/dashboard/file.jpg';
     }
   };
