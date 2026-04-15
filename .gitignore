@@ -45,3 +45,4 @@ next-env.d.ts
 # documentation and rules
 ignore.md
 website-rules.md
+RELEASE_NOTES*.md
