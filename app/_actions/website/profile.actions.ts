@@ -44,7 +44,7 @@ export async function updateProfileName(fullName: string) {
   }
 }
 
-export async function updateProfileField(field: string, value: any) {
+export async function updateProfileField(field: string, value: unknown) {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -78,11 +78,12 @@ export async function updateProfileField(field: string, value: any) {
     revalidatePath('/account/settings', 'page');
 
     return { success: true };
-  } catch (error) {
-    console.error(`Update profile ${field} error:`, error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'An unexpected error occurred';
+    console.error(`Update profile ${field} error:`, message);
     return { 
       success: false, 
-      error: error instanceof Error ? error.message : 'An unexpected error occurred' 
+      error: message
     };
   }
 }

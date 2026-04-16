@@ -41,11 +41,13 @@ export class SendGridService {
     try {
       await sgMail.send(msg);
       return { success: true };
-    } catch (error: any) {
-      console.error('SendGrid Error:', error.response?.body || error.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to send email';
+      const responseBody = (error as any).response?.body; // SendGrid error objects often have a response.body
+      console.error('SendGrid Error:', responseBody || message);
       return { 
         success: false, 
-        error: error.message || 'Failed to send email' 
+        error: message 
       };
     }
   }

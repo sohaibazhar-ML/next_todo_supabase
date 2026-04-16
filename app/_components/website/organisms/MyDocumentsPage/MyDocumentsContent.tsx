@@ -141,8 +141,8 @@ export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
       setIsModalOpen(false);
       resetForm();
       router.refresh();
-    } catch (err: any) {
-      setUploadError(err.message || 'An error occurred during upload.');
+    } catch (err: unknown) {
+      setUploadError(err instanceof Error ? err.message : 'An error occurred during upload.');
     } finally {
       setIsUploading(false);
     }
@@ -187,7 +187,7 @@ export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
 
       {/* Document List */}
       <div className="w-full flex flex-col min-h-[400px]">
-        {documents.map((doc: any, idx: number) => (
+        {documents.map((doc, idx) => (
           <DocumentRow
             key={doc.id}
             document={doc}

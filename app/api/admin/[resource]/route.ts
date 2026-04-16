@@ -23,8 +23,10 @@ function isAllowedResource(resource: string): resource is ResourceName {
 }
 
 // Maps resource name → Prisma model delegate
-function getPrismaModel(resource: ResourceName) {
-    const models: Record<ResourceName, Prisma.profilesDelegate<any> | Prisma.documentsDelegate<any> | Prisma.download_logsDelegate<any>> = {
+type PrismaDelegate = Prisma.profilesDelegate<any> | Prisma.documentsDelegate<any> | Prisma.download_logsDelegate<any>;
+
+function getPrismaModel(resource: ResourceName): PrismaDelegate {
+    const models: Record<ResourceName, PrismaDelegate> = {
         profiles: prisma.profiles,
         users: prisma.profiles, // Alias for profiles
         documents: prisma.documents,
@@ -33,7 +35,7 @@ function getPrismaModel(resource: ResourceName) {
         stats: prisma.profiles, // Dummy mapping for custom view
         settings: prisma.profiles, // Dummy mapping for custom view
     };
-    return models[resource] as any; // Cast to any here is acceptable as it's the bridge to generic Prisma calls
+    return models[resource];
 }
 
 const isUuid = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
@@ -255,7 +257,7 @@ export async function GET(
     const ids = searchParams.get('ids');
 
     // Define includes for specific resources to fetch related data
-    const includes: Record<string, any> = {
+    const includes: Record<string, Record<string, unknown>> = {
         download_logs: {
             documents: { select: { title: true } },
             profiles: { select: { username: true, email: true } }
@@ -269,7 +271,7 @@ export async function GET(
             if (!isUuid(id)) {
                 return NextResponse.json({ error: 'Invalid ID format' }, { status: 400 });
             }
-            const record = await model.findUnique({ 
+            const record = await (model as any).findUnique({ 
                 where: { id },
                 include
             });
@@ -432,14 +434,14 @@ export async function GET(
     try {
         // Fetch records + total count in parallel for efficiency
         const [records, total] = await Promise.all([
-            model.findMany({
+            (model as any).findMany({
                 where,
                 include,
                 skip: (page - 1) * perPage,
                 take: perPage,
                 orderBy: { [sortField]: sortOrder === 'asc' ? 'asc' : 'desc' },
             }),
-            model.count({ where }),
+            (model as any).count({ where }),
         ]);
 
         return NextResponse.json({
@@ -463,11 +465,11 @@ const RESOURCE_FIELD_WHITELISTS: Record<ResourceName, string[]> = {
     settings: [], // Custom
 };
 
-function whitelistFields(data: any, resource: ResourceName): any {
+function whitelistFields(data: Record<string, unknown>, resource: ResourceName): Record<string, unknown> {
     const allowedFields = RESOURCE_FIELD_WHITELISTS[resource];
     if (!allowedFields || allowedFields.length === 0) return data;
     
-    const cleanData: any = {};
+    const cleanData: Record<string, unknown> = {};
     for (const field of allowedFields) {
         if (data[field] !== undefined) {
             cleanData[field] = data[field];
@@ -503,7 +505,7 @@ export async function POST(
     const data = whitelistFields(body, resource);
 
     try {
-        const record = await model.create({ data });
+        const record = await (model as any).create({ data });
         return NextResponse.json(serializeRecord(record, resource), { status: 201 });
     } catch (error) {
         console.error('[Admin API] create error:', error);
@@ -539,7 +541,7 @@ export async function PUT(
     const data = whitelistFields(inputData, resource);
 
     try {
-        const record = await model.update({ where: { id }, data });
+        const record = await (model as any).update({ where: { id }, data });
         return NextResponse.json(serializeRecord(record, resource));
     } catch (error) {
         console.error('[Admin API] update error:', error);
@@ -581,7 +583,7 @@ export async function DELETE(
     }
 
     try {
-        await model.delete({ where: { id } });
+        await (model as any).delete({ where: { id } });
         return NextResponse.json({ id });
     } catch (error) {
         console.error('[Admin API] delete error:', error);
@@ -591,7 +593,7 @@ export async function DELETE(
 
 // Converts BigInt → number and Date → ISO string for JSON serialization
 // Optionally flattens relations for specific resources
-function serializeRecord(record: unknown, resource?: string): any {
+function serializeRecord(record: unknown, resource?: string): Record<string, unknown> | unknown {
     if (!record || typeof record !== 'object') return record;
     
     const rec = record as Record<string, unknown>;

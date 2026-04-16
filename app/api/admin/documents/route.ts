@@ -76,10 +76,10 @@ export async function GET(request: Request) {
 
     // Parse filter from JSON if present (React Admin style)
     const filterStr = searchParams.get('_filters') || searchParams.get('filter')
-    let filterObj: any = {}
+    let filterObj: Record<string, any> = {}
     if (filterStr) {
         try {
-            filterObj = JSON.parse(filterStr)
+            filterObj = JSON.parse(filterStr);
         } catch (e) {
             console.error('[Admin Documents API] Filter parse error:', e)
         }
@@ -252,14 +252,14 @@ export async function PUT(request: Request) {
     }
 
     // Convert file_size back to BigInt if present
-    const updateData: any = { ...data }
+    const updateData: Record<string, unknown> = { ...data }
     if (updateData.file_size !== undefined) {
-      updateData.file_size = BigInt(updateData.file_size)
+      updateData.file_size = BigInt(updateData.file_size as string | number | bigint)
     }
 
     const document = await prisma.documents.update({
       where: { id },
-      data: updateData
+      data: updateData as Prisma.documentsUpdateInput
     })
 
     return NextResponse.json({

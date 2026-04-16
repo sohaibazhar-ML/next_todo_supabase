@@ -97,11 +97,13 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
     if (value === '' || value === false || value === undefined) return undefined;
 
     // Rule 2: Only show validation if the field has been touched
-    const serverError = (state as any).errors?.[name]?.[0];
-    if (!touchedFields[name]) return serverError;
+    const serverError = state.errors ? (state.errors as Record<string, unknown>)[name] : undefined;
+    const serverErrorMsg = Array.isArray(serverError) ? serverError[0] : (typeof serverError === 'string' ? serverError : undefined);
+    
+    if (!touchedFields[name]) return serverErrorMsg;
 
     // Rule 3: Prioritize client-side real-time errors, fallback to server errors
-    return clientErrors[name]?.[0] || serverError;
+    return clientErrors[name]?.[0] || serverErrorMsg;
   };
 
   const passwordRules = [
@@ -384,7 +386,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               label={t('consent')}
               labelClassName="text-[21px] font-medium text-[#362E2D]"
               checked={formData.consent}
-              onChange={(e: any) => {
+              onChange={(e) => {
                 setFormData(prev => ({ ...prev, consent: e.target.checked }));
                 setTouchedFields(prev => ({ ...prev, consent: true }));
               }}
@@ -446,11 +448,11 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
           </Button>
         </div>
 
-        {showError && (state as any).errors?.form && (
+        {showError && state.errors?.form && (
           <div className="w-full mt-4">
             <FormMessage 
               variant="error" 
-              message={(state as any).errors.form} 
+              message={state.errors.form} 
             />
           </div>
         )}

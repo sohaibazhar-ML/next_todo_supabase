@@ -78,7 +78,7 @@ export async function GET(request: Request) {
                     }
                 }
             })
-            const serialized = logs.map((log: any) => ({
+            const serialized = logs.map((log) => ({
                 ...log,
                 document_title: log.documents?.title,
                 username: log.profiles?.username,
@@ -93,13 +93,16 @@ export async function GET(request: Request) {
 
     // Parse filter from JSON if present
     const filterStr = searchParams.get('_filters') || searchParams.get('filter')
-    let filterObj: any = {}
+    let filterObj: Record<string, any> = {}
     if (filterStr) {
         try {
             // Support double-stringified JSON which can occur in some frontend environments
-            filterObj = typeof filterStr === 'string' && filterStr.startsWith('"{') 
+            const parsed = typeof filterStr === 'string' && filterStr.startsWith('"{') 
                 ? JSON.parse(JSON.parse(filterStr)) 
                 : JSON.parse(filterStr);
+            if (parsed && typeof parsed === 'object') {
+                filterObj = parsed;
+            }
         } catch (e) {
             console.error('[Admin DownloadLogs API] Filter parse error:', e)
         }
@@ -198,7 +201,7 @@ export async function GET(request: Request) {
 
     const total = await prisma.download_logs.count({ where })
 
-    const serializedLogs = logs.map((log: any) => {
+    const serializedLogs = logs.map((log) => {
         const { documents, profiles, ...rest } = log;
         const firstName = profiles?.first_name || '';
         const lastName = profiles?.last_name || '';

@@ -69,7 +69,7 @@ export async function GET(request: Request) {
       fileTypes: uniqueFileTypes,
       tags: uniqueTags,
     })
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(CONSOLE_MESSAGES.ERROR_FETCHING_FILTER_OPTIONS, error)
     const errorMessage = isErrorWithMessage(error)
       ? error.message

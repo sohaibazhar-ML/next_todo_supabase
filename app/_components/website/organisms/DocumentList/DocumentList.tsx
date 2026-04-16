@@ -37,7 +37,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
 
       {/* List Container */}
       <div className="w-full flex flex-col min-h-[400px]">
-        {documents.map((doc: any, idx: number) => (
+        {documents.map((doc, idx) => (
           <DocumentRow 
             key={doc.id}
             document={doc}

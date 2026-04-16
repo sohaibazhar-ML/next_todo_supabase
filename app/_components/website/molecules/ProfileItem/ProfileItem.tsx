@@ -80,10 +80,10 @@ export const ProfileItem: React.FC<ProfileItemProps> = ({
       await onSave(editValue);
       setIsEditing(false);
       setStatus('success');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to save:', error);
       setStatus('error');
-      setErrorMsg(error.message || 'Failed to save');
+      setErrorMsg(error instanceof Error ? error.message : 'Failed to save');
     } finally {
       setIsLoading(false);
     }

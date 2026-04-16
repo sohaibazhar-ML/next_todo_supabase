@@ -52,16 +52,16 @@ export async function GET(request: NextRequest) {
         ]);
 
         // Aggregate by day via Prisma's groupBy (optimizing for larger datasets)
-        const uploadsByDay = await (prisma.documents as any).groupBy({
+        const uploadsByDay = await prisma.documents.groupBy({
             by: ['created_at'],
             where: { created_at: { gte: start, lte: end } },
-            _count: true,
+            _count: { created_at: true },
         });
 
-        const downloadsByDay = await (prisma.download_logs as any).groupBy({
+        const downloadsByDay = await prisma.download_logs.groupBy({
             by: ['downloaded_at'],
             where: { downloaded_at: { gte: start, lte: end } },
-            _count: true,
+            _count: { downloaded_at: true },
         });
 
         // Helper: Format date for daily matching
@@ -69,15 +69,15 @@ export async function GET(request: NextRequest) {
 
         // Aggregate results into maps
         const uploadMap = new Map<string, number>();
-        uploadsByDay.forEach((group: any) => {
+        uploadsByDay.forEach((group) => {
             const key = toDayKey(group.created_at);
-            uploadMap.set(key, (uploadMap.get(key) || 0) + (group._count || 0));
+            uploadMap.set(key, (uploadMap.get(key) || 0) + (group._count.created_at || 0));
         });
 
         const downloadMap = new Map<string, number>();
-        downloadsByDay.forEach((group: any) => {
+        downloadsByDay.forEach((group) => {
             const key = toDayKey(group.downloaded_at);
-            downloadMap.set(key, (downloadMap.get(key) || 0) + (group._count || 0));
+            downloadMap.set(key, (downloadMap.get(key) || 0) + (group._count.downloaded_at || 0));
         });
 
         // Map interval to aggregated data
@@ -100,8 +100,8 @@ export async function GET(request: NextRequest) {
             totalDownloads,
             dailyData: reportData,
         });
-    } catch (error) {
-        console.error('[Reports API] Error:', error);
+    } catch (error: unknown) {
+        console.error('[Reports API] Error:', error instanceof Error ? error.message : error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

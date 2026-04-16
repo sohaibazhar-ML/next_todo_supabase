@@ -16,15 +16,20 @@ import { getTranslations } from 'next-intl/server';
 /**
  * Checks if an error is related to a network connection failure or timeout.
  */
-function isConnectionError(err: any): boolean {
-  if (!err) return false;
+function isConnectionError(err: unknown): boolean {
+  if (!err || typeof err !== 'object') return false;
+  
+  const errorObj = err as Record<string, unknown>;
   
   // Check for common connection error signatures
-  const isTimeout = err.code === 'UND_ERR_CONNECT_TIMEOUT' || err.cause?.code === 'UND_ERR_CONNECT_TIMEOUT';
-  const isFetchFailed = err.message?.toLowerCase().includes('fetch failed');
-  const isNetworkError = err.message?.toLowerCase().includes('network error') || err.message?.toLowerCase().includes('eai_again');
+  const isTimeout = errorObj.code === 'UND_ERR_CONNECT_TIMEOUT' || 
+                   (errorObj.cause && typeof errorObj.cause === 'object' && (errorObj.cause as Record<string, unknown>).code === 'UND_ERR_CONNECT_TIMEOUT');
+  
+  const message = typeof errorObj.message === 'string' ? errorObj.message.toLowerCase() : '';
+  const isFetchFailed = message.includes('fetch failed');
+  const isNetworkError = message.includes('network error') || message.includes('eai_again');
 
-  return isTimeout || isFetchFailed || isNetworkError;
+  return !!(isTimeout || isFetchFailed || isNetworkError);
 }
 
 export async function forgotPasswordAction(prevState: ActionState, formData: FormData): Promise<ActionState> {

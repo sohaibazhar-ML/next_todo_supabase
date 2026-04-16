@@ -55,11 +55,12 @@ export async function submitContactAction(formData: {
     }
 
     return { success: true };
-  } catch (error: any) {
-    console.error('Contact Form Error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'An unexpected error occurred. Please try again later.';
+    console.error('Contact Form Error:', message);
     return { 
       success: false, 
-      error: error.message || 'An unexpected error occurred. Please try again later.' 
+      error: message 
     };
   }
 }
