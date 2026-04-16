@@ -280,7 +280,11 @@ export async function resetPasswordAction(prevState: ActionState, formData: Form
 export async function loginAction(prevState: ActionState, formData: FormData): Promise<ActionState> {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
-  const keepMeLoggedIn = formData.get('keepMeLoggedIn') === 'on';
+  
+  // If keepMeLoggedIn is missing from the form (as it's hidden/omitted per Figma), 
+  // we default to true to ensure session persistence and prevent 401 logouts.
+  const keepMeLoggedInInput = formData.get('keepMeLoggedIn');
+  const keepMeLoggedInForm = keepMeLoggedInInput === null ? true : keepMeLoggedInInput === 'on';
 
   // Validate using Zod
   const validatedFields = loginSchema.safeParse({
@@ -300,7 +304,7 @@ export async function loginAction(prevState: ActionState, formData: FormData): P
     // 1. Check if user exists in the profiles table to provide a specific error
     const profile = await prisma.profiles.findUnique({
       where: { email },
-      select: { id: true, preferred_language: true, email_confirmed: true }
+      select: { id: true, preferred_language: true, email_confirmed: true, keep_me_logged_in: true }
     });
 
     if (!profile) {
@@ -337,7 +341,10 @@ export async function loginAction(prevState: ActionState, formData: FormData): P
       sameSite: 'lax' as const,
     };
 
-    cookieStore.set('keep_me_logged_in', keepMeLoggedIn.toString(), {
+    // Use preference from form/default, but override with DB preference if available
+    const finalKeepMeLoggedIn = profile?.keep_me_logged_in ?? keepMeLoggedInForm;
+
+    cookieStore.set('keep_me_logged_in', finalKeepMeLoggedIn.toString(), {
       ...cookieOptions,
       maxAge: 60 * 60 * 24 * 30, // 30 days
     });

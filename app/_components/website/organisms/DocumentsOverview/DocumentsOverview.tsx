@@ -34,8 +34,8 @@ export const DocumentsOverview: React.FC<DocumentsOverviewProps> = ({ className 
 
             <div className="flex flex-col gap-6">
               {list.map((item, idx) => (
-                <div key={idx} className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center mt-1">
+                <div key={idx} className="flex items-center gap-4">
+                  <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center">
                     <Image
                       src="/assets/website/icons/check-icon.png"
                       alt="Check"
@@ -44,7 +44,7 @@ export const DocumentsOverview: React.FC<DocumentsOverviewProps> = ({ className 
                       className="w-[18px] h-auto object-contain"
                     />
                   </div>
-                  <Text variant="text-xxs" className="font-semibold text-secondary leading-tight pt-0.5">
+                  <Text variant="text-xxs" className="font-semibold text-secondary leading-tight">
                     {item}
                   </Text>
                 </div>

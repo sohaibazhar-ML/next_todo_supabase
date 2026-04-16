@@ -230,7 +230,7 @@ export const Footer: React.FC<FooterProps> = ({ className = '' }) => {
 
               {/* Partnership logo aligned with CTA radius */}
               <div className="flex flex-col items-start lg:items-end gap-1 mb-[-4px]">
-                <Text variant="text-xxs" className="text-white/60 lowercase italic !text-[11px] lg:mr-4">
+                <Text variant="text-xxs" className="text-white/60 italic !text-[11px] lg:mr-4">
                   {t('partnership')}
                 </Text>
                 <Image

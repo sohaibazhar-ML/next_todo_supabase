@@ -140,60 +140,29 @@ export async function middleware(request: NextRequest) {
   // If user doesn't want persistent sessions, modify auth cookies to be session-only
   if (!keepMeLoggedIn) {
     try {
-      // Get all Supabase auth cookies from the response
-      const authCookieNames = ['sb-access-token', 'sb-refresh-token']
+      // Get all auth-related cookies that were just set or already exist in the response
+      const authCookiePrefixes = ['sb-', 'supabase-auth-token'];
+      const responseCookies = supabaseResponse.cookies.getAll();
 
-      // Create a new response based on the existing one
-      const modifiedResponse = NextResponse.next({
-        request: {
-          headers: request.headers,
-        },
-      })
-
-      // Copy all existing cookies first
-      supabaseResponse.cookies.getAll().forEach((cookie) => {
-        modifiedResponse.cookies.set(cookie.name, cookie.value, {
-          ...cookie,
-          // Preserve original options
-        })
-      })
-
-      // Modify each auth cookie to be session-only (no maxAge)
-      authCookieNames.forEach(cookieName => {
-        const cookie = modifiedResponse.cookies.get(cookieName)
-        if (cookie) {
-          modifiedResponse.cookies.set(cookieName, cookie.value, {
+      responseCookies.forEach(cookie => {
+        const isAuthCookie = authCookiePrefixes.some(prefix => cookie.name.startsWith(prefix)) || 
+                             cookie.name.includes('supabase');
+        
+        if (isAuthCookie) {
+          // Re-set the cookie without maxAge to make it a session cookie
+          supabaseResponse.cookies.set(cookie.name, cookie.value, {
+            ...cookie,
+            maxAge: undefined, // Remove maxAge to make it session-only
+            expires: undefined,
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
             path: '/',
-            // No maxAge = session cookie (expires when browser closes)
-          })
+          });
         }
-      })
-
-      // Also check for any cookies with 'sb-' prefix
-      modifiedResponse.cookies.getAll().forEach((cookie) => {
-        if (cookie.name.startsWith('sb-') || cookie.name.includes('supabase')) {
-          modifiedResponse.cookies.set(cookie.name, cookie.value, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            path: '/',
-            // No maxAge = session cookie
-          })
-        }
-      })
-
-      // Copy headers and status from original response
-      supabaseResponse.headers.forEach((value, key) => {
-        modifiedResponse.headers.set(key, value)
-      })
-
-      return modifiedResponse
+      });
     } catch (err) {
-      // If error modifying cookies, just return original response
-      console.error(CONSOLE_MESSAGES.ERROR_MODIFYING_SESSION_COOKIES, err)
+      console.error(CONSOLE_MESSAGES.ERROR_MODIFYING_SESSION_COOKIES, err);
     }
   }
 

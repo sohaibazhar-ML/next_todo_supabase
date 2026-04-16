@@ -102,7 +102,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
               key={lang.code}
               variant="ghost"
               onClick={() => handleLanguageChange(lang.code)}
-              className={`w-full flex items-center justify-start gap-4 px-6 py-3 transition-colors hover:bg-background-neutral/50 border-none rounded-none shadow-none text-left ${locale === lang.code ? 'text-primary bg-primary/5' : 'text-secondary'
+              className={`w-full flex items-center justify-start gap-4 px-6 py-3 transition-colors hover:bg-background-secondary border-none rounded-none shadow-none text-left ${locale === lang.code ? 'text-primary bg-primary/5' : 'text-secondary'
                 }`}
             >
               <div className="relative w-[30px] h-[22px] flex items-center justify-center flex-shrink-0">
@@ -117,7 +117,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
               <Text
                 as="span"
                 variant="text-xs"
-                className={`font-medium ${locale === lang.code ? 'text-primary font-bold' : 'text-secondary'}`}
+                className={`font-normal ${locale === lang.code ? 'text-primary' : 'text-secondary'}`}
               >
                 {lang.name}
               </Text>
