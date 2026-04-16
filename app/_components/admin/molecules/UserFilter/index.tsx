@@ -1,6 +1,7 @@
 import { Filter, SearchInput, SelectInput, DateInput, FilterProps } from "react-admin";
 import { Box } from "@mui/material";
 import { COUNTRIES } from "../../constants/countries";
+import Image from "next/image";
 
 export const UserFilter = (props: Omit<FilterProps, 'children'>) => (
     <Filter {...props}>
@@ -22,7 +23,7 @@ export const UserFilter = (props: Omit<FilterProps, 'children'>) => (
             optionValue="value"
             optionText={choice => (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <img src={choice.flag} alt={choice.label} style={{ width: 20 }} />
+                    <Image src={choice.flag} alt={choice.label} width={20} height={14} />
                     <span>{choice.label}</span>
                 </Box>
             )}

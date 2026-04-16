@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import * as SelectPrimitive from '@radix-ui/react-select';
 import { twMerge } from 'tailwind-merge';
 import { SelectProps, SelectOption } from '@/website/atoms/Select/Select.types';
-import { Text } from '@/website/atoms';
+import { Text, Image } from '@/website/atoms';
 
 export const Select: React.FC<SelectProps> = ({
   id,
@@ -74,9 +74,11 @@ export const Select: React.FC<SelectProps> = ({
               <div className="flex items-center gap-2 flex-1 truncate pointer-events-none">
                 {selectedOption?.flag && (
                   <div className="relative w-[22px] h-[15px] flex-shrink-0 shadow-sm overflow-hidden rounded-[1px]">
-                    <img
+                    <Image
                       src={selectedOption.flag}
                       alt=""
+                      width={22}
+                      height={15}
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -112,9 +114,11 @@ export const Select: React.FC<SelectProps> = ({
                       <div className="flex items-center gap-3">
                         {option.flag && (
                           <div className="relative w-[22px] h-[15px] flex-shrink-0 shadow-sm overflow-hidden rounded-[1px]">
-                            <img
+                            <Image
                               src={option.flag}
                               alt=""
+                              width={22}
+                              height={15}
                               className="w-full h-full object-cover"
                             />
                           </div>

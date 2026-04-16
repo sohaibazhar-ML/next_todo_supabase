@@ -1,21 +1,23 @@
-"use client";
 import React, { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { Title } from 'react-admin';
 import {
     Box,
     Typography,
-    CircularProgress,
     Alert,
     Paper,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
-    TextField,
     Stack
 } from '@mui/material';
-import { StatisticsDashboard } from '@/admin/organisms/StatisticsDashboard';
 import { useAdminStats } from '@/admin/hooks';
+import { StatisticsSkeleton } from '@/admin/organisms/StatisticsDashboard/Skeleton';
+
+const StatisticsDashboard = dynamic(
+    () => import('@/admin/organisms/StatisticsDashboard').then(mod => mod.StatisticsDashboard),
+    { 
+        loading: () => <StatisticsSkeleton />,
+        ssr: false 
+    }
+);
 
 export const StatisticsPage = () => {
     // Global Dashboard Filters (controlled by Sidebar)
@@ -38,14 +40,6 @@ export const StatisticsPage = () => {
             endDate: newFilters.endDate
         });
     };
-
-    if (isLoading) {
-        return (
-            <Box display="flex" justifyContent="center" alignItems="center" py={8} sx={{ height: '60vh' }}>
-                <CircularProgress sx={{ color: '#2196F3' }} />
-            </Box>
-        );
-    }
 
     if (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -113,7 +107,9 @@ export const StatisticsPage = () => {
                 </Stack>
             </Box>
 
-            {stats && (
+            {isLoading ? (
+                <StatisticsSkeleton />
+            ) : stats && (
                 <StatisticsDashboard
                     statistics={stats}
                     displayMode={displayMode}

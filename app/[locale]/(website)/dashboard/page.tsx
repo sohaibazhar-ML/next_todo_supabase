@@ -1,9 +1,8 @@
-import React from 'react';
 import { DashboardHeader, DocumentList, Footer } from '@/website/organisms';
 import { DocumentItem } from '@/website/types';
-import { prisma } from '@/lib/prisma';
 import { formatBytes } from '@/website/utils/formatters';
 import { Prisma } from '@prisma/client';
+import { getDocuments, getDocumentsCount } from '@/app/_services/website/document-service';
 
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
@@ -27,8 +26,8 @@ export default async function DashboardPage(props: PageProps) {
   };
 
   const [totalCount, dbDocuments] = await Promise.all([
-    prisma.documents.count({ where }),
-    prisma.documents.findMany({
+    getDocumentsCount(where),
+    getDocuments({
       where,
       orderBy: { created_at: 'desc' },
       skip,

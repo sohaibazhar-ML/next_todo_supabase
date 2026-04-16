@@ -17,8 +17,24 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Document Portal",
-  description: "Document management and download portal",
+  title: {
+    template: "%s | MySwissMove",
+    default: "MySwissMove - Document Portal",
+  },
+  description: "Your official Swiss move document management and download portal. Manage your transition with ease.",
+  metadataBase: new URL('https://myswissmove.ch'), // Example domain
+  openGraph: {
+    title: "MySwissMove - Document Portal",
+    description: "Your official Swiss move document management and download portal.",
+    url: 'https://myswissmove.ch',
+    siteName: 'MySwissMove',
+    locale: 'en_US',
+    type: 'website',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

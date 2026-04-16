@@ -28,6 +28,7 @@ import { ADMIN_ROLES } from "@/admin/constants";
 import { COUNTRIES } from "../../constants/countries";
 import { useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/constants/queryKeys";
+import Image from "next/image";
 
 const UserEditToolbar = () => {
     const record = useRecordContext();
@@ -98,7 +99,7 @@ export const UserEdit = () => (
                                     optionValue="value"
                                     optionText={choice => (
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                            <img src={choice.flag} alt={choice.label} style={{ width: 20 }} />
+                                            <Image src={choice.flag} alt={choice.label} width={20} height={14} />
                                             <span>{choice.label}</span>
                                         </Box>
                                     )}

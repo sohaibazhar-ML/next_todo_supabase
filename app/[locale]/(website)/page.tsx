@@ -1,6 +1,21 @@
 import { Header, Hero, HowItWorks, MyDocuments, DocumentsOverview, Footer } from '@/website/organisms';
 import { TrustBar } from '@/website/molecules';
-import { Text } from '@/website/atoms';
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+
+  const translations: Record<string, string> = {
+    en: "MySwissMove",
+    de: "MySwissMove",
+    fr: "MySwissMove",
+    it: "MySwissMove"
+  };
+
+  return {
+    title: translations[locale] || translations.en,
+    description: "Download all necessary documents for your move to Switzerland. Fast, secure and organized.",
+  };
+}
 
 export default function Home() {
   return (
