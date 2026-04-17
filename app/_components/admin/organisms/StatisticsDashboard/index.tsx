@@ -296,11 +296,11 @@ export const StatisticsDashboard = ({ statistics, displayMode, onApplyFilters }:
                                         borderRadius: '12px', 
                                         border: '1px solid', 
                                         borderColor: 'divider',
-                                        bgcolor: '#fcfcfc',
+                                        bgcolor: theme.palette.mode === 'dark' ? 'background.paper' : '#fcfcfc',
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: 1.5,
-                                        boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
+                                        boxShadow: theme.palette.mode === 'dark' ? 'none' : '0 2px 8px rgba(0,0,0,0.02)'
                                     }}
                                 >
                                     <Box 
@@ -313,13 +313,16 @@ export const StatisticsDashboard = ({ statistics, displayMode, onApplyFilters }:
                                             outline: 'none', 
                                             fontSize: '13px', 
                                             fontWeight: '700', 
-                                            color: '#444', 
+                                            color: 'text.primary', 
                                             bgcolor: 'transparent',
                                             cursor: 'pointer',
-                                            fontFamily: 'inherit'
+                                            fontFamily: 'inherit',
+                                            '&::-webkit-calendar-picker-indicator': {
+                                                filter: theme.palette.mode === 'dark' ? 'invert(1)' : 'none'
+                                            }
                                         }} 
                                     />
-                                    <Typography variant="caption" sx={{ color: '#ccc', fontWeight: 'bold' }}>—</Typography>
+                                    <Typography variant="caption" sx={{ color: 'text.disabled', fontWeight: 'bold' }}>—</Typography>
                                     <Box 
                                         component="input" 
                                         type="date" 
@@ -330,13 +333,16 @@ export const StatisticsDashboard = ({ statistics, displayMode, onApplyFilters }:
                                             outline: 'none', 
                                             fontSize: '13px', 
                                             fontWeight: '700', 
-                                            color: '#444', 
+                                            color: 'text.primary', 
                                             bgcolor: 'transparent',
                                             cursor: 'pointer',
-                                            fontFamily: 'inherit'
+                                            fontFamily: 'inherit',
+                                            '&::-webkit-calendar-picker-indicator': {
+                                                filter: theme.palette.mode === 'dark' ? 'invert(1)' : 'none'
+                                            }
                                         }} 
                                     />
-                                    <TodayIcon sx={{ fontSize: 18, color: '#aaa', cursor: 'default' }} />
+                                    <TodayIcon sx={{ fontSize: 18, color: 'text.disabled', cursor: 'default' }} />
                                 </Paper>
                             </Box>
                             
@@ -349,12 +355,12 @@ export const StatisticsDashboard = ({ statistics, displayMode, onApplyFilters }:
                                                 <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0}/>
                                             </linearGradient>
                                         </defs>
-                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.palette.divider} />
                                         <XAxis 
                                             dataKey="date" 
                                             axisLine={false} 
                                             tickLine={false} 
-                                            tick={{ fontSize: 12, fill: '#999' }}
+                                            tick={{ fontSize: 12, fill: theme.palette.text.disabled }}
                                             tickFormatter={(val) => {
                                                 const d = new Date(val);
                                                 return d.toLocaleDateString('en-US', { day: '2-digit', month: 'short' });
@@ -365,7 +371,7 @@ export const StatisticsDashboard = ({ statistics, displayMode, onApplyFilters }:
                                         <YAxis 
                                             axisLine={false} 
                                             tickLine={false} 
-                                            tick={{ fontSize: 12, fill: '#999' }}
+                                            tick={{ fontSize: 12, fill: theme.palette.text.disabled }}
                                             tickFormatter={(val) => displayMode === 'percent' ? `${val}%` : val}
                                         />
                                         <Tooltip 
@@ -373,9 +379,12 @@ export const StatisticsDashboard = ({ statistics, displayMode, onApplyFilters }:
                                             contentStyle={{ 
                                                 borderRadius: '16px', 
                                                 border: 'none', 
-                                                boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
-                                                padding: '16px'
+                                                boxShadow: theme.palette.mode === 'dark' ? '0 10px 40px rgba(0,0,0,0.5)' : '0 10px 40px rgba(0,0,0,0.1)',
+                                                padding: '16px',
+                                                backgroundColor: theme.palette.background.paper,
+                                                color: theme.palette.text.primary
                                             }}
+                                            itemStyle={{ color: theme.palette.text.primary }}
                                         />
                                         <Area 
                                             type="monotone" 
@@ -422,14 +431,14 @@ export const StatisticsDashboard = ({ statistics, displayMode, onApplyFilters }:
                                                     width: 44, 
                                                     height: 44, 
                                                     borderRadius: '12px', 
-                                                    bgcolor: '#f5f5f5', 
+                                                    bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : '#f5f5f5', 
                                                     display: 'flex', 
                                                     alignItems: 'center', 
                                                     justifyContent: 'center',
                                                     flexShrink: 0
                                                 }}
                                             >
-                                                <TodayIcon sx={{ color: '#666', fontSize: 20 }} />
+                                                <TodayIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
                                             </Box>
                                             <Box sx={{ flexGrow: 1, minWidth: 0 }}>
                                                 <Box display="flex" justifyContent="space-between" mb={0.5}>
@@ -446,7 +455,7 @@ export const StatisticsDashboard = ({ statistics, displayMode, onApplyFilters }:
                                                     sx={{ 
                                                         height: 6, 
                                                         borderRadius: 3, 
-                                                        bgcolor: '#eee',
+                                                        bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : '#eee',
                                                         '& .MuiLinearProgress-bar': {
                                                             bgcolor: index === 0 ? COLORS.primary : COLORS.secondary,
                                                             borderRadius: 3
@@ -474,23 +483,30 @@ export const StatisticsDashboard = ({ statistics, displayMode, onApplyFilters }:
                                     <Box sx={{ height: 350, width: '100%', minWidth: 0 }}>
                                         <ResponsiveContainer width="100%" height="100%">
                                             <BarChart data={transformedDownloadsByCategory} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.palette.divider} />
                                                 <XAxis 
                                                     dataKey="category" 
                                                     axisLine={false} 
                                                     tickLine={false}
-                                                    tick={{ fontSize: 13, fontWeight: 600, fill: '#666' }}
+                                                    tick={{ fontSize: 13, fontWeight: 600, fill: theme.palette.text.secondary }}
                                                 />
                                                 <YAxis 
                                                     axisLine={false} 
                                                     tickLine={false}
-                                                    tick={{ fontSize: 12, fill: '#999' }}
+                                                    tick={{ fontSize: 12, fill: theme.palette.text.disabled }}
                                                     tickFormatter={(val) => displayMode === 'percent' ? `${val}%` : val}
                                                 />
                                                 <Tooltip 
-                                                    cursor={{ fill: 'rgba(0,0,0,0.03)' }}
+                                                    cursor={{ fill: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }}
                                                     formatter={(value: any) => displayMode === 'percent' ? [`${value}%`, 'Count'] : [value, 'Count']}
-                                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}
+                                                    contentStyle={{ 
+                                                        borderRadius: '12px', 
+                                                        border: 'none', 
+                                                        boxShadow: theme.palette.mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.5)' : '0 4px 20px rgba(0,0,0,0.08)',
+                                                        backgroundColor: theme.palette.background.paper,
+                                                        color: theme.palette.text.primary
+                                                    }}
+                                                    itemStyle={{ color: theme.palette.text.primary }}
                                                 />
                                                 <Bar dataKey="count" radius={[8, 8, 0, 0]} barSize={50}>
                                                     {transformedDownloadsByCategory.map((entry, index) => (
@@ -513,7 +529,7 @@ export const StatisticsDashboard = ({ statistics, displayMode, onApplyFilters }:
                                         sx={{ 
                                             p: 3, 
                                             borderRadius: '16px', 
-                                            bgcolor: '#ffffff', 
+                                            bgcolor: 'background.paper', 
                                             height: '100%',
                                             border: '1px solid',
                                             borderColor: 'divider'

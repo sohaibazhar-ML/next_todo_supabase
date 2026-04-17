@@ -6,7 +6,8 @@ import {
     Typography,
     Alert,
     Paper,
-    Stack
+    Stack,
+    useTheme
 } from '@mui/material';
 import { useAdminStats } from '@/admin/hooks';
 import { StatisticsSkeleton } from '@/admin/organisms/StatisticsDashboard/Skeleton';
@@ -20,6 +21,7 @@ const StatisticsDashboard = dynamic(
 );
 
 export const StatisticsPage = () => {
+    const theme = useTheme();
     // Global Dashboard Filters (controlled by Sidebar)
     const [dashboardFilters, setDashboardFilters] = useState<{ startDate?: string, endDate?: string }>({
         // Default to last 30 days
@@ -53,7 +55,7 @@ export const StatisticsPage = () => {
             {/* Design-Matched Header */}
             <Box mb={6} display="flex" justifyContent="space-between" alignItems="center">
                 <Box>
-                    <Typography variant="h4" fontWeight="800" sx={{ color: '#333' }}>
+                    <Typography variant="h4" fontWeight="800" sx={{ color: 'text.primary' }}>
                         Admin Dashboard
                     </Typography>
                 </Box>
@@ -67,7 +69,7 @@ export const StatisticsPage = () => {
                             borderRadius: '30px',
                             border: '1px solid',
                             borderColor: 'divider',
-                            bgcolor: '#f5f5f5',
+                            bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : '#f5f5f5',
                             display: 'flex',
                             cursor: 'pointer'
                         }}
@@ -78,8 +80,9 @@ export const StatisticsPage = () => {
                                 px: 2, 
                                 py: 0.5, 
                                 borderRadius: '20px', 
-                                bgcolor: displayMode === 'absolute' ? 'white' : 'transparent', 
-                                border: displayMode === 'absolute' ? '1px solid #ddd' : '1px solid transparent',
+                                bgcolor: displayMode === 'absolute' ? (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'white') : 'transparent', 
+                                border: displayMode === 'absolute' ? '1px solid' : '1px solid transparent',
+                                borderColor: displayMode === 'absolute' ? 'divider' : 'transparent',
                                 opacity: displayMode === 'absolute' ? 1 : 0.5,
                                 transition: 'all 0.2s ease'
                             }}
@@ -92,8 +95,9 @@ export const StatisticsPage = () => {
                                 px: 2, 
                                 py: 0.5, 
                                 borderRadius: '20px', 
-                                bgcolor: displayMode === 'percent' ? 'white' : 'transparent', 
-                                border: displayMode === 'percent' ? '1px solid #ddd' : '1px solid transparent',
+                                bgcolor: displayMode === 'percent' ? (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'white') : 'transparent', 
+                                border: displayMode === 'percent' ? '1px solid' : '1px solid transparent',
+                                borderColor: displayMode === 'percent' ? 'divider' : 'transparent',
                                 opacity: displayMode === 'percent' ? 1 : 0.5,
                                 transition: 'all 0.2s ease'
                             }}
