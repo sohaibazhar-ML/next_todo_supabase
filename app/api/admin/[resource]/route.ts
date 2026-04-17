@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/service';
 import { isAdmin, isSubadmin } from '@/utils/roles';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
@@ -583,6 +584,20 @@ export async function DELETE(
     }
 
     try {
+        // If we are deleting a user or profile, also delete from Supabase Auth
+        if (resource === 'profiles' || resource === 'users') {
+            const adminClient = createServiceClient();
+            const { error: deleteError } = await adminClient.auth.admin.deleteUser(id);
+            
+            if (deleteError) {
+                console.error('[Admin API] Supabase Auth deletion failed:', deleteError.message);
+                // We log the error but proceed with DB deletion to maintain internal consistency
+                // as the record might already be partially gone or orphaned.
+            } else {
+                console.log(`[Admin API] Successfully deleted auth user ${id} from Supabase`);
+            }
+        }
+
         await (model as any).delete({ where: { id } });
         return NextResponse.json({ id });
     } catch (error) {

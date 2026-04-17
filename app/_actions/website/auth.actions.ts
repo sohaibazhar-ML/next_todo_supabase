@@ -156,32 +156,38 @@ export async function registerAction(prevState: ActionState, formData: FormData)
 
     // 2. Create profile in Prisma
     // Username is optional and not present in the current UI design
-
-    await prisma.profiles.create({
-      data: {
-        id: authData.user.id,
-        username: null,
-        email,
-        first_name: firstName,
-        last_name: lastName,
-        phone_number: phone || null,
-        current_address: currentAddress,
-        country_of_origin: country,
-        new_address_switzerland: newAddress,
-        number_of_adults: parseInt(numAdults),
-        number_of_children: numChildren ? parseInt(numChildren) : 0,
-        total_persons: parseInt(numPersons),
-        gender,
-        preferred_call_time: preferredTime || null,
-        has_pets: pets === 'yes',
-        pets_type: pets === 'yes' ? whichPets || null : null,
-        marketing_consent: formattedData.consent || false,
-        terms_accepted: true,
-        data_privacy_accepted: true,
-        role: 'user',
-        preferred_language: (data.locale as string) || 'de',
-      }
-    });
+    try {
+      await prisma.profiles.create({
+        data: {
+          id: authData.user.id,
+          username: null,
+          email,
+          first_name: firstName,
+          last_name: lastName,
+          phone_number: phone || null,
+          current_address: currentAddress,
+          country_of_origin: country,
+          new_address_switzerland: newAddress,
+          number_of_adults: parseInt(numAdults),
+          number_of_children: numChildren ? parseInt(numChildren) : 0,
+          total_persons: parseInt(numPersons),
+          gender,
+          preferred_call_time: preferredTime || null,
+          has_pets: pets === 'yes',
+          pets_type: pets === 'yes' ? whichPets || null : null,
+          marketing_consent: formattedData.consent || false,
+          terms_accepted: true,
+          data_privacy_accepted: true,
+          role: 'user',
+          preferred_language: (data.locale as string) || 'de',
+        }
+      });
+    } catch (prismaError) {
+      // ROLLBACK: Delete the Supabase auth user if profile creation fails
+      console.error('Prisma profile creation failed, rolling back Supabase user:', prismaError);
+      await admin.auth.admin.deleteUser(authData.user.id);
+      throw prismaError;
+    }
 
     // 3. Generate confirmation link and send via SendGrid
     // Use 'magiclink' type since the user already exists (created via admin.createUser above).
