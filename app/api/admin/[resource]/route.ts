@@ -65,7 +65,17 @@ async function authorize(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
-        console.error('[Admin API] Auth error:', authError?.message || 'No user session');
+        if (authError) {
+            const message = authError.message.toLowerCase();
+            // Check for network connection failures or timeouts
+            if (message.includes('fetch failed') || message.includes('timeout')) {
+                console.error('[Admin API] Auth service unavailable (Network):', authError.message);
+                return { authorized: false as const, status: 503, message: 'Authentication service temporarily unavailable' };
+            }
+            console.error('[Admin API] Auth error:', authError.message);
+        } else {
+            console.error('[Admin API] No user session found');
+        }
         return { authorized: false as const, status: 401, message: 'Unauthorized' };
     }
 
