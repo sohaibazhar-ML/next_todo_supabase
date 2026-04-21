@@ -102,13 +102,15 @@ export async function PUT(
     }
 
     // 2. Delete old file from Supabase Storage
-    const { error: deleteError } = await supabase.storage
-      .from(STORAGE_BUCKETS.DOCUMENTS)
-      .remove([existingDoc.file_path])
+    if (existingDoc.file_path) {
+      const { error: deleteError } = await supabase.storage
+        .from(STORAGE_BUCKETS.DOCUMENTS)
+        .remove([existingDoc.file_path])
 
-    if (deleteError) {
-      // Log but don't fail — the new file is already uploaded
-      console.error('Failed to delete old file from storage:', deleteError)
+      if (deleteError) {
+        // Log but don't fail — the new file is already uploaded
+        console.error('Failed to delete old file from storage:', deleteError)
+      }
     }
 
     // 3. Update database record with new file info + any metadata changes
