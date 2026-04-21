@@ -8,15 +8,15 @@ export const DashboardOverview: React.FC = () => {
   const t = useTranslations('Dashboard');
 
   const overviewItems = [
-    { label: t('overview.labels.mandatory'), title: t('overview.titles.gemeinde') },
-    { label: t('overview.labels.mandatory'), title: t('overview.titles.krankenkasse') },
-    { label: t('overview.labels.important'), title: t('overview.titles.internet') },
-    { label: t('overview.labels.important'), title: t('overview.titles.bank') },
-    { label: t('overview.labels.optional'), title: t('overview.titles.post') },
-    { label: t('overview.labels.mandatory'), title: t('overview.titles.auto') },
-    { label: t('overview.labels.important'), title: t('overview.titles.creditcard') },
-    { label: t('overview.labels.optional'), title: t('overview.titles.friends') },
-    { label: t('overview.labels.mandatory'), title: t('overview.titles.pet') },
+    { label: t('overview.labels.mandatory'), title: 'Register with municipality' },
+    { label: t('overview.labels.mandatory'), title: 'Health insurance' },
+    { label: t('overview.labels.important'), title: 'Register internet' },
+    { label: t('overview.labels.important'), title: 'Open bank account' },
+    { label: t('overview.labels.optional'), title: 'Mail forwarding' },
+    { label: t('overview.labels.mandatory'), title: 'Register car' },
+    { label: t('overview.labels.important'), title: 'Apply for credit card' },
+    { label: t('overview.labels.optional'), title: 'Address notification friends' },
+    { label: t('overview.labels.mandatory'), title: 'Register pet' },
   ];
 
   return (
