@@ -49,6 +49,11 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     { code: 'en', name: t('languages.en'), flag: '/assets/website/icons/uk.png' },
   ] as const;
 
+  const isRestrictedPage = ['/terms', '/privacy', '/imprint'].includes(pathname);
+  const displayedLanguages = isRestrictedPage 
+    ? languages.filter(l => l.code === 'en' || l.code === 'de') 
+    : languages;
+
   const handleLanguageChange = async (newLocale: string) => {
     close();
     // 1. Update persistent cookies
@@ -97,7 +102,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         <div
           className="absolute right-0 top-full mt-4 bg-white border border-black/5 shadow-lg z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 w-[200px] h-auto rounded-[10px] pt-2 pb-2 flex flex-col gap-0.5"
         >
-          {languages.map((lang) => (
+          {displayedLanguages.map((lang) => (
             <Button
               key={lang.code}
               variant="ghost"
