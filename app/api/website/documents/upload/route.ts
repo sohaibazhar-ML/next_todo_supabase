@@ -35,6 +35,7 @@ export async function POST(request: Request) {
     const file = formData.get('file') as File | null
     const title = formData.get('title') as string | null
     const description = formData.get('description') as string | null
+    const recipient = formData.get('recipient') as string | null
 
     if (!file || !title?.trim()) {
       return NextResponse.json(
@@ -96,6 +97,7 @@ export async function POST(request: Request) {
       data: {
         title: title.trim(),
         description: description?.trim() || null,
+        recipient: recipient?.trim() || null,
         category: 'Personal',
         tags: [],
         file_name: file.name,

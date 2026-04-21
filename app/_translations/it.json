@@ -343,6 +343,8 @@
       "profile": "Profilo",
       "settings": "Impostazioni",
       "dashboardNav": "Dashboard",
+      "allDocuments": "Tutti i documenti A-Z",
+      "checklist": "Lista di controllo",
       "searchPlaceholder": "Termine di ricerca",
       "logout": "Disconnetti",
       "myDocuments": "I Miei Documenti"

@@ -19,4 +19,8 @@ export * from '@/website/organisms/GtcContent';
 export * from '@/website/organisms/PrivacyContent';
 export * from '@/website/organisms/ProfileSection/ProfileSection';
 export * from '@/website/organisms/SettingsSection/SettingsSection';
+export * from '@/website/organisms/DashboardSidebar';
+export * from '@/website/organisms/DashboardLayout';
+export * from '@/website/organisms/DashboardOverview';
+export * from '@/website/organisms/MyDocumentsPage';
 

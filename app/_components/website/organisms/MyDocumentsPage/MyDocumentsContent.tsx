@@ -3,10 +3,12 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Upload, X, FileText, Loader2 } from 'lucide-react';
-import { DocumentRow, DashboardPagination } from '@/website/molecules';
+import { DocumentTable, DashboardPagination, ConfirmModal } from '@/website/molecules';
 import { Text, Button } from '@/website/atoms';
 import { DocumentItem } from '@/website/types';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { createClient } from '@/app/_lib/supabase/client';
+import { STORAGE_BUCKETS } from '@/constants';
 
 interface MyDocumentsContentProps {
   documents: DocumentItem[];
@@ -19,7 +21,7 @@ export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
   totalPages,
   currentPage,
 }) => {
-  const t = useTranslations('Dashboard.list');
+  const t = useTranslations('Dashboard');
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -29,8 +31,13 @@ export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [recipient, setRecipient] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [docToDelete, setDocToDelete] = useState<DocumentItem | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handlePageChange = (page: number) => {
@@ -42,6 +49,7 @@ export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
   const resetForm = () => {
     setTitle('');
     setDescription('');
+    setRecipient('');
     setSelectedFile(null);
     setUploadError(null);
   };
@@ -103,12 +111,12 @@ export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
       'application/x-zip-compressed',
     ];
     if (!allowedTypes.includes(file.type)) {
-      setUploadError('Only PDF, DOCX, XLSX, and ZIP files are allowed.');
+      setUploadError(t('upload.errors.invalidType'));
       return false;
     }
     // 50MB limit
     if (file.size > 50 * 1024 * 1024) {
-      setUploadError('File size must be less than 50MB.');
+      setUploadError(t('upload.errors.tooLarge'));
       return false;
     }
     setUploadError(null);
@@ -126,6 +134,7 @@ export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
       formData.append('file', selectedFile);
       formData.append('title', title.trim());
       if (description.trim()) formData.append('description', description.trim());
+      if (recipient.trim()) formData.append('recipient', recipient.trim());
 
       const response = await fetch('/api/website/documents/upload', {
         method: 'POST',
@@ -142,9 +151,71 @@ export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
       resetForm();
       router.refresh();
     } catch (err: unknown) {
-      setUploadError(err instanceof Error ? err.message : 'An error occurred during upload.');
+      setUploadError(err instanceof Error ? err.message : t('upload.errors.general'));
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const openDeleteConfirm = (doc: DocumentItem) => {
+    setDocToDelete(doc);
+    setIsConfirmOpen(true);
+  };
+
+  const closeDeleteConfirm = () => {
+    setIsConfirmOpen(false);
+    setDocToDelete(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!docToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/website/documents/${docToDelete.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete document');
+      }
+
+      closeDeleteConfirm();
+      router.refresh();
+    } catch (err) {
+      console.error('Delete error:', err);
+      // Optional: show error message to user
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDownload = async (doc: DocumentItem) => {
+    if (!doc.filePath || downloadingId) return;
+
+    setDownloadingId(doc.id);
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase.storage
+        .from(STORAGE_BUCKETS.DOCUMENTS)
+        .download(doc.filePath);
+
+      if (error) throw error;
+
+      // Create a blob URL and trigger download
+      const blob = new Blob([data]);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = doc.name + (doc.filePath.includes('.') ? `.${doc.filePath.split('.').pop()}` : '');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Download error:', err);
+    } finally {
+      setDownloadingId(null);
     }
   };
 
@@ -164,61 +235,51 @@ export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
     <div className="w-full flex flex-col">
       {/* Header with Upload Button */}
       <div className="flex items-center justify-between mb-6">
-        <Text variant="text-m" className="text-secondary font-bold">
-          My Documents
+        <Text variant="text-m" className="text-secondary font-bold uppercase tracking-tight">
+          {t('header.myDocuments')}
         </Text>
         <Button
           variant="primary"
           size="md"
           onClick={openModal}
-          className="flex items-center gap-2 bg-secondary hover:bg-secondary/90 text-white px-5 py-2.5 rounded-lg font-semibold transition-all shadow-sm hover:shadow-md"
+          className="flex items-center gap-2 bg-secondary hover:bg-secondary/90 text-white px-5 py-2.5 rounded shadow-sm hover:shadow-md transition-all font-semibold"
         >
           <Upload size={18} />
-          Upload Document
+          {t('upload.modalTitle')}
         </Button>
       </div>
 
       {/* Top Pagination */}
-      <DashboardPagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
+      <div className="flex justify-center mb-2">
+        <DashboardPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          className="py-0"
+        />
+      </div>
+
+      {/* Document Table */}
+      <DocumentTable 
+        documents={documents} 
+        emptyMessage={t('list.emptyState')}
+        onUploadClick={openModal}
+        onDeleteClick={openDeleteConfirm}
+        onDownloadClick={handleDownload}
+        downloadingId={downloadingId}
+        variant="user"
       />
 
-      {/* Document List */}
-      <div className="w-full flex flex-col min-h-[400px]">
-        {documents.map((doc, idx) => (
-          <DocumentRow
-            key={doc.id}
-            document={doc}
-            index={startIndex + idx}
-          />
-        ))}
-
-        {/* Empty State */}
-        {documents.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-20 bg-white rounded-lg border border-dashed border-secondary/20">
-            <div className="w-16 h-16 rounded-full bg-secondary/5 flex items-center justify-center mb-4">
-              <FileText size={28} className="text-secondary/30" />
-            </div>
-            <Text variant="text-s" className="text-secondary/50 font-medium mb-2">
-              No documents uploaded yet
-            </Text>
-            <Text variant="text-xxs" className="text-secondary/35 mb-6">
-              Upload your first document to get started
-            </Text>
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={openModal}
-              className="flex items-center gap-2 bg-secondary hover:bg-secondary/90 text-white px-4 py-2 rounded-lg font-medium text-sm"
-            >
-              <Upload size={16} />
-              Upload Document
-            </Button>
-          </div>
-        )}
-      </div>
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={isConfirmOpen}
+        onClose={closeDeleteConfirm}
+        onConfirm={handleConfirmDelete}
+        title={t('confirmDelete.title')}
+        message={t('confirmDelete.message')}
+        confirmText={isDeleting ? t('confirmDelete.deleting') : t('confirmDelete.confirm')}
+        cancelText={t('confirmDelete.cancel')}
+      />
 
       {/* Bottom Pagination */}
       {totalPages > 1 && (
@@ -239,15 +300,16 @@ export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-secondary/10">
               <Text variant="text-s" className="text-secondary font-bold">
-                Upload Document
+                {t('upload.modalTitle')}
               </Text>
-              <button
+              <Button
+                variant="unstyled"
                 onClick={closeModal}
                 disabled={isUploading}
                 className="p-1.5 rounded-lg hover:bg-secondary/5 transition-colors disabled:opacity-50"
               >
                 <X size={20} className="text-secondary/50" />
-              </button>
+              </Button>
             </div>
 
             {/* Modal Body */}
@@ -255,13 +317,13 @@ export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
               {/* Title Field */}
               <div>
                 <label className="block text-sm font-semibold text-secondary/70 mb-1.5">
-                  Title <span className="text-red-400">*</span>
+                  {t('upload.fields.title')} <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Enter document title"
+                  placeholder={t('upload.placeholders.title')}
                   disabled={isUploading}
                   className="w-full px-4 py-2.5 rounded-lg border border-secondary/15 bg-white text-secondary placeholder:text-secondary/30 focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary/30 transition-all text-sm disabled:opacity-50"
                 />
@@ -270,15 +332,30 @@ export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
               {/* Description Field */}
               <div>
                 <label className="block text-sm font-semibold text-secondary/70 mb-1.5">
-                  Description <span className="text-secondary/30 font-normal">(optional)</span>
+                  {t('upload.fields.description')} <span className="text-secondary/30 font-normal">{t('upload.fields.optional')}</span>
                 </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Add a brief description"
+                  placeholder={t('upload.placeholders.description')}
                   disabled={isUploading}
                   rows={3}
                   className="w-full px-4 py-2.5 rounded-lg border border-secondary/15 bg-white text-secondary placeholder:text-secondary/30 focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary/30 transition-all text-sm resize-none disabled:opacity-50"
+                />
+              </div>
+
+              {/* Recipient Field */}
+              <div>
+                <label className="block text-sm font-semibold text-secondary/70 mb-1.5">
+                  {t('upload.fields.recipient')} <span className="text-secondary/30 font-normal">{t('upload.fields.optional')}</span>
+                </label>
+                <input
+                  type="text"
+                  value={recipient}
+                  onChange={(e) => setRecipient(e.target.value)}
+                  placeholder={t('upload.placeholders.recipient')}
+                  disabled={isUploading}
+                  className="w-full px-4 py-2.5 rounded border border-secondary/15 bg-white text-secondary placeholder:text-secondary/30 focus:outline-none focus:ring-2 focus:ring-secondary/20 transition-all text-sm disabled:opacity-50"
                 />
               </div>
 
@@ -323,7 +400,8 @@ export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
                           {(selectedFile.size / 1024).toFixed(1)} KB — Click to change
                         </p>
                       </div>
-                      <button
+                      <Button
+                        variant="unstyled"
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedFile(null);
@@ -331,7 +409,7 @@ export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
                         className="p-1 rounded-md hover:bg-secondary/10 transition-colors"
                       >
                         <X size={16} className="text-secondary/40" />
-                      </button>
+                      </Button>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center text-center">
@@ -339,10 +417,10 @@ export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
                         <Upload size={20} className="text-secondary/30" />
                       </div>
                       <p className="text-sm text-secondary/50 font-medium">
-                        Drop your file here or click to browse
+                        {t('upload.placeholders.dropzone')}
                       </p>
                       <p className="text-xs text-secondary/30 mt-1">
-                        PDF, DOCX, XLSX, ZIP — Max 50MB
+                        {t('upload.placeholders.dropzoneSub')}
                       </p>
                     </div>
                   )}
@@ -366,7 +444,7 @@ export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
                 disabled={isUploading}
                 className="px-4 py-2 text-secondary/60 hover:text-secondary font-medium text-sm"
               >
-                Cancel
+                {t('upload.buttons.cancel')}
               </Button>
               <Button
                 variant="primary"
@@ -378,12 +456,12 @@ export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
                 {isUploading ? (
                   <>
                     <Loader2 size={16} className="animate-spin" />
-                    Uploading...
+                    {t('upload.buttons.uploading')}
                   </>
                 ) : (
                   <>
                     <Upload size={16} />
-                    Upload
+                    {t('upload.buttons.upload')}
                   </>
                 )}
               </Button>

@@ -346,6 +346,8 @@
       "profile": "Profil",
       "settings": "Paramètres",
       "dashboardNav": "Tableau de bord",
+      "allDocuments": "Tous les documents A-Z",
+      "checklist": "Liste de contrôle",
       "searchPlaceholder": "Terme de recherche",
       "logout": "Déconnexion",
       "myDocuments": "Mes Documents"

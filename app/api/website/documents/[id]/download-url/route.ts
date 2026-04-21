@@ -59,8 +59,14 @@ export async function GET(
           metadata: { source: 'api/website/documents/[id]/download-url' }
         }
       })
+
+      // Increment download count on the document
+      await prisma.documents.update({
+        where: { id: document.id },
+        data: { download_count: { increment: 1 } }
+      })
     } catch (logError) {
-      console.error('Failed to create audit log for download:', logError)
+      console.error('Failed to create audit log or increment download count:', logError);
     }
 
     // Get signed URL from Supabase Storage

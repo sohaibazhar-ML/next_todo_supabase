@@ -349,17 +349,83 @@
       "profile": "Profil",
       "settings": "Einstellungen",
       "dashboardNav": "Dashboard",
+      "allDocuments": "Alle Dokumente A-Z",
+      "checklist": "Checkliste",
+      "portalTitle": "KUNDENPORTAL",
       "searchPlaceholder": "Suchbegriff",
       "logout": "Abmelden",
       "myDocuments": "Meine Dokumente"
     },
+    "upload": {
+      "modalTitle": "Dokument hochladen",
+      "fields": {
+        "title": "Titel",
+        "description": "Beschreibung",
+        "recipient": "Empfänger",
+        "file": "Datei",
+        "optional": "(optional)"
+      },
+      "placeholders": {
+        "title": "Dokumenttitel eingeben",
+        "description": "Fügen Sie eine kurze Beschreibung hinzu",
+        "recipient": "Name des Empfängers",
+        "dropzone": "Datei hier ablegen oder zum Durchsuchen klicken",
+        "dropzoneSub": "PDF, DOCX, XLSX, ZIP — Max. 50MB"
+      },
+      "buttons": {
+        "cancel": "Abbrechen",
+        "upload": "Hochladen",
+        "uploading": "Wird hochgeladen..."
+      },
+      "errors": {
+        "invalidType": "Nur PDF-, DOCX-, XLSX- und ZIP-Dateien sind zulässig.",
+        "tooLarge": "Die Dateigröße muss weniger als 50 MB betragen.",
+        "general": "Beim Hochladen ist ein Fehler aufgetreten."
+      }
+    },
+    "overview": {
+      "progress": "Fortschritt: {percent}%",
+      "labels": {
+        "mandatory": "Pflicht",
+        "important": "Wichtig",
+        "optional": "Optional"
+      },
+      "titles": {
+        "gemeinde": "Gemeinde ummelden",
+        "krankenkasse": "Krankenkasse",
+        "internet": "Internet ummelden",
+        "bank": "Bank Konto eröffnen",
+        "post": "Post Nachsendung",
+        "auto": "Auto ummelden",
+        "creditcard": "Beantragung Kreditkarte",
+        "friends": "Adressmitteilung Freunde",
+        "pet": "Haustier anmelden"
+      }
+    },
+    "confirmDelete": {
+      "title": "Dokument löschen",
+      "message": "Sind Sie sicher, dass Sie dieses Dokument löschen möchten?",
+      "confirm": "Bestätigen",
+      "cancel": "Abbrechen",
+      "deleting": "Löschen..."
+    },
     "list": {
       "download": "Download",
+      "columns": {
+        "category": "Kategorie",
+        "name": "Dokument Name",
+        "recipient": "Empfänger",
+        "file": "Datei",
+        "date": "Datum",
+        "download": "Download",
+        "delete": "Löschen"
+      },
       "pagination": {
         "prev": "zurück",
         "next": "vor"
       },
-      "emptyState": "Keine Dokumente gefunden"
+      "emptyState": "Keine Dokumente gefunden",
+      "emptyStateAction": "Laden Sie Ihr erstes Dokument hoch"
     },
     "account": {
       "breadcrumb": "Mein Konto / Profil",

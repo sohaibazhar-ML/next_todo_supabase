@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { LogOut, Plus, Search } from 'lucide-react';
+import { LogOut, Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Logo, Image, Text, Input, Button } from '@/website/atoms';
 import { Link } from '@/i18n/routing';
@@ -64,9 +64,9 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
   return (
     <header className={`w-full flex flex-col ${className}`}>
-      {/* Top Tier: White background with Logo and Banner */}
+      {/* Top Tier: White background with Logo and Banner (Same as before) */}
       <div className="w-full bg-white flex justify-center py-4 lg:py-0 h-auto lg:h-[120px]">
-        <div className="max-w-7xl w-full px-4 sm:px-6 lg:px-10 flex items-center justify-between lg:h-full">
+        <div className="max-w-[1440px] w-full px-4 sm:px-6 lg:px-10 flex items-center justify-between lg:h-full">
           {/* Logo */}
           <Link href="/">
             <Logo
@@ -74,25 +74,6 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               className="w-[120px] h-[30px] sm:w-[150px] sm:h-[37px] lg:w-[260px] lg:h-[65px]"
             />
           </Link>
-
-          {/* Mobile Right Actions: Logout & Language (hidden on desktop) */}
-          <div className="flex md:hidden items-center gap-4">
-            {/* Logout */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLogout}
-              isLoading={isPending}
-              className="text-secondary font-bold p-0 h-auto hover:bg-transparent"
-            >
-              {t('logout')}
-            </Button>
-
-            {/* Language Switcher */}
-            <div className="scale-75 flex-shrink-0">
-              <LanguageSwitcher customIcon="/assets/website/dashboard/language-switcher-icon-2.png" />
-            </div>
-          </div>
 
           {/* Banner Image (Right Aligned) - Desktop Only */}
           <div className="hidden lg:block relative h-[120px] w-[400px]">
@@ -108,123 +89,68 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         </div>
       </div>
 
-      {/* Bottom Tier: Nav Bar */}
-      <div className="w-full bg-background-nav flex justify-center h-auto min-h-[50px] lg:min-h-[60px]">
-        <div className="max-w-7xl w-full px-4 sm:px-6 lg:px-10 flex items-center justify-between gap-4">
-          {/* Left: Nav Tabs - Scrollable on mobile */}
-          <nav className="flex items-center h-full gap-4 lg:gap-8 overflow-x-auto no-scrollbar whitespace-nowrap">
-            {!isAccountPage ? (
-              <>
-                <Link
-                  href="/account"
-                  className={`text-white transition-opacity hover:opacity-100 h-full flex items-center border-b-2 transition-all ${activeTab === 'account' ? 'border-primary opacity-100' : 'border-transparent opacity-70'}`}
-                >
-                  <Text variant="text-xxs" className="font-semibold uppercase tracking-wider">
-                    {t('account')}
-                  </Text>
-                </Link>
-                <Link
-                  href="/dashboard"
-                  className={`text-white transition-opacity hover:opacity-100 h-full flex items-center border-b-2 transition-all ${activeTab === 'documents' ? 'border-primary opacity-100' : 'border-transparent opacity-70'}`}
-                >
-                  <Text variant="text-xxs" className="font-semibold uppercase tracking-wider">
-                    {t('documents')}
-                  </Text>
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/account"
-                  className={`text-white transition-opacity hover:opacity-100 h-full flex items-center border-b-2 transition-all ${activeTab === 'profile' ? 'border-primary opacity-100' : 'border-transparent opacity-70'}`}
-                >
-                  <Text variant="text-xxs" className="font-semibold uppercase tracking-wider">
-                    {t('profile')}
-                  </Text>
-                </Link>
-                <Link
-                  href="/dashboard"
-                  className={`text-white transition-opacity hover:opacity-100 h-full flex items-center border-b-2 transition-all ${activeTab === 'dashboard' ? 'border-primary opacity-100' : 'border-transparent opacity-70'}`}
-                >
-                  <Text variant="text-xxs" className="font-semibold uppercase tracking-wider">
-                    {t('dashboardNav')}
-                  </Text>
-                </Link>
-                <Link
-                  href="/account/my-documents"
-                  className={`text-white transition-opacity hover:opacity-100 h-full flex items-center border-b-2 transition-all ${activeTab === 'my-documents' ? 'border-primary opacity-100' : 'border-transparent opacity-70'}`}
-                >
-                  <Text variant="text-xxs" className="font-semibold uppercase tracking-wider">
-                    {t('myDocuments')}
-                  </Text>
-                </Link>
-                <Link
-                  href="/account/settings"
-                  className={`text-white transition-opacity hover:opacity-100 h-full flex items-center border-b-2 transition-all ${activeTab === 'settings' ? 'border-primary opacity-100' : 'border-transparent opacity-70'}`}
-                >
-                  <Text variant="text-xxs" className="font-semibold uppercase tracking-wider">
-                    {t('settings')}
-                  </Text>
-                </Link>
-              </>
-            )}
-          </nav>
+      {/* Bottom Tier: Nav/Search Bar (Same styling as before) */}
+      <div className="w-full bg-background-nav flex justify-center h-auto min-h-[50px] lg:min-h-[60px] shadow-md relative z-20">
+        <div className="max-w-[1440px] w-full px-4 sm:px-6 lg:px-10 flex items-center justify-between gap-4">
+          
+          {/* Left: Heading (Replacing Nav Tabs) */}
+          <div className="flex items-center h-full">
+            <Text 
+              variant="heading-m" 
+              className="text-white font-bold uppercase tracking-tight"
+            >
+              {t('portalTitle')}
+            </Text>
+          </div>
 
-          {/* Right: Search and Logout/Lang (Desktop Only Logout/Lang) */}
-          <div className="flex items-center gap-3 lg:gap-10 ml-auto">
-            {(!isAccountPage || activeTab === 'my-documents') && (
-              <>
-                {/* Search Bar - Desktop */}
-                <div className="hidden md:block">
-                  <Input
-                    id="search-desktop"
-                    inputSize="sm"
-                    type='search'
-                    value={searchValue}
-                    onChange={(e) => setSearchValue(e.target.value)}
-                    placeholder={t('searchPlaceholder')}
-                    rightIcon={Search}
-                    className="w-[180px] lg:w-[320px]"
-                  />
-                </div>
+          {/* Middle: Search Bar (Desktop) */}
+          <div className="hidden md:block flex-1 max-w-[500px]">
+            <Input
+              id="search-desktop"
+              inputSize="sm"
+              type='search'
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              placeholder={t('searchPlaceholder')}
+              rightIcon={Search}
+              className="bg-white/95 border-transparent focus:bg-white transition-all shadow-sm"
+            />
+          </div>
 
-                {/* Search Trigger - Mobile */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={toggleSearch}
-                  className="md:hidden text-white p-2 h-auto hover:bg-white/10"
-                  aria-label="Toggle search"
-                >
-                  <Search size={22} />
-                </Button>
-              </>
-            )}
+          {/* Right: Actions */}
+          <div className="flex items-center gap-3 lg:gap-10">
+            {/* Mobile Search Trigger */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleSearch}
+              className="md:hidden text-white p-2 h-auto hover:bg-white/10"
+              aria-label="Toggle search"
+            >
+              <Search size={22} />
+            </Button>
 
-            {/* Actions Tier (Desktop Only) */}
-            <div className="hidden md:flex items-center gap-4 lg:gap-10">
-              {/* Logout */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLogout}
-                isLoading={isPending}
-                className="text-white font-bold p-0 h-auto hover:bg-transparent"
-              >
-                {t('logout')}
-              </Button>
+            {/* Logout */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLogout}
+              isLoading={isPending}
+              className="text-white font-bold p-0 h-auto hover:bg-transparent"
+            >
+              {t('logout')}
+            </Button>
 
-              {/* Language Switcher */}
-              <div className="scale-75 lg:scale-90 opacity-90 hover:opacity-100 transition-opacity flex-shrink-0">
-                <LanguageSwitcher customIcon="/assets/website/dashboard/language-switcher-icon-2.png" />
-              </div>
+            {/* Language Switcher (Same as before) */}
+            <div className="scale-75 lg:scale-90 opacity-90 hover:opacity-100 transition-opacity flex-shrink-0">
+              <LanguageSwitcher customIcon="/assets/website/dashboard/language-switcher-icon-2.png" />
             </div>
           </div>
         </div>
 
         {/* Mobile Search Dropdown */}
         {isSearchOpen && (
-          <div className="absolute top-[170px] left-0 w-full bg-background-nav px-(--spacing-container-padding) py-3 border-t border-white/10 md:hidden z-30 shadow-lg animate-in slide-in-from-top-2 duration-200">
+          <div className="absolute top-full left-0 w-full bg-background-nav px-4 py-3 border-t border-white/10 md:hidden z-30 shadow-lg animate-in slide-in-from-top-2 duration-200">
             <Input
               autoFocus
               id="search-mobile"
@@ -233,7 +159,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               onChange={(e) => setSearchValue(e.target.value)}
               placeholder={t('searchPlaceholder')}
               rightIcon={Search}
-              className="w-full h-[40px] shadow-inner"
+              className="w-full h-[40px] shadow-inner bg-white"
             />
           </div>
         )}

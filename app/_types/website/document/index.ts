@@ -6,6 +6,10 @@ export interface DocumentItem {
   type: 'pdf' | 'doc' | 'xls' | 'zip' | 'other';
   size: string;
   url: string;
+  filePath?: string;
+  category?: string;
+  recipient?: string;
+  createdAt?: string;
 }
 
 export interface Document {
