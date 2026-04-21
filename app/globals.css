@@ -142,6 +142,7 @@ html {
   --text-body-md: var(--text-text-m);
   --text-body-sm: var(--text-text-s);
   --text-body-xs: var(--text-text-xs);
+
 }
 
 @media (prefers-color-scheme: dark) {

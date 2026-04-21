@@ -10,10 +10,16 @@ export const TrustBar: React.FC<TrustBarProps> = ({ className = '' }) => {
 
   return (
     <div className={`w-full bg-background-secondary flex justify-center py-3 ${className}`}>
-      <div className="max-w-(--container-width-desktop) w-full px-(--spacing-container-padding) flex items-center justify-center gap-3 font-body text-[13px] md:text-[14px] text-secondary/70 font-medium">
-        <Text variant="text-xs" className="text-secondary/70 font-medium">{t('expats')}</Text>
-        <Text variant="text-xs" className="text-secondary/30">•</Text>
-        <Text variant="text-xs" className="text-secondary/70 font-medium">{t('hosting')}</Text>
+      <div className="max-w-(--container-width-desktop) w-full px-(--spacing-container-padding) flex items-center justify-center gap-3">
+        <span style={{ fontSize: '18px', fontWeight: 600, fontStretch: '85%' }} className="text-secondary/70 font-heading">
+          {t('expats')}
+        </span>
+        <span style={{ fontSize: '18px', fontWeight: 600, fontStretch: '85%' }} className="text-secondary/30 font-heading">
+          •
+        </span>
+        <span style={{ fontSize: '18px', fontWeight: 600, fontStretch: '85%' }} className="text-secondary/70 font-heading">
+          {t('hosting')}
+        </span>
       </div>
     </div>
   );
