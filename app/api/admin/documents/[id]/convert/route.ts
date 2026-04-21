@@ -44,7 +44,7 @@ export async function GET(
       }
     })
 
-    if (!document) {
+    if (!document || !document.file_path || !document.file_name) {
       return NextResponse.json({ error: ERROR_MESSAGES.DOCUMENT_NOT_FOUND }, { status: 404 })
     }
 

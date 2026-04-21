@@ -39,7 +39,7 @@ export async function GET(
       select: { file_path: true, id: true }
     })
 
-    if (!document) {
+    if (!document || !document.file_path) {
       return NextResponse.json({ error: ERROR_MESSAGES.DOCUMENT_NOT_FOUND }, { status: 404 })
     }
 
