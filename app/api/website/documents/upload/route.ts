@@ -75,10 +75,14 @@ export async function POST(request: Request) {
     const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`
     const filePath = `${user.id}/${fileName}`
 
+    // Convert file to ArrayBuffer for more reliable server-side upload
+    const arrayBuffer = await file.arrayBuffer();
+
     // Upload to Supabase Storage
     const { error: uploadError } = await supabase.storage
       .from(STORAGE_BUCKETS.DOCUMENTS)
-      .upload(filePath, file, {
+      .upload(filePath, arrayBuffer, {
+        contentType: file.type,
         cacheControl: STORAGE_CONFIG.CACHE_CONTROL,
         upsert: false,
       })
@@ -93,39 +97,47 @@ export async function POST(request: Request) {
 
     // Create database record
     const fileType = getFileType(file.name)
-    const document = await prisma.documents.create({
-      data: {
-        title: title.trim(),
-        description: description?.trim() || null,
-        recipient: recipient?.trim() || null,
-        category: 'Personal',
-        tags: [],
-        file_name: file.name,
-        file_path: filePath,
-        file_size: BigInt(file.size),
-        file_type: fileType,
-        mime_type: file.type,
-        is_featured: false,
-        created_by: user.id,
-      }
-    })
+    try {
+      const document = await prisma.documents.create({
+        data: {
+          title: title.trim(),
+          description: description?.trim() || null,
+          recipient: recipient?.trim() || null,
+          category: 'Personal',
+          tags: [],
+          file_name: file.name,
+          file_path: filePath,
+          file_size: BigInt(file.size),
+          file_type: fileType,
+          mime_type: file.type,
+          is_featured: false,
+          created_by: user.id,
+        } as any
+      })
 
-    return new NextResponse(
-      JSON.stringify({
-        ...document,
-        file_size: Number(document.file_size),
-      }, (key, value) =>
-        typeof value === 'bigint' ? Number(value) : value
-      ),
-      {
-        status: 201,
-        headers: { 'Content-Type': 'application/json' }
-      }
-    )
-  } catch (error: unknown) {
-    console.error('User document upload error:', error)
+      return new NextResponse(
+        JSON.stringify({
+          ...document,
+          file_size: Number(document.file_size),
+        }, (key, value) =>
+          typeof value === 'bigint' ? Number(value) : value
+        ),
+        {
+          status: 201,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      )
+    } catch (dbError: any) {
+      console.error('Database record creation error:', dbError);
+      return NextResponse.json(
+        { error: `Database error: ${dbError.message || 'Failed to create record'}` },
+        { status: 500 }
+      )
+    }
+  } catch (error: any) {
+    console.error('User document upload global error:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: `Internal server error: ${error.message || 'Unknown error'}` },
       { status: 500 }
     )
   }
