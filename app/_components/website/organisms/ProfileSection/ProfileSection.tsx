@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { User, Mail, Box, Settings, Phone } from 'lucide-react';
+import { User, Mail, Settings, Phone } from 'lucide-react';
 import { ProfileAvatar } from '@/website/molecules/ProfileAvatar/ProfileAvatar';
 import { ProfileItem } from '@/website/molecules/ProfileItem/ProfileItem';
 import { Text } from '@/website/atoms';
@@ -160,11 +160,6 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
 
           {/* Navigation Links */}
           <div className="flex flex-col">
-            <ProfileItem 
-              icon={Box} 
-              label={t('myDocuments')} 
-              href="/account/my-documents" 
-            />
             <ProfileItem 
               icon={Settings} 
               label={t('settings')} 

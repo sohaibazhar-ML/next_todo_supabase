@@ -1,5 +1,5 @@
 import React from 'react';
-import { DashboardHeader, Footer, ProfileSection } from '@/website/organisms';
+import { DashboardLayout, ProfileSection } from '@/website/organisms';
 import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
@@ -21,11 +21,7 @@ export default async function AccountPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background-secondary flex flex-col font-heading">
-      {/* Account Specific Header (Search Hidden, Account Nav Active) */}
-      <DashboardHeader isAccountPage activeTab="profile" />
-
-      {/* Profile Content with High Fidelity Design */}
+    <DashboardLayout isAccountPage activeTab="profile">
       <ProfileSection 
         firstName={profile.first_name}
         lastName={profile.last_name}
@@ -36,9 +32,6 @@ export default async function AccountPage() {
         newAddressSwitzerland={profile.new_address_switzerland}
         avatarUrl={profile.avatar_url}
       />
-
-      {/* Global Footer */}
-      <Footer />
-    </main>
+    </DashboardLayout>
   );
 }

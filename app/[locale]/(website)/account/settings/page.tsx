@@ -1,5 +1,5 @@
 import React from 'react';
-import { DashboardHeader, Footer, SettingsSection } from '@/website/organisms';
+import { DashboardLayout, SettingsSection } from '@/website/organisms';
 import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
@@ -32,11 +32,7 @@ export default async function SettingsPage(props: { params: Promise<{ locale: st
   const currentLocale = profile.preferred_language || cookieStore.get('NEXT_LOCALE')?.value || locale || 'de';
 
   return (
-    <main className="min-h-screen bg-background-secondary flex flex-col font-heading">
-      {/* Settings Specific Header */}
-      <DashboardHeader isAccountPage activeTab="settings" />
-
-      {/* Settings Content */}
+    <DashboardLayout isAccountPage activeTab="settings">
       <SettingsSection 
         firstName={profile.first_name}
         lastName={profile.last_name}
@@ -44,9 +40,6 @@ export default async function SettingsPage(props: { params: Promise<{ locale: st
         keepMeLoggedIn={profile.keep_me_logged_in}
         avatarUrl={profile.avatar_url}
       />
-
-      {/* Global Footer */}
-      <Footer />
-    </main>
+    </DashboardLayout>
   );
 }

@@ -29,6 +29,16 @@ export const DashboardSidebar: React.FC = () => {
       label: t('checklist'),
       href: '/dashboard/checklist',
       active: pathname === '/dashboard/checklist'
+    },
+    {
+      label: t('profile'),
+      href: '/account',
+      active: pathname === '/account'
+    },
+    {
+      label: t('settings'),
+      href: '/account/settings',
+      active: pathname === '/account/settings'
     }
   ];
 
