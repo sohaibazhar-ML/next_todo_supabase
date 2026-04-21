@@ -10,11 +10,11 @@ export const DashboardOverview: React.FC = () => {
   const overviewItems = [
     { label: t('overview.labels.mandatory'), title: 'Register with municipality' },
     { label: t('overview.labels.mandatory'), title: 'Health insurance' },
-    { label: t('overview.labels.important'), title: 'Register internet' },
-    { label: t('overview.labels.important'), title: 'Open bank account' },
+    { label: t('overview.labels.mandatory'), title: 'Register internet' },
+    { label: t('overview.labels.mandatory'), title: 'Open bank account' },
     { label: t('overview.labels.optional'), title: 'Mail forwarding' },
     { label: t('overview.labels.mandatory'), title: 'Register car' },
-    { label: t('overview.labels.important'), title: 'Apply for credit card' },
+    { label: t('overview.labels.mandatory'), title: 'Apply for credit card' },
     { label: t('overview.labels.optional'), title: 'Address notification friends' },
     { label: t('overview.labels.mandatory'), title: 'Register pet' },
   ];
