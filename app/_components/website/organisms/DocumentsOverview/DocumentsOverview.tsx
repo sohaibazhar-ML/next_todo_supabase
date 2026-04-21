@@ -20,7 +20,12 @@ export const DocumentsOverview: React.FC<DocumentsOverviewProps> = ({ className 
       <div className="max-w-(--container-width-desktop) w-full px-(--spacing-container-padding) flex flex-col gap-12">
         {/* Top: Heading */}
         <div className="w-full">
-          <Text variant="heading-l" as="h2" className="text-secondary leading-tight">
+          <Text 
+            variant="heading-l" 
+            as="h2" 
+            style={{ fontSize: '43px', fontWeight: 600, fontStretch: '85%' }}
+            className="text-secondary leading-tight"
+          >
             {t('title')}
           </Text>
         </div>
@@ -28,7 +33,11 @@ export const DocumentsOverview: React.FC<DocumentsOverviewProps> = ({ className 
         <div className="grid grid-cols-12 gap-x-(--spacing-gutter) items-start">
           {/* Left: Content */}
           <div className="col-span-12 lg:col-span-7 space-y-10">
-            <Text variant="text-m" className="text-secondary/80 max-w-[640px] leading-relaxed">
+            <Text 
+              variant="text-m" 
+              style={{ fontSize: '21px', fontWeight: 400 }}
+              className="text-secondary/80 max-w-[640px] leading-relaxed"
+            >
               {t('description')}
             </Text>
 
@@ -44,7 +53,11 @@ export const DocumentsOverview: React.FC<DocumentsOverviewProps> = ({ className 
                       className="w-[18px] h-auto object-contain"
                     />
                   </div>
-                  <Text variant="text-xxs" className="font-semibold text-secondary leading-tight">
+                  <Text 
+                    variant="text-xxs" 
+                    style={{ fontSize: '23px', fontWeight: 600, fontStretch: '85%' }}
+                    className="text-secondary leading-tight"
+                  >
                     {item}
                   </Text>
                 </div>
@@ -53,14 +66,14 @@ export const DocumentsOverview: React.FC<DocumentsOverviewProps> = ({ className 
           </div>
 
           {/* Right: Documents Overview Image */}
-          <div className="col-span-12 lg:col-span-5 relative h-[240px] md:h-[320px] lg:h-auto lg:min-h-[400px] mt-10 lg:mt-0">
+          <div className="col-span-12 lg:col-span-5 relative w-full aspect-[4/3] lg:aspect-auto lg:min-h-[500px] mt-10 lg:mt-0">
             <div className="absolute inset-0 shadow-lg overflow-hidden">
               <Image
                 src="/assets/website/landing-page/doc-overview.png"
                 alt="Documents Overview"
                 fill
                 sizes="(max-width: 1024px) 100vw, 42vw"
-                className="object-cover"
+                className="object-cover object-top"
                 priority
               />
             </div>
