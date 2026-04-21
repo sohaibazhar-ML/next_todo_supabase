@@ -29,14 +29,15 @@
     "step3": "Vorlagen bearbeiten, drucken, speichern oder versenden"
   },
   "MyDocuments": {
-    "title": "Meine Dokumente",
-    "description": "Anmelden, melden, anmelden. Mit myswissmove wird der Einzug in die Schweiz zum Kinderspiel.",
+    "title": "My documents",
+    "subtitle": "Abmelden, Ummelden, Anmelden.",
+    "description": "Mit myswissmove gelingt der Umzug in die Schweiz spielend.",
     "list": [
       "Die ultimative Dokumenten-Checkliste",
-      "Behörde, Bank, Versicherung – alles geregelt?",
-      "Diese 15 Dokumente, die Sie für Ihren Neustart in der Schweiz benötigen",
-      "Umzug Schweiz 2026: Das müssen Sie unbedingt beachten",
-      "Bestens vorbereitet zum Auswandern: So vermeiden Sie teure Fehler"
+      "Behörden, Bank, Versicherung – alles geregelt?",
+      "Diese 15 Dokumente brauchen Sie für Ihren Neustart in der Schweiz",
+      "Schweiz-Umzug 2026: Was Sie rechtlich unbedingt beachten müssen",
+      "Gut vorbereitet auswandern: So vermeiden Sie teure Fehler"
     ],
     "register": "Kostenlos registrieren"
   },

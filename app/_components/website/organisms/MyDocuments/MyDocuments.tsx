@@ -22,7 +22,7 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({ className = '' }) => {
     <section id="my-documents" className={`w-full bg-background-secondary flex justify-center py-16 pb-24 ${className}`}>
       <div className="max-w-(--container-width-desktop) w-full px-(--spacing-container-padding) grid grid-cols-12 gap-x-(--spacing-gutter) items-center">
         {/* Left: Image/Preview */}
-        <div className="col-span-12 lg:col-span-6 mb-10 lg:mb-0">
+        <div className="col-span-12 lg:col-span-5 mb-10 lg:mb-0">
           <div className="bg-white py-8 px-3 flex items-center justify-center">
             <div className="relative w-full aspect-[653/430]">
               <Image
@@ -38,15 +38,29 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({ className = '' }) => {
         </div>
 
         {/* Right: Content */}
-        <div className="col-span-12 lg:col-span-6 pl-0 lg:pl-12">
-          <Text variant="heading-l" as="h2" className="text-secondary mb-6">
+        <div className="col-span-12 lg:col-span-7 pl-0 lg:pl-12">
+          <Text 
+            variant="heading-l" 
+            as="h2" 
+            style={{ fontSize: '43px', fontWeight: 600, fontStretch: '85%' }}
+            className="text-secondary mb-2"
+          >
             {t('title')}
           </Text>
-          <Text variant="text-m" className="text-secondary/80 mb-8 leading-relaxed max-w-[540px]">
+          <Text 
+            style={{ fontSize: '27px', fontWeight: 500, fontStretch: '85%' }} 
+            className="text-secondary mb-0"
+          >
+            {t('subtitle')}
+          </Text>
+          <Text 
+            style={{ fontSize: '27px', fontWeight: 500, fontStretch: '85%' }} 
+            className="text-secondary mb-4 max-w-[600px]"
+          >
             {t('description')}
           </Text>
 
-          <ul className="space-y-4 mb-10">
+          <ul className="space-y-2 mb-6">
             {list.map((item, idx) => (
               <li key={idx} className="flex items-start gap-4">
                 <div className="mt-1 flex-shrink-0">
@@ -58,7 +72,11 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({ className = '' }) => {
                     className="w-3 h-auto object-contain"
                   />
                 </div>
-                <Text as="span" variant="text-xs" className="text-secondary leading-snug">
+                <Text 
+                  as="span" 
+                  style={{ fontSize: '21px', fontWeight: 500 }} 
+                  className="text-secondary leading-snug"
+                >
                   {item}
                 </Text>
               </li>

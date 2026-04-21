@@ -30,7 +30,8 @@
   },
   "MyDocuments": {
     "title": "My documents",
-    "description": "Log in, report, log in. With myswissmove, moving to Switzerland is child's play.",
+    "subtitle": "Log in, report, log in.",
+    "description": "With myswissmove, moving to Switzerland is child's play.",
     "list": [
       "The ultimate document checklist",
       "Authorities, bank, insurance – all settled?",

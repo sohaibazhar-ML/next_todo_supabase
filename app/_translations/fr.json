@@ -30,7 +30,8 @@
   },
   "MyDocuments": {
     "title": "Mes documents",
-    "description": "Se connecter, signaler, se connecter. Avec myswissmove, emménager en Suisse est un jeu d'enfant.",
+    "subtitle": "Se connecter, signaler, se connecter.",
+    "description": "Avec myswissmove, emménager en Suisse est un jeu d'enfant.",
     "list": [
       "La liste de contrôle ultime des documents",
       "Autorités, banque, assurance – tout est réglé ?",

@@ -30,7 +30,8 @@
   },
   "MyDocuments": {
     "title": "I miei documenti",
-    "description": "Accedi, segnala, accedi. Con myswissmove trasferirsi in Svizzera è un gioco da ragazzi.",
+    "subtitle": "Accedi, segnala, accedi.",
+    "description": "Con myswissmove trasferirsi in Svizzera è un gioco da ragazzi.",
     "list": [
       "La checklist definitiva dei documenti",
       "Autorità, banca, assicurazione – tutto regolato?",
