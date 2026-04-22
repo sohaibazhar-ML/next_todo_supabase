@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ChevronRight, LucideIcon, Check, X, Loader2 } from 'lucide-react';
-import { Text, Button, Input, Select } from '@/website/atoms';
+import { Text, Button, Input, Select, Image } from '@/website/atoms';
 import { FormMessage } from '@/website/molecules';
 import { Link } from '@/i18n/routing';
 import { twMerge } from 'tailwind-merge';
@@ -10,6 +10,7 @@ import { twMerge } from 'tailwind-merge';
 interface Option {
   label: string;
   value: string;
+  flag?: string;
 }
 
 interface ProfileItemProps {
@@ -157,9 +158,22 @@ export const ProfileItem: React.FC<ProfileItemProps> = ({
             </div>
           ) : (
             options ? (
-              <Text variant="text-m" className="text-secondary font-medium leading-tight">
-                {options.find(opt => opt.value === value)?.label || value || '–'}
-              </Text>
+              <div className="flex items-center gap-2">
+                {options.find(opt => opt.value === value)?.flag && (
+                  <div className="relative w-[20px] h-[20px] flex-shrink-0 flex items-center justify-center overflow-hidden">
+                    <Image
+                      src={options.find(opt => opt.value === value)!.flag!}
+                      alt=""
+                      width={20}
+                      height={20}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                )}
+                <Text variant="text-m" className="text-secondary font-medium leading-tight">
+                  {options.find(opt => opt.value === value)?.label || value || '–'}
+                </Text>
+              </div>
             ) : typeof value === 'string' ? (
               <Text variant="text-m" className="text-secondary font-medium leading-tight">
                 {value || '–'}

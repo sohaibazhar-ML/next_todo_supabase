@@ -73,13 +73,13 @@ export const Select: React.FC<SelectProps> = ({
             <SelectPrimitive.Trigger id={id} className={triggerClasses} autoFocus={autoFocus}>
               <div className="flex items-center gap-2 flex-1 truncate pointer-events-none">
                 {selectedOption?.flag && (
-                  <div className="relative w-[22px] h-[15px] flex-shrink-0 shadow-sm overflow-hidden rounded-[1px]">
+                  <div className="relative w-[20px] h-[20px] flex-shrink-0 flex items-center justify-center overflow-hidden">
                     <Image
                       src={selectedOption.flag}
                       alt=""
-                      width={22}
-                      height={15}
-                      className="w-full h-full object-cover"
+                      width={20}
+                      height={20}
+                      className="w-full h-full object-contain"
                     />
                   </div>
                 )}
@@ -113,13 +113,13 @@ export const Select: React.FC<SelectProps> = ({
                     >
                       <div className="flex items-center gap-3">
                         {option.flag && (
-                          <div className="relative w-[22px] h-[15px] flex-shrink-0 shadow-sm overflow-hidden rounded-[1px]">
+                          <div className="relative w-[20px] h-[20px] flex-shrink-0 flex items-center justify-center overflow-hidden">
                             <Image
                               src={option.flag}
                               alt=""
-                              width={22}
-                              height={15}
-                              className="w-full h-full object-cover"
+                              width={20}
+                              height={20}
+                              className="w-full h-full object-contain"
                             />
                           </div>
                         )}

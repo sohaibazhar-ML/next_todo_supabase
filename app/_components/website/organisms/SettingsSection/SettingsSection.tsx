@@ -79,10 +79,10 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
   };
 
   const languageOptions = [
-    { label: 'English', value: 'en' },
-    { label: 'Deutsch', value: 'de' },
-    { label: 'Français', value: 'fr' },
-    { label: 'Italiano', value: 'it' },
+    { label: 'English', value: 'en', flag: '/assets/website/icons/uk.png' },
+    { label: 'Deutsch', value: 'de', flag: '/assets/website/icons/switzerland.png' },
+    { label: 'Français', value: 'fr', flag: '/assets/website/icons/french.png' },
+    { label: 'Italiano', value: 'it', flag: '/assets/website/icons/italy.png' },
   ];
 
   const handlePasswordChange = async () => {
