@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { List, Datagrid, TextField, DateField, NumberField, usePermissions, FunctionField, useRecordContext, TopToolbar, CreateButton, ExportButton, useNotify, useRefresh } from "react-admin";
+import { List, Datagrid, TextField, DateField, NumberField, usePermissions, FunctionField, useRecordContext, TopToolbar, CreateButton, ExportButton, useNotify, useRefresh, FilterButton, SearchInput, SelectInput, DateInput } from "react-admin";
 import { Button, Box, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
-import { DocumentFilter } from "@/admin/molecules";
+import { DynamicCategoryInput } from "@/admin/atoms";
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 
@@ -17,20 +17,24 @@ const CustomFeaturedField = ({ source, label }: { source: string; label?: string
     );
 };
 
-const DocumentListActions = ({ onImportClick, permissions }: { onImportClick: () => void, permissions: any }) => (
-    <TopToolbar>
-        {permissions === 'admin' && <CreateButton />}
-        <Button
-            size="small"
-            color="primary"
-            onClick={onImportClick}
-            startIcon={<UploadFileIcon />}
-        >
-            Import Placeholders
-        </Button>
-        <ExportButton />
-    </TopToolbar>
-);
+const DocumentListActions = (props: any) => {
+    const { onImportClick, permissions, filters, ...rest } = props;
+    return (
+        <TopToolbar {...rest}>
+            <FilterButton filters={filters} />
+            {permissions === 'admin' && <CreateButton />}
+            <Button
+                size="small"
+                color="primary"
+                onClick={onImportClick}
+                startIcon={<UploadFileIcon />}
+            >
+                Import Placeholders
+            </Button>
+            <ExportButton />
+        </TopToolbar>
+    );
+};
 
 const DocumentEmpty = ({ onImportClick, permissions }: { onImportClick: () => void, permissions: any }) => (
     <Box textAlign="center" m={5}>
@@ -62,6 +66,35 @@ export const DocumentList = () => {
     const [importing, setImporting] = useState(false);
     const notify = useNotify();
     const refresh = useRefresh();
+
+    // Fetch dynamic types for the filter dropdown
+    const [dynamicTypes, setDynamicTypes] = useState<{ id: string, name: string }[]>([]);
+    React.useEffect(() => {
+        fetch('/api/admin/documents/filter-options')
+            .then(res => res.json())
+            .then(data => {
+                if (data.fileTypes && Array.isArray(data.fileTypes)) {
+                    const nameMap: Record<string, string> = {
+                        'pdf': 'PDF', 'docx': 'DOCX', 'document': 'DOCX',
+                        'xlsx': 'XLSX', 'spreadsheet': 'XLSX', 'zip': 'ZIP',
+                        'archive': 'ZIP', 'image': 'Image', 'other': 'Other'
+                    };
+                    setDynamicTypes(data.fileTypes.map((type: string) => ({ 
+                        id: type, 
+                        name: nameMap[type.toLowerCase()] || type.toUpperCase() 
+                    })));
+                }
+            })
+            .catch(err => console.error("Failed to load filter types", err));
+    }, []);
+
+    const filters = [
+        <SearchInput key="q" placeholder="Search Title, Category, Type..." source="q" alwaysOn />,
+        <DynamicCategoryInput key="cat" label="Category" source="category" fullWidth={false} />,
+        <SelectInput key="type" label="Type" source="file_type" choices={dynamicTypes} />,
+        <DateInput key="from" label="From Date" source="fromDate" />,
+        <DateInput key="to" label="To Date" source="toDate" />,
+    ];
 
     const handleImport = async () => {
         if (!file) return;
@@ -96,8 +129,8 @@ export const DocumentList = () => {
     return (
         <>
             <List 
-                filters={<DocumentFilter />} 
-                actions={<DocumentListActions onImportClick={() => setImportOpen(true)} permissions={permissions} />}
+                filters={filters} 
+                actions={<DocumentListActions filters={filters} onImportClick={() => setImportOpen(true)} permissions={permissions} />}
                 empty={<DocumentEmpty onImportClick={() => setImportOpen(true)} permissions={permissions} />}
             >
                 <Datagrid rowClick="edit" bulkActionButtons={permissions === 'admin'}>

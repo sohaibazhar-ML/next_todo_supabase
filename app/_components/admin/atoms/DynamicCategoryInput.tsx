@@ -9,6 +9,7 @@ interface DynamicCategoryInputProps {
     required?: boolean;
     fullWidth?: boolean;
     helperText?: string;
+    [key: string]: any; // Allow for react-admin filter props like alwaysOn
 }
 
 export const DynamicCategoryInput: React.FC<DynamicCategoryInputProps> = ({ 
@@ -16,7 +17,8 @@ export const DynamicCategoryInput: React.FC<DynamicCategoryInputProps> = ({
     label = "Category", 
     required = false,
     fullWidth = true,
-    helperText
+    helperText,
+    ...props
 }) => {
     const [categories, setCategories] = useState<{ id: string, name: string }[]>([]);
     const [loading, setLoading] = useState(true);
@@ -40,10 +42,6 @@ export const DynamicCategoryInput: React.FC<DynamicCategoryInputProps> = ({
             .finally(() => setLoading(false));
     }, [notify]);
 
-    // We use AutocompleteInput to allow users to both search existing categories 
-    // and potentially enter new ones if the backend supports it.
-    // However, a simple SelectInput with the fetched choices is what the user asked for 
-    // to replace the "hardcoded dropdown".
     return (
         <SelectInput
             source={source}
@@ -53,6 +51,7 @@ export const DynamicCategoryInput: React.FC<DynamicCategoryInputProps> = ({
             required={required}
             fullWidth={fullWidth}
             helperText={helperText}
+            {...props}
         />
     );
 };

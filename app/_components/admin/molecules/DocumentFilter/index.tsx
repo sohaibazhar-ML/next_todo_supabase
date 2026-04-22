@@ -1,9 +1,26 @@
-import { Filter, SearchInput, SelectInput, TextInput, DateInput, FilterProps } from "react-admin";
+import { SearchInput, SelectInput, DateInput } from "react-admin";
 import { useState, useEffect } from "react";
-import { DOCUMENT_CATEGORIES } from "@/admin/constants";
 import { DynamicCategoryInput } from "@/admin/atoms";
 
-export const DocumentFilter = (props: Omit<FilterProps, 'children'>) => {
+export const getDocumentFilters = (dynamicTypes: any[]) => [
+    <SearchInput key="q" placeholder="Search Title, Category, Type..." source="q" alwaysOn />,
+    <DynamicCategoryInput
+        key="category"
+        label="Category"
+        source="category"
+        fullWidth={false}
+    />,
+    <SelectInput
+        key="file_type"
+        label="Type"
+        source="file_type"
+        choices={dynamicTypes}
+    />,
+    <DateInput key="fromDate" label="From Date" source="fromDate" />,
+    <DateInput key="toDate" label="To Date" source="toDate" />,
+];
+
+export const DocumentFilter = () => {
     const [dynamicTypes, setDynamicTypes] = useState<{ id: string, name: string }[]>([]);
 
     useEffect(() => {
@@ -11,7 +28,6 @@ export const DocumentFilter = (props: Omit<FilterProps, 'children'>) => {
             .then(res => res.json())
             .then(data => {
                 if (data.fileTypes && Array.isArray(data.fileTypes)) {
-                    // Prettify common extensions mapped to the type filter ID format
                     const nameMap: Record<string, string> = {
                         'pdf': 'PDF',
                         'docx': 'Document (DOCX)',
@@ -33,22 +49,5 @@ export const DocumentFilter = (props: Omit<FilterProps, 'children'>) => {
             .catch(err => console.error("Failed to load generic filter options", err));
     }, []);
 
-    return (
-        <Filter {...props}>
-            <SearchInput placeholder="Search Title, Category, Type..." source="q" alwaysOn />
-            <DynamicCategoryInput
-                label="Category"
-                source="category"
-                fullWidth={false}
-            />
-            <SelectInput
-                label="Type"
-                source="file_type"
-                choices={dynamicTypes}
-            />
-            <TextInput label="Tags" source="tags" helperText="Comma separated" />
-            <DateInput label="From Date" source="fromDate" />
-            <DateInput label="To Date" source="toDate" />
-        </Filter>
-    );
+    return getDocumentFilters(dynamicTypes);
 };
