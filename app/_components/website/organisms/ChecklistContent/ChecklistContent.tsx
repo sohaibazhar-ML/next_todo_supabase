@@ -35,6 +35,8 @@ export const ChecklistContent: React.FC<ChecklistContentProps> = ({
   const t = useTranslations('Checklist');
   const [mounted, setMounted] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [updatingDeadlineId, setUpdatingDeadlineId] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const [progress, setProgress] = useState<UserProgress[]>(
     initialProgress.map(p => ({
@@ -54,6 +56,7 @@ export const ChecklistContent: React.FC<ChecklistContentProps> = ({
     const current = progress.find(p => p.checklist_item_id === itemId);
     const newStatus = current ? !current.is_completed : true;
     
+    setTogglingId(itemId);
     // Optimistic update
     const newProgress = current 
       ? progress.map(p => p.checklist_item_id === itemId ? { ...p, is_completed: newStatus } : p)
@@ -63,12 +66,14 @@ export const ChecklistContent: React.FC<ChecklistContentProps> = ({
 
     startTransition(async () => {
       await updateChecklistProgress(userId, itemId, { is_completed: newStatus });
+      setTogglingId(null);
     });
   };
 
   const handleDeadlineChange = async (itemId: string, deadline: string) => {
     const current = progress.find(p => p.checklist_item_id === itemId);
     
+    setUpdatingDeadlineId(itemId);
     // Optimistic update
     const newProgress = current 
       ? progress.map(p => p.checklist_item_id === itemId ? { ...p, deadline } : p)
@@ -78,6 +83,7 @@ export const ChecklistContent: React.FC<ChecklistContentProps> = ({
 
     startTransition(async () => {
       await updateChecklistProgress(userId, itemId, { deadline: new Date(deadline) });
+      setUpdatingDeadlineId(null);
     });
   };
 
@@ -147,22 +153,44 @@ export const ChecklistContent: React.FC<ChecklistContentProps> = ({
                           <td className="py-4 px-4 text-sm text-gray-600 border-r border-gray-100 text-center">
                             {item.is_mandatory ? t('status.yes') : t('status.no')}
                           </td>
-                          <td className="py-4 px-4 text-sm text-gray-600 border-r border-gray-100">
-                            <div className="flex items-center justify-center gap-2">
+                          <td 
+                            className="py-4 px-4 text-sm text-gray-600 border-r border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
+                            onClick={(e) => {
+                              const input = e.currentTarget.querySelector('input');
+                              if (input && !updatingDeadlineId && !togglingId) {
+                                try {
+                                  (input as any).showPicker();
+                                } catch (err) {
+                                  input.focus();
+                                }
+                              }
+                            }}
+                          >
+                            <div className="flex items-center justify-center gap-2 relative pointer-events-none">
                               <input 
                                 type="date"
                                 value={deadline}
+                                disabled={updatingDeadlineId === item.id}
                                 onChange={(e) => handleDeadlineChange(item.id, e.target.value)}
-                                className="bg-transparent outline-none text-gray-600 focus:text-primary transition-colors text-xs text-center cursor-pointer"
+                                onClick={(e) => e.stopPropagation()} // Prevent double trigger if clicking input directly
+                                className={`bg-transparent outline-none text-gray-600 focus:text-primary transition-all text-xs text-center cursor-pointer pointer-events-auto ${updatingDeadlineId === item.id ? 'opacity-30' : 'opacity-100'}`}
                               />
+                              {updatingDeadlineId === item.id && (
+                                <div className="absolute right-0 top-1/2 -translate-y-1/2">
+                                  <div className="w-3 h-3 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+                                </div>
+                              )}
                             </div>
                           </td>
                           <td className="py-4 px-4 text-center">
                             <button
                               onClick={() => handleToggle(item.id)}
-                              className="inline-flex items-center justify-center w-6 h-6 border-2 border-gray-300 rounded-sm hover:border-primary transition-all relative mx-auto"
+                              disabled={togglingId === item.id}
+                              className={`inline-flex items-center justify-center w-6 h-6 border-2 border-gray-300 rounded-sm hover:border-primary transition-all relative mx-auto ${togglingId === item.id ? 'opacity-50 cursor-wait' : ''}`}
                             >
-                              {isCompleted && (
+                              {togglingId === item.id ? (
+                                <div className="w-3 h-3 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+                              ) : isCompleted && (
                                 <motion.div
                                   initial={{ scale: 0.5, opacity: 0 }}
                                   animate={{ scale: 1, opacity: 1 }}
