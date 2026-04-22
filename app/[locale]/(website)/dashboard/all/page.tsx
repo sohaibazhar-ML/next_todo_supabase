@@ -24,7 +24,16 @@ export default async function AllDocumentsPage(props: PageProps) {
   // Fetch ALL documents with dynamic sorting
   const where: Prisma.documentsWhereInput = {
     is_featured: true,
-    ...(q ? { title: { contains: q, mode: 'insensitive' } } : {})
+    ...(q ? {
+      OR: [
+        { title: { contains: q, mode: 'insensitive' } },
+        { category: { contains: q, mode: 'insensitive' } },
+        { recipient: { contains: q, mode: 'insensitive' } },
+        { file_type: { contains: q, mode: 'insensitive' } },
+        { file_name: { contains: q, mode: 'insensitive' } },
+        { description: { contains: q, mode: 'insensitive' } },
+      ]
+    } : {})
   };
 
   const [totalCount, dbDocuments] = await Promise.all([
@@ -60,7 +69,7 @@ export default async function AllDocumentsPage(props: PageProps) {
   });
 
   return (
-    <DashboardLayout activeTab="all-documents">
+    <DashboardLayout activeTab="all-documents" showSearch>
       <DocumentList 
         documents={documents} 
         totalPages={totalPages}

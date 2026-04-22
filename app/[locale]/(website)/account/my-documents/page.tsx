@@ -78,7 +78,7 @@ export default async function MyDocumentsPage(props: PageProps) {
   });
 
   return (
-    <DashboardLayout isAccountPage activeTab="my-documents">
+    <DashboardLayout isAccountPage activeTab="my-documents" showSearch>
       <MyDocumentsContent
         documents={documents}
         totalPages={totalPages}

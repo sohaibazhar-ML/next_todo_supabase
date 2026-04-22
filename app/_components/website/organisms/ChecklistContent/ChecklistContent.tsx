@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useTransition, useEffect } from 'react';
+import React, { useState, useTransition, useEffect, useMemo } from 'react';
 import { Text } from '@/website/atoms';
 import { useTranslations } from 'next-intl';
 import { updateChecklistProgress } from './actions';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSearchParams } from 'next/navigation';
 
 interface ChecklistItem {
   id: string;
@@ -33,6 +34,8 @@ export const ChecklistContent: React.FC<ChecklistContentProps> = ({
   userId 
 }) => {
   const t = useTranslations('Checklist');
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get('q') || '';
   const [mounted, setMounted] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [updatingDeadlineId, setUpdatingDeadlineId] = useState<string | null>(null);
@@ -49,6 +52,18 @@ export const ChecklistContent: React.FC<ChecklistContentProps> = ({
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Filter items based on search query (client-side)
+  const filteredItems = useMemo(() => {
+    if (!searchQuery.trim()) return items;
+    const q = searchQuery.toLowerCase();
+    return items.filter(item =>
+      item.title.toLowerCase().includes(q) ||
+      item.category.toLowerCase().includes(q) ||
+      (item.description && item.description.toLowerCase().includes(q)) ||
+      (item.phase && item.phase.toLowerCase().includes(q))
+    );
+  }, [items, searchQuery]);
 
   if (!mounted) return null;
 
@@ -113,8 +128,8 @@ export const ChecklistContent: React.FC<ChecklistContentProps> = ({
               </tr>
             </thead>
             <tbody>
-              {items.length > 0 ? phases.map((phase) => {
-                const phaseItems = items.filter(item => item.phase === phase);
+              {filteredItems.length > 0 ? phases.map((phase) => {
+                const phaseItems = filteredItems.filter(item => item.phase === phase);
                 if (phaseItems.length === 0) return null;
 
                 const phaseKey = phaseMap[phase];

@@ -31,7 +31,7 @@ export default async function ChecklistPage() {
   }) : [];
 
   return (
-    <DashboardLayout>
+    <DashboardLayout showSearch>
       <div className="px-10 py-12">
         <ChecklistContent 
           items={checklistItems} 

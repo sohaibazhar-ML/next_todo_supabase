@@ -8,17 +8,19 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
   activeTab?: DashboardHeaderProps['activeTab'];
   isAccountPage?: boolean;
+  showSearch?: boolean;
 }
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ 
   children, 
   activeTab,
-  isAccountPage = false
+  isAccountPage = false,
+  showSearch = false
 }) => {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <Suspense fallback={<div className="h-[50px] lg:h-[60px] bg-background-nav" />}>
-        <DashboardHeader activeTab={activeTab} isAccountPage={isAccountPage} />
+        <DashboardHeader activeTab={activeTab} isAccountPage={isAccountPage} showSearch={showSearch} />
       </Suspense>
       
       <div className="flex flex-1 justify-center bg-white">

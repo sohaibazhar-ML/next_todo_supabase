@@ -18,7 +18,8 @@ import { useDebounce } from '@/app/_hooks/website/useDebounce';
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   className = '',
   activeTab = 'documents',
-  isAccountPage = false
+  isAccountPage = false,
+  showSearch = false
 }) => {
   const t = useTranslations('Dashboard.header');
   const router = useRouter();
@@ -33,8 +34,10 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   const [searchValue, setSearchValue] = React.useState(searchParams.get('q') || '');
   const debouncedSearch = useDebounce(searchValue, 500);
 
-  // Sync Search with URL
+  // Sync Search with URL (only when search is enabled for this page)
   React.useEffect(() => {
+    if (!showSearch) return;
+
     const params = new URLSearchParams(searchParams.toString());
     const currentSearch = searchParams.get('q') || '';
     
@@ -49,7 +52,14 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       
       router.push(`${pathname}?${params.toString()}`);
     }
-  }, [debouncedSearch, router, pathname, searchParams]);
+  }, [debouncedSearch, router, pathname, searchParams, showSearch]);
+
+  // Clear search when navigating to a non-search page
+  React.useEffect(() => {
+    if (!showSearch && searchValue) {
+      setSearchValue('');
+    }
+  }, [showSearch]);
 
   // Sync search input with URL (e.g. on back button)
   React.useEffect(() => {
@@ -115,8 +125,8 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             </Text>
           </div>
 
-          {/* Middle: Search Bar (Desktop) */}
-          <div className="hidden md:block flex-1 max-w-[500px]">
+          {/* Middle: Search Bar (Desktop) — hidden via CSS when not on a searchable page */}
+          <div className={`flex-1 max-w-[500px] ${showSearch ? 'hidden md:block' : 'hidden'}`}>
             <Input
               id="search-desktop"
               inputSize="sm"
@@ -131,12 +141,12 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
           {/* Right: Actions */}
           <div className="flex items-center gap-3 lg:gap-10">
-            {/* Mobile Search Trigger */}
+            {/* Mobile Search Trigger — hidden via CSS when not on a searchable page */}
             <Button
               variant="ghost"
               size="sm"
               onClick={toggleSearch}
-              className="md:hidden text-white p-2 h-auto hover:bg-white/10"
+              className={`text-white p-2 h-auto hover:bg-white/10 ${showSearch ? 'md:hidden' : 'hidden'}`}
               aria-label="Toggle search"
             >
               <Search size={22} />
@@ -203,9 +213,9 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           )}
         </AnimatePresence>
 
-        {/* Mobile Search Dropdown */}
+        {/* Mobile Search Dropdown — hidden via CSS when not on a searchable page */}
         {isSearchOpen && (
-          <div className="absolute top-full left-0 w-full bg-background-nav px-4 py-3 border-t border-white/10 md:hidden z-30 shadow-lg animate-in slide-in-from-top-2 duration-200">
+          <div className={`absolute top-full left-0 w-full bg-background-nav px-4 py-3 border-t border-white/10 z-30 shadow-lg animate-in slide-in-from-top-2 duration-200 ${showSearch ? 'md:hidden' : 'hidden'}`}>
             <Input
               autoFocus
               id="search-mobile"
