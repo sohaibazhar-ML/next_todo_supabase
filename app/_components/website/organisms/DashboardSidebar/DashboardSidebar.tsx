@@ -5,7 +5,11 @@ import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/routing';
 import { Text } from '@/website/atoms';
 
-export const DashboardSidebar: React.FC = () => {
+interface DashboardSidebarProps {
+  onItemClick?: () => void;
+}
+
+export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ onItemClick }) => {
   const t = useTranslations('Dashboard.header');
   const pathname = usePathname();
 
@@ -49,6 +53,7 @@ export const DashboardSidebar: React.FC = () => {
           <Link
             key={idx}
             href={item.href as any}
+            onClick={() => onItemClick?.()}
             className="flex items-center gap-3 py-3 px-8 transition-colors group relative"
           >
             {/* Active Indicator Arrow */}

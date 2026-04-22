@@ -1,13 +1,15 @@
 "use client";
 
 import React from 'react';
-import { LogOut, Search } from 'lucide-react';
+import { Menu, X, LogOut, Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Logo, Image, Text, Input, Button } from '@/website/atoms';
 import { Link } from '@/i18n/routing';
 import { LanguageSwitcher } from '@/website/molecules';
 import { DashboardHeaderProps } from '@/website/organisms/DashboardHeader/DashboardHeader.types';
 import { logoutAction } from '@/actions/website/auth.actions';
+import { DashboardSidebar } from '@/website/organisms';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { useToggle } from '@/app/_hooks/website/useToggle';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
@@ -25,6 +27,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
   const [isPending, startTransition] = React.useTransition();
   const { value: isSearchOpen, toggle: toggleSearch } = useToggle(false);
+  const { value: isMobileMenuOpen, toggle: toggleMobileMenu, close: closeMobileMenu } = useToggle(false);
 
   // Search State
   const [searchValue, setSearchValue] = React.useState(searchParams.get('q') || '');
@@ -94,7 +97,16 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         <div className="max-w-[1440px] w-full px-4 sm:px-6 lg:px-10 flex items-center justify-between gap-4">
           
           {/* Left: Heading (Replacing Nav Tabs) */}
-          <div className="flex items-center h-full">
+          <div className="flex items-center gap-3 h-full">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleMobileMenu}
+              className="lg:hidden text-white p-1 hover:bg-white/10"
+              aria-label="Toggle mobile menu"
+            >
+              <Menu size={24} />
+            </Button>
             <Text 
               variant="heading-m" 
               className="text-white font-bold uppercase tracking-tight"
@@ -147,6 +159,49 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             </div>
           </div>
         </div>
+
+        {/* Mobile Sidebar Overlay/Drawer */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <>
+              {/* Overlay */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={closeMobileMenu}
+                className="fixed inset-0 bg-black/50 z-[100] lg:hidden"
+              />
+              
+              {/* Drawer Content */}
+              <motion.div
+                initial={{ x: '-100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '-100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                className="fixed left-0 top-0 h-full w-[280px] bg-white z-[101] lg:hidden shadow-2xl flex flex-col"
+              >
+                <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-background-nav text-white">
+                  <Text variant="heading-m" className="font-bold uppercase tracking-tight">
+                    {t('portalTitle')}
+                  </Text>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={closeMobileMenu}
+                    className="text-white p-1 hover:bg-white/10"
+                  >
+                    <X size={24} />
+                  </Button>
+                </div>
+                
+                <div className="flex-1 overflow-y-auto">
+                  <DashboardSidebar onItemClick={closeMobileMenu} />
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
 
         {/* Mobile Search Dropdown */}
         {isSearchOpen && (
