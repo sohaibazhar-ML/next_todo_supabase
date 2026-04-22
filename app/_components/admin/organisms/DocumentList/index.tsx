@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { List, Datagrid, TextField, DateField, NumberField, usePermissions, FunctionField, useRecordContext, TopToolbar, CreateButton, ExportButton, useNotify, useRefresh, FilterButton, SearchInput, DateInput } from "react-admin";
 import { Button, Box, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
-import { DynamicCategoryInput } from "@/admin/atoms";
+import { DynamicCategoryInput, AdminFilePicker } from "@/admin/atoms";
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 
@@ -132,11 +132,12 @@ export const DocumentList = () => {
                         The system will create placeholders that can later be replaced with actual files.
                     </Typography>
                     <Box mt={2}>
-                        <input
-                            type="file"
+                        <AdminFilePicker 
+                            file={file}
+                            onChange={setFile}
                             accept=".xlsx, .xls"
-                            onChange={(e) => setFile(e.target.files?.[0] || null)}
                             disabled={importing}
+                            helperText="Accepted formats: .xlsx, .xls"
                         />
                     </Box>
                 </DialogContent>
