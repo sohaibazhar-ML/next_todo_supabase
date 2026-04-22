@@ -57,14 +57,14 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ onItemClick 
             className="flex items-center gap-3 py-3 px-8 transition-colors group relative"
           >
             {/* Active Indicator Arrow */}
-            <div 
+            <div
               className={`absolute left-4 transition-opacity ${item.active ? 'opacity-100' : 'opacity-0 group-hover:opacity-40'}`}
             >
               <div className="w-0 h-0 border-t-[6px] border-t-transparent border-l-[8px] border-l-primary border-b-[6px] border-b-transparent" />
             </div>
-            
+
             <Text
-              variant="text-s"
+              variant="text-xs"
               className={`font-semibold transition-colors ${item.active ? 'text-primary' : 'text-secondary group-hover:text-primary'}`}
             >
               {item.label}
