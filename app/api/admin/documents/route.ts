@@ -136,6 +136,8 @@ export async function GET(request: Request) {
             { category: { contains: searchQuery, mode: 'insensitive' } },
             { file_type: { contains: searchQuery, mode: 'insensitive' } },
             { file_name: { contains: searchQuery, mode: 'insensitive' } },
+            { recipient: { contains: searchQuery, mode: 'insensitive' } },
+            { mime_type: { contains: searchQuery, mode: 'insensitive' } },
           ]
         }
       } catch (e) {
@@ -146,6 +148,8 @@ export async function GET(request: Request) {
           { category: { contains: searchQuery, mode: 'insensitive' } },
           { file_type: { contains: searchQuery, mode: 'insensitive' } },
           { file_name: { contains: searchQuery, mode: 'insensitive' } },
+          { recipient: { contains: searchQuery, mode: 'insensitive' } },
+          { mime_type: { contains: searchQuery, mode: 'insensitive' } },
         ]
       }
     }

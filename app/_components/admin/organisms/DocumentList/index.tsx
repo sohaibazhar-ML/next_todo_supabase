@@ -68,7 +68,7 @@ export const DocumentList = () => {
     const refresh = useRefresh();
 
     const filters = [
-        <SearchInput key="q" placeholder="Search Title, Category, Type..." source="q" alwaysOn />,
+        <SearchInput key="q" placeholder="Search Title, Category, Recipient, Type..." source="q" alwaysOn />,
         <DynamicCategoryInput key="cat" label="Category" source="category" fullWidth={false} />,
         <DateInput key="from" label="From Date" source="fromDate" />,
         <DateInput key="to" label="To Date" source="toDate" />,

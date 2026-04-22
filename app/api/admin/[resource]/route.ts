@@ -354,6 +354,7 @@ export async function GET(
                             { category: { contains: q, mode: 'insensitive' } },
                             { file_type: { contains: q, mode: 'insensitive' } },
                             { mime_type: { contains: q, mode: 'insensitive' } },
+                            { recipient: { contains: q, mode: 'insensitive' } },
                         ];
                     } else if (resource === 'profiles' || resource === 'users') {
                         // Resolve country names to 2-letter codes for DB matching (e.g. "Pakistan" -> "PK")
