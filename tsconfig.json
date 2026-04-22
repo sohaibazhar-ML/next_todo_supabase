@@ -23,6 +23,7 @@
       "@/*": ["./*"],
       "@/actions/*": ["./app/_actions/*"],
       "@/lib/*": ["./app/_lib/*"],
+      "@/lib/prisma": ["./app/_lib/db"],
       "@/shared_assets/*": ["./app/_shared_assets/*"],
       "@/i18n/*": ["./app/_i18n/*"],
       "@/features/*": ["./app/_features/*"],

@@ -14,6 +14,7 @@ export const DocumentEdit = () => (
                 choices={[...DOCUMENT_CATEGORIES]}
                 required
             />
+            <TextInput source="recipient" label="Recipient" fullWidth />
             <TextInput 
                 source="tags" 
                 helperText="Separate tags with commas" 

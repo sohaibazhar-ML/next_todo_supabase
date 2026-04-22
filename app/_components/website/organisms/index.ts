@@ -23,4 +23,5 @@ export * from '@/website/organisms/DashboardSidebar';
 export * from '@/website/organisms/DashboardLayout';
 export * from '@/website/organisms/DashboardOverview';
 export * from '@/website/organisms/MyDocumentsPage';
+export * from '@/website/organisms/ChecklistContent/ChecklistContent';
 

@@ -528,5 +528,26 @@
   "DateTimeInput": {
     "confirm": "Conferma",
     "time": "Orario"
+  },
+  "Checklist": {
+    "title": "Lista di controllo",
+    "columns": {
+      "category": "Categoria",
+      "todo": "ToDo",
+      "description": "Descrizione",
+      "mandatory": "Obbligatorio",
+      "deadline": "Scadenza",
+      "done": "Fatto"
+    },
+    "phases": {
+      "before": "Prima del trasloco",
+      "during": "Durante il trasloco",
+      "after": "Dopo il trasloco"
+    },
+    "status": {
+      "yes": "sì",
+      "no": "no"
+    },
+    "empty": "Nessun elemento della lista di controllo trovato."
   }
 }

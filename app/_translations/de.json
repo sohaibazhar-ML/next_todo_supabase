@@ -598,5 +598,26 @@
   "DateTimeInput": {
     "confirm": "Bestätigen",
     "time": "Zeit"
+  },
+  "Checklist": {
+    "title": "Checkliste",
+    "columns": {
+      "category": "Kategorie",
+      "todo": "ToDo",
+      "description": "Beschreibung",
+      "mandatory": "Pflicht",
+      "deadline": "Termin",
+      "done": "Erledigt"
+    },
+    "phases": {
+      "before": "Vor Umzug",
+      "during": "Während Umzug",
+      "after": "Nach Umzug"
+    },
+    "status": {
+      "yes": "ja",
+      "no": "nein"
+    },
+    "empty": "Keine Checklisten-Einträge gefunden."
   }
 }

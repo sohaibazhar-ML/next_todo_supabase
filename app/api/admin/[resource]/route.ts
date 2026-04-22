@@ -16,7 +16,7 @@ import { COUNTRIES } from '@/app/_components/admin/constants/countries';
 export const dynamic = 'force-dynamic';
 
 // Whitelist of resources that can be accessed via this API
-const ALLOWED_RESOURCES = ['profiles', 'users', 'documents', 'download_logs', 'documents-list', 'stats', 'settings'] as const;
+const ALLOWED_RESOURCES = ['profiles', 'users', 'documents', 'download_logs', 'documents-list', 'stats', 'settings', 'checklistItem'] as const;
 type ResourceName = typeof ALLOWED_RESOURCES[number];
 
 function isAllowedResource(resource: string): resource is ResourceName {
@@ -24,7 +24,7 @@ function isAllowedResource(resource: string): resource is ResourceName {
 }
 
 // Maps resource name → Prisma model delegate
-type PrismaDelegate = Prisma.profilesDelegate<any> | Prisma.documentsDelegate<any> | Prisma.download_logsDelegate<any>;
+type PrismaDelegate = Prisma.profilesDelegate<any> | Prisma.documentsDelegate<any> | Prisma.download_logsDelegate<any> | Prisma.ChecklistItemDelegate<any>;
 
 function getPrismaModel(resource: ResourceName): PrismaDelegate {
     const models: Record<ResourceName, PrismaDelegate> = {
@@ -35,6 +35,7 @@ function getPrismaModel(resource: ResourceName): PrismaDelegate {
         download_logs: prisma.download_logs,
         stats: prisma.profiles, // Dummy mapping for custom view
         settings: prisma.profiles, // Dummy mapping for custom view
+        checklistItem: prisma.checklistItem,
     };
     return models[resource];
 }
@@ -469,9 +470,10 @@ export async function GET(
 const RESOURCE_FIELD_WHITELISTS: Record<ResourceName, string[]> = {
     profiles: ['first_name', 'last_name', 'role', 'current_address', 'country_of_origin', 'phone_number', 'number_of_adults', 'number_of_children', 'pets_type', 'new_address_switzerland', 'marketing_consent', 'terms_accepted', 'data_privacy_accepted', 'keep_me_logged_in', 'admin_notes'],
     users: ['first_name', 'last_name', 'role', 'current_address', 'country_of_origin', 'phone_number', 'number_of_adults', 'number_of_children', 'pets_type', 'new_address_switzerland', 'marketing_consent', 'terms_accepted', 'data_privacy_accepted', 'keep_me_logged_in', 'admin_notes'],
-    documents: ['title', 'description', 'category', 'tags', 'is_featured', 'file_name', 'file_path', 'file_size', 'file_type', 'mime_type'],
-    'documents-list': ['title', 'description', 'category', 'tags', 'is_featured'],
+    documents: ['title', 'description', 'category', 'tags', 'is_featured', 'file_name', 'file_path', 'file_size', 'file_type', 'mime_type', 'recipient'],
+    'documents-list': ['title', 'description', 'category', 'tags', 'is_featured', 'recipient'],
     download_logs: [], // Usually read-only via this API
+    checklistItem: ['phase', 'category', 'title', 'description', 'is_mandatory'],
     stats: [], // Read-only
     settings: [], // Custom
 };

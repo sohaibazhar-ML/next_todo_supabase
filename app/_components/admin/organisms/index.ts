@@ -11,3 +11,6 @@ export * from "./StatisticsPage";
 export * from "./UserEdit";
 export * from "./UserList";
 export * from "./UserShow";
+export * from "./ChecklistManagement/ChecklistList";
+export * from "./ChecklistManagement/ChecklistCreate";
+export * from "./ChecklistManagement/ChecklistEdit";

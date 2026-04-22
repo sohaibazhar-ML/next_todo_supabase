@@ -1,47 +1,46 @@
-import React, { useState } from "react";
-import { List, Datagrid, TextField, DateField, NumberField, usePermissions, FunctionField, useRecordContext, TopToolbar, CreateButton, ExportButton, useNotify, useRefresh } from "react-admin";
+import React, { useState } from 'react';
+import {
+    List,
+    Datagrid,
+    TextField,
+    BooleanField,
+    EditButton,
+    DeleteButton,
+    TopToolbar,
+    CreateButton,
+    ExportButton,
+    useNotify,
+    useRefresh,
+} from 'react-admin';
 import { Button, Box, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
-import { DocumentFilter } from "@/admin/molecules";
-import CheckIcon from '@mui/icons-material/Check';
-import ClearIcon from '@mui/icons-material/Clear';
+import { Empty } from 'react-admin';
 
-const CustomFeaturedField = ({ source, label }: { source: string; label?: string }) => {
-    const record = useRecordContext();
-    if (!record) return null;
-    const value = record[source];
-    return value ? (
-        <CheckIcon sx={{ color: '#4caf50' }} fontSize="small"  />
-    ) : (
-        <ClearIcon sx={{ color: '#f44336' }} fontSize="small" />
-    );
-};
-
-const DocumentListActions = ({ onImportClick, permissions }: { onImportClick: () => void, permissions: any }) => (
+const ChecklistListActions = ({ onImportClick }: { onImportClick: () => void }) => (
     <TopToolbar>
-        {permissions === 'admin' && <CreateButton />}
+        <CreateButton />
         <Button
             size="small"
             color="primary"
             onClick={onImportClick}
             startIcon={<UploadFileIcon />}
         >
-            Import Placeholders
+            Import Checklist
         </Button>
         <ExportButton />
     </TopToolbar>
 );
 
-const DocumentEmpty = ({ onImportClick, permissions }: { onImportClick: () => void, permissions: any }) => (
+const ChecklistEmpty = ({ onImportClick }: { onImportClick: () => void }) => (
     <Box textAlign="center" m={5}>
         <Typography variant="h4" paragraph>
-            No Documents yet.
+            No Checklist yet.
         </Typography>
         <Typography variant="body1" gutterBottom>
-            Do you want to add one or import placeholders?
+            Do you want to add one or import from a file?
         </Typography>
         <Box display="flex" justifyContent="center" gap={2} mt={4}>
-            {permissions === 'admin' && <CreateButton variant="contained" />}
+            <CreateButton variant="contained" />
             <Button
                 variant="contained"
                 color="primary"
@@ -49,14 +48,13 @@ const DocumentEmpty = ({ onImportClick, permissions }: { onImportClick: () => vo
                 startIcon={<UploadFileIcon />}
                 sx={{ ml: 2 }}
             >
-                Import Placeholders
+                Import Checklist
             </Button>
         </Box>
     </Box>
 );
 
-export const DocumentList = () => {
-    const { permissions } = usePermissions();
+export const ChecklistList = () => {
     const [importOpen, setImportOpen] = useState(false);
     const [file, setFile] = useState<File | null>(null);
     const [importing, setImporting] = useState(false);
@@ -71,7 +69,7 @@ export const DocumentList = () => {
         formData.append('file', file);
 
         try {
-            const response = await fetch('/api/admin/documents/import', {
+            const response = await fetch('/api/admin/checklist/import', {
                 method: 'POST',
                 body: formData,
             });
@@ -96,28 +94,27 @@ export const DocumentList = () => {
     return (
         <>
             <List 
-                filters={<DocumentFilter />} 
-                actions={<DocumentListActions onImportClick={() => setImportOpen(true)} permissions={permissions} />}
-                empty={<DocumentEmpty onImportClick={() => setImportOpen(true)} permissions={permissions} />}
+                actions={<ChecklistListActions onImportClick={() => setImportOpen(true)} />}
+                empty={<ChecklistEmpty onImportClick={() => setImportOpen(true)} />}
             >
-                <Datagrid rowClick="show" bulkActionButtons={permissions === 'admin'}>
-                    <TextField source="title" />
-                    <TextField source="file_name" label="File Name" />
+                <Datagrid rowClick="edit">
+                    <TextField source="phase" />
                     <TextField source="category" />
-                    <TextField source="recipient" label="Recipient" />
-                    <TextField source="file_type" label="Type" />
-                    <FunctionField label="Size (KB)" render={(record: any) => record.file_size ? `${(record.file_size / 1024).toFixed(1)} KB` : '0 KB'} />
-                    <NumberField source="download_count" label="Downloads" />
-                    <DateField source="created_at" label="Created" showTime />
-                    <CustomFeaturedField source="is_featured" label="Featured" />
+                    <TextField source="title" label="Task" />
+                    <TextField source="description" />
+                    <BooleanField source="is_mandatory" label="Mandatory" />
+                    <Box display="flex">
+                        <EditButton />
+                        <DeleteButton />
+                    </Box>
                 </Datagrid>
             </List>
 
             <Dialog open={importOpen} onClose={() => !importing && setImportOpen(false)}>
-                <DialogTitle>Import Document Placeholders</DialogTitle>
+                <DialogTitle>Import Checklist from Excel/CSV</DialogTitle>
                 <DialogContent>
                     <Typography variant="body2" sx={{ mb: 2 }}>
-                        Select an Excel (.xlsx) file containing columns: Kategorie, Dokumentname, Zuständige Stelle / Empfänger, Datei.
+                        Select an Excel (.xlsx) or CSV file containing columns: Phase, Kategorie, ToDo, Beschreibung, Pflicht.
                     </Typography>
                     <input
                         type="file"

@@ -5,6 +5,7 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import UploadIcon from "@mui/icons-material/Upload";
 import DownloadIcon from "@mui/icons-material/Download";
 import SettingsIcon from "@mui/icons-material/Settings";
+import FactCheckIcon from "@mui/icons-material/FactCheck";
 import { dataProvider } from "./dataProvider";
 import { authProvider } from "./authProvider";
 import { DocumentList, DocumentEdit, DocumentShow, DocumentCreate } from "@/admin/organisms";
@@ -13,6 +14,7 @@ import { DownloadLogList } from "@/admin/organisms";
 import { SettingsPage } from "@/admin/organisms";
 import { ReportsPage } from "@/admin/organisms";
 import { StatisticsPage } from "@/admin/organisms";
+import { ChecklistList, ChecklistCreate, ChecklistEdit } from "@/admin/organisms";
 
 const AdminApp = () => (
     <Admin 
@@ -42,6 +44,17 @@ const AdminApp = () => (
                 create={permissions === 'admin' ? DocumentCreate : undefined}
                 edit={permissions === 'admin' ? DocumentEdit : undefined}
                 show={DocumentShow}
+            />,
+            
+            // Checklist Management
+            <Resource
+                name="checklistItem"
+                key="checklist"
+                options={{ label: 'Checklist' }}
+                icon={FactCheckIcon}
+                list={ChecklistList}
+                create={permissions === 'admin' ? ChecklistCreate : undefined}
+                edit={permissions === 'admin' ? ChecklistEdit : undefined}
             />,
 
             // Download History (View Only)

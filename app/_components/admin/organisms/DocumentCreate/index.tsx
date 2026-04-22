@@ -16,6 +16,7 @@ export const DocumentCreate = () => (
                 choices={[...DOCUMENT_CATEGORIES]}
                 required
             />
+            <TextInput source="recipient" label="Zuständige Stelle / Empfänger" fullWidth />
             <TextInput source="tags" helperText="Separate tags with commas" fullWidth />
 
             <FileInput

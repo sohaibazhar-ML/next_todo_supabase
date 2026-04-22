@@ -531,5 +531,26 @@
   "DateTimeInput": {
     "confirm": "Confirmer",
     "time": "Heure"
+  },
+  "Checklist": {
+    "title": "Liste de contrôle",
+    "columns": {
+      "category": "Catégorie",
+      "todo": "ToDo",
+      "description": "Description",
+      "mandatory": "Obligatoire",
+      "deadline": "Échéance",
+      "done": "Fait"
+    },
+    "phases": {
+      "before": "Avant le déménagement",
+      "during": "Pendant le déménagement",
+      "after": "Après le déménagement"
+    },
+    "status": {
+      "yes": "oui",
+      "no": "non"
+    },
+    "empty": "Aucun élément de liste de contrôle trouvé."
   }
 }

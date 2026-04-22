@@ -2,7 +2,7 @@ import { DashboardLayout, DocumentList } from '@/website/organisms';
 import { DocumentItem } from '@/website/types';
 import { formatBytes } from '@/website/utils/formatters';
 import { Prisma } from '@prisma/client';
-import { getDocuments, getDocumentsCount } from '@/app/_services/website/document-service';
+import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
@@ -21,14 +21,15 @@ export default async function AllDocumentsPage(props: PageProps) {
 
   // Fetch ALL documents sorted A-Z
   const where: Prisma.documentsWhereInput = {
+    is_featured: true,
     ...(q ? { title: { contains: q, mode: 'insensitive' } } : {})
   };
 
   const [totalCount, dbDocuments] = await Promise.all([
-    getDocumentsCount(where),
-    getDocuments({
+    prisma.documents.count({ where }),
+    prisma.documents.findMany({
       where,
-      orderBy: { title: 'asc' }, // Sort A-Z as requested by page name
+      orderBy: { title: 'asc' },
       skip,
       take: limit
     })

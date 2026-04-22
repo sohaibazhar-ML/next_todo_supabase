@@ -598,5 +598,26 @@
   "DateTimeInput": {
     "confirm": "Confirm",
     "time": "Time"
+  },
+  "Checklist": {
+    "title": "Checklist",
+    "columns": {
+      "category": "Category",
+      "todo": "ToDo",
+      "description": "Description",
+      "mandatory": "Mandatory",
+      "deadline": "Deadline",
+      "done": "Done"
+    },
+    "phases": {
+      "before": "Before Move",
+      "during": "During Move",
+      "after": "After Move"
+    },
+    "status": {
+      "yes": "yes",
+      "no": "no"
+    },
+    "empty": "No checklist items found."
   }
 }
