@@ -7,6 +7,7 @@ import { Image, Text, Button } from '@/website/atoms';
 import { useToggle } from '@/app/_hooks/website/useToggle';
 import { updateLanguageAction } from '@/app/_actions/website/settings.actions';
 import { updateProfileField } from '@/app/_actions/website/profile.actions';
+import { useLoading } from '@/lib/providers/LoadingProvider';
 
 export interface LanguageSwitcherProps {
   customIcon?: string;
@@ -21,6 +22,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  const { startLoading } = useLoading();
    const { value: isOpen, toggle, close } = useToggle(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -56,6 +58,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 
   const handleLanguageChange = async (newLocale: string) => {
     close();
+    startLoading();
     // 1. Update persistent cookies
     await updateLanguageAction(newLocale);
     // 2. Try to update DB if user is logged in (best effort)

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Figtree, Poppins } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from '@/lib/providers/QueryProvider'
+import { LoadingProvider } from '@/lib/providers/LoadingProvider'
 
 const figtree = Figtree({
   subsets: ["latin"],
@@ -45,7 +46,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${figtree.variable} ${poppins.variable}`}>
       <body suppressHydrationWarning className="font-body text-foreground bg-background-neutral antialiased">
-        <QueryProvider>{children}</QueryProvider>
+        <LoadingProvider>
+          <QueryProvider>{children}</QueryProvider>
+        </LoadingProvider>
       </body>
     </html>
   );

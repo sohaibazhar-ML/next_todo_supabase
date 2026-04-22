@@ -3,6 +3,8 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
+import { ClientLayout } from './ClientLayout';
+import { NavigationHandler } from '@/app/_components/website/atoms/NavigationHandler/NavigationHandler';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,9 +39,11 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
       <NextIntlClientProvider messages={messages}>
-        {children}
+        <ClientLayout>
+          <NavigationHandler />
+          {children}
+        </ClientLayout>
       </NextIntlClientProvider>
     </div>
   );
 }
-
