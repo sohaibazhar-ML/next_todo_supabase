@@ -338,7 +338,7 @@
   },
   "Dashboard": {
     "header": {
-      "account": "Il mio account",
+      "account": "Dashboard",
       "documents": "I miei documenti",
       "profile": "Profilo",
       "settings": "Impostazioni",
@@ -358,7 +358,7 @@
       "emptyState": "Nessun documento trovato"
     },
     "account": {
-      "breadcrumb": "Il mio account / Profilo",
+      "breadcrumb": "Dashboard / Profilo",
       "myNameLabel": "Il mio nome *",
       "emailLabel": "E-mail *",
       "myDocuments": "I miei documenti",
@@ -370,7 +370,7 @@
       "newAddressSwitzerland": "Nuovo indirizzo in Svizzera (Via, CAP, Città)",
       "phoneNumber": "Numero di telefono",
       "breadcrumbs": {
-        "account": "Il mio account",
+        "account": "Dashboard",
         "profile": "Profilo"
       },
       "avatar": {
@@ -381,7 +381,7 @@
     },
     "settings": {
       "breadcrumbs": {
-        "account": "Il mio account",
+        "account": "Dashboard",
         "settings": "Impostazioni"
       },
       "preferredLanguage": "Lingua preferita",

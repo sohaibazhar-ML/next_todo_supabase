@@ -344,7 +344,7 @@
   },
   "Dashboard": {
     "header": {
-      "account": "Mein Konto",
+      "account": "Dashboard",
       "documents": "Meine Dokumente",
       "profile": "Profil",
       "settings": "Einstellungen",
@@ -428,7 +428,7 @@
       "emptyStateAction": "Laden Sie Ihr erstes Dokument hoch"
     },
     "account": {
-      "breadcrumb": "Mein Konto / Profil",
+      "breadcrumb": "Dashboard / Profil",
       "myNameLabel": "Mein Name *",
       "emailLabel": "E-Mailadresse *",
       "myDocuments": "Meine Dokumente",
@@ -440,7 +440,7 @@
       "newAddressSwitzerland": "Neue Adresse in der Schweiz (Strasse, PLZ, Ort)",
       "phoneNumber": "Telefonnummer",
       "breadcrumbs": {
-        "account": "Mein Konto",
+        "account": "Dashboard",
         "profile": "Profil"
       },
       "avatar": {
@@ -451,7 +451,7 @@
     },
     "settings": {
       "breadcrumbs": {
-        "account": "Mein Konto",
+        "account": "Dashboard",
         "settings": "Einstellungen"
       },
       "preferredLanguage": "Bevorzugte Sprache",
