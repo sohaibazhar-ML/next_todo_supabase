@@ -1,7 +1,6 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
 
 interface LoadingContextType {
   isLoading: boolean;
@@ -13,8 +12,6 @@ const LoadingContext = createContext<LoadingContextType | undefined>(undefined);
 
 export const LoadingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   const startLoading = useCallback(() => setIsLoading(true), []);
   const stopLoading = useCallback(() => setIsLoading(false), []);
