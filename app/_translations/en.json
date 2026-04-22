@@ -425,7 +425,8 @@
         "next": "next"
       },
       "emptyState": "No documents found",
-      "emptyStateAction": "Upload your first document"
+      "emptyStateAction": "Upload your first document",
+      "loading": "Sorting..."
     },
     "account": {
       "breadcrumb": "Dashboard / Profile",

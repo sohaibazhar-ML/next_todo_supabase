@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { Upload, X, FileText, Loader2 } from 'lucide-react';
 import { DocumentTable, DashboardPagination, ConfirmModal } from '@/website/molecules';
@@ -14,17 +14,22 @@ interface MyDocumentsContentProps {
   documents: DocumentItem[];
   totalPages: number;
   currentPage: number;
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
   documents,
   totalPages,
   currentPage,
+  sortField,
+  sortOrder,
 }) => {
   const t = useTranslations('Dashboard');
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -42,6 +47,24 @@ export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
     const params = new URLSearchParams(searchParams.toString());
     params.set('page', page.toString());
     router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const handleSortChange = (field: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    const currentSort = params.get('sort');
+    const currentOrder = params.get('order');
+
+    if (currentSort === field) {
+      params.set('order', currentOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      params.set('sort', field);
+      params.set('order', 'asc');
+    }
+    params.set('page', '1');
+    
+    startTransition(() => {
+      router.push(`${pathname}?${params.toString()}`);
+    });
   };
 
   const resetForm = () => {
@@ -260,7 +283,11 @@ export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
         onUploadClick={openModal}
         onDeleteClick={openDeleteConfirm}
         onDownloadClick={handleDownload}
+        onSortChange={handleSortChange}
+        sortField={sortField}
+        sortOrder={sortOrder}
         downloadingId={downloadingId}
+        isLoading={isPending}
         variant="user"
       />
 

@@ -12,7 +12,11 @@ interface DocumentTableProps {
   onUploadClick?: () => void;
   onDeleteClick?: (doc: DocumentItem) => void;
   onDownloadClick?: (doc: DocumentItem) => void;
+  onSortChange?: (field: string) => void;
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
   downloadingId?: string | null;
+  isLoading?: boolean;
   variant?: 'all' | 'user';
 }
 
@@ -22,7 +26,11 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
   onUploadClick,
   onDeleteClick,
   onDownloadClick,
+  onSortChange,
+  sortField,
+  sortOrder = 'asc',
   downloadingId,
+  isLoading,
   variant = 'all'
 }) => {
   const t = useTranslations('Dashboard.list');
@@ -49,39 +57,88 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
 
   return (
     <div className="w-full flex justify-center">
-      <div className="w-full max-w-6xl bg-white rounded shadow-sm overflow-hidden border border-gray-200">
+      <div className="w-full max-w-6xl bg-white rounded shadow-sm overflow-hidden border border-gray-200 relative">
+        {/* Loading Overlay */}
+        {isLoading && (
+          <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-10 flex items-center justify-center animate-in fade-in duration-200">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+              <Text variant="text-xxs" className="text-secondary/60 font-bold uppercase tracking-widest">{t('loading') || 'Sorting...'}</Text>
+            </div>
+          </div>
+        )}
         <div className="overflow-x-auto">
           <table className="w-full border-collapse min-w-[700px]">
           <thead>
             <tr className="bg-[#414141] text-white">
               {variant === 'all' ? (
                 <>
-                  <th className="py-3 px-4 text-left font-semibold text-sm border-r border-white/10 w-[15%]">
-                    {t('columns.category')} <span className="ml-1 text-[10px]">▲</span>
+                  <th 
+                    className="py-3 px-4 text-left font-semibold text-sm border-r border-white/10 w-[15%] cursor-pointer hover:bg-[#555555] transition-colors group"
+                    onClick={() => onSortChange?.('category')}
+                  >
+                    <div className="flex items-center gap-1">
+                      {t('columns.category')}
+                      <span className={`text-[10px] transition-opacity ${sortField === 'category' ? 'opacity-100' : 'opacity-30 group-hover:opacity-50'}`}>
+                        {sortField === 'category' && sortOrder === 'desc' ? '▼' : '▲'}
+                      </span>
+                    </div>
                   </th>
-                  <th className="py-3 px-4 text-left font-semibold text-sm border-r border-white/10 w-[45%]">
-                    {t('columns.name')} <span className="ml-1 text-[10px]">▲</span>
+                  <th 
+                    className="py-3 px-4 text-left font-semibold text-sm border-r border-white/10 w-[45%] cursor-pointer hover:bg-[#555555] transition-colors group"
+                    onClick={() => onSortChange?.('title')}
+                  >
+                    <div className="flex items-center gap-1">
+                      {t('columns.name')}
+                      <span className={`text-[10px] transition-opacity ${sortField === 'title' ? 'opacity-100' : 'opacity-30 group-hover:opacity-50'}`}>
+                        {sortField === 'title' && sortOrder === 'desc' ? '▼' : '▲'}
+                      </span>
+                    </div>
                   </th>
-                  <th className="py-3 px-4 text-left font-semibold text-sm border-r border-white/10 w-[30%]">
-                    {t('columns.recipient')} <span className="ml-1 text-[10px]">▲</span>
+                  <th 
+                    className="py-3 px-4 text-left font-semibold text-sm border-r border-white/10 w-[30%] cursor-pointer hover:bg-[#555555] transition-colors group"
+                    onClick={() => onSortChange?.('recipient')}
+                  >
+                    <div className="flex items-center gap-1">
+                      {t('columns.recipient')}
+                      <span className={`text-[10px] transition-opacity ${sortField === 'recipient' ? 'opacity-100' : 'opacity-30 group-hover:opacity-50'}`}>
+                        {sortField === 'recipient' && sortOrder === 'desc' ? '▼' : '▲'}
+                      </span>
+                    </div>
                   </th>
                   <th className="py-3 px-4 text-left font-semibold text-sm w-[10%] text-center">
-                    {t('columns.file')} <span className="ml-1 text-[10px]">▲</span>
+                    {t('columns.file')}
                   </th>
                 </>
               ) : (
                 <>
-                  <th className="py-3 px-4 text-left font-semibold text-sm border-r border-white/10 w-[55%]">
-                    {t('columns.name')} <span className="ml-1 text-[10px]">▲</span>
+                  <th 
+                    className="py-3 px-4 text-left font-semibold text-sm border-r border-white/10 w-[55%] cursor-pointer hover:bg-[#555555] transition-colors group"
+                    onClick={() => onSortChange?.('title')}
+                  >
+                    <div className="flex items-center gap-1">
+                      {t('columns.name')}
+                      <span className={`text-[10px] transition-opacity ${sortField === 'title' ? 'opacity-100' : 'opacity-30 group-hover:opacity-50'}`}>
+                        {sortField === 'title' && sortOrder === 'desc' ? '▼' : '▲'}
+                      </span>
+                    </div>
                   </th>
-                  <th className="py-3 px-4 text-left font-semibold text-sm border-r border-white/10 w-[20%]">
-                    {t('columns.date')} <span className="ml-1 text-[10px]">▲</span>
+                  <th 
+                    className="py-3 px-4 text-left font-semibold text-sm border-r border-white/10 w-[20%] cursor-pointer hover:bg-[#555555] transition-colors group"
+                    onClick={() => onSortChange?.('created_at')}
+                  >
+                    <div className="flex items-center gap-1">
+                      {t('columns.date')}
+                      <span className={`text-[10px] transition-opacity ${sortField === 'created_at' ? 'opacity-100' : 'opacity-30 group-hover:opacity-50'}`}>
+                        {sortField === 'created_at' && sortOrder === 'desc' ? '▼' : '▲'}
+                      </span>
+                    </div>
                   </th>
                   <th className="py-3 px-4 text-left font-semibold text-sm border-r border-white/10 w-[15%] text-center">
-                    {t('columns.download')} <span className="ml-1 text-[10px]">▲</span>
+                    {t('columns.download')}
                   </th>
                   <th className="py-3 px-4 text-left font-semibold text-sm w-[10%] text-center">
-                    {t('columns.delete')} <span className="ml-1 text-[10px]">▲</span>
+                    {t('columns.delete')}
                   </th>
                 </>
               )}

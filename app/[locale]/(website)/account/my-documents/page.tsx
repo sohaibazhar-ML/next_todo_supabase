@@ -26,6 +26,8 @@ export default async function MyDocumentsPage(props: PageProps) {
   const searchParams = await props.searchParams;
   const q = typeof searchParams.q === 'string' ? searchParams.q : undefined;
   const page = typeof searchParams.page === 'string' ? parseInt(searchParams.page, 10) : 1;
+  const sort = typeof searchParams.sort === 'string' ? searchParams.sort : 'created_at';
+  const order = typeof searchParams.order === 'string' ? searchParams.order : 'desc';
   const limit = 20;
   const skip = (page - 1) * limit;
 
@@ -45,7 +47,7 @@ export default async function MyDocumentsPage(props: PageProps) {
     prisma.documents.count({ where }),
     prisma.documents.findMany({
       where,
-      orderBy: { created_at: 'desc' },
+      orderBy: { [sort]: order },
       skip,
       take: limit
     })
@@ -81,6 +83,8 @@ export default async function MyDocumentsPage(props: PageProps) {
         documents={documents}
         totalPages={totalPages}
         currentPage={page}
+        sortField={sort}
+        sortOrder={order as 'asc' | 'desc'}
       />
     </DashboardLayout>
   );

@@ -358,7 +358,8 @@
         "prev": "retour",
         "next": "suivant"
       },
-      "emptyState": "Aucun document trouvé"
+      "emptyState": "Aucun document trouvé",
+      "loading": "Tri en cours..."
     },
     "account": {
       "breadcrumb": "Dashboard / Profil",

@@ -425,7 +425,8 @@
         "next": "vor"
       },
       "emptyState": "Keine Dokumente gefunden",
-      "emptyStateAction": "Laden Sie Ihr erstes Dokument hoch"
+      "emptyStateAction": "Laden Sie Ihr erstes Dokument hoch",
+      "loading": "Wird sortiert..."
     },
     "account": {
       "breadcrumb": "Dashboard / Profil",

@@ -4,5 +4,7 @@ export interface DocumentListProps {
   documents: DocumentItem[];
   totalPages: number;
   currentPage: number;
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
   className?: string;
 }

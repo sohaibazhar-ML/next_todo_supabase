@@ -355,7 +355,8 @@
         "prev": "indietro",
         "next": "avanti"
       },
-      "emptyState": "Nessun documento trovato"
+      "emptyState": "Nessun documento trovato",
+      "loading": "Ordinamento..."
     },
     "account": {
       "breadcrumb": "Dashboard / Profilo",

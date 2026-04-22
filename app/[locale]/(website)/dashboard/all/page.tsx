@@ -18,8 +18,10 @@ export default async function AllDocumentsPage(props: PageProps) {
   const page = typeof searchParams.page === 'string' ? parseInt(searchParams.page, 10) : 1;
   const limit = 20;
   const skip = (page - 1) * limit;
+  const sort = typeof searchParams.sort === 'string' ? searchParams.sort : 'title';
+  const order = typeof searchParams.order === 'string' ? searchParams.order : 'asc';
 
-  // Fetch ALL documents sorted A-Z
+  // Fetch ALL documents with dynamic sorting
   const where: Prisma.documentsWhereInput = {
     is_featured: true,
     ...(q ? { title: { contains: q, mode: 'insensitive' } } : {})
@@ -29,7 +31,7 @@ export default async function AllDocumentsPage(props: PageProps) {
     prisma.documents.count({ where }),
     prisma.documents.findMany({
       where,
-      orderBy: { title: 'asc' },
+      orderBy: { [sort]: order },
       skip,
       take: limit
     })
@@ -63,6 +65,8 @@ export default async function AllDocumentsPage(props: PageProps) {
         documents={documents} 
         totalPages={totalPages}
         currentPage={page}
+        sortField={sort}
+        sortOrder={order as 'asc' | 'desc'}
       />
     </DashboardLayout>
   );
