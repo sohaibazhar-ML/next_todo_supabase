@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { List, Datagrid, TextField, DateField, NumberField, usePermissions, FunctionField, useRecordContext, TopToolbar, CreateButton, ExportButton, useNotify, useRefresh, FilterButton, SearchInput, SelectInput, DateInput } from "react-admin";
+import { List, Datagrid, TextField, DateField, NumberField, usePermissions, FunctionField, useRecordContext, TopToolbar, CreateButton, ExportButton, useNotify, useRefresh, FilterButton, SearchInput, DateInput } from "react-admin";
 import { Button, Box, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import { DynamicCategoryInput } from "@/admin/atoms";
@@ -67,31 +67,9 @@ export const DocumentList = () => {
     const notify = useNotify();
     const refresh = useRefresh();
 
-    // Fetch dynamic types for the filter dropdown
-    const [dynamicTypes, setDynamicTypes] = useState<{ id: string, name: string }[]>([]);
-    React.useEffect(() => {
-        fetch('/api/admin/documents/filter-options')
-            .then(res => res.json())
-            .then(data => {
-                if (data.fileTypes && Array.isArray(data.fileTypes)) {
-                    const nameMap: Record<string, string> = {
-                        'pdf': 'PDF', 'docx': 'DOCX', 'document': 'DOCX',
-                        'xlsx': 'XLSX', 'spreadsheet': 'XLSX', 'zip': 'ZIP',
-                        'archive': 'ZIP', 'image': 'Image', 'other': 'Other'
-                    };
-                    setDynamicTypes(data.fileTypes.map((type: string) => ({ 
-                        id: type, 
-                        name: nameMap[type.toLowerCase()] || type.toUpperCase() 
-                    })));
-                }
-            })
-            .catch(err => console.error("Failed to load filter types", err));
-    }, []);
-
     const filters = [
         <SearchInput key="q" placeholder="Search Title, Category, Type..." source="q" alwaysOn />,
         <DynamicCategoryInput key="cat" label="Category" source="category" fullWidth={false} />,
-        <SelectInput key="type" label="Type" source="file_type" choices={dynamicTypes} />,
         <DateInput key="from" label="From Date" source="fromDate" />,
         <DateInput key="to" label="To Date" source="toDate" />,
     ];
@@ -149,24 +127,30 @@ export const DocumentList = () => {
             <Dialog open={importOpen} onClose={() => !importing && setImportOpen(false)}>
                 <DialogTitle>Import Document Placeholders</DialogTitle>
                 <DialogContent>
-                    <Typography variant="body2" sx={{ mb: 2 }}>
-                        Select an Excel (.xlsx) file containing columns: Kategorie, Dokumentname, Zuständige Stelle / Empfänger, Datei.
+                    <Typography variant="body2" color="textSecondary" paragraph>
+                        Select the Excel file containing document names and categories. 
+                        The system will create placeholders that can later be replaced with actual files.
                     </Typography>
-                    <input
-                        type="file"
-                        accept=".xlsx, .xls, .csv"
-                        onChange={(e) => setFile(e.target.files?.[0] || null)}
-                    />
+                    <Box mt={2}>
+                        <input
+                            type="file"
+                            accept=".xlsx, .xls"
+                            onChange={(e) => setFile(e.target.files?.[0] || null)}
+                            disabled={importing}
+                        />
+                    </Box>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setImportOpen(false)} disabled={importing}>Cancel</Button>
-                    <Button
-                        onClick={handleImport}
-                        color="primary"
+                    <Button onClick={() => setImportOpen(false)} disabled={importing}>
+                        Cancel
+                    </Button>
+                    <Button 
+                        onClick={handleImport} 
+                        color="primary" 
                         variant="contained"
                         disabled={!file || importing}
                     >
-                        {importing ? 'Importing...' : 'Upload & Import'}
+                        {importing ? 'Importing...' : 'Start Import'}
                     </Button>
                 </DialogActions>
             </Dialog>
