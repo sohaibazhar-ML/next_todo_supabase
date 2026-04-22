@@ -98,8 +98,9 @@ export const ChecklistContent: React.FC<ChecklistContentProps> = ({
   return (
     <div className="min-h-screen bg-[#f9f8f4] -m-10 p-10">
       <div className="max-w-6xl mx-auto">
-        <div className="bg-white rounded-sm shadow-sm overflow-hidden border border-gray-200">
-          <table className="w-full border-collapse">
+        <div className="bg-white rounded-sm shadow-sm border border-gray-200">
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse min-w-[850px]">
             <thead>
               <tr className="bg-[#444444] text-white">
                 <th className="w-12 border-r border-gray-600"></th>
@@ -218,7 +219,8 @@ export const ChecklistContent: React.FC<ChecklistContentProps> = ({
                 </tr>
               )}
             </tbody>
-          </table>
+            </table>
+          </div>
         </div>
       </div>
     </div>

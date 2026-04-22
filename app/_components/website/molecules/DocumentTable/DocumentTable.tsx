@@ -51,7 +51,7 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
     <div className="w-full flex justify-center">
       <div className="w-full max-w-6xl bg-white rounded shadow-sm overflow-hidden border border-gray-200">
         <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
+          <table className="w-full border-collapse min-w-[700px]">
           <thead>
             <tr className="bg-[#414141] text-white">
               {variant === 'all' ? (
