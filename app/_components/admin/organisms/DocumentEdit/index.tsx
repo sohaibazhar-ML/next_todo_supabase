@@ -1,19 +1,21 @@
-import React from "react";
-import { Edit, SimpleForm, TextInput, SelectInput, BooleanInput, FileInput, FileField } from "react-admin";
+import { Edit, SimpleForm, TextInput, SelectInput, BooleanInput, FileInput, FileField, TopToolbar, ListButton } from "react-admin";
 import { DOCUMENT_CATEGORIES } from "@/admin/constants";
+import { DynamicCategoryInput } from "@/admin/atoms";
 import { useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/constants/queryKeys";
 
+const DocumentEditActions = () => (
+    <TopToolbar>
+        <ListButton label="Back to Documents" />
+    </TopToolbar>
+);
+
 export const DocumentEdit = () => (
-    <Edit>
+    <Edit actions={<DocumentEditActions />}>
         <SimpleForm>
             <TextInput source="title" fullWidth />
             <TextInput source="description" multiline fullWidth />
-            <SelectInput
-                source="category"
-                choices={[...DOCUMENT_CATEGORIES]}
-                required
-            />
+            <DynamicCategoryInput source="category" required />
             <TextInput source="recipient" label="Recipient" fullWidth />
             <TextInput 
                 source="tags" 

@@ -1,6 +1,7 @@
 import React from "react";
 import { Create, SimpleForm, TextInput, SelectInput, FileInput, FileField, BooleanInput } from "react-admin";
 import { DOCUMENT_CATEGORIES } from "@/admin/constants";
+import { DynamicCategoryInput } from "@/admin/atoms";
 import { Box, Typography, Button } from "@mui/material";
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import { useQueryClient } from "@tanstack/react-query";
@@ -11,11 +12,7 @@ export const DocumentCreate = () => (
         <SimpleForm>
             <TextInput source="title" fullWidth />
             <TextInput source="description" multiline fullWidth />
-            <SelectInput
-                source="category"
-                choices={[...DOCUMENT_CATEGORIES]}
-                required
-            />
+            <DynamicCategoryInput source="category" required />
             <TextInput source="recipient" label="Zuständige Stelle / Empfänger" fullWidth />
             <TextInput source="tags" helperText="Separate tags with commas" fullWidth />
 

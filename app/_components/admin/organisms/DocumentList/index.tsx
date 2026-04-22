@@ -100,7 +100,7 @@ export const DocumentList = () => {
                 actions={<DocumentListActions onImportClick={() => setImportOpen(true)} permissions={permissions} />}
                 empty={<DocumentEmpty onImportClick={() => setImportOpen(true)} permissions={permissions} />}
             >
-                <Datagrid rowClick="show" bulkActionButtons={permissions === 'admin'}>
+                <Datagrid rowClick="edit" bulkActionButtons={permissions === 'admin'}>
                     <TextField source="title" />
                     <TextField source="file_name" label="File Name" />
                     <TextField source="category" />

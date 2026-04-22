@@ -1,6 +1,7 @@
 import { Filter, SearchInput, SelectInput, TextInput, DateInput, FilterProps } from "react-admin";
 import { useState, useEffect } from "react";
 import { DOCUMENT_CATEGORIES } from "@/admin/constants";
+import { DynamicCategoryInput } from "@/admin/atoms";
 
 export const DocumentFilter = (props: Omit<FilterProps, 'children'>) => {
     const [dynamicTypes, setDynamicTypes] = useState<{ id: string, name: string }[]>([]);
@@ -35,10 +36,10 @@ export const DocumentFilter = (props: Omit<FilterProps, 'children'>) => {
     return (
         <Filter {...props}>
             <SearchInput placeholder="Search Title, Category, Type..." source="q" alwaysOn />
-            <SelectInput
+            <DynamicCategoryInput
                 label="Category"
                 source="category"
-                choices={[...DOCUMENT_CATEGORIES]}
+                fullWidth={false}
             />
             <SelectInput
                 label="Type"

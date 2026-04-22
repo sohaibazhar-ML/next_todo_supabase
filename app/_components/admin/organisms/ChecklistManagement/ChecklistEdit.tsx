@@ -1,5 +1,5 @@
 import React from 'react';
-import { Edit, SimpleForm, TextInput, BooleanInput, SelectInput } from 'react-admin';
+import { Edit, SimpleForm, TextInput, BooleanInput, SelectInput, TopToolbar, ListButton } from 'react-admin';
 
 const PHASES = [
     { id: 'Vor Umzug', name: 'Vor Umzug' },
@@ -7,8 +7,14 @@ const PHASES = [
     { id: 'Nach Umzug', name: 'Nach Umzug' },
 ];
 
+const ChecklistEditActions = () => (
+    <TopToolbar>
+        <ListButton label="Back to Checklist" />
+    </TopToolbar>
+);
+
 export const ChecklistEdit = () => (
-    <Edit>
+    <Edit actions={<ChecklistEditActions />}>
         <SimpleForm>
             <SelectInput source="phase" choices={PHASES} fullWidth />
             <TextInput source="category" required fullWidth />

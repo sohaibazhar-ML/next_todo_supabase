@@ -28,7 +28,7 @@ export const UserList = () => {
     const { permissions } = usePermissions();
     return (
         <List filters={<UserFilter />}>
-            <Datagrid rowClick="show" bulkActionButtons={permissions === 'admin'}>
+            <Datagrid rowClick="edit" bulkActionButtons={permissions === 'admin'}>
                 <TextField source="first_name" />
                 <TextField source="last_name" />
                 <EmailField source="email" />
