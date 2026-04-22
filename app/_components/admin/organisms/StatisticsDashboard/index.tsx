@@ -147,6 +147,27 @@ export const StatisticsDashboard = ({ statistics, displayMode, onApplyFilters }:
         return <Box sx={{ height: 800 }} />; // Fixed height placeholder to prevent layout shift
     }
 
+    const NoDataPlaceholder = ({ message = "Currently no data is available" }) => (
+        <Box 
+            display="flex" 
+            flexDirection="column" 
+            alignItems="center" 
+            justifyContent="center" 
+            height="100%" 
+            width="100%"
+            minHeight={200}
+            sx={{ opacity: 0.6 }}
+        >
+            <DescriptionIcon sx={{ fontSize: 48, mb: 2, color: 'text.disabled' }} />
+            <Typography variant="body1" color="text.secondary" fontWeight="600">
+                {message}
+            </Typography>
+            <Typography variant="caption" color="text.disabled">
+                Check back later or adjust your filters
+            </Typography>
+        </Box>
+    );
+
 
     const kpiCards = [
         {
@@ -419,53 +440,57 @@ export const StatisticsDashboard = ({ statistics, displayMode, onApplyFilters }:
                     <Card sx={{ borderRadius: '24px', height: '100%', border: '1px solid', borderColor: 'divider', boxShadow: 'none' }}>
                         <CardContent sx={{ p: 4 }}>
                             <Typography variant="h6" fontWeight="800" mb={4}>Top Downloads</Typography>
-                            <Box display="flex" flexDirection="column" gap={3.5}>
-                                {statistics.topDownloads.map((item, index) => {
-                                    const maxCount = statistics.topDownloads[0].count;
-                                    const progress = (item.count / maxCount) * 100;
-                                    
-                                    return (
-                                        <Box key={item.id} display="flex" alignItems="center" gap={2}>
-                                            <Box 
-                                                sx={{ 
-                                                    width: 44, 
-                                                    height: 44, 
-                                                    borderRadius: '12px', 
-                                                    bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : '#f5f5f5', 
-                                                    display: 'flex', 
-                                                    alignItems: 'center', 
-                                                    justifyContent: 'center',
-                                                    flexShrink: 0
-                                                }}
-                                            >
-                                                <TodayIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
-                                            </Box>
-                                            <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                                                <Box display="flex" justifyContent="space-between" mb={0.5}>
-                                                    <Typography variant="body2" fontWeight="700" noWrap>
-                                                        {item.title}
-                                                    </Typography>
-                                                    <Typography variant="body2" fontWeight="800" sx={{ color: COLORS.primary }}>
-                                                        {item.count.toLocaleString()}
-                                                    </Typography>
-                                                </Box>
-                                                <LinearProgress 
-                                                    variant="determinate" 
-                                                    value={progress} 
+                            <Box display="flex" flexDirection="column" gap={3.5} sx={{ height: '100%', minHeight: 300 }}>
+                                {statistics.topDownloads.length > 0 ? (
+                                    statistics.topDownloads.map((item, index) => {
+                                        const maxCount = statistics.topDownloads[0].count;
+                                        const progress = (item.count / maxCount) * 100;
+                                        
+                                        return (
+                                            <Box key={item.id} display="flex" alignItems="center" gap={2}>
+                                                <Box 
                                                     sx={{ 
-                                                        height: 6, 
-                                                        borderRadius: 3, 
-                                                        bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : '#eee',
-                                                        '& .MuiLinearProgress-bar': {
-                                                            bgcolor: index === 0 ? COLORS.primary : COLORS.secondary,
-                                                            borderRadius: 3
-                                                        }
+                                                        width: 44, 
+                                                        height: 44, 
+                                                        borderRadius: '12px', 
+                                                        bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : '#f5f5f5', 
+                                                        display: 'flex', 
+                                                        alignItems: 'center', 
+                                                        justifyContent: 'center',
+                                                        flexShrink: 0
                                                     }}
-                                                />
+                                                >
+                                                    <TodayIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
+                                                </Box>
+                                                <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                                                    <Box display="flex" justifyContent="space-between" mb={0.5}>
+                                                        <Typography variant="body2" fontWeight="700" noWrap>
+                                                            {item.title}
+                                                        </Typography>
+                                                        <Typography variant="body2" fontWeight="800" sx={{ color: COLORS.primary }}>
+                                                            {item.count.toLocaleString()}
+                                                        </Typography>
+                                                    </Box>
+                                                    <LinearProgress 
+                                                        variant="determinate" 
+                                                        value={progress} 
+                                                        sx={{ 
+                                                            height: 6, 
+                                                            borderRadius: 3, 
+                                                            bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : '#eee',
+                                                            '& .MuiLinearProgress-bar': {
+                                                                bgcolor: index === 0 ? COLORS.primary : COLORS.secondary,
+                                                                borderRadius: 3
+                                                            }
+                                                        }}
+                                                    />
+                                                </Box>
                                             </Box>
-                                        </Box>
-                                    );
-                                })}
+                                        );
+                                    })
+                                ) : (
+                                    <NoDataPlaceholder />
+                                )}
                             </Box>
                         </CardContent>
                     </Card>
@@ -481,44 +506,48 @@ export const StatisticsDashboard = ({ statistics, displayMode, onApplyFilters }:
                                 {/* Chart Area */}
                                 <Grid size={{ xs: 12, md: 8 }}>
                                     <Box sx={{ height: 350, width: '100%', minWidth: 0 }}>
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <BarChart data={transformedDownloadsByCategory} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.palette.divider} />
-                                                <XAxis 
-                                                    dataKey="category" 
-                                                    axisLine={false} 
-                                                    tickLine={false}
-                                                    tick={{ fontSize: 13, fontWeight: 600, fill: theme.palette.text.secondary }}
-                                                />
-                                                <YAxis 
-                                                    axisLine={false} 
-                                                    tickLine={false}
-                                                    tick={{ fontSize: 12, fill: theme.palette.text.disabled }}
-                                                    tickFormatter={(val) => displayMode === 'percent' ? `${val}%` : val}
-                                                />
-                                                <Tooltip 
-                                                    cursor={{ fill: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }}
-                                                    formatter={(value: any) => displayMode === 'percent' ? [`${value}%`, 'Count'] : [value, 'Count']}
-                                                    contentStyle={{ 
-                                                        borderRadius: '12px', 
-                                                        border: 'none', 
-                                                        boxShadow: theme.palette.mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.5)' : '0 4px 20px rgba(0,0,0,0.08)',
-                                                        backgroundColor: theme.palette.background.paper,
-                                                        color: theme.palette.text.primary
-                                                    }}
-                                                    itemStyle={{ color: theme.palette.text.primary }}
-                                                />
-                                                <Bar dataKey="count" radius={[8, 8, 0, 0]} barSize={50}>
-                                                    {transformedDownloadsByCategory.map((entry, index) => (
-                                                        <Cell 
-                                                            key={`cell-${index}`} 
-                                                            fill={index === 0 ? COLORS.primary : COLORS.secondary} 
-                                                            fillOpacity={1 - (index * 0.15)}
-                                                        />
-                                                    ))}
-                                                </Bar>
-                                            </BarChart>
-                                        </ResponsiveContainer>
+                                        {transformedDownloadsByCategory.length > 0 ? (
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <BarChart data={transformedDownloadsByCategory} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.palette.divider} />
+                                                    <XAxis 
+                                                        dataKey="category" 
+                                                        axisLine={false} 
+                                                        tickLine={false}
+                                                        tick={{ fontSize: 13, fontWeight: 600, fill: theme.palette.text.secondary }}
+                                                    />
+                                                    <YAxis 
+                                                        axisLine={false} 
+                                                        tickLine={false}
+                                                        tick={{ fontSize: 12, fill: theme.palette.text.disabled }}
+                                                        tickFormatter={(val) => displayMode === 'percent' ? `${val}%` : val}
+                                                    />
+                                                    <Tooltip 
+                                                        cursor={{ fill: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }}
+                                                        formatter={(value: any) => displayMode === 'percent' ? [`${value}%`, 'Count'] : [value, 'Count']}
+                                                        contentStyle={{ 
+                                                            borderRadius: '12px', 
+                                                            border: 'none', 
+                                                            boxShadow: theme.palette.mode === 'dark' ? '0 4px 20px rgba(0,0,0,0.5)' : '0 4px 20px rgba(0,0,0,0.08)',
+                                                            backgroundColor: theme.palette.background.paper,
+                                                            color: theme.palette.text.primary
+                                                        }}
+                                                        itemStyle={{ color: theme.palette.text.primary }}
+                                                    />
+                                                    <Bar dataKey="count" radius={[8, 8, 0, 0]} barSize={50}>
+                                                        {transformedDownloadsByCategory.map((entry, index) => (
+                                                            <Cell 
+                                                                key={`cell-${index}`} 
+                                                                fill={index === 0 ? COLORS.primary : COLORS.secondary} 
+                                                                fillOpacity={1 - (index * 0.15)}
+                                                            />
+                                                        ))}
+                                                    </Bar>
+                                                </BarChart>
+                                            </ResponsiveContainer>
+                                        ) : (
+                                            <NoDataPlaceholder message="No matching download data found" />
+                                        )}
                                     </Box>
                                 </Grid>
 
