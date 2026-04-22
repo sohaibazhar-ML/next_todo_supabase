@@ -105,9 +105,6 @@ export const StatisticsPage = () => {
                             <Typography variant="caption" fontWeight="700">Percent</Typography>
                         </Box>
                     </Paper>
-                    <Box sx={{ p: 1, borderRadius: '50%', '&:hover': { bgcolor: 'divider' }, cursor: 'pointer' }}>
-                        <Typography variant="h6" sx={{ lineWeight: 1 }}>•••</Typography>
-                    </Box>
                 </Stack>
             </Box>
 

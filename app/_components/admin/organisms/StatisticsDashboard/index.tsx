@@ -329,6 +329,7 @@ export const StatisticsDashboard = ({ statistics, displayMode, onApplyFilters }:
                                         type="date" 
                                         value={chartDateFrom}
                                         onChange={(e) => setChartDateFrom(e.target.value)}
+                                        onClick={(e: any) => e.target.showPicker?.()}
                                         sx={{ 
                                             border: 'none', 
                                             outline: 'none', 
@@ -349,6 +350,7 @@ export const StatisticsDashboard = ({ statistics, displayMode, onApplyFilters }:
                                         type="date" 
                                         value={chartDateTo}
                                         onChange={(e) => setChartDateTo(e.target.value)}
+                                        onClick={(e: any) => e.target.showPicker?.()}
                                         sx={{ 
                                             border: 'none', 
                                             outline: 'none', 
