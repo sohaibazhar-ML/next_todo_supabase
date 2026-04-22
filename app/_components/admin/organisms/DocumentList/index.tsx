@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { List, Datagrid, TextField, DateField, NumberField, usePermissions, FunctionField, useRecordContext, TopToolbar, CreateButton, ExportButton, useNotify, useRefresh, FilterButton, SearchInput, DateInput } from "react-admin";
 import { Button, Box, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
-import { DynamicCategoryInput, AdminFilePicker } from "@/admin/atoms";
+import { DynamicCategoryInput, DynamicFileTypeInput, AdminFilePicker } from "@/admin/atoms";
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 
@@ -70,6 +70,7 @@ export const DocumentList = () => {
     const filters = [
         <SearchInput key="q" placeholder="Search Title, Category, Recipient, Type..." source="q" alwaysOn />,
         <DynamicCategoryInput key="cat" label="Category" source="category" fullWidth={false} />,
+        <DynamicFileTypeInput key="ft" label="File Type" source="fileType" fullWidth={false} />,
         <DateInput key="from" label="From Date" source="fromDate" />,
         <DateInput key="to" label="To Date" source="toDate" />,
     ];
