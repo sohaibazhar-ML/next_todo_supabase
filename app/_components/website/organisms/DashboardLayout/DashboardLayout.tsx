@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { DashboardHeader, DashboardSidebar, Footer } from '@/website/organisms';
 import { DashboardHeaderProps } from '@/website/organisms/DashboardHeader/DashboardHeader.types';
 
@@ -17,7 +17,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 }) => {
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <DashboardHeader activeTab={activeTab} isAccountPage={isAccountPage} />
+      <Suspense fallback={<div className="h-[50px] lg:h-[60px] bg-background-nav" />}>
+        <DashboardHeader activeTab={activeTab} isAccountPage={isAccountPage} />
+      </Suspense>
       
       <div className="flex flex-1 justify-center bg-white">
         <div className="max-w-[1440px] w-full flex relative">
