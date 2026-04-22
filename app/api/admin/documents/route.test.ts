@@ -1,13 +1,13 @@
 import { GET, POST, PUT, DELETE } from './route'
-import { prismaMock } from '@/lib/__mocks__/prisma'
-import { isAdmin } from '@/utils/roles'
-import { ERROR_MESSAGES } from '@/constants'
-import { createMockRequest, validateResponse, cleanupMocks } from '@/test/utils/handler-utils'
-import { createSupabaseMock, setupSupabaseMock } from '@/test/utils/supabase-mock'
+import { prismaMock } from '../../../_lib/__mocks__/prisma'
+import { isAdmin } from '../../../_utils/admin/roles'
+import { ERROR_MESSAGES } from '../../../_constants/admin'
+import { createMockRequest, validateResponse, cleanupMocks } from '../../../../test/utils/handler-utils'
+import { createSupabaseMock, setupSupabaseMock } from '../../../../test/utils/supabase-mock'
 
 // Mock dependencies
-jest.mock('@/lib/supabase/server')
-jest.mock('@/utils/roles')
+jest.mock('../../../_lib/supabase/server')
+jest.mock('../../../_utils/admin/roles')
 
 
 describe('Documents API', () => {
@@ -22,7 +22,6 @@ describe('Documents API', () => {
             file_type: 'pdf',
             is_featured: true,
             is_active: true,
-            tags: ['docs', 'important'],
             created_at: new Date('2024-01-01T10:00:00Z'),
             file_size: BigInt(1024),
             parent_document_id: null,
@@ -35,7 +34,6 @@ describe('Documents API', () => {
             file_type: 'docx',
             is_featured: false,
             is_active: true,
-            tags: ['help'],
             created_at: new Date('2024-02-01T10:00:00Z'),
             file_size: BigInt(2048),
             parent_document_id: null,
@@ -169,26 +167,7 @@ describe('Documents API', () => {
             }))
         })
 
-        it('should apply client-side tag filtering and handle documents without tags', async () => {
-            setupSupabaseMock(createSupabaseMock({ user: mockUser }))
-            const docsWithOneNoTags = [
-                ...mockDocuments.map(d => ({ ...d })),
-                { id: 'doc-3', title: 'No Tags', tags: null, parent_document_id: null, category: 'manual', file_type: 'pdf', created_at: new Date(), file_size: BigInt(0) }
-            ]
-            prismaMock.documents.findMany.mockResolvedValue(docsWithOneNoTags as any)
-            prismaMock.documents.count.mockResolvedValue(docsWithOneNoTags.length)
-
-            const request = createMockRequest('http://localhost/api/admin/documents?tags=important')
-            const response = await GET(request)
-            const { status, data } = await validateResponse<any>(response)
-
-            expect(status).toBe(200)
-            // Note: The current handler DOES NOT actually filter by tags in the database.
-            // This test now accurately reflects the current handler's behavior (no filtering).
-            expect(data.data).toHaveLength(3)
-        })
-
-        it('should apply sorting options', async () => {
+        it('should handle sorting options', async () => {
             setupSupabaseMock(createSupabaseMock({ user: mockUser }))
             prismaMock.documents.findMany.mockResolvedValue([])
             prismaMock.documents.count.mockResolvedValue(0)
@@ -290,7 +269,6 @@ describe('Documents API', () => {
             title: 'New Document',
             description: 'A test document',
             category: 'misc',
-            tags: ['new'],
             file_name: 'test.pdf',
             file_path: '/path/to/test.pdf',
             file_size: 512,

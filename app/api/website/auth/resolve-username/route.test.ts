@@ -1,7 +1,7 @@
 import { GET } from './route'
-import { prismaMock } from '@/lib/__mocks__/prisma'
-import { createMockRequest, validateResponse, cleanupMocks } from '@/test/utils/handler-utils'
-import { ERROR_MESSAGES } from '@/website/constants'
+import { prismaMock } from '../../../../_lib/__mocks__/prisma'
+import { createMockRequest, validateResponse, cleanupMocks } from '../../../../../test/utils/handler-utils'
+import { ERROR_MESSAGES } from '../../../../_constants/website'
 
 describe('Resolve Username API', () => {
     afterEach(() => {

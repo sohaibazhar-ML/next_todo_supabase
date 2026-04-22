@@ -104,7 +104,6 @@ export async function POST(request: Request) {
           description: description?.trim() || null,
           recipient: recipient?.trim() || null,
           category: 'Personal',
-          tags: [],
           file_name: file.name,
           file_path: filePath,
           file_size: BigInt(file.size),

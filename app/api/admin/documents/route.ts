@@ -89,7 +89,6 @@ export async function GET(request: Request) {
     const fileType = filterObj.fileType || searchParams.get('fileType')
     const featuredOnly = filterObj.is_featured === true || searchParams.get('featuredOnly') === 'true'
     const searchQuery = filterObj.q || filterObj.searchQuery || searchParams.get('searchQuery') || searchParams.get('q')
-    const tags = (filterObj.tags || searchParams.get('tags'))?.split(',').filter(Boolean)
     const fromDate = filterObj.fromDate || filterObj.gte_created_at || searchParams.get('fromDate') || searchParams.get('gte_created_at')
     const toDate = filterObj.toDate || filterObj.lte_created_at || searchParams.get('toDate') || searchParams.get('lte_created_at')
     
@@ -210,7 +209,6 @@ export async function POST(request: Request) {
         title: body.title,
         description: body.description || null,
         category: body.category,
-        tags: body.tags && body.tags.length > 0 ? body.tags : [],
         file_name: body.file_name,
         file_path: body.file_path,
         file_size: BigInt(body.file_size),

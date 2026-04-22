@@ -1,19 +1,19 @@
 import { GET } from './route'
-import { prismaMock } from '@/lib/__mocks__/prisma'
-import { createMockRequest, validateResponse, cleanupMocks } from '@/test/utils/handler-utils'
-import { createSupabaseMock, setupSupabaseMock } from '@/test/utils/supabase-mock'
+import { prismaMock } from '../../../_lib/__mocks__/prisma'
+import { createMockRequest, validateResponse, cleanupMocks } from '../../../../test/utils/handler-utils'
+import { createSupabaseMock, setupSupabaseMock } from '../../../../test/utils/supabase-mock'
 import { startOfMonth, endOfMonth, format } from 'date-fns'
 
 // Mock dependencies
-jest.mock('@/lib/supabase/server')
-jest.mock('@/utils/roles')
+jest.mock('../../../_lib/supabase/server')
+jest.mock('../../../_utils/admin/roles')
 
 describe('Reports API — GET /api/admin/reports', () => {
     const mockUserId = 'user-123'
     const mockUser = { id: mockUserId, email: 'admin@example.com' }
     
     const setupAuth = (isAdmin = true, isSubadmin = false) => {
-        const { getUserPermissions } = require('@/utils/roles')
+        const { getUserPermissions } = require('../../../_utils/admin/roles')
         setupSupabaseMock(createSupabaseMock({ user: mockUser }))
         getUserPermissions.mockResolvedValue({ 
             isAdmin, 

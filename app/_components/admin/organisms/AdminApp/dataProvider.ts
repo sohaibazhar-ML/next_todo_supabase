@@ -154,9 +154,7 @@ export const dataProvider: DataProvider = {
             for (const [key, value] of Object.entries(params.data)) {
                 if (key === 'file') continue;
                 
-                if (key === 'tags' && typeof value === 'string') {
-                    formData.append(key, JSON.stringify(value.split(',').map(t => t.trim()).filter(Boolean)));
-                } else if (Array.isArray(value)) {
+                if (Array.isArray(value)) {
                     formData.append(key, JSON.stringify(value));
                 } else if (value !== undefined && value !== null) {
                     formData.append(key, String(value));
@@ -175,9 +173,6 @@ export const dataProvider: DataProvider = {
         }
 
         const data = { ...params.data } as Record<string, unknown>;
-        if (resource === 'documents' && typeof data.tags === 'string') {
-            data.tags = (data.tags as string).split(',').map((t: string) => t.trim()).filter(Boolean);
-        }
 
         const { json } = await httpClient(`${apiUrl}/${resource}`, {
             method: 'POST',
@@ -196,9 +191,7 @@ export const dataProvider: DataProvider = {
             for (const [key, value] of Object.entries(params.data)) {
                 if (key === 'file') continue;
                 
-                if (key === 'tags' && typeof value === 'string') {
-                    formData.append(key, JSON.stringify(value.split(',').map((t: string) => t.trim()).filter(Boolean)));
-                } else if (Array.isArray(value)) {
+                if (Array.isArray(value)) {
                     formData.append(key, JSON.stringify(value));
                 } else if (value !== undefined && value !== null) {
                     formData.append(key, String(value));
@@ -219,9 +212,6 @@ export const dataProvider: DataProvider = {
         // Clean out the file field if it wasn't changed (react-admin sends existing file data back)
         if (resource === 'documents') {
             delete data.file;
-            if (typeof data.tags === 'string') {
-                data.tags = (data.tags as string).split(',').map((t: string) => t.trim()).filter(Boolean);
-            }
         }
 
         const { json } = await httpClient(`${apiUrl}/${resource}`, {

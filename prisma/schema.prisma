@@ -13,7 +13,6 @@ model documents {
   title                    String
   description              String?
   category                 String
-  tags                     String[]
   file_name                String?
   file_path                String?
   file_size                BigInt?
@@ -32,7 +31,6 @@ model documents {
   @@index([created_by], map: "idx_documents_created_by")
   @@index([file_type], map: "idx_documents_file_type")
   @@index([is_featured], map: "idx_documents_is_featured")
-  @@index([tags], map: "idx_documents_tags_gin", type: Gin)
   @@schema("public")
 }
 

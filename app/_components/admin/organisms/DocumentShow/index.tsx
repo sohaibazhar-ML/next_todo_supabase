@@ -8,10 +8,6 @@ export const DocumentShow = () => (
             <TextField source="description" />
             <TextField source="category" />
             <TextField source="recipient" label="Recipient" />
-            <FunctionField 
-                label="Tags"
-                render={(record: Document) => Array.isArray(record.tags) ? record.tags.join(', ') : record.tags} 
-            />
             <TextField source="file_name" />
             <FunctionField 
                 label="Size (KB)" 

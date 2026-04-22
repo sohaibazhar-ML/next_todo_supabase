@@ -1,12 +1,12 @@
 import { GET, POST, DELETE } from './route'
-import { prismaMock } from '@/lib/__mocks__/prisma'
-import { isAdmin } from '@/utils/roles'
-import { createMockRequest, validateResponse, cleanupMocks } from '@/test/utils/handler-utils'
-import { createSupabaseMock, setupSupabaseMock } from '@/test/utils/supabase-mock'
+import { prismaMock } from '../../../_lib/__mocks__/prisma'
+import { isAdmin } from '../../../_utils/admin/roles'
+import { createMockRequest, validateResponse, cleanupMocks } from '../../../../test/utils/handler-utils'
+import { createSupabaseMock, setupSupabaseMock } from '../../../../test/utils/supabase-mock'
 
 // Mock dependencies
-jest.mock('@/lib/supabase/server')
-jest.mock('@/utils/roles')
+jest.mock('../../../_lib/supabase/server')
+jest.mock('../../../_utils/admin/roles')
 
 describe('Download Logs API', () => {
     const mockUser = { id: 'user-123', email: 'test@example.com' }

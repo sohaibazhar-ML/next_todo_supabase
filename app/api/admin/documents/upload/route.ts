@@ -41,7 +41,6 @@ export async function POST(request: Request) {
     const title = formData.get('title') as string
     const description = formData.get('description') as string
     const category = formData.get('category') as string
-    const tags = formData.get('tags') as string
     const is_featured = formData.get('is_featured') === 'true'
 
     if (files.length === 0 || !category) {
@@ -51,15 +50,7 @@ export async function POST(request: Request) {
       )
     }
 
-    // Parse tags if provided
-    let parsedTags: string[] = []
-    if (tags) {
-      try {
-        parsedTags = JSON.parse(tags)
-      } catch (e) {
-        parsedTags = tags.split(',').map(t => t.trim()).filter(Boolean)
-      }
-    }
+
 
 
     const createdDocuments = []
@@ -92,7 +83,6 @@ export async function POST(request: Request) {
             title: docTitle,
             description: description || null,
             category,
-            tags: parsedTags,
             file_name: file.name,
             file_path: filePath,
             file_size: BigInt(file.size),

@@ -1,16 +1,16 @@
 import { GET } from './route'
-import { createClient } from '@/lib/supabase/server'
-import { prisma } from '@/lib/prisma'
-import { ERROR_MESSAGES, STORAGE_BUCKETS } from '@/constants'
+import { createClient } from '../../../../../_lib/supabase/server'
+import { prisma } from '../../../../../_lib/db'
+import { ERROR_MESSAGES, STORAGE_BUCKETS } from '../../../../../_constants/admin'
 import { DeepMockProxy } from 'jest-mock-extended'
 import { PrismaClient } from '@prisma/client'
-import { createMockRequest, validateResponse, cleanupMocks } from '@/test/utils/handler-utils'
+import { createMockRequest, validateResponse, cleanupMocks } from '../../../../../../test/utils/handler-utils'
 import mammoth from 'mammoth'
 import { PDFDocument } from 'pdf-lib'
 
 // Mock dependencies
-jest.mock('@/lib/supabase/server')
-jest.mock('@/lib/prisma', () => ({
+jest.mock('../../../../../_lib/supabase/server')
+jest.mock('../../../../../_lib/db', () => ({
     prisma: (require('jest-mock-extended') as any).mockDeep(),
 }))
 jest.mock('mammoth')

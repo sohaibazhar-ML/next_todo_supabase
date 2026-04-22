@@ -71,7 +71,6 @@ export async function POST(request: NextRequest) {
             created_by: user.id,
             // Since there is no actual file yet, file_path and file_name remain null
             is_featured: false,
-            tags: []
           }
         });
         newCategories.add(category);

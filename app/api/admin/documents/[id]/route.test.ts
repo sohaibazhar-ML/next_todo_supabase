@@ -1,13 +1,13 @@
 import { GET, PUT, DELETE } from './route'
-import { prismaMock } from '@/lib/__mocks__/prisma'
-import { isAdmin } from '@/utils/roles'
-import { ERROR_MESSAGES } from '@/constants'
-import { createMockRequest, validateResponse, cleanupMocks } from '@/test/utils/handler-utils'
-import { createSupabaseMock, setupSupabaseMock } from '@/test/utils/supabase-mock'
+import { prismaMock } from '../../../../_lib/__mocks__/prisma'
+import { isAdmin } from '../../../../_utils/admin/roles'
+import { ERROR_MESSAGES } from '../../../../_constants/admin'
+import { createMockRequest, validateResponse, cleanupMocks } from '../../../../../test/utils/handler-utils'
+import { createSupabaseMock, setupSupabaseMock } from '../../../../../test/utils/supabase-mock'
 
 // Mock dependencies
-jest.mock('@/lib/supabase/server')
-jest.mock('@/utils/roles')
+jest.mock('../../../../_lib/supabase/server')
+jest.mock('../../../../_utils/admin/roles')
 
 describe('Document by ID API', () => {
     const mockUser = { id: 'user-123', email: 'test@example.com' }
@@ -53,7 +53,6 @@ describe('Document by ID API', () => {
                 file_size: BigInt(2048576),
                 description: 'A test document',
                 category: 'reports',
-                tags: ['tag1', 'tag2'],
                 is_featured: false,
                 is_active: true,
                 file_name: 'test.pdf',
@@ -193,7 +192,6 @@ describe('Document by ID API', () => {
                 title: 'New Title',
                 description: 'New description',
                 category: 'legal',
-                tags: ['legal', 'contract'],
                 is_featured: true,
                 is_active: false,
                 searchable_content: 'full text content here',
@@ -212,7 +210,6 @@ describe('Document by ID API', () => {
                     title: 'New Title',
                     description: 'New description',
                     category: 'legal',
-                    tags: ['legal', 'contract'],
                     is_featured: true,
                     is_active: false,
                     searchable_content: 'full text content here',

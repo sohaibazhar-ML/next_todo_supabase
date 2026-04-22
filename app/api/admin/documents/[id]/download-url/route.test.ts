@@ -1,17 +1,17 @@
 import { GET } from './route'
-import { createClient } from '@/lib/supabase/server'
-import { prisma } from '@/lib/prisma'
-import { createMockRequest, validateResponse } from '@/test/utils/handler-utils'
-import { isAdmin, isSubadmin } from '@/utils/roles'
+import { createClient } from '../../../../../_lib/supabase/server'
+import { prisma } from '../../../../../_lib/db'
+import { createMockRequest, validateResponse } from '../../../../../../test/utils/handler-utils'
+import { isAdmin, isSubadmin } from '../../../../../_utils/admin/roles'
 
 // Mock dependencies
-jest.mock('@/lib/supabase/server', () => ({
+jest.mock('../../../../../_lib/supabase/server', () => ({
     createClient: jest.fn()
 }))
 
-jest.mock('@/utils/roles')
+jest.mock('../../../../../_utils/admin/roles')
 
-jest.mock('@/lib/prisma', () => ({
+jest.mock('../../../../../_lib/db', () => ({
     prisma: {
         documents: {
             findUnique: jest.fn()

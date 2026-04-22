@@ -14,7 +14,6 @@ export const DocumentCreate = () => (
             <TextInput source="description" multiline fullWidth />
             <DynamicCategoryInput source="category" required />
             <TextInput source="recipient" label="Zuständige Stelle / Empfänger" fullWidth />
-            <TextInput source="tags" helperText="Separate tags with commas" fullWidth />
 
             <FileInput
                 source="file"

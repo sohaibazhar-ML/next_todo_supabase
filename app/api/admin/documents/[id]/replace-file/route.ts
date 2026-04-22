@@ -6,7 +6,7 @@
  *   - Deletes old file from Supabase Storage
  *   - Uploads new file to Supabase Storage
  *   - Updates file-related fields (file_name, file_path, file_size, file_type, mime_type)
- *   - Preserves all other fields (title, description, category, tags, download_count, etc.)
+ *   - Preserves all other fields (title, description, category, download_count, etc.)
  */
 
 import { createClient } from '@/lib/supabase/server'
@@ -70,16 +70,6 @@ export async function PUT(
     const description = formData.get('description') as string | null
     const category = formData.get('category') as string | null
     const is_featured = formData.get('is_featured')
-    const tagsRaw = formData.get('tags') as string | null
-
-    let parsedTags: string[] | undefined
-    if (tagsRaw) {
-      try {
-        parsedTags = JSON.parse(tagsRaw)
-      } catch {
-        parsedTags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean)
-      }
-    }
 
     // 1. Upload new file to Supabase Storage
     const fileExt = file.name.split('.').pop()
@@ -129,7 +119,6 @@ export async function PUT(
     if (title !== null && title !== undefined) updateData.title = title
     if (description !== null && description !== undefined) updateData.description = description
     if (category !== null && category !== undefined) updateData.category = category
-    if (parsedTags !== undefined) updateData.tags = parsedTags
     if (is_featured !== null && is_featured !== undefined) {
       updateData.is_featured = is_featured === 'true'
     }

@@ -1,11 +1,11 @@
 import { GET, POST, PUT, DELETE } from './route'
-import { prismaMock } from '@/lib/__mocks__/prisma'
-import { createMockRequest, validateResponse, cleanupMocks } from '@/test/utils/handler-utils'
-import { createSupabaseMock, setupSupabaseMock } from '@/test/utils/supabase-mock'
+import { prismaMock } from '../../../_lib/__mocks__/prisma'
+import { createMockRequest, validateResponse, cleanupMocks } from '../../../../test/utils/handler-utils'
+import { createSupabaseMock, setupSupabaseMock } from '../../../../test/utils/supabase-mock'
 
 // Mock dependencies
-jest.mock('@/lib/supabase/server')
-jest.mock('@/utils/roles')
+jest.mock('../../../_lib/supabase/server')
+jest.mock('../../../_utils/admin/roles')
 
 describe('Generic Admin CRUD API — /api/admin/[resource]', () => {
     const mockUserId = '550e8400-e29b-41d4-a716-446655440000'

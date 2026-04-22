@@ -17,13 +17,6 @@ export const DocumentEdit = () => (
             <TextInput source="description" multiline fullWidth />
             <DynamicCategoryInput source="category" required />
             <TextInput source="recipient" label="Recipient" fullWidth />
-            <TextInput 
-                source="tags" 
-                helperText="Separate tags with commas" 
-                fullWidth 
-                format={(tags: string[] | string) => Array.isArray(tags) ? tags.join(', ') : tags}
-                parse={(str: string) => str.split(',').map(t => t.trim()).filter(Boolean)}
-            />
             <BooleanInput source="is_featured" label="Featured" />
             <FileInput 
                 source="file" 

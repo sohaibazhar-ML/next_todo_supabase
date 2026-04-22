@@ -411,10 +411,7 @@ export async function GET(
                     let filterKey = key;
                     if ((resource === 'documents' || resource === 'documents-list') && key === 'fileType') filterKey = 'file_type';
 
-                    if (key === 'tags' && resource === 'documents') {
-                        const tagList = typeof value === 'string' ? value.split(',').map(t => t.trim()).filter(Boolean) : value;
-                        if (Array.isArray(tagList) && tagList.length > 0) where.tags = { hasSome: tagList };
-                    } else if (key === 'role' && (resource === 'profiles' || resource === 'users')) {
+                    if (key === 'role' && (resource === 'profiles' || resource === 'users')) {
                         where[filterKey] = value;
                     } else if (typeof value === 'string' && value.length > 0) {
                         const cleanValue = value.trim();
@@ -486,8 +483,8 @@ export async function GET(
 const RESOURCE_FIELD_WHITELISTS: Record<ResourceName, string[]> = {
     profiles: ['first_name', 'last_name', 'role', 'current_address', 'country_of_origin', 'phone_number', 'number_of_adults', 'number_of_children', 'pets_type', 'new_address_switzerland', 'marketing_consent', 'terms_accepted', 'data_privacy_accepted', 'keep_me_logged_in', 'admin_notes'],
     users: ['first_name', 'last_name', 'role', 'current_address', 'country_of_origin', 'phone_number', 'number_of_adults', 'number_of_children', 'pets_type', 'new_address_switzerland', 'marketing_consent', 'terms_accepted', 'data_privacy_accepted', 'keep_me_logged_in', 'admin_notes'],
-    documents: ['title', 'description', 'category', 'tags', 'is_featured', 'file_name', 'file_path', 'file_size', 'file_type', 'mime_type', 'recipient'],
-    'documents-list': ['title', 'description', 'category', 'tags', 'is_featured', 'recipient'],
+    documents: ['title', 'description', 'category', 'is_featured', 'file_name', 'file_path', 'file_size', 'file_type', 'mime_type', 'recipient'],
+    'documents-list': ['title', 'description', 'category', 'is_featured', 'recipient'],
     download_logs: [], // Usually read-only via this API
     checklistItem: ['phase', 'category', 'title', 'description', 'is_mandatory'],
     stats: [], // Read-only

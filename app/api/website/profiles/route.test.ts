@@ -1,13 +1,13 @@
 import { GET, POST, PUT } from './route'
-import { prismaMock } from '@/lib/__mocks__/prisma'
-import { isAdmin } from '@/website/utils/roles'
-import { ERROR_MESSAGES } from '@/website/constants'
-import { createMockRequest, validateResponse, cleanupMocks } from '@/test/utils/handler-utils'
-import { createSupabaseMock, setupSupabaseMock } from '@/test/utils/supabase-mock'
+import { prismaMock } from '../../../_lib/__mocks__/prisma'
+import { isAdmin } from '../../../_utils/website/roles'
+import { ERROR_MESSAGES } from '../../../_constants/website'
+import { createMockRequest, validateResponse, cleanupMocks } from '../../../../test/utils/handler-utils'
+import { createSupabaseMock, setupSupabaseMock } from '../../../../test/utils/supabase-mock'
 
 // Mock dependencies
-jest.mock('@/lib/supabase/server')
-jest.mock('@/website/utils/roles')
+jest.mock('../../../_lib/supabase/server')
+jest.mock('../../../_utils/website/roles')
 
 describe('Profiles API', () => {
     const mockUserId = '550e8400-e29b-41d4-a716-446655440000'

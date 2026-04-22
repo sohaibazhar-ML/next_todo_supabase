@@ -95,7 +95,6 @@ export async function PUT(
     if (body.title !== undefined) updateData.title = body.title
     if (body.description !== undefined) updateData.description = body.description
     if (body.category !== undefined) updateData.category = body.category
-    if (body.tags !== undefined) updateData.tags = body.tags
     if (body.is_featured !== undefined) updateData.is_featured = body.is_featured
 
     // Update document metadata directly

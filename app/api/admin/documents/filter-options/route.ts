@@ -2,7 +2,7 @@
  * Document Filter Options API Route
  * 
  * Handles fetching filter options:
- * - GET: Get categories, file types, and tags
+ * - GET: Get categories and file types
  * 
  * This route has been refactored to:
  * - Use proper TypeScript types (no 'any')
@@ -15,7 +15,7 @@ import { NextResponse } from 'next/server'
 import { isErrorWithMessage } from '@/utils'
 import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
 
-// GET - Get filter options (categories, file types, tags)
+// GET - Get filter options (categories, file types)
 export async function GET(request: Request) {
   try {
     const supabase = await createClient()
@@ -27,9 +27,8 @@ export async function GET(request: Request) {
 
     // Optimized: Use DISTINCT queries with proper index usage
     // Using partial index scan with WHERE clause for better performance
-    const [categories, fileTypes, tags] = await Promise.all([
+    const [categories, fileTypes] = await Promise.all([
       // Get distinct categories (only from root documents, not versions)
-      // Uses composite index (parent_document_id, category) for fast lookup
       prisma.$queryRaw<Array<{ category: string }>>`
         SELECT DISTINCT category 
         FROM documents 
@@ -37,37 +36,20 @@ export async function GET(request: Request) {
         LIMIT 1000
       `,
       // Get distinct file types
-      // Uses composite index (parent_document_id, file_type) for fast lookup
       prisma.$queryRaw<Array<{ file_type: string }>>`
         SELECT DISTINCT file_type 
         FROM documents 
         ORDER BY file_type ASC
-        LIMIT 1000
-      `,
-      // Get all unique tags using GIN index for array operations
-      // Using array_to_string and string_to_array for better performance with GIN index
-      prisma.$queryRaw<Array<{ tag: string }>>`
-        SELECT DISTINCT tag
-        FROM (
-          SELECT unnest(tags) as tag
-          FROM documents
-          WHERE tags IS NOT NULL 
-            AND tags != '{}'
-        ) AS tag_list
-        WHERE tag IS NOT NULL AND tag != ''
-        ORDER BY tag ASC
         LIMIT 1000
       `
     ])
 
     const uniqueCategories = categories.map(row => row.category)
     const uniqueFileTypes = fileTypes.map(row => row.file_type)
-    const uniqueTags = tags.map(row => row.tag).filter(Boolean)
 
     return NextResponse.json({
       categories: uniqueCategories,
       fileTypes: uniqueFileTypes,
-      tags: uniqueTags,
     })
   } catch (error: unknown) {
     console.error(CONSOLE_MESSAGES.ERROR_FETCHING_FILTER_OPTIONS, error)

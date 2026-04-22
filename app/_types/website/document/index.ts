@@ -17,7 +17,6 @@ export interface Document {
   title: string
   description: string | null
   category: string
-  tags: string[] | null
   file_name: string
   file_path: string
   file_size: number
@@ -48,7 +47,6 @@ export interface DocumentUploadData {
   title: string
   description?: string
   category: string
-  tags?: string[]
   file: File
   is_featured?: boolean
 }

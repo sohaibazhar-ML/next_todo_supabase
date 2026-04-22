@@ -1,11 +1,11 @@
 import { GET } from './route'
-import { prismaMock } from '@/lib/__mocks__/prisma'
-import { createMockRequest, validateResponse } from '@/test/utils/handler-utils'
-import { createSupabaseMock, setupSupabaseMock } from '@/test/utils/supabase-mock'
-import { ERROR_MESSAGES } from '@/constants'
+import { prismaMock } from '../../../../_lib/__mocks__/prisma'
+import { createMockRequest, validateResponse } from '../../../../../test/utils/handler-utils'
+import { createSupabaseMock, setupSupabaseMock } from '../../../../../test/utils/supabase-mock'
+import { ERROR_MESSAGES } from '../../../../_constants/admin'
 
 // Mock dependencies
-jest.mock('@/lib/supabase/server')
+jest.mock('../../../../_lib/supabase/server')
 
 describe('Documents Filter Options API', () => {
     const mockUser = { id: 'user-123', email: 'test@example.com' }
@@ -36,7 +36,6 @@ describe('Documents Filter Options API', () => {
         prismaMock.$queryRaw
             .mockResolvedValueOnce([{ category: 'Financial' }, { category: 'Legal' }])
             .mockResolvedValueOnce([{ file_type: 'pdf' }, { file_type: 'docx' }])
-            .mockResolvedValueOnce([{ tag: 'important' }, { tag: 'urgent' }])
 
         const response = await GET(createMockRequest('http://localhost:3000/api/admin/documents/filter-options'))
         const { status, data } = await validateResponse<any>(response)
@@ -45,7 +44,6 @@ describe('Documents Filter Options API', () => {
         expect(data).toEqual({
             categories: ['Financial', 'Legal'],
             fileTypes: ['pdf', 'docx'],
-            tags: ['important', 'urgent']
         })
     })
 

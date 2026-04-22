@@ -1,13 +1,13 @@
 import { POST } from './route'
-import { prismaMock } from '@/lib/__mocks__/prisma'
-import { isAdmin } from '@/utils/roles'
-import { ERROR_MESSAGES } from '@/constants'
-import { createMockRequest, validateResponse, cleanupMocks } from '@/test/utils/handler-utils'
-import { createSupabaseMock, setupSupabaseMock } from '@/test/utils/supabase-mock'
+import { prismaMock } from '../../../../_lib/__mocks__/prisma'
+import { isAdmin } from '../../../../_utils/admin/roles'
+import { ERROR_MESSAGES } from '../../../../_constants/admin'
+import { createMockRequest, validateResponse, cleanupMocks } from '../../../../../test/utils/handler-utils'
+import { createSupabaseMock, setupSupabaseMock } from '../../../../../test/utils/supabase-mock'
 
 // Mock dependencies
-jest.mock('@/lib/supabase/server')
-jest.mock('@/utils/roles')
+jest.mock('../../../../_lib/supabase/server')
+jest.mock('../../../../_utils/admin/roles')
 
 describe('Document Upload API — POST /api/admin/documents/upload', () => {
     const mockUserId = 'user-123'
@@ -71,7 +71,6 @@ describe('Document Upload API — POST /api/admin/documents/upload', () => {
             get: jest.fn().mockImplementation((key) => {
                 if (key === 'title') return 'Monthly Report'
                 if (key === 'category') return 'business'
-                if (key === 'tags') return JSON.stringify(['report', '2024'])
                 return null
             })
         }
@@ -104,7 +103,6 @@ describe('Document Upload API — POST /api/admin/documents/upload', () => {
             data: expect.objectContaining({
                 title: 'Monthly Report',
                 category: 'business',
-                tags: ['report', '2024']
             })
         }))
     })
