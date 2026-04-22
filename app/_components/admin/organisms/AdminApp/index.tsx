@@ -21,6 +21,7 @@ const AdminApp = () => (
         dataProvider={dataProvider} 
         authProvider={authProvider}
         dashboard={StatisticsPage}
+        darkTheme={null}
     >
         {permissions => [
             // Profiles: Full access for admin, show-only for subadmin
