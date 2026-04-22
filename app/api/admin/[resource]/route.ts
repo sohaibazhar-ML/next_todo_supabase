@@ -436,12 +436,26 @@ export async function GET(
         }
     }
 
-    // DIAGNOSTIC LOG: This will show in your terminal exactly what Prisma is looking for
-    if (Object.keys(where).length > 0) {
-        console.log(`[Admin API] Final WHERE clause for ${resource}:`, JSON.stringify(where, null, 2));
-    } else {
-        console.warn(`[Admin API] WARNING: Empty WHERE clause for ${resource} request with filters:`, filterParam);
+    // SECURITY: Filter out user-uploaded documents (Category: Personal) from Admin Panel
+    if (resource === 'documents' || resource === 'documents-list') {
+        console.log(`[Admin API] Applying security filter for ${resource}`);
+        
+        // Use AND to ensure we don't overwrite existing filters (like search)
+        const personalFilter = { category: { notIn: ['Personal', 'personal'] } };
+        
+        if (where.AND) {
+            where.AND = [...(Array.isArray(where.AND) ? where.AND : [where.AND]), personalFilter];
+        } else if (Object.keys(where).length > 0) {
+            // If there's already a where clause, wrap it in AND
+            where = { AND: [where, personalFilter] };
+        } else {
+            // Otherwise, just set the category filter
+            where.category = { notIn: ['Personal', 'personal'] };
+        }
     }
+
+    // DIAGNOSTIC LOG: This will show in your terminal exactly what Prisma is looking for
+    console.log(`[Admin API] ${resource} - Final WHERE:`, JSON.stringify(where, null, 2));
 
     try {
         // Fetch records + total count in parallel for efficiency
@@ -455,6 +469,8 @@ export async function GET(
             }),
             (model as any).count({ where }),
         ]);
+        
+        console.log(`[Admin API] ${resource} - Found ${records.length} records out of ${total} total`);
 
         return NextResponse.json({
             data: records.map((r: unknown) => serializeRecord(r, resource)),
@@ -518,7 +534,13 @@ export async function POST(
     const data = whitelistFields(body, resource);
 
     try {
-        const record = await (model as any).create({ data });
+        // Automatically associate the record with the current admin/subadmin
+        const record = await (model as any).create({ 
+            data: {
+                ...data,
+                created_by: auth.user.id
+            } 
+        });
         return NextResponse.json(serializeRecord(record, resource), { status: 201 });
     } catch (error) {
         console.error('[Admin API] create error:', error);

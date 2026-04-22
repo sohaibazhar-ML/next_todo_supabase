@@ -30,8 +30,6 @@ export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [recipient, setRecipient] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -48,8 +46,6 @@ export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
 
   const resetForm = () => {
     setTitle('');
-    setDescription('');
-    setRecipient('');
     setSelectedFile(null);
     setUploadError(null);
   };
@@ -133,8 +129,6 @@ export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
       const formData = new FormData();
       formData.append('file', selectedFile);
       formData.append('title', title.trim());
-      if (description.trim()) formData.append('description', description.trim());
-      if (recipient.trim()) formData.append('recipient', recipient.trim());
 
       const response = await fetch('/api/website/documents/upload', {
         method: 'POST',
@@ -326,36 +320,6 @@ export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
                   placeholder={t('upload.placeholders.title')}
                   disabled={isUploading}
                   className="w-full px-4 py-2.5 rounded-lg border border-secondary/15 bg-white text-secondary placeholder:text-secondary/30 focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary/30 transition-all text-sm disabled:opacity-50"
-                />
-              </div>
-
-              {/* Description Field */}
-              <div>
-                <label className="block text-sm font-semibold text-secondary/70 mb-1.5">
-                  {t('upload.fields.description')} <span className="text-secondary/30 font-normal">{t('upload.fields.optional')}</span>
-                </label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder={t('upload.placeholders.description')}
-                  disabled={isUploading}
-                  rows={3}
-                  className="w-full px-4 py-2.5 rounded-lg border border-secondary/15 bg-white text-secondary placeholder:text-secondary/30 focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary/30 transition-all text-sm resize-none disabled:opacity-50"
-                />
-              </div>
-
-              {/* Recipient Field */}
-              <div>
-                <label className="block text-sm font-semibold text-secondary/70 mb-1.5">
-                  {t('upload.fields.recipient')} <span className="text-secondary/30 font-normal">{t('upload.fields.optional')}</span>
-                </label>
-                <input
-                  type="text"
-                  value={recipient}
-                  onChange={(e) => setRecipient(e.target.value)}
-                  placeholder={t('upload.placeholders.recipient')}
-                  disabled={isUploading}
-                  className="w-full px-4 py-2.5 rounded border border-secondary/15 bg-white text-secondary placeholder:text-secondary/30 focus:outline-none focus:ring-2 focus:ring-secondary/20 transition-all text-sm disabled:opacity-50"
                 />
               </div>
 

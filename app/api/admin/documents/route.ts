@@ -151,16 +151,27 @@ export async function GET(request: Request) {
       }
     }
 
+    // SECURITY: Filter out user-uploaded documents (Category: Personal) from Admin Panel
+    const personalFilter: Prisma.documentsWhereInput = { category: { notIn: ['Personal', 'personal'] } };
+    const finalWhere: Prisma.documentsWhereInput = {
+      AND: [where, personalFilter]
+    };
+
+    // DIAGNOSTIC LOG
+    console.log(`[Admin Documents API] Final WHERE:`, JSON.stringify(finalWhere, null, 2));
+
     // Regular query with all filters applied
     const [documents, total] = await Promise.all([
       prisma.documents.findMany({
-        where,
+        where: finalWhere,
         skip: (page - 1) * perPage,
         take: perPage,
         orderBy: { [sortField]: sortOrder as 'asc' | 'desc' }
       }),
-      prisma.documents.count({ where })
+      prisma.documents.count({ where: finalWhere })
     ])
+
+    console.log(`[Admin Documents API] Found ${documents.length} records out of ${total} total`);
 
     const serializedDocuments = documents.map((doc: Prisma.documentsGetPayload<{}>) => ({
       ...doc,
