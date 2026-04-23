@@ -16,16 +16,20 @@ import {
     DeleteButton,
     useGetIdentity,
     useRecordContext,
+    useListContext,
+    useGetList,
     ReferenceManyCount,
     TopToolbar,
-    ListButton
+    ListButton,
+    BooleanField
 } from "react-admin";
-import { Grid, Card, CardContent, Typography, Box, Divider } from "@mui/material";
+import { Grid, Card, CardContent, Typography, Box, Divider, CircularProgress } from "@mui/material";
 import HistoryIcon from "@mui/icons-material/History";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import PersonIcon from "@mui/icons-material/Person";
 import HomeIcon from "@mui/icons-material/Home";
 import PetsIcon from "@mui/icons-material/Pets";
+import FactCheckIcon from "@mui/icons-material/FactCheck";
 import { ADMIN_ROLES } from "@/admin/constants";
 import { COUNTRIES } from "../../constants/countries";
 import { useQueryClient } from "@tanstack/react-query";
@@ -58,6 +62,40 @@ const UserEditActions = () => (
         <ListButton label="Back to Users" />
     </TopToolbar>
 );
+
+const ChecklistProgressHeader = () => {
+    const { data: userProgress, isLoading: isProgressLoading } = useListContext();
+    const { total: totalTasks = 0, isLoading: isGlobalLoading } = useGetList('checklistItem', {
+        pagination: { page: 1, perPage: 1 }
+    });
+
+    if (isProgressLoading || isGlobalLoading || !userProgress) return null;
+
+    const completedTasks = userProgress.filter(item => item.is_completed).length;
+    const percentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+    return (
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+            <Box>
+                <Typography variant="body2" color="text.secondary">Total Tasks</Typography>
+                <Typography variant="h6">{totalTasks}</Typography>
+            </Box>
+            <Box>
+                <Typography variant="body2" color="text.secondary">Completed</Typography>
+                <Typography variant="h6" color="primary.main">{completedTasks}</Typography>
+            </Box>
+            <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                <CircularProgress variant="determinate" value={100} size={50} sx={{ color: 'grey.200' }} />
+                <CircularProgress variant="determinate" value={percentage} size={50} color="primary" sx={{ position: 'absolute', left: 0 }} />
+                <Box sx={{ top: 0, left: 0, bottom: 0, right: 0, position: 'absolute', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Typography variant="caption" component="div" color="text.secondary" sx={{ fontWeight: 'bold' }}>
+                        {percentage}%
+                    </Typography>
+                </Box>
+            </Box>
+        </Box>
+    );
+};
 
 export const UserEdit = () => (
     <Edit 
@@ -196,6 +234,33 @@ export const UserEdit = () => (
                             <Typography variant="body2" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
                                 Changes to User Roles take effect after the next login session.
                             </Typography>
+                        </Box>
+
+                        <Box sx={{ mt: 1 }}>
+                            <Card variant="outlined" sx={{ bgcolor: 'white' }}>
+                                <CardContent>
+                                    <Typography variant="subtitle2" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, fontWeight: 'bold' }}>
+                                        <FactCheckIcon fontSize="small" color="primary" /> Checklist Progress
+                                    </Typography>
+                                    <Box sx={{ maxHeight: '400px', overflowY: 'auto' }}>
+                                        <ReferenceManyField
+                                            reference="user_checklist_progress"
+                                            target="user_id"
+                                            source="id"
+                                            pagination={false}
+                                        >
+                                            <ChecklistProgressHeader />
+                                            <Datagrid bulkActionButtons={false} sx={{
+                                                '& .MuiTableCell-root': { py: 1, px: 1 },
+                                            }}>
+                                                <TextField source="checklist_items.title" label="Task" />
+                                                <TextField source="checklist_items.category" label="Category" />
+                                                <BooleanField source="is_completed" label="Done" />
+                                            </Datagrid>
+                                        </ReferenceManyField>
+                                    </Box>
+                                </CardContent>
+                            </Card>
                         </Box>
                     </Box>
                 </Grid>

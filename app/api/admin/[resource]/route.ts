@@ -17,7 +17,7 @@ import { STORAGE_BUCKETS } from '@/constants';
 export const dynamic = 'force-dynamic';
 
 // Whitelist of resources that can be accessed via this API
-const ALLOWED_RESOURCES = ['profiles', 'users', 'documents', 'download_logs', 'documents-list', 'stats', 'settings', 'checklistItem'] as const;
+const ALLOWED_RESOURCES = ['profiles', 'users', 'documents', 'download_logs', 'documents-list', 'stats', 'settings', 'checklistItem', 'user_checklist_progress'] as const;
 type ResourceName = typeof ALLOWED_RESOURCES[number];
 
 function isAllowedResource(resource: string): resource is ResourceName {
@@ -25,7 +25,7 @@ function isAllowedResource(resource: string): resource is ResourceName {
 }
 
 // Maps resource name → Prisma model delegate
-type PrismaDelegate = Prisma.profilesDelegate<any> | Prisma.documentsDelegate<any> | Prisma.download_logsDelegate<any> | Prisma.ChecklistItemDelegate<any>;
+type PrismaDelegate = Prisma.profilesDelegate<any> | Prisma.documentsDelegate<any> | Prisma.download_logsDelegate<any> | Prisma.ChecklistItemDelegate<any> | Prisma.UserChecklistProgressDelegate<any>;
 
 function getPrismaModel(resource: ResourceName): PrismaDelegate {
     const models: Record<ResourceName, PrismaDelegate> = {
@@ -37,6 +37,7 @@ function getPrismaModel(resource: ResourceName): PrismaDelegate {
         stats: prisma.profiles, // Dummy mapping for custom view
         settings: prisma.profiles, // Dummy mapping for custom view
         checklistItem: prisma.checklistItem,
+        user_checklist_progress: prisma.userChecklistProgress,
     };
     return models[resource];
 }
@@ -274,6 +275,9 @@ export async function GET(
         download_logs: {
             documents: { select: { title: true } },
             profiles: { select: { username: true, email: true } }
+        },
+        user_checklist_progress: {
+            checklist_items: { select: { title: true, category: true, is_mandatory: true } }
         }
     };
     const include = includes[resource];
@@ -489,6 +493,7 @@ const RESOURCE_FIELD_WHITELISTS: Record<ResourceName, string[]> = {
     'documents-list': ['title', 'description', 'category', 'is_featured', 'recipient'],
     download_logs: [], // Usually read-only via this API
     checklistItem: ['phase', 'category', 'title', 'description', 'is_mandatory'],
+    user_checklist_progress: ['is_completed', 'deadline'],
     stats: [], // Read-only
     settings: [], // Custom
 };
