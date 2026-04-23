@@ -20,7 +20,7 @@ export const FaqAccordionItem: React.FC<FaqAccordionItemProps> = ({
       {/* Question Header */}
       <div className="px-6 py-5 sm:px-8 sm:py-6 flex justify-between items-start gap-4 pr-12">
         <div className="flex-1">
-          <Text variant="heading-m" className="text-secondary select-none">
+          <Text className="text-secondary font-semibold text-[24px] select-none">
             {question}
           </Text>
         </div>
@@ -31,7 +31,7 @@ export const FaqAccordionItem: React.FC<FaqAccordionItemProps> = ({
         className={`px-8 transition-all duration-300 ease-in-out ${isOpen ? 'max-h-[500px] pb-8 opacity-100' : 'max-h-0 pb-0 opacity-0 px-8'
           }`}
       >
-        <Text variant="text-m" className="text-secondary leading-relaxed">
+        <Text className="text-secondary font-medium text-[24px] leading-relaxed">
           {answer}
         </Text>
       </div>
