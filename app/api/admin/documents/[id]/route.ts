@@ -18,7 +18,7 @@ import { NextResponse } from 'next/server'
 import { isAdmin } from '@/utils/roles'
 import type { Prisma } from '@prisma/client'
 import { isErrorWithMessage } from '@/utils'
-import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES, STORAGE_BUCKETS } from '@/constants'
 
 // GET - Get single document
 export async function GET(
@@ -155,13 +155,22 @@ export async function DELETE(
       return NextResponse.json({ error: ERROR_MESSAGES.DOCUMENT_NOT_FOUND }, { status: 404 })
     }
 
+    // Delete from storage
+    if (document.file_path) {
+      const { error: deleteError } = await supabase.storage
+        .from(STORAGE_BUCKETS.DOCUMENTS)
+        .remove([document.file_path])
+
+      if (deleteError) {
+        console.error(CONSOLE_MESSAGES.ERROR_DELETING_DOCUMENT, deleteError)
+      }
+    }
+
     // Delete from database (cascade will handle download_logs)
     await prisma.documents.delete({
       where: { id }
     })
 
-    // Delete from storage (client will handle this separately if needed)
-    // We return the file_path so client can delete it
     return NextResponse.json({
       message: 'Document deleted successfully',
       file_path: document.file_path,

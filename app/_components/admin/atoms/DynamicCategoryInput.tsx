@@ -43,14 +43,20 @@ export const DynamicCategoryInput: React.FC<DynamicCategoryInputProps> = ({
     }, [notify]);
 
     return (
-        <SelectInput
+        <AutocompleteInput
             source={source}
             label={label}
             choices={categories}
             isLoading={loading}
-            required={required}
+            isRequired={required}
             fullWidth={fullWidth}
             helperText={helperText}
+            onCreate={(filter) => {
+                const safeFilter = filter || 'New Category';
+                const newCategory = { id: safeFilter, name: safeFilter };
+                setCategories(prev => [...prev, newCategory]);
+                return newCategory;
+            }}
             {...props}
         />
     );

@@ -17,7 +17,7 @@ import { NextResponse } from 'next/server'
 import { isAdmin } from '@/utils/roles'
 import type { Prisma } from '@prisma/client'
 import { isErrorWithMessage } from '@/utils'
-import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/constants'
+import { CONSOLE_MESSAGES, ERROR_MESSAGES, STORAGE_BUCKETS } from '@/constants'
 
 // GET - Get documents with optional filters
 export async function GET(request: Request) {
@@ -308,6 +308,25 @@ export async function DELETE(request: Request) {
 
     if (!id) {
       return NextResponse.json({ error: 'ID is required' }, { status: 400 })
+    }
+
+    const document = await prisma.documents.findUnique({
+      where: { id },
+      select: { file_path: true }
+    })
+
+    if (!document) {
+      return NextResponse.json({ error: 'Document not found' }, { status: 404 })
+    }
+
+    if (document.file_path) {
+      const { error: deleteError } = await supabase.storage
+        .from(STORAGE_BUCKETS.DOCUMENTS)
+        .remove([document.file_path])
+
+      if (deleteError) {
+        console.error('[Admin Documents API] Failed to delete file from storage:', deleteError)
+      }
     }
 
     await prisma.documents.delete({

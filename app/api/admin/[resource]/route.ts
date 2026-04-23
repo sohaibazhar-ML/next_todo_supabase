@@ -12,6 +12,7 @@ import { isAdmin, isSubadmin } from '@/utils/roles';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 import { COUNTRIES } from '@/app/_components/admin/constants/countries';
+import { STORAGE_BUCKETS } from '@/constants';
 
 export const dynamic = 'force-dynamic';
 
@@ -627,6 +628,27 @@ export async function DELETE(
                 // as the record might already be partially gone or orphaned.
             } else {
                 console.log(`[Admin API] Successfully deleted auth user ${id} from Supabase`);
+            }
+        }
+
+        // If we are deleting a document, also delete the file from Supabase Storage
+        if (resource === 'documents' || resource === 'documents-list') {
+            const document = await (model as any).findUnique({
+                where: { id },
+                select: { file_path: true }
+            });
+            
+            if (document?.file_path) {
+                const supabase = await createClient();
+                const { error: deleteError } = await supabase.storage
+                    .from(STORAGE_BUCKETS.DOCUMENTS)
+                    .remove([document.file_path]);
+
+                if (deleteError) {
+                    console.error('[Admin API] Failed to delete document from storage:', deleteError.message);
+                } else {
+                    console.log(`[Admin API] Successfully deleted file ${document.file_path} from Supabase Storage`);
+                }
             }
         }
 
