@@ -35,18 +35,18 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
           <Link href="/">
             <Logo 
               variant="primary" 
-              className="w-[140px] h-[35px] xs:w-[180px] xs:h-[45px] lg:w-[220px] lg:h-[55px] xl:w-[260px] xl:h-[65px] hover:opacity-90 transition-opacity" 
+              className="w-[140px] h-[35px] xs:w-[180px] xs:h-[45px] lg:w-[220px] lg:h-[55px] xl:w-[200px] xl:h-[50px] min-[1351px]:w-[260px] min-[1351px]:h-[65px] hover:opacity-90 transition-opacity" 
             />
           </Link>
         </div>
 
         {/* Desktop Navigation */}
-        <nav className={`hidden lg:flex items-center ${locale === 'en' ? 'gap-[12px] xl:gap-[40px]' : 'gap-[8px] xl:gap-[16px]'}`}>
+        <nav className={`hidden lg:flex items-center ${locale === 'en' ? 'gap-[12px] xl:gap-[20px] min-[1351px]:gap-[40px]' : 'gap-[8px] xl:gap-[10px] min-[1351px]:gap-[16px]'}`}>
           {navLinks.map((link) => (
             <NavLink 
               key={link.name} 
               href={link.href} 
-              className="lg:text-[14px] xl:text-[16px]"
+              className="lg:text-[14px] xl:text-[14px] min-[1351px]:text-[16px]"
               disableTruncate={locale === 'en'}
             >
               {link.name}
@@ -55,7 +55,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
         </nav>
 
         {/* Desktop Actions */}
-        <div className={`hidden lg:flex items-center ${locale === 'en' ? 'gap-[4px] xl:gap-[24px]' : 'gap-[4px] xl:gap-[16px]'}`}>
+        <div className={`hidden lg:flex items-center ${locale === 'en' ? 'gap-[4px] xl:gap-[12px] min-[1351px]:gap-[24px]' : 'gap-[4px] xl:gap-[10px] min-[1351px]:gap-[16px]'}`}>
           <Link href="/login">
             <Button
               size="sm"
