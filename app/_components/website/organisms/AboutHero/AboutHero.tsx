@@ -15,13 +15,13 @@ export const AboutHero: React.FC<AboutHeroProps> = ({ className = '' }) => {
         <div className="bg-white rounded-none shadow-sm overflow-hidden grid grid-cols-12">
           {/* Left: Content */}
           <div className="col-span-12 lg:col-span-6 flex flex-col justify-center p-8 lg:p-16 gap-6">
-            <Text variant="heading-xl" className="text-secondary font-bold leading-tight">
+            <Text as="h1" className="text-secondary font-semibold text-[43px] [font-stretch:85%] leading-tight">
               {t('title')}
             </Text>
-            <Text variant="text-m" className="text-secondary font-bold leading-snug">
+            <Text className="text-secondary font-semibold text-[29px] [font-stretch:85%] leading-snug">
               {t('subtitle')}
             </Text>
-            <Text variant="text-s" className="text-secondary/80 leading-relaxed whitespace-pre-line">
+            <Text className="text-secondary font-medium text-[24px] leading-relaxed whitespace-pre-line">
               {t('description')}
             </Text>
           </div>

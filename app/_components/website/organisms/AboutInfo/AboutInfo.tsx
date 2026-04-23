@@ -25,10 +25,10 @@ export const AboutInfo: React.FC<AboutInfoProps> = ({ className = '' }) => {
 
           {/* Right: Content */}
           <div className="col-span-12 lg:col-span-6 order-1 lg:order-2 flex flex-col justify-center p-8 lg:p-16 gap-6">
-            <Text variant="heading-l" className="text-secondary font-bold leading-tight">
+            <Text as="h2" className="text-secondary font-semibold text-[43px] [font-stretch:85%] leading-tight whitespace-pre-line">
               {t('title')}
             </Text>
-            <Text variant="text-s" className="text-secondary/80 leading-relaxed">
+            <Text className="text-secondary font-medium text-[24px] leading-relaxed">
               {t('description')}
             </Text>
           </div>
