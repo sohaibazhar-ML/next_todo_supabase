@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
-import { Camera, PawPrint, Loader2, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Camera, User, Loader2, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Text, Image, Button } from '@/website/atoms';
 import { FormMessage } from '@/website/molecules';
@@ -111,7 +111,7 @@ export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({ firstName, imageUr
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-background-neutral/30 group-hover:bg-background-neutral/50 transition-colors">
-              <PawPrint size={48} className="text-secondary/20" />
+              <User size={48} className="text-secondary/20" />
             </div>
           )}
 
