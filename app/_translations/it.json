@@ -276,43 +276,43 @@
     "items": [
       {
         "question": "La registrazione è davvero gratuita?",
-        "answer": "Sì. La registrazione sul nostro portale è completamente gratuita e non vincolante per voi. Non ci sono costi nascosti o costi aggiuntivi."
+        "answer": "Sì. La registrazione sul nostro portale è gratuita e non comporta alcun obbligo. Non sono previsti costi nascosti, spese ricorrenti o impegni contrattuali derivanti dalla registrazione."
       },
       {
-        "question": "Quali documenti per il trasloco posso scaricare?",
-        "answer": "Offriamo tutti i modelli rilevanti per il vostro trasloco: disdette di affitto, cambi di indirizzo, liste di controllo e verbali di consegna."
+        "question": "Quali documenti posso scaricare?",
+        "answer": "Dopo la registrazione, tutti i documenti e i modelli sono messi gratuitamente a vostra disposizione. I documenti sono destinati esclusivamente all'uso personale. È vietata qualsiasi distribuzione, riproduzione o trasmissione a terzi."
       },
       {
-        "question": "Ci sono obblighi dopo la registrazione?",
-        "answer": "No. Non ci sono durate minime contrattuali o rinnovi automatici. Decidete voi stessi per quanto tempo volete utilizzare il servizio."
+        "question": "Dopo la registrazione sorgono obblighi?",
+        "answer": "No, non sorgono obblighi né abbonamenti a pagamento."
       },
       {
-        "question": "Come verranno utilizzati i miei dati?",
-        "answer": "I vostri dati verranno utilizzati esclusivamente per lo scopo da voi scelto (ad es. creazione di documenti). Non trasmettiamo alcun dato a terzi."
+        "question": "Come vengono utilizzati i miei dati?",
+        "answer": "I vostri dati personali sono trattati nel rispetto della normativa vigente in materia di protezione dei dati. Qualora abbiate fornito il consenso al marketing, i vostri dati saranno utilizzati esclusivamente per informazioni relative ai servizi o per il contatto da parte del nostro partner di cooperazione Helvetia Versicherungs AG."
       },
       {
-        "question": "Posso revocare il mio consenso alla pubblicità?",
-        "answer": "Sì, una revoca è possibile in qualsiasi momento senza problemi nelle impostazioni del vostro account o via e-mail al nostro supporto."
+        "question": "Posso revocare il consenso al marketing?",
+        "answer": "Potete revocare il vostro consenso al marketing in qualsiasi momento con effetto per il futuro tramite e-mail o modulo di contatto. La revoca non pregiudica la liceità del trattamento effettuato prima della revoca."
       },
       {
         "question": "I miei dati sono sicuri?",
-        "answer": "Sì. Utilizziamo tecnologie di crittografia all'avanguardia e sedi di server in Svizzera per proteggere i vostri dati secondo i più alti standard di sicurezza."
+        "answer": "Sì. I vostri dati sono protetti mediante misure tecniche e organizzative di sicurezza allo stato dell'arte, inclusa la crittografia SSL."
       },
       {
-        "question": "Per quanto tempo avrò accesso ai documenti?",
-        "answer": "Finché esiste il vostro account utente, avete accesso illimitato a tutti i documenti che avete creato e salvato."
+        "question": "Per quanto tempo ho accesso ai documenti?",
+        "answer": "L'accesso è disponibile per 12 mesi a partire dalla data di registrazione."
       },
       {
-        "question": "Posso cancellare il mio account utente?",
-        "answer": "Sì. Potete cancellare il vostro account in modo irrevocabile in qualsiasi momento. Tutti i vostri dati personali verranno completamente rimossi in conformità con il GDPR."
+        "question": "Posso eliminare il mio account utente?",
+        "answer": "Sì. Potete richiedere la cancellazione del vostro account utente in qualsiasi momento. Restano salvi eventuali obblighi legali di conservazione."
       },
       {
-        "question": "Chi posso contattare in caso di domande?",
-        "answer": "Il nostro team di supporto è a vostra disposizione in qualsiasi momento via e-mail o tramite il modulo di contatto nel piè di pagina."
+        "question": "A chi posso rivolgermi in caso di domande?",
+        "answer": "Per ulteriori informazioni o assistenza, potete contattare il nostro servizio clienti tramite modulo di contatto, telefono o e-mail. I recapiti sono disponibili sul nostro sito web."
       },
       {
         "question": "In quante lingue sono disponibili i modelli?",
-        "answer": "Attualmente offriamo i nostri modelli in tedesco, francese e italiano per coprire l'intera Svizzera."
+        "answer": "Attualmente, i documenti e i modelli sono forniti esclusivamente in lingua tedesca. Non sussiste alcun diritto alla disponibilità in altre lingue."
       }
     ]
   },

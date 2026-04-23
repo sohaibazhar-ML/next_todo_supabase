@@ -282,43 +282,43 @@
     "items": [
       {
         "question": "Is registration really free?",
-        "answer": "Yes. Registration on our portal is completely free and non-binding for you. There are no hidden fees or follow-up costs."
+        "answer": "Yes. Registration on our portal is provided free of charge and without obligation. No hidden fees, recurring costs, or contractual commitments arise from registration."
       },
       {
-        "question": "Which moving documents can I download?",
-        "answer": "We offer all relevant templates for your move: from tenancy terminations to address changes to checklists and handover protocols."
+        "question": "Which relocation documents can I download?",
+        "answer": "Following registration, all documents and templates are made available to you free of charge. The documents are intended solely for personal use. Any distribution, reproduction, or transfer to third parties is prohibited."
       },
       {
-        "question": "Are there obligations after registration?",
-        "answer": "No. There are no minimum contract periods or automatic renewals. You decide for yourself how long you want to use the service."
+        "question": "Do any obligations arise after registration?",
+        "answer": "No, there are no obligations or paid subscriptions."
       },
       {
-        "question": "How will my data be used?",
-        "answer": "Your data will be used exclusively for the purpose you have chosen (e.g. creation of documents). We do not pass any data on to third parties."
+        "question": "How is my data used?",
+        "answer": "Your personal data is processed in accordance with applicable data protection legislation. Where you have provided marketing consent, your data will be used exclusively for information regarding services or for contact by our cooperation partner Helvetia Versicherungs AG."
       },
       {
-        "question": "Can I revoke the advertising consent?",
-        "answer": "Yes, revocation is possible at any time without problems in your account settings or by email to our support."
+        "question": "Can I withdraw my marketing consent?",
+        "answer": "You may withdraw your marketing consent at any time with effect for the future by email or via the contact form. Withdrawal does not affect the lawfulness of processing carried out prior to withdrawal."
       },
       {
         "question": "Is my data secure?",
-        "answer": "Yes. We use state-of-the-art encryption technologies and server locations in Switzerland to protect your data according to the highest security standards."
+        "answer": "Yes. Your data is protected using state-of-the-art technical and organizational security measures, including SSL encryption."
       },
       {
         "question": "How long do I have access to the documents?",
-        "answer": "As long as your user account exists, you have unlimited access to all documents you have created and saved."
+        "answer": "Access is available for 12 months from the date of registration."
       },
       {
         "question": "Can I delete my user account?",
-        "answer": "Yes. You can delete your account at any time irrevocably. All your personal data will be completely removed in accordance with GDPR."
+        "answer": "Yes. You may request deletion of your user account at any time. Statutory retention obligations remain unaffected."
       },
       {
         "question": "Who can I contact if I have questions?",
-        "answer": "Our support team is at your disposal at any time by email or via the contact form in the footer."
+        "answer": "For further information or assistance, you may contact our customer service via the contact form, by telephone, or by email. Contact details are available on our website."
       },
       {
         "question": "In how many languages are the templates available?",
-        "answer": "We currently offer our templates in German, French and Italian to cover the whole of Switzerland."
+        "answer": "Currently, the documents and templates are provided exclusively in the German language. No entitlement to versions in other languages exists."
       }
     ]
   },

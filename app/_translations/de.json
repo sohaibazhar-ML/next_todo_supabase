@@ -282,43 +282,43 @@
     "items": [
       {
         "question": "Ist die Registrierung wirklich kostenlos?",
-        "answer": "Ja. Die Registrierung auf unserem Portal ist für Sie vollkommen kostenlos und unverbindlich. Es gibt keine versteckten Gebühren oder Folgekosten."
+        "answer": "Ja. Die Registrierung auf unserem Portal ist für Sie vollständig kostenlos und unverbindlich. Es entstehen keinerlei versteckte Gebühren oder Folgekosten."
       },
       {
-        "question": "Welche Umzugsdokumente kann ich downloaden?",
-        "answer": "Wir bieten alle relevanten Vorlagen für Ihren Umzug an: von Mietkündigungen über Adressänderungen bis hin zu Checklisten und Übergabeprotokollen."
+        "question": "Welche Umzugsdokumente kann ich herunterladen?",
+        "answer": "Nach Registrierung stehen Ihnen alle Dokumente kostenlos zur Verfügung. Bitte beachten Sie, dass die Dokumente und Vorlagen nur zur persönlichen Nutzung und die Weitergabe an Dritte nicht gestattet ist."
       },
       {
-        "question": "Gibt es Verpflichtungen nach der Registrierung?",
-        "answer": "Nein. Es gibt keine Mindestvertragslaufzeiten oder automatische Verlängerungen. Sie entscheiden selbst, wie lange Sie den Service nutzen möchten."
+        "question": "Entstehen nach der Registrierung Verpflichtungen?",
+        "answer": "Nein, es entstehen keinerlei Verpflichtungen oder kostenpflichtige Abos."
       },
       {
         "question": "Wie werden meine Daten verwendet?",
-        "answer": "Ihre Daten werden ausschliesslich für den von Ihnen gewählten Zweck (z. B. Erstellung von Dokumenten) verwendet. Wir geben keine Daten an Dritte weiter."
+        "answer": "Wir verwenden Ihre Daten nach den gesetzlichen Datenschutzbestimmungen. Wenn Sie uns eine Werbeeinwilligung gegeben haben, so werden Ihre Daten ausschliesslich im Zusammenhang mit Leistungen bzw. der Kontaktaufnahme durch unseren Partner \"Helvetia Versicherungs AG\" verwendet."
       },
       {
-        "question": "Kann ich die Werbeeinwilligung widerrufen?",
-        "answer": "Ja, ein Widerruf ist jederzeit problemlos in Ihren Kontoeinstellungen oder per E-Mail an unseren Support möglich."
+        "question": "Kann ich meine Einwilligung zur Werbung widerrufen?",
+        "answer": "Ja, die Einwilligung können Sie jederzeit per E-Mail oder mittels Kontaktformular formlos widerrufen. Die Kontaktdaten finden Sie auf unserer Webseite."
       },
       {
         "question": "Sind meine Daten sicher?",
-        "answer": "Ja. Wir nutzen modernste Verschlüsselungstechnologien und Serverstandorte in der Schweiz, um Ihre Daten nach höchsten Sicherheitsstandards zu schützen."
+        "answer": "Ja, Ihre Daten sind sicher und werden SSL-verschlüsselt gespeichert."
       },
       {
         "question": "Wie lange habe ich Zugriff auf die Dokumente?",
-        "answer": "Solange Ihr Benutzerkonto besteht, haben Sie uneingeschränkten Zugriff auf alle von Ihnen erstellten und gespeicherten Dokumente."
+        "answer": "Die Zugriffszeit beträgt 12 Monate ab Tag der Registrierung."
       },
       {
         "question": "Kann ich mein Benutzerkonto löschen?",
-        "answer": "Ja. Sie können Ihr Konto jederzeit unwiderruflich löschen. Alle Ihre persönlichen Daten werden gemäss DSGVO vollständig entfernt."
+        "answer": "Ja, Sie können Ihr Benutzerkonto jederzeit löschen"
       },
       {
         "question": "An wen kann ich mich bei Fragen wenden?",
-        "answer": "Unser Support-Team steht Ihnen jederzeit per E-Mail oder über das Kontaktformular im Footer zur Verfügung."
+        "answer": "Bei Fragen können Sie sich an unseren Service mittels Kontaktformular oder per Telefon und E-Mail wenden. Die Kontaktdaten finden Sie auf unserer Webseite."
       },
       {
         "question": "In wie vielen Sprachen sind die Vorlagen verfügbar?",
-        "answer": "Wir bieten unsere Vorlagen aktuell in Deutsch, Französisch und Italienisch an, um die gesamte Schweiz abzudecken."
+        "answer": "Aktuell stehen Ihnen die Dokumente und Vorlagen ausschliesslich in Deutscher Sprache zur Verfügung"
       }
     ]
   },

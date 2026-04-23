@@ -279,43 +279,43 @@
     "items": [
       {
         "question": "L'inscription est-elle vraiment gratuite ?",
-        "answer": "Oui. L'inscription sur notre portail est entièrement gratuite et sans engagement pour vous. Il n'y a pas de frais cachés ou de frais de suivi."
+        "answer": "Oui. L'inscription sur notre portail est gratuite et sans engagement. Aucun frais caché, coût récurrent ou engagement contractuel ne découle de l'inscription."
       },
       {
         "question": "Quels documents de déménagement puis-je télécharger ?",
-        "answer": "Nous proposons tous les modèles pertinents pour votre déménagement : résiliations de bail, changements d'adresse, listes de contrôle et protocoles de remise."
+        "answer": "Après l'inscription, tous les documents et modèles sont mis à votre disposition gratuitement. Les documents sont destinés exclusivement à un usage personnel. Toute distribution, reproduction ou transfert à des tiers est interdit."
       },
       {
-        "question": "Existe-t-il des obligations après l'inscription ?",
-        "answer": "Non. Il n'y a pas de durée minimale de contrat ou de renouvellement automatique. Vous décidez vous-même de la durée d'utilisation du service."
+        "question": "Des obligations surviennent-elles après l'inscription ?",
+        "answer": "Non, il n'y a aucune obligation ni abonnement payant."
       },
       {
-        "question": "Comment mes données seront-elles utilisées ?",
-        "answer": "Vos données seront utilisées exclusivement aux fins que vous avez choisies (par exemple, la création de documents). Nous ne transmettons aucune donnée à des tiers."
+        "question": "Comment mes données sont-elles utilisées ?",
+        "answer": "Vos données personnelles sont traitées conformément à la législation en vigueur sur la protection des données. Si vous avez donné votre consentement marketing, vos données seront utilisées exclusivement pour des informations concernant les services ou pour une prise de contact par notre partenaire de coopération Helvetia Versicherungs AG."
       },
       {
-        "question": "Puis-je retirer mon consentement à la publicité ?",
-        "answer": "Oui, un retrait est possible à tout moment sans problème dans les paramètres de votre compte ou par e-mail à notre support."
+        "question": "Puis-je retirer mon consentement marketing ?",
+        "answer": "Vous pouvez retirer votre consentement marketing à tout moment avec effet pour l'avenir par e-mail ou via le formulaire de contact. Le retrait n'affecte pas la licéité du traitement effectué avant le retrait."
       },
       {
         "question": "Mes données sont-elles sécurisées ?",
-        "answer": "Oui. Nous utilisons des technologies de cryptage de pointe et des emplacements de serveurs en Suisse pour protéger vos données selon les normes de sécurité les plus élevées."
+        "answer": "Oui. Vos données sont protégées par des mesures de sécurité techniques et organisationnelles de pointe, y compris le cryptage SSL."
       },
       {
-        "question": "Pendant combien de temps aurai-je accès aux documents ?",
-        "answer": "Tant que votre compte utilisateur existe, vous avez un accès illimité à tous les documents que vous avez créés et enregistrés."
+        "question": "Pendant combien de temps ai-je accès aux documents ?",
+        "answer": "L'accès est disponible pendant 12 mois à compter de la date d'inscription."
       },
       {
         "question": "Puis-je supprimer mon compte utilisateur ?",
-        "answer": "Oui. Vous pouvez supprimer votre compte de manière irrévocable à tout moment. Toutes vos données personnelles seront complètement supprimées conformément au RGPD."
+        "answer": "Oui. Vous pouvez demander la suppression de votre compte utilisateur à tout moment. Les obligations légales de conservation restent inchangées."
       },
       {
         "question": "Qui puis-je contacter si j'ai des questions ?",
-        "answer": "Notre équipe de support est à votre disposition à tout moment par e-mail ou via le formulaire de contact en pied de page."
+        "answer": "Pour plus d'informations ou d'assistance, vous pouvez contacter notre service client via le formulaire de contact, par téléphone ou par e-mail. Les coordonnées sont disponibles sur notre site web."
       },
       {
         "question": "En combien de langues les modèles sont-ils disponibles ?",
-        "answer": "Nous proposons actuellement nos modèles en allemand, français et italien pour couvrir l'ensemble de la Suisse."
+        "answer": "Actuellement, les documents et modèles sont fournis exclusivement en langue allemande. Aucun droit à des versions dans d'autres langues n'existe."
       }
     ]
   },
