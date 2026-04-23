@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/service';
 import { STORAGE_BUCKETS } from '@/constants';
 
 export async function DELETE(
@@ -31,7 +32,8 @@ export async function DELETE(
 
     // 1. Delete from Supabase storage
     if (document.file_path) {
-      const { error: storageError } = await supabase.storage
+      const adminClient = createServiceClient();
+      const { error: storageError } = await adminClient.storage
         .from(STORAGE_BUCKETS.DOCUMENTS)
         .remove([document.file_path]);
 
