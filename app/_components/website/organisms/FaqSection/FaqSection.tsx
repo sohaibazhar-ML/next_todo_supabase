@@ -22,11 +22,6 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
           <Text variant="heading-xl" className="text-secondary">
             {title}
           </Text>
-          {description && (
-            <Text variant="text-m" className="text-secondary max-w-[700px] mx-auto opacity-80">
-              {description}
-            </Text>
-          )}
         </div>
 
         {/* FAQ List with white gaps */}

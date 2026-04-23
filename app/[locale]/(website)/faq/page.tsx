@@ -21,7 +21,6 @@ export default function FaqPage() {
 
       <FaqSection
         title={t('title')}
-        description={t('description')}
         items={faqItems}
       />
 
