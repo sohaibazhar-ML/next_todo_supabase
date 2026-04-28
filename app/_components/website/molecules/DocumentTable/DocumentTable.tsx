@@ -57,10 +57,10 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
 
   return (
     <div className="w-full flex justify-center">
-      <div className="w-full max-w-6xl bg-white rounded shadow-sm overflow-hidden border border-gray-200 relative">
+      <div className="w-full max-w-6xl relative">
         {/* Loading Overlay */}
         {isLoading && (
-          <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-10 flex items-center justify-center animate-in fade-in duration-200">
+          <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-20 flex items-center justify-center animate-in fade-in duration-200">
             <div className="flex flex-col items-center gap-3">
               <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
               <Text variant="text-xxs" className="text-secondary/60 font-bold uppercase tracking-widest">{t('loading') || 'Sorting...'}</Text>
@@ -68,112 +68,124 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
           </div>
         )}
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse min-w-[700px]">
+          <table className="w-full border-separate border-spacing-y-[4px]">
           <thead>
-            <tr className="bg-[#414141] text-white">
+            <tr className="text-white">
               {variant === 'all' ? (
                 <>
                   <th 
-                    className="py-3 px-4 text-left font-semibold text-sm border-r border-white/10 w-[15%] cursor-pointer hover:bg-[#555555] transition-colors group"
+                    className="py-[12px] px-4 text-left w-[18%] cursor-pointer bg-[#333333] hover:bg-[#444444] transition-colors group first:rounded-tl-sm relative"
                     onClick={() => onSortChange?.('category')}
                   >
-                    <div className="flex items-center gap-1">
-                      {t('columns.category')}
-                      <span className={`text-[10px] transition-opacity ${sortField === 'category' ? 'opacity-100' : 'opacity-30 group-hover:opacity-50'}`}>
+                    <div className="flex items-center justify-between">
+                      <Text variant="table-heading" className="text-white">{t('columns.category')}</Text>
+                      <span className={`text-[12px] transition-opacity ${sortField === 'category' ? 'opacity-100' : 'opacity-40'}`}>
                         {sortField === 'category' && sortOrder === 'desc' ? '▼' : '▲'}
                       </span>
                     </div>
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-white/20" />
                   </th>
                   <th 
-                    className="py-3 px-4 text-left font-semibold text-sm border-r border-white/10 w-[45%] cursor-pointer hover:bg-[#555555] transition-colors group"
+                    className="py-[12px] px-4 text-left w-[42%] cursor-pointer bg-[#333333] hover:bg-[#444444] transition-colors group relative"
                     onClick={() => onSortChange?.('title')}
                   >
-                    <div className="flex items-center gap-1">
-                      {t('columns.name')}
-                      <span className={`text-[10px] transition-opacity ${sortField === 'title' ? 'opacity-100' : 'opacity-30 group-hover:opacity-50'}`}>
+                    <div className="flex items-center justify-between">
+                      <Text variant="table-heading" className="text-white">{t('columns.name')}</Text>
+                      <span className={`text-[12px] transition-opacity ${sortField === 'title' ? 'opacity-100' : 'opacity-40'}`}>
                         {sortField === 'title' && sortOrder === 'desc' ? '▼' : '▲'}
                       </span>
                     </div>
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-white/20" />
                   </th>
                   <th 
-                    className="py-3 px-4 text-left font-semibold text-sm border-r border-white/10 w-[30%] cursor-pointer hover:bg-[#555555] transition-colors group"
+                    className="py-[12px] px-4 text-left w-[30%] cursor-pointer bg-[#333333] hover:bg-[#444444] transition-colors group relative"
                     onClick={() => onSortChange?.('recipient')}
                   >
-                    <div className="flex items-center gap-1">
-                      {t('columns.recipient')}
-                      <span className={`text-[10px] transition-opacity ${sortField === 'recipient' ? 'opacity-100' : 'opacity-30 group-hover:opacity-50'}`}>
+                    <div className="flex items-center justify-between">
+                      <Text variant="table-heading" className="text-white">{t('columns.recipient')}</Text>
+                      <span className={`text-[12px] transition-opacity ${sortField === 'recipient' ? 'opacity-100' : 'opacity-40'}`}>
                         {sortField === 'recipient' && sortOrder === 'desc' ? '▼' : '▲'}
                       </span>
                     </div>
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-white/20" />
                   </th>
-                  <th className="py-3 px-4 text-left font-semibold text-sm w-[10%] text-center">
-                    {t('columns.file')}
+                  <th className="py-[12px] px-4 text-left w-[10%] bg-[#333333] last:rounded-tr-sm">
+                    <Text variant="table-heading" className="text-white">{t('columns.file')}</Text>
                   </th>
                 </>
               ) : (
                 <>
                   <th 
-                    className="py-3 px-4 text-left font-semibold text-sm border-r border-white/10 w-[55%] cursor-pointer hover:bg-[#555555] transition-colors group"
+                    className="py-[12px] px-4 text-left w-[55%] cursor-pointer bg-[#333333] hover:bg-[#444444] transition-colors group first:rounded-tl-sm relative"
                     onClick={() => onSortChange?.('title')}
                   >
-                    <div className="flex items-center gap-1">
-                      {t('columns.name')}
-                      <span className={`text-[10px] transition-opacity ${sortField === 'title' ? 'opacity-100' : 'opacity-30 group-hover:opacity-50'}`}>
+                    <div className="flex items-center justify-between">
+                      <Text variant="table-heading" className="text-white">{t('columns.name')}</Text>
+                      <span className={`text-[12px] transition-opacity ${sortField === 'title' ? 'opacity-100' : 'opacity-40'}`}>
                         {sortField === 'title' && sortOrder === 'desc' ? '▼' : '▲'}
                       </span>
                     </div>
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-white/20" />
                   </th>
                   <th 
-                    className="py-3 px-4 text-left font-semibold text-sm border-r border-white/10 w-[20%] cursor-pointer hover:bg-[#555555] transition-colors group"
+                    className="py-[12px] px-4 text-left w-[20%] cursor-pointer bg-[#333333] hover:bg-[#444444] transition-colors group relative"
                     onClick={() => onSortChange?.('created_at')}
                   >
-                    <div className="flex items-center gap-1">
-                      {t('columns.date')}
-                      <span className={`text-[10px] transition-opacity ${sortField === 'created_at' ? 'opacity-100' : 'opacity-30 group-hover:opacity-50'}`}>
+                    <div className="flex items-center justify-between">
+                      <Text variant="table-heading" className="text-white">{t('columns.date')}</Text>
+                      <span className={`text-[12px] transition-opacity ${sortField === 'created_at' ? 'opacity-100' : 'opacity-40'}`}>
                         {sortField === 'created_at' && sortOrder === 'desc' ? '▼' : '▲'}
                       </span>
                     </div>
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-white/20" />
                   </th>
-                  <th className="py-3 px-4 text-left font-semibold text-sm border-r border-white/10 w-[15%] text-center">
-                    {t('columns.download')}
+                  <th className="py-[12px] px-4 text-center bg-[#333333] relative">
+                    <div className="flex items-center justify-between">
+                      <Text variant="table-heading" className="text-white">{t('columns.download')}</Text>
+                      <span className="text-[12px] opacity-40">▲</span>
+                    </div>
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-white/20" />
                   </th>
-                  <th className="py-3 px-4 text-left font-semibold text-sm w-[10%] text-center">
-                    {t('columns.delete')}
+                  <th className="py-[12px] px-4 text-center bg-[#333333] last:rounded-tr-sm">
+                    <Text variant="table-heading" className="text-white">{t('columns.delete')}</Text>
                   </th>
                 </>
               )}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody>
             {documents.map((doc) => (
               <tr 
                 key={doc.id} 
                 onClick={() => {
                   if (variant === 'all') onDownloadClick?.(doc);
                 }}
-                className={`hover:bg-gray-50/50 transition-colors ${variant === 'all' ? 'cursor-pointer' : ''}`}
+                className={`group transition-colors ${variant === 'all' ? 'cursor-pointer' : ''}`}
               >
                 {variant === 'all' ? (
                   <>
-                    <td className="py-3.5 px-4 text-sm text-secondary/80 border-r border-gray-100">
-                      {doc.category || 'Info'}
+                    <td className="py-[6.5px] px-4 relative bg-white first:rounded-l-sm group-hover:bg-gray-50 transition-colors">
+                      <Text variant="table-data">{doc.category || 'Info'}</Text>
+                      <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-gray-300" />
                     </td>
-                    <td className="py-3.5 px-4 text-sm text-secondary font-medium border-r border-gray-100">
-                      {doc.name}
+                    <td className="py-[6.5px] px-4 relative bg-white group-hover:bg-gray-50 transition-colors">
+                      <Text variant="table-data">{doc.name}</Text>
+                      <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-gray-300" />
                     </td>
-                    <td className="py-3.5 px-4 text-sm text-secondary/80 border-r border-gray-100">
-                      {doc.recipient || '-'}
+                    <td className="py-[6.5px] px-4 relative bg-white group-hover:bg-gray-50 transition-colors">
+                      <Text variant="table-data">{doc.recipient || '-'}</Text>
+                      <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-gray-300" />
                     </td>
-                    <td className="py-3.5 px-4 text-center">
-                      <div className="inline-flex items-center justify-center transition-transform hover:scale-110">
+                    <td className="py-[6.5px] px-4 text-center bg-white last:rounded-r-sm group-hover:bg-gray-50 transition-colors">
+                      <div className="inline-flex items-center justify-center transition-transform hover:scale-105">
                         {downloadingId === doc.id ? (
                           <Loader2 size={24} className="animate-spin text-primary" />
                         ) : (
                           <Image 
                             src={getFileIcon(doc.type)} 
                             alt="file icon" 
-                            width={24} 
-                            height={24}
+                            width={23} 
+                            height={28}
                             className="object-contain"
                           />
                         )}
@@ -182,32 +194,35 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
                   </>
                 ) : (
                   <>
-                    <td className="py-3.5 px-4 text-sm text-secondary font-medium border-r border-gray-100">
-                      {doc.name}
+                    <td className="py-[6.5px] px-4 relative bg-white first:rounded-l-sm group-hover:bg-gray-50 transition-colors">
+                      <Text variant="table-data">{doc.name}</Text>
+                      <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-gray-300" />
                     </td>
-                    <td className="py-3.5 px-4 text-sm text-secondary/80 border-r border-gray-100">
-                      {formatDate(doc.createdAt)}
+                    <td className="py-[6.5px] px-4 relative bg-white group-hover:bg-gray-50 transition-colors">
+                      <Text variant="table-data">{formatDate(doc.createdAt)}</Text>
+                      <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-gray-300" />
                     </td>
-                    <td className="py-3.5 px-4 text-center border-r border-gray-100">
+                    <td className="py-[6.5px] px-4 relative text-center bg-white group-hover:bg-gray-50 transition-colors">
                       <Button 
                         variant="unstyled"
                         onClick={() => onDownloadClick?.(doc)}
                         disabled={!!downloadingId}
-                        className="inline-flex items-center justify-center transition-transform hover:scale-110 text-secondary disabled:opacity-50"
+                        className="inline-flex items-center justify-center transition-transform hover:scale-105 text-secondary disabled:opacity-50"
                         title={t('columns.download')}
                       >
                         {downloadingId === doc.id ? (
-                          <Loader2 size={20} className="animate-spin text-primary" />
+                          <Loader2 size={24} className="animate-spin text-primary" />
                         ) : (
-                          <Download size={20} />
+                          <Download size={24} />
                         )}
                       </Button>
+                      <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-gray-300" />
                     </td>
-                    <td className="py-3.5 px-4 text-center">
+                    <td className="py-[6.5px] px-4 text-center bg-white last:rounded-r-sm group-hover:bg-gray-50 transition-colors">
                       <Button 
                         variant="unstyled"
                         onClick={() => onDeleteClick?.(doc)}
-                        className="inline-flex items-center justify-center transition-transform hover:scale-110 text-primary font-bold text-xl"
+                        className="inline-flex items-center justify-center transition-transform hover:scale-110 text-primary font-bold text-2xl"
                         title={t('columns.delete')}
                       >
                         X

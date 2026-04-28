@@ -9,7 +9,9 @@ export type TextVariant =
   | 'dashboard-sidebar'
   | 'card-label'
   | 'card-title'
-  | 'progress-label';
+  | 'progress-label'
+  | 'table-heading'
+  | 'table-data';
 
 export type TextTag = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span' | 'div' | 'label';
 

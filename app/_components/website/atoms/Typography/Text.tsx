@@ -28,6 +28,8 @@ const variantMap: Record<TextVariant, string> = {
   'card-label': 'text-card-label',
   'card-title': 'text-card-title',
   'progress-label': 'text-progress-label',
+  'table-heading': 'text-table-heading',
+  'table-data': 'text-table-data',
 };
 
 const defaultTagMap: Record<TextVariant, React.ElementType> = {
@@ -57,6 +59,8 @@ const defaultTagMap: Record<TextVariant, React.ElementType> = {
   'card-label': 'span',
   'card-title': 'p',
   'progress-label': 'p',
+  'table-heading': 'span',
+  'table-data': 'span',
 };
 
 export const Text: React.FC<TextProps> = ({
