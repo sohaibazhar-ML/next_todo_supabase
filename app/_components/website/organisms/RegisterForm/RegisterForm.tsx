@@ -1,7 +1,7 @@
 "use client";
 import React, { useActionState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { Text, Button, Input, Select, Checkbox, SelectOption, DateTimeInput, LoadingOverlay } from '@/website/atoms';
+import { Text, Button, Input, Select, Checkbox, SelectOption, DateTimeInput, LoadingOverlay, SearchableSelect } from '@/website/atoms';
 import { FormMessage } from '@/website/molecules';
 import { Eye, EyeOff, CheckCircle, CheckCircle2 } from 'lucide-react';
 import { RegisterFormProps } from '@/website/organisms/RegisterForm/RegisterForm.types';
@@ -267,11 +267,12 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
             />
           </div>
           <div className="col-span-12 md:col-span-4">
-            <Select
+            <SearchableSelect
               id="country"
               name="country"
               label={t('fields.country.label')}
               placeholder={t('fields.country.placeholder')}
+              searchPlaceholder={t('fields.country.searchPlaceholder')}
               options={countryOptions}
               required
               value={formData.country}

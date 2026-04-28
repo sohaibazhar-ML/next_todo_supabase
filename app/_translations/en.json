@@ -150,6 +150,7 @@
       "country": {
         "label": "Country",
         "placeholder": "Select",
+        "searchPlaceholder": "Search country...",
         "options": {
           "AF": "Afghanistan",
           "AL": "Albania",

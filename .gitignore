@@ -46,3 +46,5 @@ next-env.d.ts
 ignore.md
 website-rules.md
 RELEASE_NOTES*.md
+setup_guide.md
+environment.ts

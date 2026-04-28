@@ -147,6 +147,7 @@
       "country": {
         "label": "Pays",
         "placeholder": "Sélectionner",
+        "searchPlaceholder": "Chercher un pays...",
         "options": {
           "AF": "Afghanistan",
           "AL": "Albanie",
