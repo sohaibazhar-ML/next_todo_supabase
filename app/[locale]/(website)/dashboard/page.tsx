@@ -53,7 +53,7 @@ export default async function DashboardPage(props: PageProps) {
   }) : [];
 
   return (
-    <DashboardLayout activeTab="dashboard">
+    <DashboardLayout activeTab="dashboard" showSearch={true}>
       <DashboardOverview 
         progressPercent={progressPercent} 
         featuredDocuments={featuredDocuments} 

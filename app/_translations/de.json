@@ -343,6 +343,9 @@
     }
   },
   "Dashboard": {
+    "featuredDocuments": "Vorgeschlagene Dokumente",
+    "viewAll": "Alle anzeigen",
+    "noResultsFound": "Keine Ergebnisse für Ihre Suche gefunden.",
     "header": {
       "account": "Dashboard",
       "documents": "Meine Dokumente",

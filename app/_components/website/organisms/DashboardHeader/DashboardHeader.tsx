@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Menu, X, LogOut, Search } from 'lucide-react';
+import { Menu, X, LogOut, Search, Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Logo, Image, Text, Input, Button } from '@/website/atoms';
 import { Link } from '@/i18n/routing';
@@ -26,15 +26,22 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const [isPending, startTransition] = React.useTransition();
+  const [isLogoutPending, startLogoutTransition] = React.useTransition();
+  const [isSearchPending, startSearchTransition] = React.useTransition();
   const { value: isSearchOpen, toggle: toggleSearch } = useToggle(false);
   const { value: isMobileMenuOpen, toggle: toggleMobileMenu, close: closeMobileMenu } = useToggle(false);
 
   // Search State
   const [searchValue, setSearchValue] = React.useState(searchParams.get('q') || '');
-  const debouncedSearch = useDebounce(searchValue, 500);
+  const debouncedSearch = useDebounce(searchValue, 300); // 300ms is more stable for server-side search
 
-  // Sync Search with URL (only when search is enabled for this page)
+  const handleSearchChange = (val: string) => {
+    setSearchValue(val);
+    // Dispatch instant event for really fast client-side filtering (overview only)
+    window.dispatchEvent(new CustomEvent('dashboard:search', { detail: val }));
+  };
+
+  // Sync Search with URL
   React.useEffect(() => {
     if (!showSearch) return;
 
@@ -47,10 +54,11 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       } else {
         params.delete('q');
       }
-      // Reset to page 1 on new search
       params.delete('page');
       
-      router.push(`${pathname}?${params.toString()}`);
+      startSearchTransition(() => {
+        router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+      });
     }
   }, [debouncedSearch, router, pathname, searchParams, showSearch]);
 
@@ -62,15 +70,18 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   }, [showSearch]);
 
   // Sync search input with URL (e.g. on back button)
+  // ONLY if the search input is not active, to prevent typing race conditions
   React.useEffect(() => {
     const q = searchParams.get('q') || '';
-    if (q !== searchValue) {
+    const isInputFocused = document.activeElement?.id === 'search-desktop' || document.activeElement?.id === 'search-mobile';
+    
+    if (q !== searchValue && !isInputFocused) {
       setSearchValue(q);
     }
-  }, [searchParams]);
+  }, [searchParams, searchValue]);
 
   const handleLogout = () => {
-    startTransition(async () => {
+    startLogoutTransition(async () => {
       await logoutAction();
     });
   };
@@ -117,8 +128,9 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                   inputSize="sm"
                   type='search'
                   value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
+                  onChange={(e) => handleSearchChange(e.target.value)}
                   placeholder={t('searchPlaceholder')}
+                  rightIcon={isSearchPending ? () => <Loader2 className="animate-spin" size={18} /> : undefined}
                   className="bg-white border-transparent focus:ring-0 transition-all shadow-sm !h-[36px] !rounded-[4px]"
                   inputClassName="text-secondary placeholder:text-secondary/50 py-[5px] px-[20px] !h-[36px]"
                 />
@@ -144,7 +156,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               variant="ghost"
               size="sm"
               onClick={handleLogout}
-              isLoading={isPending}
+              isLoading={isLogoutPending}
               className="text-white font-semibold p-0 h-auto hover:bg-transparent !text-[23px] [font-stretch:85%]"
             >
               {t('logout')}
@@ -208,9 +220,9 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               id="search-mobile"
               type='search'
               value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               placeholder={t('searchPlaceholder')}
-              rightIcon={Search}
+              rightIcon={isSearchPending ? () => <Loader2 className="animate-spin" size={18} /> : Search}
               className="w-full h-[40px] shadow-inner bg-white"
             />
           </div>
