@@ -102,7 +102,7 @@
     "noAccount": "No account yet?",
     "register": "Register for free",
     "errors": {
-      "userNotFound": "User not found or user does not exist",
+      "userNotFound": "User not found. Please check your email address and try again.",
       "invalidCredentials": "Invalid email or password.",
       "emailNotConfirmed": "Your email address has not been confirmed yet. Please check your inbox.",
       "connectionError": "Unable to connect. Please check your internet connection and try again."

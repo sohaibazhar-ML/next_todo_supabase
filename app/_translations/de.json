@@ -102,7 +102,7 @@
     "noAccount": "Noch kein Konto?",
     "register": "Kostenlos registrieren",
     "errors": {
-      "userNotFound": "Benutzer nicht gefunden oder Benutzer existiert nicht",
+      "userNotFound": "Benutzer nicht gefunden. Bitte überprüfen Sie Ihre E-Mail-Adresse und versuchen Sie es erneut.",
       "invalidCredentials": "Ungültige E-Mail oder Passwort.",
       "emailNotConfirmed": "Ihre E-Mail-Adresse wurde noch nicht bestätigt. Bitte überprüfen Sie Ihren Posteingang.",
       "connectionError": "Verbindung fehlgeschlagen. Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut."

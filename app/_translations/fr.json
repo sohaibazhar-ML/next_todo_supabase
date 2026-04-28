@@ -108,7 +108,7 @@
     "noAccount": "Pas encore de compte ?",
     "register": "S'inscrire gratuitement",
     "errors": {
-      "userNotFound": "Utilisateur non trouvé ou l'utilisateur n'existe pas",
+      "userNotFound": "Utilisateur non trouvé. Veuillez vérifier votre adresse e-mail et réessayer.",
       "invalidCredentials": "E-mail ou mot de passe invalide.",
       "connectionError": "Échec de la connexion. Veuillez vérifier votre connexion Internet et réessayer."
     }
