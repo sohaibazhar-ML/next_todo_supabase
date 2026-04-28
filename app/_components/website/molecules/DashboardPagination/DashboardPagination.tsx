@@ -23,7 +23,7 @@ export const DashboardPagination: React.FC<DashboardPaginationProps> = ({
         size="sm"
         onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="text-secondary/60 hover:text-secondary p-0 h-auto font-normal"
+        className="p-0 h-auto text-pagination-label lowercase"
       >
         {t('prev')}
       </Button>
@@ -46,8 +46,8 @@ export const DashboardPagination: React.FC<DashboardPaginationProps> = ({
                 size="sm"
                 onClick={() => onPageChange(page)}
                 className={`transition-all flex items-center justify-center h-6 min-w-[20px] rounded-none p-0 ${currentPage === page
-                  ? 'text-secondary border-b-2 border-secondary font-bold'
-                  : 'text-secondary/60 hover:text-secondary'
+                  ? 'text-secondary border-b-2 border-secondary font-bold text-[24px]'
+                  : 'text-secondary/60 hover:text-secondary text-[20px]'
                   }`}
               >
                 {page}
@@ -63,7 +63,7 @@ export const DashboardPagination: React.FC<DashboardPaginationProps> = ({
         size="sm"
         onClick={() => currentPage < totalPages && onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="text-secondary/60 hover:text-secondary p-0 h-auto font-normal"
+        className="p-0 h-auto text-pagination-label lowercase"
       >
         {t('next')}
       </Button>
