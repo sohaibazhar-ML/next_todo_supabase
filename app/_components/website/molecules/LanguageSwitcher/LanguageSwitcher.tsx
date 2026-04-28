@@ -71,6 +71,11 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     router.replace(pathname, { locale: newLocale as "en" | "de" | "fr" | "it" });
   };
 
+  const isDashboard = pathname.startsWith('/dashboard') || pathname.startsWith('/account');
+  const arrowIcon = isDashboard 
+    ? "/assets/website/icons/lite-grey-arrow-down.png" 
+    : "/assets/website/icons/black-down-arrow-icon.png";
+
   const currentLang = languages.find(l => l.code === locale) || languages.find(l => l.code === 'de')!;
 
   return (
@@ -90,12 +95,12 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
             className="object-contain"
           />
         </div>
-        <div className="relative w-[12px] h-[12px] flex-shrink-0 ml-[3px] mt-auto mb-0.5">
+        <div className={`relative w-[11px] h-[11px] flex-shrink-0 ml-[3px] ${isDashboard ? 'mt-auto mb-0.5' : 'mb-0.5'}`}>
           <Image
-            src="/assets/website/icons/lite-grey-arrow-down.png"
+            src={arrowIcon}
             alt="Dropdown"
             fill
-            sizes="12px"
+            sizes="11px"
             className="object-contain"
           />
         </div>
