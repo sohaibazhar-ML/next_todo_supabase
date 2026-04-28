@@ -1,4 +1,4 @@
-export type LogoVariant = 'primary' | 'helvetia' | 'mehrwerk' | 'swisscom';
+export type LogoVariant = 'primary' | 'helvetia' | 'mehrwerk' | 'swisscom' | 'logo2';
 
 export interface LogoProps {
   variant?: LogoVariant;

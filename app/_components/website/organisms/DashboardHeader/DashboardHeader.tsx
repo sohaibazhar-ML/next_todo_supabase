@@ -76,38 +76,13 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   };
 
   return (
-    <header className={`w-full flex flex-col ${className}`}>
-      {/* Top Tier: White background with Logo and Banner (Same as before) */}
-      <div className="w-full bg-white flex justify-center py-4 lg:py-0 h-auto lg:h-[120px]">
-        <div className="max-w-[1440px] w-full px-4 sm:px-6 lg:px-10 flex items-center justify-between lg:h-full">
-          {/* Logo */}
-          <Link href="/">
-            <Logo
-              variant="primary"
-              className="w-[120px] h-[30px] sm:w-[150px] sm:h-[37px] lg:w-[260px] lg:h-[65px]"
-            />
-          </Link>
-
-          {/* Banner Image (Right Aligned) - Desktop Only */}
-          <div className="hidden lg:block relative h-[120px] w-[400px]">
-            <Image
-              src="/assets/website/dashboard/dashboard-header-right.png"
-              alt="Dashboard Banner"
-              fill
-              sizes="400px"
-              className="object-contain object-right"
-              priority
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Tier: Nav/Search Bar (Same styling as before) */}
-      <div className="w-full bg-background-nav flex justify-center h-auto min-h-[50px] lg:min-h-[60px] shadow-md relative z-20">
-        <div className="max-w-[1440px] w-full px-4 sm:px-6 lg:px-10 flex items-center justify-between gap-4">
+    <header className={`w-full flex flex-col shadow-md relative z-50 ${className}`}>
+      {/* Main Nav Bar */}
+      <div className="w-full bg-background-dark flex justify-center h-auto">
+        <div className="max-w-[1440px] w-full px-6 lg:px-[50px] py-[9px] flex items-center justify-between gap-4">
           
-          {/* Left: Heading (Replacing Nav Tabs) */}
-          <div className="flex items-center gap-3 h-full">
+          {/* Left Section: Logo & Mobile Menu */}
+          <div className="flex items-center gap-4 lg:gap-8 flex-shrink-0">
             <Button
               variant="ghost"
               size="sm"
@@ -117,31 +92,43 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             >
               <Menu size={24} />
             </Button>
+            
+            <Link href="/">
+              <Logo
+                variant="logo2"
+                className="w-[140px] h-[35px] lg:w-[220px] lg:h-[55px]"
+              />
+            </Link>
+          </div>
+
+          {/* Middle Section: Title & Search */}
+          <div className="hidden md:flex items-center justify-center gap-6 lg:gap-12 flex-1 px-4 lg:px-10">
             <Text 
               variant="heading-m" 
-              className="text-white font-bold uppercase tracking-tight"
+              className="text-white font-semibold whitespace-nowrap !text-[23px] [font-stretch:85%]"
             >
               {t('portalTitle')}
             </Text>
+
+            {showSearch && (
+              <div className="flex-1 max-w-[411px]">
+                <Input
+                  id="search-desktop"
+                  inputSize="sm"
+                  type='search'
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  placeholder={t('searchPlaceholder')}
+                  className="bg-white border-transparent focus:ring-0 transition-all shadow-sm !h-[36px] !rounded-[4px]"
+                  inputClassName="text-secondary placeholder:text-secondary/50 py-[5px] px-[20px] !h-[36px]"
+                />
+              </div>
+            )}
           </div>
 
-          {/* Middle: Search Bar (Desktop) — hidden via CSS when not on a searchable page */}
-          <div className={`flex-1 max-w-[500px] ${showSearch ? 'hidden md:block' : 'hidden'}`}>
-            <Input
-              id="search-desktop"
-              inputSize="sm"
-              type='search'
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              placeholder={t('searchPlaceholder')}
-              rightIcon={Search}
-              className="bg-white/95 border-transparent focus:bg-white transition-all shadow-sm"
-            />
-          </div>
-
-          {/* Right: Actions */}
-          <div className="flex items-center gap-3 lg:gap-10">
-            {/* Mobile Search Trigger — hidden via CSS when not on a searchable page */}
+          {/* Right Section: Actions */}
+          <div className="flex items-center gap-4 lg:gap-8 flex-shrink-0">
+            {/* Mobile Search Trigger */}
             <Button
               variant="ghost"
               size="sm"
@@ -158,12 +145,12 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               size="sm"
               onClick={handleLogout}
               isLoading={isPending}
-              className="text-white font-bold p-0 h-auto hover:bg-transparent"
+              className="text-white font-semibold p-0 h-auto hover:bg-transparent !text-[23px] [font-stretch:85%]"
             >
               {t('logout')}
             </Button>
 
-            {/* Language Switcher (Same as before) */}
+            {/* Language Switcher */}
             <div className="scale-75 lg:scale-90 opacity-90 hover:opacity-100 transition-opacity flex-shrink-0">
               <LanguageSwitcher customIcon="/assets/website/dashboard/language-switcher-icon-2.png" />
             </div>
@@ -191,7 +178,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                 className="fixed left-0 top-0 h-full w-[280px] bg-white z-[101] lg:hidden shadow-2xl flex flex-col"
               >
-                <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-background-nav text-white">
+                <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-background-dark text-white">
                   <Text variant="heading-m" className="font-bold uppercase tracking-tight">
                     {t('portalTitle')}
                   </Text>
@@ -215,7 +202,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
         {/* Mobile Search Dropdown — hidden via CSS when not on a searchable page */}
         {isSearchOpen && (
-          <div className={`absolute top-full left-0 w-full bg-background-nav px-4 py-3 border-t border-white/10 z-30 shadow-lg animate-in slide-in-from-top-2 duration-200 ${showSearch ? 'md:hidden' : 'hidden'}`}>
+          <div className={`absolute top-full left-0 w-full bg-background-dark px-4 py-3 border-t border-white/10 z-30 shadow-lg animate-in slide-in-from-top-2 duration-200 ${showSearch ? 'md:hidden' : 'hidden'}`}>
             <Input
               autoFocus
               id="search-mobile"

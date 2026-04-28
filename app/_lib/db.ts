@@ -6,8 +6,13 @@ import { Pool } from 'pg'
 //   prisma: PrismaClient | undefined
 // }
 
-const connectionString = process.env.DATABASE_URL
-const pool = new Pool({ connectionString })
+const connectionString = process.env.DIRECT_URL || process.env.DATABASE_URL
+const pool = new Pool({ 
+  connectionString,
+  ssl: connectionString?.includes('supabase.co') || connectionString?.includes('pooler.supabase.com') 
+    ? { rejectUnauthorized: false } 
+    : false
+})
 const adapter = new PrismaPg(pool)
 
 // Note: In Prisma 7, the constructor accepts an 'adapter' property.
