@@ -79,7 +79,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         <Text variant="text-s" className="text-secondary font-medium">
           {t('overview.progress', { percent: progressPercent })}
         </Text>
-        <div className="w-full max-w-xl h-6 bg-gray-100 flex rounded-full overflow-hidden">
+        <div 
+          className="w-full h-[20px] flex overflow-hidden" 
+          style={{ backgroundColor: '#999999' }}
+        >
           <div 
             className="h-full bg-primary transition-all duration-500 ease-out" 
             style={{ width: `${progressPercent}%` }}
