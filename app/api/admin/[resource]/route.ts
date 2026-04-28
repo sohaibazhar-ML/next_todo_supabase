@@ -487,8 +487,8 @@ export async function GET(
 
 // SECURITY: Whitelist of fields allowed for each resource to prevent mass assignment
 const RESOURCE_FIELD_WHITELISTS: Record<ResourceName, string[]> = {
-    profiles: ['first_name', 'last_name', 'role', 'current_address', 'country_of_origin', 'phone_number', 'number_of_adults', 'number_of_children', 'pets_type', 'new_address_switzerland', 'marketing_consent', 'terms_accepted', 'data_privacy_accepted', 'keep_me_logged_in', 'admin_notes'],
-    users: ['first_name', 'last_name', 'role', 'current_address', 'country_of_origin', 'phone_number', 'number_of_adults', 'number_of_children', 'pets_type', 'new_address_switzerland', 'marketing_consent', 'terms_accepted', 'data_privacy_accepted', 'keep_me_logged_in', 'admin_notes'],
+    profiles: ['first_name', 'last_name', 'role', 'current_address', 'country_of_origin', 'phone_number', 'number_of_adults', 'number_of_children', 'has_pets', 'pets_type', 'new_address_switzerland', 'marketing_consent', 'terms_accepted', 'data_privacy_accepted', 'keep_me_logged_in', 'admin_notes', 'gender', 'preferred_call_time', 'total_persons', 'preferred_language'],
+    users: ['first_name', 'last_name', 'role', 'current_address', 'country_of_origin', 'phone_number', 'number_of_adults', 'number_of_children', 'has_pets', 'pets_type', 'new_address_switzerland', 'marketing_consent', 'terms_accepted', 'data_privacy_accepted', 'keep_me_logged_in', 'admin_notes', 'gender', 'preferred_call_time', 'total_persons', 'preferred_language'],
     documents: ['title', 'description', 'category', 'is_featured', 'file_name', 'file_path', 'file_size', 'file_type', 'mime_type', 'recipient'],
     'documents-list': ['title', 'description', 'category', 'is_featured', 'recipient'],
     download_logs: [], // Usually read-only via this API
@@ -538,12 +538,15 @@ export async function POST(
     const data = whitelistFields(body, resource);
 
     try {
-        // Automatically associate the record with the current admin/subadmin
+        const createData: any = { ...data };
+        
+        // Only add created_by if the resource is documents (the only model currently supporting it)
+        if (resource === 'documents' || resource === 'documents-list') {
+            createData.created_by = auth.user.id;
+        }
+
         const record = await (model as any).create({ 
-            data: {
-                ...data,
-                created_by: auth.user.id
-            } 
+            data: createData
         });
         return NextResponse.json(serializeRecord(record, resource), { status: 201 });
     } catch (error) {

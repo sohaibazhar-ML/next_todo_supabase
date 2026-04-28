@@ -1,5 +1,5 @@
-import React from 'react';
 import { Edit, SimpleForm, TextInput, BooleanInput, SelectInput, TopToolbar, ListButton } from 'react-admin';
+import { DynamicCategoryInput } from '../../atoms/DynamicCategoryInput';
 
 const PHASES = [
     { id: 'Vor Umzug', name: 'Vor Umzug' },
@@ -17,7 +17,11 @@ export const ChecklistEdit = () => (
     <Edit actions={<ChecklistEditActions />}>
         <SimpleForm>
             <SelectInput source="phase" choices={PHASES} fullWidth />
-            <TextInput source="category" required fullWidth />
+            <DynamicCategoryInput 
+                source="category" 
+                apiUrl="/api/admin/checklist/filter-options" 
+                required 
+            />
             <TextInput source="title" label="Task" required fullWidth />
             <TextInput source="description" multiline fullWidth />
             <BooleanInput source="is_mandatory" label="Mandatory" />

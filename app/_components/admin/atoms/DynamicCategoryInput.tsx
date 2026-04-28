@@ -9,6 +9,7 @@ interface DynamicCategoryInputProps {
     required?: boolean;
     fullWidth?: boolean;
     helperText?: string;
+    apiUrl?: string;
     [key: string]: any; // Allow for react-admin filter props like alwaysOn
 }
 
@@ -18,6 +19,7 @@ export const DynamicCategoryInput: React.FC<DynamicCategoryInputProps> = ({
     required = false,
     fullWidth = true,
     helperText,
+    apiUrl = '/api/admin/documents/filter-options',
     ...props
 }) => {
     const [categories, setCategories] = useState<{ id: string, name: string }[]>([]);
@@ -25,7 +27,7 @@ export const DynamicCategoryInput: React.FC<DynamicCategoryInputProps> = ({
     const notify = useNotify();
 
     useEffect(() => {
-        fetch('/api/admin/documents/filter-options')
+        fetch(apiUrl)
             .then(res => res.json())
             .then(data => {
                 if (data.categories && Array.isArray(data.categories)) {
