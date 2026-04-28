@@ -83,19 +83,19 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
       >
         <div className="relative w-[28px] h-[28px] sm:w-[32px] sm:h-[32px] flex-shrink-0">
           <Image
-            src={currentLang.flag}
+            src={customIcon || currentLang.flag}
             alt={currentLang.name}
             fill
             sizes="32px"
             className="object-contain"
           />
         </div>
-        <div className="relative w-[11px] h-[11px] flex-shrink-0 ">
+        <div className="relative w-[12px] h-[12px] flex-shrink-0 ml-[3px] mt-auto mb-0.5">
           <Image
-            src="/assets/website/icons/black-down-arrow-icon.png"
+            src="/assets/website/icons/lite-grey-arrow-down.png"
             alt="Dropdown"
             fill
-            sizes="11px"
+            sizes="12px"
             className="object-contain"
           />
         </div>

@@ -165,7 +165,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
               {/* Language Switcher */}
               <div className="scale-75 lg:scale-90 opacity-90 hover:opacity-100 transition-opacity flex-shrink-0">
-                <LanguageSwitcher customIcon="/assets/website/dashboard/language-switcher-icon-2.png" />
+                <LanguageSwitcher />
               </div>
             </div>
           </div>
