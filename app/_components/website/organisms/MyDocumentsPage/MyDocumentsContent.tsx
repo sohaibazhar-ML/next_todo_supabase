@@ -3,7 +3,7 @@
 import React, { useState, useRef, useCallback, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { Upload, X, FileText, Loader2 } from 'lucide-react';
-import { DocumentTable, DashboardPagination, ConfirmModal } from '@/website/molecules';
+import { DocumentTable, DashboardPagination, ConfirmModal, Popup } from '@/website/molecules';
 import { Text, Button } from '@/website/atoms';
 import { DocumentItem } from '@/website/types';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
@@ -41,6 +41,7 @@ export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
   const [docToDelete, setDocToDelete] = useState<DocumentItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handlePageChange = (page: number) => {
@@ -166,6 +167,7 @@ export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
 
       setIsModalOpen(false);
       resetForm();
+      setShowSuccessPopup(true);
       router.refresh();
     } catch (err: unknown) {
       setUploadError(err instanceof Error ? err.message : t('upload.errors.general'));
@@ -460,6 +462,13 @@ export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
           </div>
         </div>
       )}
+      {/* Success Popup */}
+      <Popup
+        isOpen={showSuccessPopup}
+        onClose={() => setShowSuccessPopup(false)}
+        title={t('upload.successTitle')}
+        description={t('upload.successDescription')}
+      />
     </div>
   );
 };

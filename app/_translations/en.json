@@ -380,6 +380,8 @@
         "upload": "Upload",
         "uploading": "Uploading..."
       },
+      "successTitle": "Document Uploaded",
+      "successDescription": "Your document has been uploaded successfully and is now available in your list.",
       "errors": {
         "invalidType": "Only PDF, DOCX, XLSX, and ZIP files are allowed.",
         "tooLarge": "File size must be less than 50MB.",

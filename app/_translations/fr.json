@@ -375,8 +375,10 @@
       "buttons": {
         "cancel": "Annuler",
         "upload": "Télécharger",
-        "uploading": "Téléchargement en cours..."
+        "uploading": "Téléchargement..."
       },
+      "successTitle": "Document téléchargé",
+      "successDescription": "Votre document a été téléchargé avec succès et est maintenant disponible dans votre liste.",
       "errors": {
         "invalidType": "Seuls les fichiers PDF, DOCX, XLSX et ZIP sont autorisés.",
         "tooLarge": "La taille du fichier doit être inférieure à 50 Mo.",

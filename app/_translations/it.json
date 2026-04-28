@@ -374,6 +374,8 @@
         "upload": "Carica",
         "uploading": "Caricamento in corso..."
       },
+      "successTitle": "Documento caricato",
+      "successDescription": "Il tuo documento è stato caricato con successo ed è ora disponibile nella tua lista.",
       "errors": {
         "invalidType": "Sono ammessi solo file PDF, DOCX, XLSX e ZIP.",
         "tooLarge": "La dimensione del file deve essere inferiore a 50 MB.",

@@ -380,6 +380,8 @@
         "upload": "Hochladen",
         "uploading": "Wird hochgeladen..."
       },
+      "successTitle": "Dokument hochgeladen",
+      "successDescription": "Ihr Dokument wurde erfolgreich hochgeladen und ist nun in Ihrer Liste verfügbar.",
       "errors": {
         "invalidType": "Nur PDF-, DOCX-, XLSX- und ZIP-Dateien sind zulässig.",
         "tooLarge": "Die Dateigröße muss weniger als 50 MB betragen.",

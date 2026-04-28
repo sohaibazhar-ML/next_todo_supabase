@@ -4,7 +4,7 @@ import React from 'react';
 import { useTranslations } from 'next-intl';
 import { Text, Image, Button } from '@/website/atoms';
 import { DocumentItem } from '@/website/types';
-import { FileText, Trash2, Download, Loader2 } from 'lucide-react';
+import { FileText, Loader2 } from 'lucide-react';
 
 interface DocumentTableProps {
   documents: DocumentItem[];
@@ -213,7 +213,13 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
                         {downloadingId === doc.id ? (
                           <Loader2 size={24} className="animate-spin text-primary" />
                         ) : (
-                          <Download size={24} />
+                          <Image 
+                            src="/assets/website/icons/download.png" 
+                            alt="download" 
+                            width={21} 
+                            height={20}
+                            className="object-contain"
+                          />
                         )}
                       </Button>
                       <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-gray-300" />
@@ -222,10 +228,16 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
                       <Button 
                         variant="unstyled"
                         onClick={() => onDeleteClick?.(doc)}
-                        className="inline-flex items-center justify-center transition-transform hover:scale-110 text-primary font-bold text-2xl"
+                        className="inline-flex items-center justify-center transition-transform hover:scale-110"
                         title={t('columns.delete')}
                       >
-                        X
+                        <Image 
+                          src="/assets/website/icons/cross.png" 
+                          alt="delete" 
+                          width={20} 
+                          height={20}
+                          className="object-contain"
+                        />
                       </Button>
                     </td>
                   </>
