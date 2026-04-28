@@ -191,7 +191,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 className="fixed left-0 top-0 h-full w-[280px] bg-white z-[101] lg:hidden shadow-2xl flex flex-col"
               >
                 <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-background-dark text-white">
-                  <Text variant="heading-m" className="font-bold uppercase tracking-tight">
+                  <Text variant="heading-m" className="font-bold tracking-tight">
                     {t('portalTitle')}
                   </Text>
                   <Button

@@ -62,12 +62,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     (item.is_mandatory ? 'mandatory' : 'optional').includes(query)
   );
 
-  const filteredDocuments = featuredDocuments.filter(doc =>
-    doc.title?.toLowerCase().includes(query) ||
-    doc.description?.toLowerCase().includes(query) ||
-    doc.category?.toLowerCase().includes(query)
-  );
-
   const SkeletonCard = () => (
     <div className="bg-white p-6 shadow-sm border border-gray-50 flex flex-col gap-4 min-h-[160px] justify-between animate-pulse">
       <div className="flex flex-col gap-2">
@@ -124,38 +118,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         )}
       </div>
 
-      {/* Documents Section */}
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <Text variant="heading-m" className="font-bold">{t('featuredDocuments')}</Text>
-          <Button variant="ghost" size="sm" className="text-secondary hover:bg-secondary/5 font-semibold">
-            {t('viewAll')}
-          </Button>
-        </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {isFiltering ? (
-            [...Array(4)].map((_, i) => (
-              <div key={i} className="h-[120px] bg-white rounded-lg border border-gray-100 animate-pulse" />
-            ))
-          ) : (filteredCards.length > 0 || filteredDocuments.length > 0) ? (
-            filteredDocuments.map((doc, idx) => (
-              <div key={doc.id || idx} className="bg-white p-4 rounded-lg border border-gray-100 flex flex-col gap-2 hover:shadow-md transition-shadow cursor-pointer">
-                <Text variant="body-sm" className="text-secondary/60 font-medium uppercase text-[10px] tracking-wider">
-                  {doc.category}
-                </Text>
-                <Text variant="body-md" className="font-semibold line-clamp-1">
-                  {doc.title}
-                </Text>
-              </div>
-            ))
-          ) : (
-            <div className="col-span-full py-10 flex flex-col items-center justify-center text-gray-400 gap-2 border-2 border-dashed border-gray-50 rounded-xl">
-               <Text variant="body-md">{t('noResultsFound') || 'No results found for your search.'}</Text>
-            </div>
-          )}
-        </div>
-      </div>
     </div>
   );
 };

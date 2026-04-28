@@ -351,17 +351,81 @@
       "dashboardNav": "Tableau de bord",
       "allDocuments": "Tous les documents A-Z",
       "checklist": "Liste de contrôle",
+      "portalTitle": "Portail client",
       "searchPlaceholder": "Terme de recherche",
       "logout": "Déconnexion",
       "myDocuments": "Mes Documents"
     },
+    "upload": {
+      "modalTitle": "Télécharger un document",
+      "fields": {
+        "title": "Titre",
+        "description": "Description",
+        "recipient": "Destinataire",
+        "file": "Fichier",
+        "optional": "(optionnel)"
+      },
+      "placeholders": {
+        "title": "Saisir le titre du document",
+        "description": "Ajouter une brève description",
+        "recipient": "Nom du destinataire",
+        "dropzone": "Déposer le fichier ici ou cliquer pour parcourir",
+        "dropzoneSub": "PDF, DOCX, XLSX, ZIP — Max. 50Mo"
+      },
+      "buttons": {
+        "cancel": "Annuler",
+        "upload": "Télécharger",
+        "uploading": "Téléchargement en cours..."
+      },
+      "errors": {
+        "invalidType": "Seuls les fichiers PDF, DOCX, XLSX et ZIP sont autorisés.",
+        "tooLarge": "La taille du fichier doit être inférieure à 50 Mo.",
+        "general": "Une erreur s'est produite lors du téléchargement."
+      }
+    },
+    "overview": {
+      "progress": "Progression : {percent}%",
+      "labels": {
+        "mandatory": "Obligatoire",
+        "important": "Important",
+        "optional": "Optionnel"
+      },
+      "titles": {
+        "gemeinde": "Enregistrement à la commune",
+        "krankenkasse": "Assurance maladie",
+        "internet": "Enregistrement internet",
+        "bank": "Ouverture de compte bancaire",
+        "post": "Réexpédition de courrier",
+        "auto": "Enregistrement voiture",
+        "creditcard": "Demande de carte de crédit",
+        "friends": "Notification d'adresse aux amis",
+        "pet": "Enregistrement d'animal domestico"
+      }
+    },
+    "confirmDelete": {
+      "title": "Supprimer le document",
+      "message": "Êtes-vous sûr de vouloir supprimer ce document ?",
+      "confirm": "Confirmer",
+      "cancel": "Annuler",
+      "deleting": "Suppression..."
+    },
     "list": {
       "download": "Télécharger",
+      "columns": {
+        "category": "Catégorie",
+        "name": "Nom du document",
+        "recipient": "Destinataire",
+        "file": "Fichier",
+        "date": "Date",
+        "download": "Télécharger",
+        "delete": "Supprimer"
+      },
       "pagination": {
         "prev": "retour",
         "next": "suivant"
       },
       "emptyState": "Aucun document trouvé",
+      "emptyStateAction": "Téléchargez votre premier document",
       "loading": "Tri en cours..."
     },
     "account": {

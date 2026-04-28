@@ -348,17 +348,81 @@
       "dashboardNav": "Dashboard",
       "allDocuments": "Tutti i documenti A-Z",
       "checklist": "Lista di controllo",
+      "portalTitle": "Portale clienti",
       "searchPlaceholder": "Termine di ricerca",
       "logout": "Disconnetti",
       "myDocuments": "I Miei Documenti"
     },
+    "upload": {
+      "modalTitle": "Carica documento",
+      "fields": {
+        "title": "Titolo",
+        "description": "Descrizione",
+        "recipient": "Destinatario",
+        "file": "File",
+        "optional": "(opzionale)"
+      },
+      "placeholders": {
+        "title": "Inserisci il titolo del documento",
+        "description": "Aggiungi una breve descrizione",
+        "recipient": "Nome del destinatario",
+        "dropzone": "Trascina il file qui o clicca per sfogliare",
+        "dropzoneSub": "PDF, DOCX, XLSX, ZIP — Max. 50MB"
+      },
+      "buttons": {
+        "cancel": "Annulla",
+        "upload": "Carica",
+        "uploading": "Caricamento in corso..."
+      },
+      "errors": {
+        "invalidType": "Sono ammessi solo file PDF, DOCX, XLSX e ZIP.",
+        "tooLarge": "La dimensione del file deve essere inferiore a 50 MB.",
+        "general": "Si è verificato un errore durante il caricamento."
+      }
+    },
+    "overview": {
+      "progress": "Progresso: {percent}%",
+      "labels": {
+        "mandatory": "Obbligatorio",
+        "important": "Importante",
+        "optional": "Opzionale"
+      },
+      "titles": {
+        "gemeinde": "Registrazione al comune",
+        "krankenkasse": "Assicurazione sanitaria",
+        "internet": "Registrazione internet",
+        "bank": "Apertura conto bancario",
+        "post": "Inoltro posta",
+        "auto": "Registrazione auto",
+        "creditcard": "Richiesta carta di credito",
+        "friends": "Notifica indirizzo amici",
+        "pet": "Registrazione animale domestico"
+      }
+    },
+    "confirmDelete": {
+      "title": "Elimina documento",
+      "message": "Sei sicuro di voler eliminare questo documento?",
+      "confirm": "Conferma",
+      "cancel": "Annulla",
+      "deleting": "Eliminazione..."
+    },
     "list": {
       "download": "Scarica",
+      "columns": {
+        "category": "Categoria",
+        "name": "Nome documento",
+        "recipient": "Destinatario",
+        "file": "File",
+        "date": "Data",
+        "download": "Scarica",
+        "delete": "Elimina"
+      },
       "pagination": {
         "prev": "indietro",
         "next": "avanti"
       },
       "emptyState": "Nessun documento trovato",
+      "emptyStateAction": "Carica il tuo primo documento",
       "loading": "Ordinamento..."
     },
     "account": {
