@@ -112,59 +112,61 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             </Link>
           </div>
 
-          {/* Middle Section: Title & Search */}
-          <div className="hidden md:flex items-center justify-center gap-6 lg:gap-12 flex-1 px-4 lg:px-10">
-            <Text 
-              variant="heading-m" 
-              className="text-white font-semibold whitespace-nowrap !text-[23px] [font-stretch:85%]"
-            >
-              {t('portalTitle')}
-            </Text>
+          {/* Right Section: Title, Search & Actions */}
+          <div className="flex items-center gap-6 lg:gap-10 flex-1 justify-end">
+            {/* Title & Search (Desktop) */}
+            <div className="hidden md:flex items-center gap-6 lg:gap-10">
+              <Text 
+                variant="heading-m" 
+                className="text-white font-semibold whitespace-nowrap !text-[23px] [font-stretch:85%]"
+              >
+                {t('portalTitle')}
+              </Text>
 
-            {showSearch && (
-              <div className="flex-1 max-w-[411px]">
-                <Input
-                  id="search-desktop"
-                  inputSize="sm"
-                  type='search'
-                  value={searchValue}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                  placeholder={t('searchPlaceholder')}
-                  rightIcon={isSearchPending ? () => <Loader2 className="animate-spin" size={18} /> : undefined}
-                  className="bg-white border-transparent focus:ring-0 transition-all shadow-sm !h-[36px] !rounded-[4px]"
-                  inputClassName="text-secondary placeholder:text-secondary/50 py-[5px] px-[20px] !h-[36px]"
-                />
+              {showSearch && (
+                <div className="w-[300px] lg:w-[411px]">
+                  <Input
+                    id="search-desktop"
+                    inputSize="sm"
+                    type='search'
+                    value={searchValue}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    placeholder={t('searchPlaceholder')}
+                    rightIcon={isSearchPending ? () => <Loader2 className="animate-spin" size={18} /> : undefined}
+                    className="bg-white border-transparent focus:ring-0 transition-all shadow-sm !h-[36px] !rounded-[4px]"
+                    inputClassName="text-secondary placeholder:text-secondary/50 py-[5px] px-[20px] !h-[36px]"
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center gap-4 lg:gap-8 flex-shrink-0">
+              {/* Mobile Search Trigger */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleSearch}
+                className={`text-white p-2 h-auto hover:bg-white/10 ${showSearch ? 'md:hidden' : 'hidden'}`}
+                aria-label="Toggle search"
+              >
+                <Search size={22} />
+              </Button>
+
+              {/* Logout */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                isLoading={isLogoutPending}
+                className="text-white font-semibold p-0 h-auto hover:bg-transparent !text-[23px] [font-stretch:85%]"
+              >
+                {t('logout')}
+              </Button>
+
+              {/* Language Switcher */}
+              <div className="scale-75 lg:scale-90 opacity-90 hover:opacity-100 transition-opacity flex-shrink-0">
+                <LanguageSwitcher customIcon="/assets/website/dashboard/language-switcher-icon-2.png" />
               </div>
-            )}
-          </div>
-
-          {/* Right Section: Actions */}
-          <div className="flex items-center gap-4 lg:gap-8 flex-shrink-0">
-            {/* Mobile Search Trigger */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleSearch}
-              className={`text-white p-2 h-auto hover:bg-white/10 ${showSearch ? 'md:hidden' : 'hidden'}`}
-              aria-label="Toggle search"
-            >
-              <Search size={22} />
-            </Button>
-
-            {/* Logout */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLogout}
-              isLoading={isLogoutPending}
-              className="text-white font-semibold p-0 h-auto hover:bg-transparent !text-[23px] [font-stretch:85%]"
-            >
-              {t('logout')}
-            </Button>
-
-            {/* Language Switcher */}
-            <div className="scale-75 lg:scale-90 opacity-90 hover:opacity-100 transition-opacity flex-shrink-0">
-              <LanguageSwitcher customIcon="/assets/website/dashboard/language-switcher-icon-2.png" />
             </div>
           </div>
         </div>
