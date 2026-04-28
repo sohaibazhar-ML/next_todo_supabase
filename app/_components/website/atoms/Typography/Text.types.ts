@@ -8,7 +8,8 @@ export type TextVariant =
   | 'body-lg' | 'body-md' | 'body-sm' | 'body-xs'
   | 'dashboard-sidebar'
   | 'card-label'
-  | 'card-title';
+  | 'card-title'
+  | 'progress-label';
 
 export type TextTag = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span' | 'div' | 'label';
 

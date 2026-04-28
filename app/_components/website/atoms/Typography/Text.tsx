@@ -27,6 +27,7 @@ const variantMap: Record<TextVariant, string> = {
   'dashboard-sidebar': 'text-dashboard-sidebar',
   'card-label': 'text-card-label',
   'card-title': 'text-card-title',
+  'progress-label': 'text-progress-label',
 };
 
 const defaultTagMap: Record<TextVariant, React.ElementType> = {
@@ -55,6 +56,7 @@ const defaultTagMap: Record<TextVariant, React.ElementType> = {
   'dashboard-sidebar': 'span',
   'card-label': 'span',
   'card-title': 'p',
+  'progress-label': 'p',
 };
 
 export const Text: React.FC<TextProps> = ({

@@ -76,7 +76,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     <div className="w-full flex flex-col gap-8">
       {/* Progress Bar Section */}
       <div className="flex flex-col gap-2">
-        <Text variant="text-s" className="text-secondary font-medium">
+        <Text variant="progress-label" className="text-secondary">
           {t('overview.progress', { percent: progressPercent })}
         </Text>
         <div 

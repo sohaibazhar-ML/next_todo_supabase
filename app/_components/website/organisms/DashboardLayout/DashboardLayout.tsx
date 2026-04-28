@@ -19,9 +19,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 }) => {
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <Suspense fallback={<div className="h-[50px] lg:h-[60px] bg-background-nav" />}>
-        <DashboardHeader activeTab={activeTab} isAccountPage={isAccountPage} showSearch={showSearch} />
-      </Suspense>
+      <div className="mb-10">
+        <Suspense fallback={<div className="h-[50px] lg:h-[60px] bg-background-nav" />}>
+          <DashboardHeader activeTab={activeTab} isAccountPage={isAccountPage} showSearch={showSearch} />
+        </Suspense>
+      </div>
       
       <div className="flex flex-1 justify-center bg-white">
         <div className="max-w-[1440px] w-full flex relative">
@@ -39,7 +41,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         </div>
       </div>
 
-      <Footer />
+      <div className="mt-20">
+        <Footer />
+      </div>
     </div>
   );
 };
