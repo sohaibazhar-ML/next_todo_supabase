@@ -68,7 +68,11 @@ export const Button: React.FC<ButtonProps> = ({
         variant !== 'unstyled' && variantClasses[variant],
         variant !== 'unstyled' && sizeClasses[size],
         fullWidth && 'w-full',
-        (disabled && !actualLoading) && 'opacity-50 bg-background-neutral',
+        (disabled && !actualLoading) && (
+          variant === 'primary' ? 'bg-primary/40 text-white shadow-none border-none' :
+          variant === 'secondary' ? 'bg-secondary/40 text-white shadow-none border-none' :
+          'opacity-40 bg-background-neutral shadow-none'
+        ),
         className
       )}
       disabled={disabled || actualLoading}
