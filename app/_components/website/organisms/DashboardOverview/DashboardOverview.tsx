@@ -98,10 +98,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           filteredCards.map((item, idx) => (
             <div key={item.id || idx} className="bg-white p-6 shadow-sm border border-gray-50 flex flex-col gap-4 min-h-[160px] justify-between transition-shadow hover:shadow-md">
               <div className="flex flex-col gap-2">
-                <Text variant="text-s" className={`${item.is_mandatory ? 'text-primary' : 'text-gray-400'} font-bold uppercase tracking-wider`}>
+                <Text variant="card-label" className="text-primary uppercase tracking-wider">
                   {item.is_mandatory ? t('overview.labels.mandatory') : t('overview.labels.optional')}
                 </Text>
-                <Text variant="text-m" className="text-secondary font-semibold">
+                <Text variant="card-title" className="text-secondary">
                   {item.title}
                 </Text>
               </div>
@@ -109,7 +109,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <Button
                 variant="primary"
                 size="sm"
-                className="bg-primary hover:bg-primary-hover text-white w-fit px-6 rounded-none font-bold shadow-sm"
+                className="bg-primary hover:bg-primary-hover text-white w-fit !py-[8px] !px-[20px] !h-auto rounded-none text-card-button shadow-sm"
                 onClick={() => window.location.href = `/dashboard/checklist`}
               >
                 {t('list.download')}

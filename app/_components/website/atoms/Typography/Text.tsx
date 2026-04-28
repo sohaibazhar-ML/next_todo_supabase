@@ -25,6 +25,8 @@ const variantMap: Record<TextVariant, string> = {
   'body-sm': 'text-text-s font-body',
   'body-xs': 'text-text-xs font-body',
   'dashboard-sidebar': 'text-dashboard-sidebar',
+  'card-label': 'text-card-label',
+  'card-title': 'text-card-title',
 };
 
 const defaultTagMap: Record<TextVariant, React.ElementType> = {
@@ -51,6 +53,8 @@ const defaultTagMap: Record<TextVariant, React.ElementType> = {
   'body-sm': 'p',
   'body-xs': 'span',
   'dashboard-sidebar': 'span',
+  'card-label': 'span',
+  'card-title': 'p',
 };
 
 export const Text: React.FC<TextProps> = ({
