@@ -281,8 +281,8 @@ export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
       {/* Document Table */}
       <DocumentTable 
         documents={documents} 
-        emptyMessage={t('list.emptyState')}
-        onUploadClick={openModal}
+        emptyMessage={searchParams.get('q') ? t('noResultsFound') : t('list.emptyState')}
+        onUploadClick={searchParams.get('q') ? undefined : openModal}
         onDeleteClick={openDeleteConfirm}
         onDownloadClick={handleDownload}
         onSortChange={handleSortChange}
