@@ -2,6 +2,7 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   id?: string;
   label?: string;
   labelClassName?: string;
+  labelTextClassName?: string;
   error?: boolean;
   errorText?: string;
   helperText?: React.ReactNode;

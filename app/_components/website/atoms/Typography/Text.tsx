@@ -63,8 +63,6 @@ const defaultTagMap: Record<TextVariant, React.ElementType> = {
   'table-data': 'span',
 };
 
-import { twMerge } from 'tailwind-merge';
-
 export const Text: React.FC<TextProps> = ({
   variant = 'body-md',
   as,
@@ -77,7 +75,7 @@ export const Text: React.FC<TextProps> = ({
   const variantClasses = variantMap[variant];
 
   return (
-    <Component ref={ref} className={twMerge(variantClasses, className)} {...props}>
+    <Component ref={ref} className={`${variantClasses} ${className}`} {...props}>
       {children}
     </Component>
   );

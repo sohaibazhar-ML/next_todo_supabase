@@ -385,7 +385,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
               id="consent"
               name="consent"
               label={t('consent')}
-              labelClassName="text-[21px] font-medium text-[#362E2D]"
+              labelTextClassName="!text-[21px] !font-medium !text-[#362E2D]"
               checked={formData.consent}
               onChange={(e) => {
                 setFormData(prev => ({ ...prev, consent: e.target.checked }));
@@ -431,7 +431,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
         </div>
 
         <div className="w-full mb-10 px-1">
-          <Text className="text-[#362E2D] text-[18px] font-normal leading-relaxed text-left">
+          <Text className="!text-[#362E2D] !text-[18px] !font-normal leading-relaxed text-left">
             {t('legalNote')}
           </Text>
         </div>
