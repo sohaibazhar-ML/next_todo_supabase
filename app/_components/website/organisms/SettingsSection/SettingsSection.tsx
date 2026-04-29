@@ -9,6 +9,7 @@ import { FormMessage } from '@/website/molecules/FormMessage/FormMessage';
 import { Text, Button, Input, Switch } from '@/website/atoms';
 import { Link, useRouter } from '@/i18n/routing';
 import { updateLanguageAction, updateKeepLoggedInAction, changePasswordAction } from '@/app/_actions/website/settings.actions';
+import { logoutAction } from '@/actions/website/auth.actions';
 import { updateProfileField, uploadAvatarAction } from '@/app/_actions/website/profile.actions';
 import { passwordChangeSchema } from '@/app/_schemas/website/profile.schema';
 import { twMerge } from 'tailwind-merge';
@@ -108,7 +109,10 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
         setPasswordSuccess(true);
         setPasswordState({ oldPassword: '', newPassword: '', confirmPassword: '' });
         setTouchedFields({});
-        setTimeout(() => setIsPasswordOpen(false), 2000);
+        // Force logout and redirect after showing success message
+        setTimeout(async () => {
+          await logoutAction();
+        }, 2000);
       } else {
         if (res.errors) {
           // Field-specific validation errors from server (unlikely with client validation but for safety)
