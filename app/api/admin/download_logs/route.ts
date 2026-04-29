@@ -166,6 +166,31 @@ export async function GET(request: Request) {
       }
 
       where.OR = orConditions
+
+      // Full name search logic: If searchQuery contains a space, try matching both first and last names
+      const nameParts = searchQuery.trim().split(/\s+/);
+      if (nameParts.length > 1) {
+          const firstPart = nameParts[0];
+          const lastPart = nameParts.slice(1).join(' ');
+          
+          where.OR.push({
+              profiles: {
+                  AND: [
+                      { first_name: { contains: firstPart, mode: 'insensitive' } },
+                      { last_name: { contains: lastPart, mode: 'insensitive' } }
+                  ]
+              }
+          });
+          
+          where.OR.push({
+              profiles: {
+                  AND: [
+                      { first_name: { contains: lastPart, mode: 'insensitive' } },
+                      { last_name: { contains: firstPart, mode: 'insensitive' } }
+                  ]
+              }
+          });
+      }
     }
 
     // Pagination & Sorting (React Admin support)

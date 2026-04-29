@@ -379,6 +379,28 @@ export async function GET(
                             { new_address_switzerland: { contains: q, mode: 'insensitive' } },
                         ];
 
+                        // Full name search logic: If q contains a space, try matching both first and last names
+                        const nameParts = q.trim().split(/\s+/);
+                        if (nameParts.length > 1) {
+                            const firstPart = nameParts[0];
+                            const lastPart = nameParts.slice(1).join(' ');
+                            
+                            where.OR.push({
+                                AND: [
+                                    { first_name: { contains: firstPart, mode: 'insensitive' } },
+                                    { last_name: { contains: lastPart, mode: 'insensitive' } }
+                                ]
+                            });
+                            
+                            // Also try swapping them (in case user entered "Last First")
+                            where.OR.push({
+                                AND: [
+                                    { first_name: { contains: lastPart, mode: 'insensitive' } },
+                                    { last_name: { contains: firstPart, mode: 'insensitive' } }
+                                ]
+                            });
+                        }
+
                         if (matchingCountryCodes.length > 0) {
                             where.OR.push({ country_of_origin: { in: matchingCountryCodes } });
                         }
