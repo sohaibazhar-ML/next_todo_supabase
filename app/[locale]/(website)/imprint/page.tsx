@@ -1,11 +1,9 @@
 import React from 'react';
 import { Header, Footer, ImprintContent } from '@/website/organisms';
 
-export const generateMetadata = async () => {
-  return {
-    title: 'Imprint | mySwissMove',
-    description: 'Legal information and contact details for mySwissMove.',
-  };
+export const metadata = {
+  title: 'Imprint',
+  description: 'Legal information and contact details for mySwissMove.',
 };
 
 export default function ImprintPage() {

@@ -19,7 +19,7 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | MySwissMove",
+    template: "MySwissMove - %s",
     default: "MySwissMove - Document Portal",
   },
   description: "Your official Swiss move document management and download portal. Manage your transition with ease.",

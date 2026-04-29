@@ -5,14 +5,16 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const { locale } = await params;
 
   const translations: Record<string, string> = {
-    en: "MySwissMove",
-    de: "MySwissMove",
-    fr: "MySwissMove",
-    it: "MySwissMove"
+    en: "Document Portal",
+    de: "Dokumentenportal",
+    fr: "Portail de documents",
+    it: "Portale dei documenti"
   };
 
   return {
-    title: translations[locale] || translations.en,
+    title: {
+      absolute: "MySwissMove"
+    },
     description: "Download all necessary documents for your move to Switzerland. Fast, secure and organized.",
   };
 }

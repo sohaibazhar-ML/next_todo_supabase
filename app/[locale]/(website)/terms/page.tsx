@@ -1,11 +1,9 @@
 import React from 'react';
 import { Header, Footer, GtcContent } from '@/website/organisms';
 
-export const generateMetadata = async () => {
-  return {
-    title: 'GTC | mySwissMove',
-    description: 'General Terms and Conditions for using the mySwissMove platform.',
-  };
+export const metadata = {
+  title: 'GTC',
+  description: 'General Terms and Conditions for using the mySwissMove platform.',
 };
 
 export default function GtcPage() {

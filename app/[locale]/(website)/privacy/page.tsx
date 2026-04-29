@@ -1,11 +1,10 @@
 import React from 'react';
 import { Header, Footer, PrivacyContent } from '@/website/organisms';
+import { Metadata } from 'next';
 
-export const generateMetadata = async () => {
-  return {
-    title: 'Privacy Policy | mySwissMove',
-    description: 'Privacy Policy for the mySwissMove platform. We value your data security.',
-  };
+export const metadata: Metadata = {
+  title: 'Privacy Policy',
+  description: 'Privacy Policy for the mySwissMove platform. We value your data security.',
 };
 
 export default function PrivacyPage() {
