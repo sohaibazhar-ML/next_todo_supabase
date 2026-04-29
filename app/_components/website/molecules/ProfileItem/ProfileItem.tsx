@@ -26,6 +26,7 @@ interface ProfileItemProps {
   options?: Option[]; // If provided, uses Select instead of Input
   isOpen?: boolean; // For rotating the chevron
   bottomBorderOnly?: boolean; // For Account page styling: only bottom border on input/select
+  target?: string;
 }
 
 export const ProfileItem: React.FC<ProfileItemProps> = ({
@@ -41,6 +42,7 @@ export const ProfileItem: React.FC<ProfileItemProps> = ({
   options,
   isOpen = false,
   bottomBorderOnly = false,
+  target,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(typeof value === 'string' ? value : '');
@@ -234,7 +236,7 @@ export const ProfileItem: React.FC<ProfileItemProps> = ({
 
   if (href && !isEditing) {
     return (
-      <Link href={href as any} className="w-full">
+      <Link href={href as any} target={target} className="w-full">
         {content}
       </Link>
     );

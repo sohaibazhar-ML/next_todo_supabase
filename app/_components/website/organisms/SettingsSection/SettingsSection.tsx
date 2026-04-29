@@ -320,6 +320,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
             icon={HelpCircle} 
             label={t('helpFaq')} 
             href="/faq" 
+            target="_blank"
           />
         </div>
       </div>
