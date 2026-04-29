@@ -91,6 +91,12 @@ export const ChecklistList = () => {
         }
     };
 
+    const handleClose = () => {
+        if (importing) return;
+        setImportOpen(false);
+        setFile(null);
+    };
+
     return (
         <>
             <List 
@@ -110,7 +116,7 @@ export const ChecklistList = () => {
                 </Datagrid>
             </List>
 
-            <Dialog open={importOpen} onClose={() => !importing && setImportOpen(false)}>
+            <Dialog open={importOpen} onClose={handleClose}>
                 <DialogTitle>Import Checklist from Excel/CSV</DialogTitle>
                 <DialogContent>
                     <Typography variant="body2" sx={{ mb: 2 }}>
@@ -125,7 +131,7 @@ export const ChecklistList = () => {
                     />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setImportOpen(false)} disabled={importing}>Cancel</Button>
+                    <Button onClick={handleClose} disabled={importing}>Cancel</Button>
                     <Button
                         onClick={handleImport}
                         color="primary"

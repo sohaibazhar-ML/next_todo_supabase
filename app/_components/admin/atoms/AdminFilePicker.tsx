@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Box, Typography, Paper, alpha, useTheme } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
@@ -20,6 +20,12 @@ export const AdminFilePicker: React.FC<AdminFilePickerProps> = ({
 }) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const theme = useTheme();
+
+    useEffect(() => {
+        if (!file && inputRef.current) {
+            inputRef.current.value = '';
+        }
+    }, [file]);
 
     const handleClick = () => {
         if (!disabled) {

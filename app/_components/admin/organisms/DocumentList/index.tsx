@@ -105,6 +105,12 @@ export const DocumentList = () => {
         }
     };
 
+    const handleClose = () => {
+        if (importing) return;
+        setImportOpen(false);
+        setFile(null);
+    };
+
     return (
         <>
             <List 
@@ -125,7 +131,7 @@ export const DocumentList = () => {
                 </Datagrid>
             </List>
 
-            <Dialog open={importOpen} onClose={() => !importing && setImportOpen(false)}>
+            <Dialog open={importOpen} onClose={handleClose}>
                 <DialogTitle>Import Document Placeholders</DialogTitle>
                 <DialogContent>
                     <Typography variant="body2" color="textSecondary" paragraph>
@@ -143,7 +149,7 @@ export const DocumentList = () => {
                     </Box>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setImportOpen(false)} disabled={importing}>
+                    <Button onClick={handleClose} disabled={importing}>
                         Cancel
                     </Button>
                     <Button 
