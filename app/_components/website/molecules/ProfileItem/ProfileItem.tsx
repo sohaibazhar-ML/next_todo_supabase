@@ -27,6 +27,8 @@ interface ProfileItemProps {
   isOpen?: boolean; // For rotating the chevron
   bottomBorderOnly?: boolean; // For Account page styling: only bottom border on input/select
   target?: string;
+  validate?: (value: string) => string | null;
+  sanitize?: (value: string) => string;
 }
 
 export const ProfileItem: React.FC<ProfileItemProps> = ({
@@ -43,6 +45,8 @@ export const ProfileItem: React.FC<ProfileItemProps> = ({
   isOpen = false,
   bottomBorderOnly = false,
   target,
+  validate,
+  sanitize,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(typeof value === 'string' ? value : '');
@@ -73,9 +77,28 @@ export const ProfileItem: React.FC<ProfileItemProps> = ({
     setIsEditing(true);
   };
 
-  const handleSave = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> | { target: { name?: string; value: string } }) => {
+    let val = e.target.value;
+    if (sanitize) {
+      val = sanitize(val);
+    }
+    setEditValue(val);
+    if (status === 'error') setStatus('idle');
+  };
+
+  const handleSave = async (e?: React.MouseEvent | React.KeyboardEvent) => {
+    if (e && 'stopPropagation' in e) e.stopPropagation();
     if (!onSave) return;
+    
+    // Client-side validation
+    if (validate) {
+      const error = validate(editValue);
+      if (error) {
+        setStatus('error');
+        setErrorMsg(error);
+        return;
+      }
+    }
     
     setIsLoading(true);
     setStatus('idle');
@@ -92,8 +115,8 @@ export const ProfileItem: React.FC<ProfileItemProps> = ({
     }
   };
 
-  const handleCancel = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleCancel = (e: React.MouseEvent | React.KeyboardEvent) => {
+    if ('stopPropagation' in e) e.stopPropagation();
     setEditValue(typeof value === 'string' ? value : '');
     setIsEditing(false);
   };
@@ -132,7 +155,7 @@ export const ProfileItem: React.FC<ProfileItemProps> = ({
                   autoFocus
                   options={options}
                   value={editValue}
-                  onChange={(e) => setEditValue(e.target.value)}
+                  onChange={handleChange}
                   className={twMerge(
                     "w-full",
                     bottomBorderOnly && "border-0 border-b border-secondary/20 rounded-none shadow-none px-0 focus:border-primary"
@@ -143,7 +166,7 @@ export const ProfileItem: React.FC<ProfileItemProps> = ({
                 <Input
                   autoFocus
                   value={editValue}
-                  onChange={(e) => setEditValue(e.target.value)}
+                  onChange={handleChange}
                   inputSize="sm"
                   className="w-full"
                   inputClassName={twMerge(
@@ -152,8 +175,8 @@ export const ProfileItem: React.FC<ProfileItemProps> = ({
                   )}
                   disabled={isLoading}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleSave(e as any);
-                    if (e.key === 'Escape') handleCancel(e as any);
+                    if (e.key === 'Enter') handleSave(e);
+                    if (e.key === 'Escape') handleCancel(e);
                   }}
                 />
               )}

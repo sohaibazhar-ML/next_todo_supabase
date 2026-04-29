@@ -154,6 +154,12 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
                   const res = await updateProfileField('phone_number', val);
                   if (!res.success) throw new Error(res.error);
                 }}
+                validate={(val) => {
+                  if (val.length > 30) return 'Phone number is too long';
+                  if (!/^[0-9+\-]*$/.test(val)) return 'Only numbers, + and - are allowed';
+                  return null;
+                }}
+                sanitize={(val) => val.replace(/[^0-9+\-]/g, '')}
               />
             </div>
           )}
