@@ -54,6 +54,7 @@ export const DynamicFileTypeInput: React.FC<DynamicFileTypeInputProps> = ({
             required={required}
             fullWidth={fullWidth}
             helperText={helperText}
+            emptyText="All"
             {...props}
         />
     );

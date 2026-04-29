@@ -1,13 +1,17 @@
 import React from "react";
-import { List, Datagrid, TextField, DateField, SearchInput, Filter, FilterProps, DateInput, SelectInput, usePermissions, DeleteButton } from "react-admin";
-import { DOCUMENT_CATEGORIES } from "@/admin/constants";
+import { List, Datagrid, TextField, DateField, SearchInput, Filter, FilterProps, DateInput, usePermissions } from "react-admin";
+import { DynamicCategoryInput } from "../../atoms";
 
 const DownloadLogFilter = (props: Omit<FilterProps, 'children'>) => (
     <Filter {...props}>
         <SearchInput placeholder="Search Document, Category, User..." source="q" alwaysOn />
         <DateInput label="From Date" source="fromDate" />
         <DateInput label="To Date" source="toDate" />
-        <SelectInput label="Category" source="category" choices={[...DOCUMENT_CATEGORIES]} />
+        <DynamicCategoryInput 
+            label="Category" 
+            source="category" 
+            apiUrl="/api/admin/download_logs/filter-options" 
+        />
     </Filter>
 );
 

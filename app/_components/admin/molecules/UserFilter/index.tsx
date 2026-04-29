@@ -21,6 +21,7 @@ export const UserFilter = (props: Omit<FilterProps, 'children'>) => (
             source="country_of_origin"
             choices={COUNTRIES}
             optionValue="value"
+            emptyText="All"
             optionText={choice => (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Image src={choice.flag} alt={choice.label} width={20} height={14} />

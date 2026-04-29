@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { SelectInput, AutocompleteInput, useNotify } from 'react-admin';
+import { SelectInput, useNotify } from 'react-admin';
 
 interface DynamicCategoryInputProps {
     source: string;
@@ -31,10 +31,12 @@ export const DynamicCategoryInput: React.FC<DynamicCategoryInputProps> = ({
             .then(res => res.json())
             .then(data => {
                 if (data.categories && Array.isArray(data.categories)) {
-                    setCategories(data.categories.map((cat: string) => ({ 
-                        id: cat, 
-                        name: cat 
-                    })));
+                    setCategories(data.categories
+                        .filter((cat: string | null) => cat != null && cat !== '')
+                        .map((cat: string) => ({ 
+                            id: cat, 
+                            name: cat 
+                        })));
                 }
             })
             .catch(err => {
@@ -42,23 +44,18 @@ export const DynamicCategoryInput: React.FC<DynamicCategoryInputProps> = ({
                 notify("Failed to load categories", { type: 'warning' });
             })
             .finally(() => setLoading(false));
-    }, [notify]);
+    }, [apiUrl, notify]);
 
     return (
-        <AutocompleteInput
+        <SelectInput
             source={source}
             label={label}
             choices={categories}
             isLoading={loading}
-            isRequired={required}
+            required={required}
             fullWidth={fullWidth}
             helperText={helperText}
-            onCreate={(filter) => {
-                const safeFilter = filter || 'New Category';
-                const newCategory = { id: safeFilter, name: safeFilter };
-                setCategories(prev => [...prev, newCategory]);
-                return newCategory;
-            }}
+            emptyText="All"
             {...props}
         />
     );
