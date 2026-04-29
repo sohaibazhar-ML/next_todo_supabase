@@ -267,3 +267,24 @@ USING (
   bucket_id = 'documents'
   AND public.is_user_admin_for_documents(auth.uid()) = true
 );
+
+-- ============================================================================
+-- Performance Optimizations (Trigram Search)
+-- ============================================================================
+
+-- 1. Enable the trigram extension for fast mid-string text matching
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+-- 2. Add GIN Trigram indexes for User/Profile search
+CREATE INDEX IF NOT EXISTS idx_profiles_search_names ON profiles USING gin (first_name gin_trgm_ops, last_name gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_profiles_search_email ON profiles USING gin (email gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_profiles_search_full ON profiles USING gin ((first_name || ' ' || last_name) gin_trgm_ops);
+
+-- 3. Add GIN Trigram indexes for Document search
+CREATE INDEX IF NOT EXISTS idx_documents_search_title ON documents USING gin (title gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_documents_search_description ON documents USING gin (description gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_documents_search_filename ON documents USING gin (file_name gin_trgm_ops);
+
+-- 4. Add GIN Trigram indexes for Checklist search
+CREATE INDEX IF NOT EXISTS idx_checklist_search_title ON "ChecklistItem" USING gin (title gin_trgm_ops);
+
