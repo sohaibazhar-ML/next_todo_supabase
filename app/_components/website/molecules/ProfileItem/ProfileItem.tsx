@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { ChevronRight, LucideIcon, Check, X, Loader2 } from 'lucide-react';
+import { ChevronRight, LucideIcon, Check, X, Loader2, Pencil } from 'lucide-react';
 import { Text, Button, Input, Select, Image } from '@/website/atoms';
 import { FormMessage } from '@/website/molecules';
 import { Link } from '@/i18n/routing';
@@ -219,12 +219,12 @@ export const ProfileItem: React.FC<ProfileItemProps> = ({
             </Button>
           </>
         ) : isEditable ? (
-          <div className="text-secondary/10 group-hover:text-secondary/30 transition-colors">
-            <ChevronRight size={18} />
+          <div className="text-secondary/30 group-hover:text-primary transition-colors">
+            <Pencil size={16} />
           </div>
         ) : !isField ? (
           <div className={twMerge(
-            "text-secondary/30 group-hover:text-secondary/80 transition-all duration-300",
+            "text-secondary/20 group-hover:text-secondary/60 transition-all duration-300",
             isOpen && "rotate-90 text-primary/80"
           )}>
             <ChevronRight size={22} />
