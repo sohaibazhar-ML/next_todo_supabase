@@ -19,45 +19,53 @@ const CustomFeaturedField = ({ source, label }: { source: string; label?: string
 
 const DocumentListActions = (props: any) => {
     const { onImportClick, permissions, filters, ...rest } = props;
+    const isAdmin = permissions === 'admin';
     return (
         <TopToolbar {...rest}>
             <FilterButton filters={filters} />
-            {permissions === 'admin' && <CreateButton />}
-            <Button
-                size="small"
-                color="primary"
-                onClick={onImportClick}
-                startIcon={<UploadFileIcon />}
-            >
-                Import Placeholders
-            </Button>
+            {isAdmin && <CreateButton />}
+            {isAdmin && (
+                <Button
+                    size="small"
+                    color="primary"
+                    onClick={onImportClick}
+                    startIcon={<UploadFileIcon />}
+                >
+                    Import Placeholders
+                </Button>
+            )}
             <ExportButton />
         </TopToolbar>
     );
 };
 
-const DocumentEmpty = ({ onImportClick, permissions }: { onImportClick: () => void, permissions: any }) => (
-    <Box textAlign="center" m={5}>
-        <Typography variant="h4" paragraph>
-            No Documents yet.
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-            Do you want to add one or import placeholders?
-        </Typography>
-        <Box display="flex" justifyContent="center" gap={2} mt={4}>
-            {permissions === 'admin' && <CreateButton variant="contained" />}
-            <Button
-                variant="contained"
-                color="primary"
-                onClick={onImportClick}
-                startIcon={<UploadFileIcon />}
-                sx={{ ml: 2 }}
-            >
-                Import Placeholders
-            </Button>
+const DocumentEmpty = ({ onImportClick, permissions }: { onImportClick: () => void, permissions: any }) => {
+    const isAdmin = permissions === 'admin';
+    return (
+        <Box textAlign="center" m={5}>
+            <Typography variant="h4" paragraph>
+                No Documents yet.
+            </Typography>
+            <Typography variant="body1" gutterBottom>
+                {isAdmin ? "Do you want to add one or import placeholders?" : "There are currently no documents available."}
+            </Typography>
+            <Box display="flex" justifyContent="center" gap={2} mt={4}>
+                {isAdmin && <CreateButton variant="contained" />}
+                {isAdmin && (
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={onImportClick}
+                        startIcon={<UploadFileIcon />}
+                        sx={{ ml: 2 }}
+                    >
+                        Import Placeholders
+                    </Button>
+                )}
+            </Box>
         </Box>
-    </Box>
-);
+    );
+};
 
 export const DocumentList = () => {
     const { permissions } = usePermissions();
@@ -118,7 +126,7 @@ export const DocumentList = () => {
                 actions={<DocumentListActions filters={filters} onImportClick={() => setImportOpen(true)} permissions={permissions} />}
                 empty={<DocumentEmpty onImportClick={() => setImportOpen(true)} permissions={permissions} />}
             >
-                <Datagrid rowClick="edit" bulkActionButtons={permissions === 'admin'}>
+                <Datagrid rowClick={permissions === 'admin' ? "edit" : "show"} bulkActionButtons={permissions === 'admin'}>
                     <TextField source="title" />
                     <TextField source="file_name" label="File Name" />
                     <TextField source="category" />

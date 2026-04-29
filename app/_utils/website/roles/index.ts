@@ -20,6 +20,11 @@ export async function isSubadmin(userId: string): Promise<boolean> {
   return role === 'subadmin'
 }
 
+export async function isManager(userId: string): Promise<boolean> {
+  const role = await getUserRole(userId)
+  return role === 'admin' || role === 'subadmin'
+}
+
 export async function requireAdmin(userId: string): Promise<void> {
   const admin = await isAdmin(userId)
   if (!admin) {

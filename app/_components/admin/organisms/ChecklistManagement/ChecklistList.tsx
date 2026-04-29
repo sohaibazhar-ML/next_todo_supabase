@@ -11,50 +11,62 @@ import {
     ExportButton,
     useNotify,
     useRefresh,
+    usePermissions,
 } from 'react-admin';
 import { Button, Box, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import { AdminFilePicker } from '@/admin/atoms';
 
-const ChecklistListActions = ({ onImportClick }: { onImportClick: () => void }) => (
-    <TopToolbar>
-        <CreateButton />
-        <Button
-            size="small"
-            color="primary"
-            onClick={onImportClick}
-            startIcon={<UploadFileIcon />}
-        >
-            Import Checklist
-        </Button>
-        <ExportButton />
-    </TopToolbar>
-);
+const ChecklistListActions = ({ onImportClick, permissions }: { onImportClick: () => void, permissions: any }) => {
+    const isAdmin = permissions === 'admin';
+    return (
+        <TopToolbar>
+            {isAdmin && <CreateButton />}
+            {isAdmin && (
+                <Button
+                    size="small"
+                    color="primary"
+                    onClick={onImportClick}
+                    startIcon={<UploadFileIcon />}
+                >
+                    Import Checklist
+                </Button>
+            )}
+            <ExportButton />
+        </TopToolbar>
+    );
+};
 
-const ChecklistEmpty = ({ onImportClick }: { onImportClick: () => void }) => (
-    <Box textAlign="center" m={5}>
-        <Typography variant="h4" paragraph>
-            No Checklist yet.
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-            Do you want to add one or import from a file?
-        </Typography>
-        <Box display="flex" justifyContent="center" gap={2} mt={4}>
-            <CreateButton variant="contained" />
-            <Button
-                variant="contained"
-                color="primary"
-                onClick={onImportClick}
-                startIcon={<UploadFileIcon />}
-                sx={{ ml: 2 }}
-            >
-                Import Checklist
-            </Button>
+const ChecklistEmpty = ({ onImportClick, permissions }: { onImportClick: () => void, permissions: any }) => {
+    const isAdmin = permissions === 'admin';
+    return (
+        <Box textAlign="center" m={5}>
+            <Typography variant="h4" paragraph>
+                No Checklist yet.
+            </Typography>
+            <Typography variant="body1" gutterBottom>
+                {isAdmin ? "Do you want to add one or import from a file?" : "There are currently no checklist items available."}
+            </Typography>
+            <Box display="flex" justifyContent="center" gap={2} mt={4}>
+                {isAdmin && <CreateButton variant="contained" />}
+                {isAdmin && (
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={onImportClick}
+                        startIcon={<UploadFileIcon />}
+                        sx={{ ml: 2 }}
+                    >
+                        Import Checklist
+                    </Button>
+                )}
+            </Box>
         </Box>
-    </Box>
-);
+    );
+};
 
 export const ChecklistList = () => {
+    const { permissions } = usePermissions();
     const [importOpen, setImportOpen] = useState(false);
     const [file, setFile] = useState<File | null>(null);
     const [importing, setImporting] = useState(false);
@@ -100,10 +112,10 @@ export const ChecklistList = () => {
     return (
         <>
             <List 
-                actions={<ChecklistListActions onImportClick={() => setImportOpen(true)} />}
-                empty={<ChecklistEmpty onImportClick={() => setImportOpen(true)} />}
+                actions={<ChecklistListActions onImportClick={() => setImportOpen(true)} permissions={permissions} />}
+                empty={<ChecklistEmpty onImportClick={() => setImportOpen(true)} permissions={permissions} />}
             >
-                <Datagrid rowClick="edit">
+                <Datagrid rowClick={permissions === 'admin' ? "edit" : "show"} bulkActionButtons={permissions === 'admin'}>
                     <TextField source="phase" />
                     <TextField source="category" />
                     <TextField source="title" label="Task" />

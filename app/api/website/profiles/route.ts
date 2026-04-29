@@ -15,7 +15,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
-import { isAdmin } from '@/website/utils/roles'
+import { isAdmin, isManager } from '@/website/utils/roles'
 import type { Prisma } from '@prisma/client'
 import { isErrorWithMessage } from '@/website/utils'
 import { CONSOLE_MESSAGES, ERROR_MESSAGES } from '@/website/constants'
@@ -39,10 +39,10 @@ export async function GET(request: Request) {
 
     // If userId is provided, get specific profile
     if (userId) {
-      const admin = await isAdmin(user.id)
+      const manager = await isManager(user.id)
 
-      // Users can only view their own profile unless they're admin
-      if (!admin && user.id !== userId) {
+      // Users can only view their own profile unless they're admin/subadmin
+      if (!manager && user.id !== userId) {
         return NextResponse.json({ error: ERROR_MESSAGES.FORBIDDEN }, { status: 403 })
       }
 
@@ -57,10 +57,10 @@ export async function GET(request: Request) {
       return NextResponse.json(profile)
     }
 
-    // Admin-only: Get all profiles with filters (role, search, date range)
-    const admin = await isAdmin(user.id)
-    if (!admin) {
-      // Non-admin: get current user's profile only
+    // Admin/Subadmin: Get all profiles with filters
+    const manager = await isManager(user.id)
+    if (!manager) {
+      // Non-manager: get current user's profile only
       const profile = await prisma.profiles.findUnique({
         where: { id: user.id }
       })
