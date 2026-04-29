@@ -431,7 +431,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
         </div>
 
         <div className="w-full mb-10 px-1">
-          <Text variant="text-xs" className="text-secondary leading-relaxed text-left">
+          <Text className="text-[#362E2D] text-[18px] font-normal leading-relaxed text-left">
             {t('legalNote')}
           </Text>
         </div>

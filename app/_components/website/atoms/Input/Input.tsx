@@ -105,10 +105,9 @@ export const Input: React.FC<InputProps> = ({
     )}>
       {label && (
         <label htmlFor={id} className={twMerge(
-          isCheckbox ? "cursor-pointer select-none order-2" : "order-1",
-          labelClassName
+          isCheckbox ? "cursor-pointer select-none order-2" : "order-1"
         )}>
-          <Text className="font-normal text-text-label text-[16px] leading-none">
+          <Text className={twMerge("font-normal text-text-label text-[16px] leading-none", labelClassName)}>
             {label}
             {props.required && <span className="text-primary ml-1">*</span>}
           </Text>
