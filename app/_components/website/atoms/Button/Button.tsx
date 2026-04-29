@@ -43,6 +43,7 @@ export const Button: React.FC<ButtonProps> = ({
   textClassName = '',
   className = '',
   style = {},
+  truncate = false,
   children,
   ref,
   ...props
@@ -91,11 +92,11 @@ export const Button: React.FC<ButtonProps> = ({
           <Text
             as="span"
             variant={textVariantMap[size]}
-            className={twMerge(
-              "flex items-center gap-2 font-semibold",
+            className={`${truncate ? "block whitespace-nowrap overflow-hidden text-ellipsis" : "flex"} ${twMerge(
+              "items-center gap-2 font-semibold",
               textClassName,
               actualLoading ? 'opacity-20' : 'opacity-100'
-            )}
+            )}`}
           >
             {!actualLoading && LeftIcon && <LeftIcon className="w-4 h-4 shrink-0" />}
             {children}

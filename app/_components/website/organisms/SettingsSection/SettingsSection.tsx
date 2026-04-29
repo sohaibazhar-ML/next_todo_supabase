@@ -297,6 +297,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                   onClick={() => setIsPasswordOpen(false)}
                   disabled={isPasswordLoading}
                   textClassName="text-secondary"
+                  truncate
                 >
                   {t('cancel')}
                 </Button>
@@ -306,6 +307,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                   onClick={handlePasswordChange}
                   isLoading={isPasswordLoading}
                   disabled={!clientValidation.success || isPasswordLoading}
+                  truncate
                 >
                   {t('saveChanges')}
                 </Button>

@@ -15,6 +15,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   minWidth?: number | string;
   textClassName?: string;
   className?: string;
+  truncate?: boolean;
   children: ReactNode;
   ref?: React.Ref<HTMLButtonElement>;
 }
