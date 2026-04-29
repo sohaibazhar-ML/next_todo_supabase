@@ -142,9 +142,9 @@ export const DocumentList = () => {
                         <AdminFilePicker 
                             file={file}
                             onChange={setFile}
-                            accept=".xlsx, .xls"
+                            accept=".xlsx, .xls, .csv"
                             disabled={importing}
-                            helperText="Accepted formats: .xlsx, .xls"
+                            helperText="Accepted formats: .xlsx, .xls, .csv"
                         />
                     </Box>
                 </DialogContent>

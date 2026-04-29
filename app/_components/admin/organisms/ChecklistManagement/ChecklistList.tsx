@@ -109,10 +109,6 @@ export const ChecklistList = () => {
                     <TextField source="title" label="Task" />
                     <TextField source="description" />
                     <BooleanField source="is_mandatory" label="Mandatory" />
-                    <Box display="flex">
-                        <EditButton />
-                        <DeleteButton />
-                    </Box>
                 </Datagrid>
             </List>
 
