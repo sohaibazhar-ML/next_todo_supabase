@@ -20,3 +20,4 @@ export { Switch } from '@/website/atoms/Switch/Switch';
 export { LoadingOverlay } from '@/website/atoms/LoadingOverlay/LoadingOverlay';
 export { SearchableSelect } from '@/website/atoms/SearchableSelect/SearchableSelect';
 export type { SearchableSelectProps } from '@/website/atoms/SearchableSelect/SearchableSelect.types';
+export { NetworkStatus } from '@/website/atoms/NetworkStatus/NetworkStatus';

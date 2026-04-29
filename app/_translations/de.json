@@ -625,5 +625,8 @@
       "no": "nein"
     },
     "empty": "Keine Checklisten-Einträge gefunden."
+  },
+  "Common": {
+    "noInternet": "Keine Internetverbindung. Bitte überprüfen Sie Ihre Verbindung."
   }
 }

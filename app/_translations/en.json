@@ -625,5 +625,8 @@
       "no": "no"
     },
     "empty": "No checklist items found."
+  },
+  "Common": {
+    "noInternet": "No internet connection. Please check your connection."
   }
 }

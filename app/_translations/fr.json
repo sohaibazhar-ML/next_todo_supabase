@@ -622,5 +622,8 @@
       "no": "non"
     },
     "empty": "Aucun élément de liste de contrôle trouvé."
+  },
+  "Common": {
+    "noInternet": "Pas de connexion Internet. Veuillez vérifier votre connexion."
   }
 }
