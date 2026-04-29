@@ -46,8 +46,8 @@ export const NavigationHandler = () => {
     window.history.pushState = function(...args) {
       const newUrl = args[2];
       if (newUrl) {
-        const absoluteUrl = new URL(String(newUrl), window.location.origin).href;
-        if (absoluteUrl !== window.location.href) {
+        const url = new URL(String(newUrl), window.location.origin);
+        if (url.pathname !== window.location.pathname) {
           // Defer to avoid React state update issues during internal router logic
           setTimeout(() => startLoading(), 0);
         }
@@ -58,8 +58,8 @@ export const NavigationHandler = () => {
     window.history.replaceState = function(...args) {
       const newUrl = args[2];
       if (newUrl) {
-        const absoluteUrl = new URL(String(newUrl), window.location.origin).href;
-        if (absoluteUrl !== window.location.href) {
+        const url = new URL(String(newUrl), window.location.origin);
+        if (url.pathname !== window.location.pathname) {
           setTimeout(() => startLoading(), 0);
         }
       }

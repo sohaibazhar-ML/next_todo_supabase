@@ -27,7 +27,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get('q')?.toLowerCase() || '';
   const [query, setQuery] = React.useState(initialQuery);
-  const [isFiltering, setIsFiltering] = React.useState(false);
 
   // Synchronize with URL query on mount or back/forward navigation
   React.useEffect(() => {
@@ -39,16 +38,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     const handleInstantSearch = (e: any) => {
       const val = e.detail?.toLowerCase() || '';
       setQuery(val);
-      
-      // Briefly show skeleton to indicate "processing" if desired, 
-      // but keep it short for "instant" feel
-      if (val) {
-        setIsFiltering(true);
-        const timer = setTimeout(() => setIsFiltering(false), 200);
-        return () => clearTimeout(timer);
-      } else {
-        setIsFiltering(false);
-      }
     };
 
     window.addEventListener('dashboard:search', handleInstantSearch);
@@ -62,15 +51,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     (item.is_mandatory ? 'mandatory' : 'optional').includes(query)
   );
 
-  const SkeletonCard = () => (
-    <div className="bg-white p-6 shadow-sm border border-gray-50 flex flex-col gap-4 min-h-[160px] justify-between animate-pulse">
-      <div className="flex flex-col gap-2">
-        <div className="h-4 w-24 bg-gray-100 rounded" />
-        <div className="h-6 w-full bg-gray-100 rounded" />
-      </div>
-      <div className="h-10 w-32 bg-gray-100 rounded" />
-    </div>
-  );
+
 
   return (
     <div className="w-full flex flex-col gap-8">
@@ -92,9 +73,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
       {/* Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {isFiltering ? (
-          [...Array(6)].map((_, i) => <SkeletonCard key={i} />)
-        ) : filteredCards.length > 0 ? (
+        {filteredCards.length > 0 ? (
           filteredCards.map((item, idx) => (
             <div key={item.id || idx} className="bg-white p-6 shadow-sm border border-gray-50 flex flex-col gap-4 min-h-[160px] justify-between transition-shadow hover:shadow-md">
               <div className="flex flex-col gap-2">

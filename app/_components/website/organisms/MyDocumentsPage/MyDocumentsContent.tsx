@@ -289,7 +289,6 @@ export const MyDocumentsContent: React.FC<MyDocumentsContentProps> = ({
         sortField={sortField}
         sortOrder={sortOrder}
         downloadingId={downloadingId}
-        isLoading={isPending}
         variant="user"
       />
 

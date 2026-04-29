@@ -132,7 +132,6 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                     value={searchValue}
                     onChange={(e) => handleSearchChange(e.target.value)}
                     placeholder={t('searchPlaceholder')}
-                    rightIcon={isSearchPending ? () => <Loader2 className="animate-spin" size={18} /> : undefined}
                     className="bg-white border-transparent focus:ring-0 transition-all shadow-sm !h-[36px] !rounded-[4px]"
                     inputClassName="text-secondary placeholder:text-secondary/50 py-[5px] px-[20px] !h-[36px]"
                   />
@@ -224,7 +223,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               value={searchValue}
               onChange={(e) => handleSearchChange(e.target.value)}
               placeholder={t('searchPlaceholder')}
-              rightIcon={isSearchPending ? () => <Loader2 className="animate-spin" size={18} /> : Search}
+              rightIcon={Search}
               className="w-full h-[40px] shadow-inner bg-white"
             />
           </div>

@@ -89,7 +89,6 @@ export const DocumentList: React.FC<DocumentListProps> = ({
         sortField={sortField}
         sortOrder={sortOrder}
         downloadingId={downloadingId}
-        isLoading={isPending}
       />
 
       {/* Bottom Pagination */}
