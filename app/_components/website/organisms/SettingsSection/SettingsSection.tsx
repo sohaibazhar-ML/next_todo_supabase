@@ -42,6 +42,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState(false);
+  const [localKeepLoggedIn, setLocalKeepLoggedIn] = useState(keepMeLoggedIn);
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -130,11 +131,17 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
   };
 
   const handleSessionToggle = async (val: boolean) => {
+    // Optimistic update for instant UI response
+    setLocalKeepLoggedIn(val);
     try {
       const res = await updateKeepLoggedInAction(val);
-      if (!res.success) alert(res.error);
+      if (!res.success) {
+        alert(res.error);
+        setLocalKeepLoggedIn(!val); // Rollback on error
+      }
     } catch (error) {
       console.error('Session toggle failed:', error);
+      setLocalKeepLoggedIn(!val); // Rollback on error
     }
   };
 
@@ -193,12 +200,12 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
             label={t('keepMeLoggedIn')} 
             value={
               <Switch 
-                checked={keepMeLoggedIn} 
+                checked={localKeepLoggedIn} 
                 onChange={handleSessionToggle} 
               />
             } 
             isField
-            onClick={() => handleSessionToggle(!keepMeLoggedIn)}
+            onClick={() => handleSessionToggle(!localKeepLoggedIn)}
             className="cursor-pointer"
           />
 
