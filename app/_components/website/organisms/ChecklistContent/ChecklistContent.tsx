@@ -153,9 +153,9 @@ export const ChecklistContent: React.FC<ChecklistContentProps> = ({
 
               return (
                 <React.Fragment key={phase}>
-                  {/* Phase Gap Spacer - only between phases */}
+                  {/* Phase Gap Spacer - significant gap between phases */}
                   {phaseIndex > 0 && (
-                    <tr className="h-10">
+                    <tr className="h-24">
                       <td colSpan={7}></td>
                     </tr>
                   )}
@@ -176,13 +176,15 @@ export const ChecklistContent: React.FC<ChecklistContentProps> = ({
                         {index === 0 ? (
                           <td
                             rowSpan={phaseItems.length}
-                            className="relative w-16 min-w-[60px] bg-transparent"
+                            className="relative w-16 min-w-[60px] bg-transparent align-middle"
                           >
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="rotate-[-90deg] whitespace-nowrap text-[#ff0000] text-checklist-phase uppercase tracking-[0.15em]">
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                              <span className="rotate-[-90deg] whitespace-nowrap text-[#ff0000] text-checklist-phase uppercase tracking-[0.15em] origin-center">
                                 {t(`phases.${phaseKey}`)}
                               </span>
                             </div>
+                            {/* Hidden spacer to prevent labels from merging when there are few items (e.g. during search) */}
+                            <div className="invisible h-24 w-full" />
                           </td>
                         ) : null}
 
