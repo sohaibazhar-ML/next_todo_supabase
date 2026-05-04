@@ -47,7 +47,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ onItemClick 
   ];
 
   return (
-    <aside className="w-80 bg-white border-r border-gray-100 flex flex-col py-10">
+    <aside className="w-64 xl:w-80 bg-white border-r border-gray-100 flex flex-col py-10">
       <nav className="flex flex-col gap-2">
         {navItems.map((item, idx) => (
           <Link

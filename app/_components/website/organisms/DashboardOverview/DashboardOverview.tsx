@@ -72,7 +72,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       </div>
 
       {/* Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {filteredCards.length > 0 ? (
           filteredCards.map((item, idx) => (
             <div key={item.id || idx} className="bg-white p-6 shadow-sm border border-gray-50 flex flex-col gap-4 min-h-[160px] justify-between transition-shadow hover:shadow-md">
@@ -80,7 +80,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <Text variant="card-label" className="text-primary uppercase tracking-wider">
                   {item.is_mandatory ? t('overview.labels.mandatory') : t('overview.labels.optional')}
                 </Text>
-                <Text variant="card-title" className="text-secondary">
+                <Text variant="card-title" className="text-secondary break-words">
                   {item.title}
                 </Text>
               </div>
@@ -88,7 +88,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <Button
                 variant="primary"
                 size="sm"
-                className="bg-primary hover:bg-primary-hover text-white w-fit !py-[8px] !px-[20px] !h-auto rounded-none text-card-button shadow-sm"
+                className="bg-primary hover:bg-primary-hover text-white w-fit !py-[8px] !px-[20px] !h-auto rounded-none shadow-sm"
+                textClassName="text-card-button"
                 onClick={() => window.location.href = `/dashboard/checklist`}
               >
                 {t('list.download')}

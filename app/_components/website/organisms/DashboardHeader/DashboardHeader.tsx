@@ -90,10 +90,10 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     <header className={`w-full flex flex-col shadow-md relative z-50 ${className}`}>
       {/* Main Nav Bar */}
       <div className="w-full bg-background-dark flex justify-center h-auto">
-        <div className="max-w-[1440px] w-full px-6 lg:px-[50px] py-[9px] flex items-center justify-between gap-4">
+        <div className="max-w-[1440px] w-full px-4 sm:px-6 lg:px-[50px] py-[9px] flex items-center justify-between gap-2 sm:gap-4">
           
           {/* Left Section: Logo & Mobile Menu */}
-          <div className="flex items-center gap-4 lg:gap-8 flex-shrink-0">
+          <div className="flex items-center gap-2 sm:gap-4 lg:gap-8 flex-shrink-0">
             <Button
               variant="ghost"
               size="sm"
@@ -101,30 +101,31 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               className="lg:hidden text-white p-1 hover:bg-white/10"
               aria-label="Toggle mobile menu"
             >
-              <Menu size={24} />
+              <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
             </Button>
             
             <Link href="/">
               <Logo
                 variant="logo2"
-                className="w-[140px] h-[35px] lg:w-[220px] lg:h-[55px]"
+                className="w-[100px] h-[25px] sm:w-[140px] sm:h-[35px] md:w-[160px] md:h-[40px] lg:w-[220px] lg:h-[55px]"
               />
             </Link>
           </div>
 
           {/* Right Section: Title, Search & Actions */}
-          <div className="flex items-center gap-6 lg:gap-10 flex-1 justify-end">
-            {/* Title & Search (Desktop) */}
+          <div className="flex items-center gap-3 sm:gap-6 lg:gap-10 flex-1 justify-end">
+            {/* Title & Search (Desktop/Tablet) */}
             <div className="hidden md:flex items-center gap-6 lg:gap-10">
+              {/* Show title only on lg+ to save space on tablets */}
               <Text 
                 variant="heading-m" 
-                className="text-white font-semibold whitespace-nowrap !text-[23px] [font-stretch:85%]"
+                className="text-white font-semibold whitespace-nowrap !text-[23px] [font-stretch:85%] hidden lg:block"
               >
                 {t('portalTitle')}
               </Text>
 
               {showSearch && (
-                <div className="w-[300px] lg:w-[411px]">
+                <div className="w-[200px] lg:w-[280px] xl:w-[411px]">
                   <Input
                     id="search-desktop"
                     inputSize="sm"
@@ -139,16 +140,16 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               )}
             </div>
 
-            <div className="flex items-center gap-4 lg:gap-8 flex-shrink-0">
-              {/* Mobile Search Trigger */}
+            <div className="flex items-center gap-2 sm:gap-4 lg:gap-8 flex-shrink-0">
+              {/* Mobile Search Trigger (below md) */}
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={toggleSearch}
-                className={`text-white p-2 h-auto hover:bg-white/10 ${showSearch ? 'md:hidden' : 'hidden'}`}
+                className={`text-white p-1 sm:p-2 h-auto hover:bg-white/10 ${showSearch ? 'md:hidden' : 'hidden'}`}
                 aria-label="Toggle search"
               >
-                <Search size={22} />
+                <Search className="w-5 h-5 sm:w-[22px] sm:h-[22px]" />
               </Button>
 
               {/* Logout */}
@@ -157,13 +158,17 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 size="sm"
                 onClick={handleLogout}
                 isLoading={isLogoutPending}
-                className="text-white font-semibold p-0 h-auto hover:bg-transparent !text-[23px] [font-stretch:85%]"
+                className="text-white font-semibold p-1 sm:p-0 h-auto hover:bg-transparent"
               >
-                {t('logout')}
+                <div className="flex items-center gap-1">
+                  {/* Show only icon on small mobile, and only text on screens > 425px */}
+                  <span className="hidden min-[426px]:inline !text-[23px] [font-stretch:85%]">{t('logout')}</span>
+                  <LogOut className="w-5 h-5 sm:w-6 sm:h-6 min-[426px]:hidden" />
+                </div>
               </Button>
 
               {/* Language Switcher */}
-              <div className="scale-75 lg:scale-90 opacity-90 hover:opacity-100 transition-opacity flex-shrink-0">
+              <div className="scale-[0.65] sm:scale-75 lg:scale-90 opacity-90 hover:opacity-100 transition-opacity flex-shrink-0">
                 <LanguageSwitcher />
               </div>
             </div>
