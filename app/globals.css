@@ -152,6 +152,15 @@ html {
   line-height: 1.2 !important;
 }
 
+@utility text-checklist-phase {
+  font-family: "Acumin Variable Concept", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  font-stretch: 85% !important;
+  font-variation-settings: 'wdth' 85 !important;
+  line-height: 1.2 !important;
+}
+
 @utility text-card-label {
   font-family: "Acumin Variable Concept", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
   font-size: 21px !important;

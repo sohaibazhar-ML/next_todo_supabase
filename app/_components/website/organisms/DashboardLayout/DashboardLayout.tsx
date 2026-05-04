@@ -9,13 +9,15 @@ interface DashboardLayoutProps {
   activeTab?: DashboardHeaderProps['activeTab'];
   isAccountPage?: boolean;
   showSearch?: boolean;
+  reducedPadding?: boolean;
 }
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ 
   children, 
   activeTab,
   isAccountPage = false,
-  showSearch = false
+  showSearch = false,
+  reducedPadding = false
 }) => {
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -34,7 +36,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
           {/* Main Content Area */}
           <main className="flex-1 min-h-[calc(100vh-180px)] bg-background-secondary overflow-x-hidden">
-            <div className="p-4 sm:p-6 lg:p-10">
+            <div className={reducedPadding ? "py-10 px-2 sm:px-4 lg:px-5" : "p-4 sm:p-6 lg:p-10"}>
               {children}
             </div>
           </main>

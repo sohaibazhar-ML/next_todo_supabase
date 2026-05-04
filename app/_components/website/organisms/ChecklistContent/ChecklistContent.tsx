@@ -28,10 +28,10 @@ interface ChecklistContentProps {
   userId: string;
 }
 
-export const ChecklistContent: React.FC<ChecklistContentProps> = ({ 
-  items, 
+export const ChecklistContent: React.FC<ChecklistContentProps> = ({
+  items,
   initialProgress,
-  userId 
+  userId
 }) => {
   const t = useTranslations('Checklist');
   const searchParams = useSearchParams();
@@ -48,7 +48,7 @@ export const ChecklistContent: React.FC<ChecklistContentProps> = ({
       is_completed: p.is_completed
     }))
   );
-  
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -70,13 +70,13 @@ export const ChecklistContent: React.FC<ChecklistContentProps> = ({
   const handleToggle = async (itemId: string) => {
     const current = progress.find(p => p.checklist_item_id === itemId);
     const newStatus = current ? !current.is_completed : true;
-    
+
     setTogglingId(itemId);
     // Optimistic update
-    const newProgress = current 
+    const newProgress = current
       ? progress.map(p => p.checklist_item_id === itemId ? { ...p, is_completed: newStatus } : p)
       : [...progress, { checklist_item_id: itemId, deadline: null, is_completed: newStatus }];
-    
+
     setProgress(newProgress);
 
     startTransition(async () => {
@@ -87,13 +87,13 @@ export const ChecklistContent: React.FC<ChecklistContentProps> = ({
 
   const handleDeadlineChange = async (itemId: string, deadline: string) => {
     const current = progress.find(p => p.checklist_item_id === itemId);
-    
+
     setUpdatingDeadlineId(itemId);
     // Optimistic update
-    const newProgress = current 
+    const newProgress = current
       ? progress.map(p => p.checklist_item_id === itemId ? { ...p, deadline } : p)
       : [...progress, { checklist_item_id: itemId, deadline, is_completed: false }];
-    
+
     setProgress(newProgress);
 
     startTransition(async () => {
@@ -111,169 +111,172 @@ export const ChecklistContent: React.FC<ChecklistContentProps> = ({
   const phases = Object.keys(phaseMap);
 
   return (
-    <div className="w-full flex justify-center">
-      <div className="w-full max-w-6xl">
-        <div className="overflow-x-auto custom-scrollbar pb-4">
-          <table className="w-full border-separate border-spacing-y-[4px] min-w-[1000px]">
-            <thead>
-              <tr className="text-white">
-                {/* Space for Phase Label Column */}
-                <th className="w-16 min-w-[60px] bg-transparent"></th>
-                
-                <th className="py-[12px] px-4 text-left bg-[#333333] first:rounded-tl-sm relative w-32">
-                  <Text variant="table-heading" className="text-white">{t('columns.category')}</Text>
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-white/20" />
-                </th>
-                <th className="py-[12px] px-4 text-left bg-[#333333] relative w-48">
-                  <Text variant="table-heading" className="text-white">{t('columns.todo')}</Text>
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-white/20" />
-                </th>
-                <th className="py-[12px] px-4 text-left bg-[#333333] relative">
-                  <Text variant="table-heading" className="text-white">{t('columns.description')}</Text>
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-white/20" />
-                </th>
-                <th className="py-[12px] px-4 text-center bg-[#333333] relative w-24">
-                  <Text variant="table-heading" className="text-white">{t('columns.mandatory')}</Text>
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-white/20" />
-                </th>
-                <th className="py-[12px] px-4 text-center bg-[#333333] relative w-40">
-                  <Text variant="table-heading" className="text-white">{t('columns.deadline')}</Text>
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-white/20" />
-                </th>
-                <th className="py-[12px] px-4 text-center bg-[#333333] last:rounded-tr-sm w-20">
-                  <Text variant="table-heading" className="text-white">{t('columns.done')}</Text>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredItems.length > 0 ? phases.map((phase, phaseIndex) => {
-                const phaseItems = filteredItems.filter(item => item.phase === phase);
-                if (phaseItems.length === 0) return null;
+    <div className="w-full">
+      <div className="overflow-x-auto custom-scrollbar pb-4">
+        <table className="w-full border-separate border-spacing-y-[4px] min-w-[1000px]">
+          <thead>
+            <tr className="text-white">
+              {/* Space for Phase Label Column */}
+              <th className="w-16 min-w-[60px] bg-transparent"></th>
 
-                const phaseKey = phaseMap[phase];
+              <th className="py-[12px] px-4 text-left bg-[#333333] first:rounded-tl-sm relative w-32">
+                <Text variant="table-heading" className="text-white">{t('columns.category')}</Text>
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-white/20" />
+              </th>
+              <th className="py-[12px] px-4 text-left bg-[#333333] relative w-48">
+                <Text variant="table-heading" className="text-white">{t('columns.todo')}</Text>
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-white/20" />
+              </th>
+              <th className="py-[12px] px-4 text-left bg-[#333333] relative">
+                <Text variant="table-heading" className="text-white">{t('columns.description')}</Text>
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-white/20" />
+              </th>
+              <th className="py-[12px] px-4 text-center bg-[#333333] relative w-24">
+                <Text variant="table-heading" className="text-white">{t('columns.mandatory')}</Text>
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-white/20" />
+              </th>
+              <th className="py-[12px] px-4 text-center bg-[#333333] relative w-40">
+                <Text variant="table-heading" className="text-white">{t('columns.deadline')}</Text>
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-white/20" />
+              </th>
+              <th className="py-[12px] px-4 text-center bg-[#333333] last:rounded-tr-sm w-20">
+                <Text variant="table-heading" className="text-white">{t('columns.done')}</Text>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredItems.length > 0 ? phases.map((phase, phaseIndex) => {
+              const phaseItems = filteredItems.filter(item => item.phase === phase);
+              if (phaseItems.length === 0) return null;
 
-                return (
-                  <React.Fragment key={phase}>
-                    {/* Phase Gap Spacer - only between phases */}
-                    {phaseIndex > 0 && (
-                      <tr className="h-10">
-                        <td colSpan={7}></td>
-                      </tr>
-                    )}
+              const phaseKey = phaseMap[phase];
 
-                    {phaseItems.map((item, index) => {
-                      const itemProgress = progress.find(p => p.checklist_item_id === item.id);
-                      const isCompleted = itemProgress?.is_completed || false;
-                      const deadline = itemProgress?.deadline || '';
+              return (
+                <React.Fragment key={phase}>
+                  {/* Phase Gap Spacer - only between phases */}
+                  {phaseIndex > 0 && (
+                    <tr className="h-10">
+                      <td colSpan={7}></td>
+                    </tr>
+                  )}
 
-                      return (
-                        <tr key={item.id} className="group transition-colors">
-                          {/* Phase Vertical Label */}
-                          {index === 0 ? (
-                            <td 
-                              rowSpan={phaseItems.length} 
-                              className="relative w-16 min-w-[60px] bg-transparent"
-                            >
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="rotate-[-90deg] whitespace-nowrap text-[#ff0000] font-bold text-[11px] uppercase tracking-[0.15em]">
-                                  {t(`phases.${phaseKey}`)}
-                                </span>
-                              </div>
-                            </td>
-                          ) : null}
-                          
-                          <td className="py-[6.5px] px-4 relative bg-white first:rounded-l-sm group-hover:bg-gray-50 transition-colors">
-                            <Text variant="table-data">{item.category}</Text>
-                            <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-gray-300" />
-                          </td>
-                          <td className="py-[6.5px] px-4 relative bg-white group-hover:bg-gray-50 transition-colors">
-                            <Text variant="table-data" className="font-medium">{item.title}</Text>
-                            <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-gray-300" />
-                          </td>
-                          <td className="py-[6.5px] px-4 relative bg-white group-hover:bg-gray-50 transition-colors">
-                            <Text variant="table-data" className="text-secondary/60">{item.description}</Text>
-                            <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-gray-300" />
-                          </td>
-                          <td className="py-[6.5px] px-4 relative bg-white group-hover:bg-gray-50 transition-colors text-center">
-                            <Text variant="table-data">{item.is_mandatory ? t('status.yes') : t('status.no')}</Text>
-                            <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-gray-300" />
-                          </td>
-                          <td 
-                            className="py-[6.5px] px-4 relative bg-white group-hover:bg-gray-50 transition-colors cursor-pointer"
-                            onClick={(e) => {
-                              const input = e.currentTarget.querySelector('input');
-                              if (input && !updatingDeadlineId && !togglingId) {
-                                try {
-                                  (input as any).showPicker();
-                                } catch (err) {
-                                  input.focus();
-                                }
-                              }
-                            }}
+                  {phaseItems.map((item, index) => {
+                    const itemProgress = progress.find(p => p.checklist_item_id === item.id);
+                    const isCompleted = itemProgress?.is_completed || false;
+                    const deadline = itemProgress?.deadline || '';
+
+                    // Format date as DD.MM.YY for display
+                    const formattedDate = deadline
+                      ? `${deadline.split('-')[2]}.${deadline.split('-')[1]}.${deadline.split('-')[0].slice(-2)}`
+                      : '';
+
+                    return (
+                      <tr key={item.id} className="group transition-colors">
+                        {/* Phase Vertical Label */}
+                        {index === 0 ? (
+                          <td
+                            rowSpan={phaseItems.length}
+                            className="relative w-16 min-w-[60px] bg-transparent"
                           >
-                            <div className="flex items-center justify-center gap-2 relative">
-                              <input 
-                                type="date"
-                                value={deadline}
-                                disabled={updatingDeadlineId === item.id}
-                                onChange={(e) => handleDeadlineChange(item.id, e.target.value)}
-                                onClick={(e) => e.stopPropagation()} 
-                                className={`bg-transparent outline-none text-[#362E2D] focus:text-primary transition-all text-[15px] text-center cursor-pointer pointer-events-auto appearance-none webkit-calendar-picker-indicator:hidden ${updatingDeadlineId === item.id ? 'opacity-30' : 'opacity-100'}`}
-                                style={{
-                                  WebkitAppearance: 'none',
-                                  MozAppearance: 'none'
-                                }}
-                              />
-                              {updatingDeadlineId === item.id && (
-                                <div className="absolute right-0 top-1/2 -translate-y-1/2">
-                                  <div className="w-3 h-3 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
-                                </div>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className="rotate-[-90deg] whitespace-nowrap text-[#ff0000] text-checklist-phase uppercase tracking-[0.15em]">
+                                {t(`phases.${phaseKey}`)}
+                              </span>
+                            </div>
+                          </td>
+                        ) : null}
+
+                        <td className="py-[6.5px] px-4 relative bg-white first:rounded-l-sm group-hover:bg-gray-50 transition-colors">
+                          <Text variant="table-data">{item.category}</Text>
+                          <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-gray-300" />
+                        </td>
+                        <td className="py-[6.5px] px-4 relative bg-white group-hover:bg-gray-50 transition-colors">
+                          <Text variant="table-data" className="font-medium">{item.title}</Text>
+                          <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-gray-300" />
+                        </td>
+                        <td className="py-[6.5px] px-4 relative bg-white group-hover:bg-gray-50 transition-colors">
+                          <Text variant="table-data" className="text-secondary/60">{item.description}</Text>
+                          <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-gray-300" />
+                        </td>
+                        <td className="py-[6.5px] px-4 relative bg-white group-hover:bg-gray-50 transition-colors text-center">
+                          <Text variant="table-data">{item.is_mandatory ? t('status.yes') : t('status.no')}</Text>
+                          <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-gray-300" />
+                        </td>
+                        <td className="py-[6.5px] px-4 relative bg-white group-hover:bg-gray-50 transition-colors cursor-pointer">
+                          <div className="flex items-center justify-between gap-2 relative min-h-[32px] w-full px-2">
+                            {/* Display Date with updated typography */}
+                            <span className="text-table-data flex-1 text-center font-normal">
+                              {formattedDate}
+                            </span>
+
+                            {/* Custom Arrow Icon or Loader */}
+                            <div className="relative w-4 h-4 flex items-center justify-center">
+                              {updatingDeadlineId === item.id ? (
+                                <div className="w-3 h-3 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+                              ) : (
+                                <img
+                                  src="/assets/website/icons/black-down-arrow-icon.png"
+                                  alt="arrow"
+                                  className="w-[8px] h-[8px] transform rotate-[270deg] opacity-70 -translate-y-[6.5px]"
+                                />
                               )}
                             </div>
-                            <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-gray-300" />
-                          </td>
-                          <td className="py-[6.5px] px-4 text-center bg-white last:rounded-r-sm group-hover:bg-gray-50 transition-colors">
-                            <button
-                              onClick={() => handleToggle(item.id)}
-                              disabled={togglingId === item.id}
-                              className={`inline-flex items-center justify-center w-[22px] h-[22px] border-2 rounded-[4px] transition-all relative mx-auto ${
-                                isCompleted 
-                                  ? 'border-primary bg-white' 
-                                  : 'border-gray-300 hover:border-primary bg-white'
-                              } ${togglingId === item.id ? 'opacity-50 cursor-wait' : ''}`}
-                            >
-                              {togglingId === item.id ? (
-                                <div className="w-3 h-3 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
-                              ) : isCompleted && (
-                                <motion.div
-                                  initial={{ scale: 0.5, opacity: 0 }}
-                                  animate={{ scale: 1, opacity: 1 }}
-                                  className="absolute inset-0 flex items-center justify-center"
-                                >
-                                  <svg viewBox="0 0 24 24" className="w-4 h-4 text-primary" fill="none" stroke="currentColor" strokeWidth="4">
-                                    <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
-                                  </svg>
-                                </motion.div>
-                              )}
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </React.Fragment>
-                );
-              }) : (
-                <tr>
-                  <td colSpan={7} className="py-20 text-center">
-                    <Text variant="text-m" className="text-secondary/30 font-medium">
-                      {t('empty')}
-                    </Text>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+
+                            {/* Transparent Date Input Overlay */}
+                            <input
+                              type="date"
+                              value={deadline}
+                              disabled={!!updatingDeadlineId}
+                              onChange={(e) => handleDeadlineChange(item.id, e.target.value)}
+                              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full appearance-none [&::-webkit-calendar-picker-indicator]:hidden"
+                              onClick={(e) => {
+                                try {
+                                  (e.target as any).showPicker();
+                                } catch (err) { }
+                              }}
+                            />
+                          </div>
+                          <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-gray-300" />
+                        </td>
+                        <td className="py-[6.5px] px-4 text-center bg-white last:rounded-r-sm group-hover:bg-gray-50 transition-colors">
+                          <button
+                            onClick={() => handleToggle(item.id)}
+                            disabled={togglingId === item.id}
+                            className={`inline-flex items-center justify-center w-[22px] h-[22px] border-[1.5px] rounded-[4px] transition-all relative mx-auto border-[#868281] bg-white ${togglingId === item.id ? 'opacity-50 cursor-wait' : ''}`}
+                          >
+                            {togglingId === item.id ? (
+                              <div className="w-3 h-3 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+                            ) : isCompleted && (
+                              <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="absolute inset-0 flex items-center justify-center"
+                              >
+                                <img 
+                                  src="/assets/website/icons/check-sign.png" 
+                                  alt="checked"
+                                  className="w-[14px] h-[10px] object-contain"
+                                />
+                              </motion.div>
+                            )}
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </React.Fragment>
+              );
+            }) : (
+              <tr>
+                <td colSpan={7} className="py-20 text-center">
+                  <Text variant="text-m" className="text-secondary/30 font-medium">
+                    {t('empty')}
+                  </Text>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

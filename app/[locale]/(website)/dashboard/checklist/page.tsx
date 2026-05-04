@@ -31,14 +31,12 @@ export default async function ChecklistPage() {
   }) : [];
 
   return (
-    <DashboardLayout showSearch>
-      <div className="px-10 py-12">
-        <ChecklistContent 
-          items={checklistItems} 
-          initialProgress={userProgress} 
-          userId={user.id} 
-        />
-      </div>
+    <DashboardLayout showSearch reducedPadding>
+      <ChecklistContent 
+        items={checklistItems} 
+        initialProgress={userProgress} 
+        userId={user.id} 
+      />
     </DashboardLayout>
   );
 }
