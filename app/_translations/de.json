@@ -268,6 +268,7 @@
       }
     },
     "consent": "Ja, ich möchte eine kostenlose telefonische Beratung rund Versicherung und Vorsorge in der Schweiz erhalten und nehme die Datenschutzerklärung zur Kenntnis.",
+    "termsLabel": "Ich akzeptiere die Allgemeinen Geschäftsbedingungen.",
     "legalNote": "Ich bin damit einverstanden, dass meine bei der Registrierung angegebenen Daten (insbesondere Name, E-Mailadresse, Telefonnummer) verwendet werden dürfen, um mich per E-Mail, Telefon, SMS oder andere elektronische Kommunikationsmittel über Produkte, Dienstleistungen und Aktionen aus dem Bereich Versicherungen und Vorsorge zu informieren. Diese Einwilligung ist freiwillig und kann jederzeit mit Wirkung für die Zukunft widerrufen werden, z. B. per E-Mail an hello@myswissmove.ch oder über den Abmeldelink in jeder Nachricht. Weitere Informationen zur Datenverarbeitung finden Sie in der Datenschutzerklärung.",
     "submit": "Kostenlos registrieren",
     "successMessage": "Registrierung erfolgreich! Wir haben eine Bestätigungs-E-Mail an Ihren Posteingang gesendet. Bitte verifizieren Sie Ihr Konto, um mit MySwissMove zu starten.",

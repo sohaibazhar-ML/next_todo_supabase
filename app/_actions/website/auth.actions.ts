@@ -114,6 +114,7 @@ export async function registerAction(prevState: ActionState, formData: FormData)
   const formattedData = {
     ...data,
     consent: data.consent === 'on',
+    termsAccepted: data.termsAccepted === 'on',
   };
 
   // Validate using Zod
@@ -125,7 +126,7 @@ export async function registerAction(prevState: ActionState, formData: FormData)
     };
   }
 
-  const { email, password, firstName, lastName, gender, currentAddress, country, newAddress, numPersons, numAdults, numChildren, pets, whichPets, phone, preferredTime } = validatedFields.data;
+  const { email, password, firstName, lastName, gender, currentAddress, country, newAddress, numPersons, numAdults, numChildren, pets, whichPets, phone, preferredTime, consent, termsAccepted } = validatedFields.data;
 
   try {
     const admin = createServiceClient();
@@ -175,8 +176,8 @@ export async function registerAction(prevState: ActionState, formData: FormData)
           preferred_call_time: preferredTime || null,
           has_pets: pets === 'yes',
           pets_type: pets === 'yes' ? whichPets || null : null,
-          marketing_consent: formattedData.consent || false,
-          terms_accepted: true,
+          marketing_consent: consent || false,
+          terms_accepted: termsAccepted || false,
           data_privacy_accepted: true,
           role: 'user',
           preferred_language: (data.locale as string) || 'de',

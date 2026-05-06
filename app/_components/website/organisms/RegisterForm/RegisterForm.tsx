@@ -34,6 +34,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
     phone: '',
     preferredTime: '',
     consent: false,
+    termsAccepted: false,
   };
 
   const [formData, setFormData] = React.useState(initialFormData);
@@ -74,7 +75,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     clearFeedback();
     let { name, value } = e.target;
-    
+
     // Sanitize phone input: only allow numbers, +, and -
     if (name === 'phone') {
       value = value.replace(/[^0-9+\-]/g, '');
@@ -99,7 +100,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
     // Rule 2: Only show validation if the field has been touched
     const serverError = state.errors ? (state.errors as Record<string, unknown>)[name] : undefined;
     const serverErrorMsg = Array.isArray(serverError) ? serverError[0] : (typeof serverError === 'string' ? serverError : undefined);
-    
+
     if (!touchedFields[name]) return serverErrorMsg;
 
     // Rule 3: Prioritize client-side real-time errors, fallback to server errors
@@ -436,6 +437,26 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
           </Text>
         </div>
 
+        <div className="col-span-12 mt-0 w-full px-1 mb-6">
+          <Checkbox
+            id="termsAccepted"
+            name="termsAccepted"
+            label={t('termsLabel')}
+            labelTextClassName="!text-[21px] !font-medium !text-[#362E2D]"
+            checked={formData.termsAccepted}
+            onChange={(e) => {
+              setFormData(prev => ({ ...prev, termsAccepted: e.target.checked }));
+              setTouchedFields(prev => ({ ...prev, termsAccepted: true }));
+            }}
+            error={!!getFieldError('termsAccepted')}
+          />
+          {getFieldError('termsAccepted') && (
+            <Text variant="text-xxs" className="text-error-dark mt-2 block">
+              {getFieldError('termsAccepted')}
+            </Text>
+          )}
+        </div>
+
         <div className="w-full flex justify-start px-1 pb-2">
           <Button
             type="submit"
@@ -451,29 +472,29 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ className = '' }) =>
 
         {showError && state.errors?.form && (
           <div className="w-full mt-4">
-            <FormMessage 
-              variant="error" 
-              message={state.errors.form} 
+            <FormMessage
+              variant="error"
+              message={state.errors.form}
             />
           </div>
         )}
 
         {showSuccess && (
           <div className="flex flex-col items-center w-full mt-4 text-center gap-2">
-            <FormMessage 
-              variant="success" 
-              message={t('successMessage')} 
+            <FormMessage
+              variant="success"
+              message={t('successMessage')}
             />
-            
+
             {resendStatus === 'success' ? (
-              <FormMessage 
-                variant="success" 
-                message={t('resendSuccess')} 
+              <FormMessage
+                variant="success"
+                message={t('resendSuccess')}
               />
             ) : resendStatus === 'error' ? (
-              <FormMessage 
-                variant="error" 
-                message={t('resendError')} 
+              <FormMessage
+                variant="error"
+                message={t('resendError')}
               />
             ) : (
               <button

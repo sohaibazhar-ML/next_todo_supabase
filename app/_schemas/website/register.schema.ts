@@ -17,6 +17,7 @@ export const registerSchema = z.object({
   whichPets: z.string().max(300, 'Description is too long').optional(),
   phone: z.string().max(20, 'Phone number is too long').regex(/^[0-9+\-]*$/, 'Only numbers, + and - are allowed').optional(),
   preferredTime: z.string().optional(),
+  termsAccepted: z.boolean().default(false),
   consent: z.boolean().optional(),
 });
 
