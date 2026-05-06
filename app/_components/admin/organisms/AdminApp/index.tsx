@@ -15,12 +15,16 @@ import { SettingsPage } from "@/admin/organisms";
 import { ReportsPage } from "@/admin/organisms";
 import { StatisticsPage } from "@/admin/organisms";
 import { ChecklistList, ChecklistCreate, ChecklistEdit } from "@/admin/organisms";
+import { adminTheme } from "./theme";
+import { MyLayout } from "./MyLayout";
 
 const AdminApp = () => (
     <Admin 
         dataProvider={dataProvider} 
         authProvider={authProvider}
         dashboard={StatisticsPage}
+        theme={adminTheme}
+        layout={MyLayout}
         darkTheme={null}
     >
         {permissions => [

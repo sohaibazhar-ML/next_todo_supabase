@@ -34,12 +34,12 @@ export const DocumentCreate = () => (
                         justifyContent="center"
                         py={4}
                     >
-                        <FileUploadOutlinedIcon sx={{ fontSize: 64, color: '#2196F3', mb: 2 }} />
+                        <FileUploadOutlinedIcon sx={{ fontSize: 64, color: '#CD1C18', mb: 2 }} />
                         <Button
                             variant="contained"
                             component="span" // important to prevent click bubbling weirdness sometimes, but dropzone handles it
                             sx={{
-                                bgcolor: '#2196F3',
+                                bgcolor: '#CD1C18',
                                 borderRadius: 6,
                                 px: 4,
                                 py: 1,
@@ -49,7 +49,7 @@ export const DocumentCreate = () => (
                                 boxShadow: 'none',
                                 pointerEvents: 'none', // let dropzone register the click
                                 '&:hover': {
-                                    bgcolor: '#1976D2',
+                                    bgcolor: '#a11612',
                                     boxShadow: 'none',
                                 }
                             }}
@@ -68,7 +68,7 @@ export const DocumentCreate = () => (
                     width: '100%',
                     mb: 3,
                     '& .RaFileInput-dropZone': {
-                        border: '2px dashed #2196F3',
+                        border: '2px dashed #CD1C18',
                         borderRadius: 4,
                         backgroundColor: '#ffffff',
                         transition: 'all 0.2s',
@@ -78,8 +78,8 @@ export const DocumentCreate = () => (
                         alignItems: 'center',
                         cursor: 'pointer',
                         '&:hover': {
-                            backgroundColor: '#e3f2fd',
-                            borderColor: '#1976D2'
+                            backgroundColor: '#fee2e2',
+                            borderColor: '#a11612'
                         }
                     }
                 }}

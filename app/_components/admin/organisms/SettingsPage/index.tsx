@@ -65,7 +65,7 @@ export const SettingsPage = () => {
             </Paper>
 
             {profile?.role === 'admin' && (
-                <Paper elevation={2} sx={{ p: 4, mt: 4, maxWidth: 800, borderLeft: '4px solid #1976d2' }}>
+                <Paper elevation={2} sx={{ p: 4, mt: 4, maxWidth: 800, borderLeft: '4px solid #CD1C18' }}>
                     <Typography variant="h6" gutterBottom color="primary">
                         Administrative Actions
                     </Typography>

@@ -31,7 +31,7 @@ const DocumentListActions = (props: any) => {
                     onClick={onImportClick}
                     startIcon={<UploadFileIcon />}
                 >
-                    Import Placeholders
+                    Import Documents
                 </Button>
             )}
             <ExportButton />
@@ -47,7 +47,7 @@ const DocumentEmpty = ({ onImportClick, permissions }: { onImportClick: () => vo
                 No Documents yet.
             </Typography>
             <Typography variant="body1" gutterBottom>
-                {isAdmin ? "Do you want to add one or import placeholders?" : "There are currently no documents available."}
+                {isAdmin ? "Do you want to add one or import documents?" : "There are currently no documents available."}
             </Typography>
             <Box display="flex" justifyContent="center" gap={2} mt={4}>
                 {isAdmin && <CreateButton variant="contained" />}
@@ -59,7 +59,7 @@ const DocumentEmpty = ({ onImportClick, permissions }: { onImportClick: () => vo
                         startIcon={<UploadFileIcon />}
                         sx={{ ml: 2 }}
                     >
-                        Import Placeholders
+                        Import Documents
                     </Button>
                 )}
             </Box>
@@ -140,11 +140,11 @@ export const DocumentList = () => {
             </List>
 
             <Dialog open={importOpen} onClose={handleClose}>
-                <DialogTitle>Import Document Placeholders</DialogTitle>
+                <DialogTitle>Import Documents</DialogTitle>
                 <DialogContent>
                     <Typography variant="body2" color="textSecondary" paragraph>
                         Select the Excel file containing document names and categories. 
-                        The system will create placeholders that can later be replaced with actual files.
+                        The system will create documents that can later be replaced with actual files.
                     </Typography>
                     <Box mt={2}>
                         <AdminFilePicker 

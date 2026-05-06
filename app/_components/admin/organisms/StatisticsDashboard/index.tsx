@@ -43,9 +43,9 @@ interface StatisticsDashboardProps {
 }
 
 const COLORS = {
-    primary: '#2196F3', // The requested Blue
-    secondary: '#90CAF9', // Lighter shade
-    faint: '#E3F2FD', // Faintest shade
+    primary: '#CD1C18', // Reddish primary
+    secondary: '#f87171', // Lighter reddish (Tailwind red-400)
+    faint: '#fee2e2', // Faintest reddish (Tailwind red-100)
     charcoal: '#333333',
     trendUp: '#10B981',
     trendDown: '#EF4444',

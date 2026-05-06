@@ -47,7 +47,7 @@ export function getFileType(fileName: string): string {
 export function getFileIconColor(fileType: string): string {
   const colors: Record<string, string> = {
     'PDF': 'text-red-600',
-    'DOCX': 'text-blue-600',
+    'DOCX': 'text-red-500',
     'XLSX': 'text-green-600',
     'ZIP': 'text-yellow-600',
   }
