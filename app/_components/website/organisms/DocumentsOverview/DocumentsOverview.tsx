@@ -69,7 +69,7 @@ export const DocumentsOverview: React.FC<DocumentsOverviewProps> = ({ className 
           <div className="col-span-12 lg:col-span-5 relative w-full aspect-[4/3] lg:aspect-auto lg:min-h-[500px] mt-10 lg:mt-0">
             <div className="absolute inset-0 shadow-lg overflow-hidden">
               <Image
-                src="/assets/website/landing-page/doc-overview.png"
+                src="/assets/website/landing-page/doc-overview-new.jpg"
                 alt="Documents Overview"
                 fill
                 sizes="(max-width: 1024px) 100vw, 42vw"
