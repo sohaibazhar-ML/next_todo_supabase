@@ -18,7 +18,16 @@ export const ChecklistCreate = () => (
             />
             <TextInput source="title" label="Task" required fullWidth />
             <TextInput source="description" multiline fullWidth />
-            <BooleanInput source="is_mandatory" label="Mandatory" defaultValue={true} />
+            <SelectInput 
+                source="is_mandatory" 
+                label="Mandatory" 
+                choices={[
+                    { id: true, name: 'Yes' },
+                    { id: false, name: 'No' },
+                ]} 
+                defaultValue={true}
+                fullWidth
+            />
         </SimpleForm>
     </Create>
 );

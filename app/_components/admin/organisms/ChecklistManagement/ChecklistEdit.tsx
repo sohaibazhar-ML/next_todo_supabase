@@ -24,7 +24,15 @@ export const ChecklistEdit = () => (
             />
             <TextInput source="title" label="Task" required fullWidth />
             <TextInput source="description" multiline fullWidth />
-            <BooleanInput source="is_mandatory" label="Mandatory" />
+            <SelectInput 
+                source="is_mandatory" 
+                label="Mandatory" 
+                choices={[
+                    { id: true, name: 'Yes' },
+                    { id: false, name: 'No' },
+                ]} 
+                fullWidth
+            />
         </SimpleForm>
     </Edit>
 );
