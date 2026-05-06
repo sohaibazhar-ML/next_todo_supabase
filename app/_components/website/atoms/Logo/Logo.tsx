@@ -16,7 +16,7 @@ export const Logo: React.FC<LogoProps> = ({
       case 'swisscom':
         return '/assets/website/logos/myswissmove_logo-new.svg';
       case 'logo2':
-        return '/assets/website/logos/logo2.png';
+        return '/assets/website/logos/myswissmove_logo_white.svg';
       case 'primary':
       default:
         return '/assets/website/logos/myswissmove_logo-new.svg';
