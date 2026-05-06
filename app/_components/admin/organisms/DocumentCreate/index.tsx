@@ -13,7 +13,7 @@ export const DocumentCreate = () => (
             <TextInput source="title" fullWidth />
             <TextInput source="description" multiline fullWidth />
             <DynamicCategoryInput source="category" required />
-            <TextInput source="recipient" label="Zuständige Stelle / Empfänger" fullWidth />
+            <TextInput source="recipient" label="Responsible Office / Recipient" fullWidth />
 
             <FileInput
                 source="file"
