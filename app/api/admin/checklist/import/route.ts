@@ -51,6 +51,7 @@ export async function POST(request: NextRequest) {
     // Phase, Kategorie, ToDo, Beschreibung, Pflicht
     
     let importedCount = 0;
+    let skippedCount = 0;
     const newCategories = new Set<string>();
 
     for (const row of data) {
@@ -62,6 +63,20 @@ export async function POST(request: NextRequest) {
       const is_mandatory = mandatoryValue.toString().toLowerCase() === 'ja' || mandatoryValue.toString().toLowerCase() === 'yes' || mandatoryValue === true;
 
       if (category && title) {
+        // Duplication Check: Check if this exact row already exists
+        const existing = await (prisma as any).checklistItem.findFirst({
+          where: {
+            title,
+            category,
+            phase: phase || undefined, // Handle null vs undefined for Prisma
+          }
+        });
+
+        if (existing) {
+          skippedCount++;
+          continue;
+        }
+
         await (prisma as any).checklistItem.create({
           data: {
             phase,
@@ -78,8 +93,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ 
       success: true, 
-      message: `Successfully imported ${importedCount} checklist items.`,
-      categories: Array.from(newCategories)
+      message: `Successfully imported ${importedCount} checklist items. ${skippedCount} duplicates were skipped.`,
+      categories: Array.from(newCategories),
+      importedCount,
+      skippedCount
     });
 
   } catch (error: any) {

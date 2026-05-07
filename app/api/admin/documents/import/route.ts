@@ -51,6 +51,7 @@ export async function POST(request: NextRequest) {
     // Kategorie, Dokumentname, Zuständige Stelle / Empfänger, Datei
     
     let importedCount = 0;
+    let skippedCount = 0;
     const newCategories = new Set<string>();
 
     for (const row of data) {
@@ -62,6 +63,20 @@ export async function POST(request: NextRequest) {
       const file_type = file_type_raw.toString().toLowerCase().includes('pdf') ? 'pdf' : 'document';
 
       if (category && title) {
+        // Duplication Check: Check if document already exists with same title, category, and recipient
+        const existing = await prisma.documents.findFirst({
+          where: {
+            title,
+            category,
+            recipient: recipient || undefined,
+          }
+        });
+
+        if (existing) {
+          skippedCount++;
+          continue;
+        }
+
         await prisma.documents.create({
           data: {
             title,
@@ -80,8 +95,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ 
       success: true, 
-      message: `Successfully imported ${importedCount} document placeholders.`,
-      categories: Array.from(newCategories)
+      message: `Successfully imported ${importedCount} document placeholders. ${skippedCount} duplicates were skipped.`,
+      categories: Array.from(newCategories),
+      importedCount,
+      skippedCount
     });
 
   } catch (error: any) {
