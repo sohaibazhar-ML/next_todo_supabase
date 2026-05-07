@@ -45,6 +45,7 @@ interface StatisticsDashboardProps {
 const COLORS = {
     primary: '#CD1C18', // Reddish primary
     secondary: '#f87171', // Lighter reddish (Tailwind red-400)
+    old: '#64748b', // Harmonious Slate Grey
     faint: '#fee2e2', // Faintest reddish (Tailwind red-100)
     charcoal: '#333333',
     trendUp: '#10B981',
@@ -103,7 +104,12 @@ export const StatisticsDashboard = ({ statistics, displayMode, onApplyFilters }:
                 return true;
             });
 
-        if (displayMode === 'absolute' || baseTimeline.length === 0) return baseTimeline;
+        if (displayMode === 'absolute' || baseTimeline.length === 0) {
+            return baseTimeline.map(item => ({
+                ...item,
+                existing: Math.max(0, item.users - item.count)
+            }));
+        }
 
         // Transform to percentage growth relative to start of window
         const firstValue = baseTimeline[0].users || 1;
@@ -112,7 +118,8 @@ export const StatisticsDashboard = ({ statistics, displayMode, onApplyFilters }:
         return baseTimeline.map(item => ({
             ...item,
             users: Number((((item.users - firstValue) / firstValue) * 100).toFixed(1)),
-            count: Number(((item.count / totalNewInWindow) * 100).toFixed(1))
+            count: Number(((item.count / totalNewInWindow) * 100).toFixed(1)),
+            existing: Number((((item.users - item.count - firstValue) / firstValue) * 100).toFixed(1))
         }));
     }, [statistics.userGrowthTimeline, chartDateFrom, chartDateTo, displayMode]);
 
@@ -299,7 +306,11 @@ export const StatisticsDashboard = ({ statistics, displayMode, onApplyFilters }:
                                     <Box display="flex" gap={3} mt={1}>
                                         <Box display="flex" alignItems="center" gap={1}>
                                             <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: COLORS.primary }} />
-                                            <Typography variant="caption" fontWeight="600" color="text.secondary">Customers</Typography>
+                                            <Typography variant="caption" fontWeight="600" color="text.secondary">Total Customers</Typography>
+                                        </Box>
+                                        <Box display="flex" alignItems="center" gap={1}>
+                                            <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: COLORS.old }} />
+                                            <Typography variant="caption" fontWeight="600" color="text.secondary">Old Customers</Typography>
                                         </Box>
                                         <Box display="flex" alignItems="center" gap={1}>
                                             <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: COLORS.secondary }} />
@@ -398,7 +409,7 @@ export const StatisticsDashboard = ({ statistics, displayMode, onApplyFilters }:
                                             tickFormatter={(val) => displayMode === 'percent' ? `${val}%` : val}
                                         />
                                         <Tooltip 
-                                            formatter={(value: any) => displayMode === 'percent' ? [`${value}%`, ''] : [value, '']}
+                                            formatter={(value: any, name: any) => [displayMode === 'percent' ? `${value}%` : value.toLocaleString(), name]}
                                             contentStyle={{ 
                                                 borderRadius: '16px', 
                                                 border: 'none', 
@@ -412,7 +423,7 @@ export const StatisticsDashboard = ({ statistics, displayMode, onApplyFilters }:
                                         <Area 
                                             type="monotone" 
                                             dataKey="users" 
-                                            name="Total"
+                                            name="Total Customers"
                                             stroke={COLORS.primary} 
                                             strokeWidth={4}
                                             fillOpacity={1} 
@@ -422,8 +433,18 @@ export const StatisticsDashboard = ({ statistics, displayMode, onApplyFilters }:
                                         />
                                         <Area 
                                             type="monotone" 
+                                            dataKey="existing" 
+                                            name="Old Customers"
+                                            stroke={COLORS.old} 
+                                            strokeWidth={2}
+                                            fill="none"
+                                            strokeDasharray="5 5"
+                                            dot={{ r: 3, fill: COLORS.old, strokeWidth: 2, stroke: 'white' }}
+                                        />
+                                        <Area 
+                                            type="monotone" 
                                             dataKey="count" 
-                                            name="New"
+                                            name="New Customers"
                                             stroke={COLORS.secondary} 
                                             strokeWidth={2}
                                             fill="none"
