@@ -225,37 +225,13 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Navigation Marquee Animation */
-@keyframes navMarquee {
-  0% {
-    transform: translateX(0);
-  }
 
-  100% {
-    transform: translateX(calc(-100% + var(--actual-width, 120px)));
-  }
-}
-
-.hover-marquee {
-  --actual-width: var(--marquee-width, 120px);
-}
-
-@media (min-width: 1024px) {
-  .hover-marquee {
-    --actual-width: var(--marquee-width-lg, var(--marquee-width, 130px));
-  }
-}
-
-@media (min-width: 1280px) {
-  .hover-marquee {
-    --actual-width: var(--marquee-width-xl, var(--marquee-width-lg, var(--marquee-width, 160px)));
-  }
-}
-
-.hover-marquee:hover {
-  animation: navMarquee 3s linear infinite alternate;
+/* Navigation Hover Reveal (instead of Marquee) */
+.hover-reveal:hover {
   width: max-content;
   max-width: none !important;
+  position: relative;
+  z-index: 10;
 }
 
 @keyframes shake {

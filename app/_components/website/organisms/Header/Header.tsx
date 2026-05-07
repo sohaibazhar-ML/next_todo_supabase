@@ -35,18 +35,18 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
           <Link href="/">
             <Logo 
               variant="primary" 
-              className="w-[140px] h-[35px] xs:w-[180px] xs:h-[45px] lg:w-[220px] lg:h-[55px] xl:w-[200px] xl:h-[50px] min-[1351px]:w-[260px] min-[1351px]:h-[65px] hover:opacity-90 transition-opacity" 
+              className="w-[140px] h-[35px] xs:w-[180px] xs:h-[45px] lg:w-[170px] lg:h-[42px] xl:w-[200px] xl:h-[50px] min-[1351px]:w-[260px] min-[1351px]:h-[65px] hover:opacity-90 transition-opacity" 
             />
           </Link>
         </div>
 
         {/* Desktop Navigation */}
-        <nav className={`hidden lg:flex items-center ${locale === 'en' ? 'gap-[12px] xl:gap-[20px] min-[1351px]:gap-[40px]' : 'gap-[8px] xl:gap-[10px] min-[1351px]:gap-[16px]'}`}>
+        <nav className="hidden lg:flex items-center gap-[8px] xl:gap-[20px] min-[1351px]:gap-[40px]">
           {navLinks.map((link) => (
             <NavLink 
               key={link.name} 
               href={link.href} 
-              className="lg:text-[14px] xl:text-[14px] min-[1351px]:text-[16px]"
+              className="lg:text-[13px] xl:text-[14px] min-[1351px]:text-[16px]"
               disableTruncate={locale === 'en'}
             >
               {link.name}
@@ -55,23 +55,18 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
         </nav>
 
         {/* Desktop Actions */}
-        <div className={`hidden lg:flex items-center ${locale === 'en' ? 'gap-[4px] xl:gap-[12px] min-[1351px]:gap-[24px]' : 'gap-[4px] xl:gap-[10px] min-[1351px]:gap-[16px]'}`}>
+        <div className="hidden lg:flex items-center gap-[4px] xl:gap-[12px] min-[1351px]:gap-[24px]">
           <Link href="/login">
             <Button
               size="sm"
               variant="outline"
-              className="bg-white border-none text-secondary font-semibold hover:bg-white/90 lg:px-3 xl:px-6 overflow-hidden relative"
+              className="bg-white border-none text-secondary font-semibold hover:bg-white/90 lg:px-2 xl:px-6 overflow-hidden relative group"
             >
               <span 
-                className={`block ${locale === 'en' ? 'max-w-none' : 'overflow-hidden lg:max-w-[80px] xl:max-w-[100px]'}`}
-                style={{ 
-                  '--marquee-width': locale === 'en' ? 'none' : '80px',
-                  '--marquee-width-lg': '80px',
-                  '--marquee-width-xl': '100px'
-                } as React.CSSProperties}
+                className={`block transition-all duration-300 ${locale === 'en' ? 'max-w-none' : 'overflow-hidden lg:max-w-[80px] xl:max-w-[100px] group-hover:max-w-[200px] group-hover:overflow-visible'}`}
               >
                 <span 
-                  className={`block truncate ${locale === 'en' ? '' : 'hover-marquee'}`}
+                  className={`block truncate ${locale === 'en' ? '' : 'hover-reveal'}`}
                   title={t('login')}
                 >
                   {t('login')}
@@ -84,18 +79,13 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
             <Button
               size="sm"
               variant="primary"
-              className="lg:px-3 xl:px-6 overflow-hidden relative"
+              className="lg:px-2 xl:px-6 overflow-hidden relative group"
             >
               <span 
-                className={`block ${locale === 'en' ? 'max-w-none' : 'overflow-hidden lg:max-w-[120px] xl:max-w-[160px]'}`}
-                style={{ 
-                  '--marquee-width': locale === 'en' ? 'none' : '120px',
-                  '--marquee-width-lg': '120px',
-                  '--marquee-width-xl': '160px'
-                } as React.CSSProperties}
+                className={`block transition-all duration-300 ${locale === 'en' ? 'max-w-none' : 'overflow-hidden lg:max-w-[120px] xl:max-w-[160px] group-hover:max-w-[300px] group-hover:overflow-visible'}`}
               >
                 <span 
-                  className={`block truncate ${locale === 'en' ? '' : 'hover-marquee'}`}
+                  className={`block truncate ${locale === 'en' ? '' : 'hover-reveal'}`}
                   title={t('register')}
                 >
                   {t('register')}
