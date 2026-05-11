@@ -47,9 +47,10 @@ export const Footer: React.FC<FooterProps> = ({ className = '' }) => {
     startTransition(async () => {
       setStatus('idle');
       const result = await submitContactAction({
-        ...data,
-        locale,
-      });
+        footer_name: data.footer_name,
+        footer_phone: data.footer_phone,
+        footer_time: data.footer_time,
+      }, locale);
 
       if (result.success) {
         setStatus('success');

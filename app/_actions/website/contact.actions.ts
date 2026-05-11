@@ -1,19 +1,16 @@
 "use server";
 
-import { contactSchema } from '@/schemas/website/contact.schema';
+import { contactSchema, ContactInput } from '@/schemas/website/contact.schema';
 import { sendGridService } from '@/services/website/email-service/sendgrid.service';
 import { format } from 'date-fns';
-import { de } from 'date-fns/locale';
+import { de, enUS, fr, it } from 'date-fns/locale';
+
+const locales: Record<string, any> = { de, en: enUS, fr, it };
 
 /**
  * Server action to handle the footer callback contact form
  */
-export async function submitContactAction(formData: {
-  footer_name: string;
-  footer_phone: string;
-  footer_time: string;
-  locale?: string;
-}) {
+export async function submitContactAction(formData: ContactInput, locale: string = 'de') {
   try {
     // 1. Validate the input data
     const validated = contactSchema.parse(formData);
@@ -23,8 +20,9 @@ export async function submitContactAction(formData: {
     try {
       if (validated.footer_time) {
         const date = new Date(validated.footer_time);
+        const dateLocale = locales[locale] || de;
         formattedTime = format(date, 'eeee, d. MMMM, HH:mm', { 
-           locale: de // Defaulting to German as per project context, can be adjusted
+           locale: dateLocale
         });
       }
     } catch (e) {
@@ -45,7 +43,7 @@ export async function submitContactAction(formData: {
         name: validated.footer_name,
         phone: validated.footer_phone,
         preferred_time: formattedTime,
-        request_locale: formData.locale || 'de',
+        request_locale: locale,
         request_timestamp: new Date().toISOString(),
       },
     });
